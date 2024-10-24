@@ -50,8 +50,8 @@
   </q-page>
 </template>
 
-<script>
-import { onUnmounted } from 'vue'
+<script setup>
+import { ref, computed, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import ApercuGenx from '../components/ApercuGenx.vue'
@@ -61,77 +61,57 @@ import { RafraichirCvsAv } from '../app/operations4.mjs'
 import { NouveauContact } from '../app/operations4.mjs'
 import { dkli, styp, afficher8000 } from '../app/util.mjs'
 
-export default {
-  name: 'PageInvitation',
+const ui = stores.ui
+const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
+const session = stores.session
+const pSt = stores.people
+const gSt = stores.groupe
 
-  components: { ApercuGenx, BtnCond, BoutonHelp },
+const propos = ref(true)
 
-  computed: {
-    nomg () { return this.session.getCV(this.session.groupeId).nom },
+const nomg = computed(() => session.getCV(session.groupeId).nom)
     
-    lst () { 
-      const src = this.pSt.peLpF
-      const l = []
-      this.session.compte.lstAvatars.forEach(x => {
-        const y = { id: x.id }
-        y.d = this.gSt.diagContact(x.id)
-        if (!y.d[0] || this.propos) l.push(y)
-      })
-      src.forEach(x => {
-        const y = { id: x.id }
-        y.d = this.gSt.diagContact(x.id)
-        if (!y.d[0] || this.propos) l.push(y)
-      })
-      return l
-    }
-    
-  },
+const lst = computed(() => { 
+  const src = pSt.peLpF
+  const l = []
+  session.compte.lstAvatars.forEach(x => {
+    const y = { id: x.id }
+    y.d = gSt.diagContact(x.id)
+    if (!y.d[0] || propos.value) l.push(y)
+  })
+  src.forEach(x => {
+    const y = { id: x.id }
+    y.d = gSt.diagContact(x.id)
+    if (!y.d[0] || propos.value) l.push(y)
+  })
+  return l
+})
 
-  methods: {
-    async rafCvs () {
-      let nc = 0, nv = 0
-      for (const id of this.session.compte.mav) {
-        const r = await new RafraichirCvsAv().run(id)
-        if (typeof r ==='number') {
-          await afficher8000(r, this.id, this.session.groupeId)
-          continue
-        }
-        const [x, y] = r
-        nc += x; nv += y
-      }
-      stores.ui.afficherMessage(this.$t('CVraf2', [nc, nv]), false)
-    }, 
-    select (p) {
-      this.session.setPeopleId(p.id)
-      this.ui.oD('PInvit', this.idc)
-    },
-    async okAjouter () {
-      const r = await new NouveauContact().run()
-      if (r) await afficher8000(r, this.session.peopleId, this.session.groupeId)
-      else this.ui.setPage('groupe', 'groupe')
+async function rafCvs () {
+  let nc = 0, nv = 0
+  for (const id of session.compte.mav) {
+    const r = await new RafraichirCvsAv().run(id)
+    if (typeof r ==='number') {
+      await afficher8000(r, id, session.groupeId)
+      continue
     }
-  },
-
-  data () {
-    return {
-      // lst: [],
-      propos: true // n'afficher que ceux proposables
-    }
-  },
-
-  setup () {
-    const ui = stores.ui
-    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
-    return {
-      dkli, styp,
-      session: stores.session,
-      ui, idc,
-      pSt: stores.people,
-      gSt: stores.groupe
-    }
+    const [x, y] = r
+    nc += x; nv += y
   }
-
+  stores.ui.afficherMessage($t('CVraf2', [nc, nv]), false)
 }
+
+function select (p) {
+  session.setPeopleId(p.id)
+  ui.oD('PInvit', idc)
+}
+
+async function okAjouter () {
+  const r = await new NouveauContact().run()
+  if (r) await afficher8000(r, session.peopleId, session.groupeId)
+  else ui.setPage('groupe', 'groupe')
+}
+
 </script>
 
 <style lang="sass" scoped>

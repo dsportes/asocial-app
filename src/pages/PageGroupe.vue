@@ -6,7 +6,7 @@
       <btn-cond icon="people" cond="cEdit"
         :label="$t('PGinvitation')" @ok="ui.setPage('invitation')"/>
       <btn-cond v-if="gSt.ambano[0]" icon="chat" :label="$t('PGchat')" cond="cVisu"
-        @ok="this.ui.oD('ACGouvrir', idc)"/>
+        @ok="ui.oD('ACGouvrir', idc)"/>
     </div>
 
     <div>
@@ -222,7 +222,9 @@
 </q-page>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, onUnmounted } from 'vue'
+
 import stores from '../stores/stores.mjs'
 import { UNITEN, UNITEV, AMJ } from '../app/api.mjs'
 import { bcf, dhcool, styp, dkli, edvol, afficher8000 } from '../app/util.mjs'
@@ -237,182 +239,167 @@ import ChoixQuotas from '../components/ChoixQuotas.vue'
 import ApercuChatgr from '../panels/ApercuChatgr.vue'
 import { ModeSimple, RafraichirCvsGr, HebGroupe } from '../app/operations4.mjs'
 
-export default {
-  name: 'PageGroupe',
+const ui = stores.ui
+const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
+const session = stores.session
+const gSt = stores.groupe
 
-  components: { ApercuChatgr, BoutonHelp, BtnCond, ApercuGenx, QuotasVols, ApercuMembre,
-    SelAvid, BoutonConfirm, ChoixQuotas },
+const cfu = ref(0)
+const options = ref([])
+const nvHeb = ref(0)
+const hko = ref(0)
+const q = ref({})
+const action = ref(0)
+const aln = ref(false) 
+const alv = ref(false) 
+const arn = ref(false) 
+const arv = ref(false) 
+const rstn = ref(0) 
+const rstv = ref(0)
+const lstVotes = ref()
 
-  computed: {
-    nomg () { return this.session.getCV(this.session.groupeId).nom },
-    mesav () { const l = []; const mav = this.session.compte.mav
-      this.gr.tid.forEach(id => {if (mav.has(id)) l.push(id)})
-      return l
-    },
-    idg () { return this.session.groupeId },
-    sav () { return this.session.compte.mpg.get(this.idg) || new Set() },
-    gr () { return this.gSt.egrC ? this.gSt.egrC.groupe : null },
-    actuelAnim () { return this.gr.imh && this.gr.st[this.gr.imh] === 5 },
-    dejaHeb () { return this.sav.has(this.gr.tid[this.gr.imh]) },
-    nbiv () { return this.gr.nbInvites },
-    amb () { return this.gSt.ambano[0] },
-    lst () { return this.gSt.pgLmFT[0] },
-    nb () { return this.gSt.pgLmFT[1] },
-    vols () { return { qn: this.gr.qn, qv: this.gr.qv, nn: this.gr.nn, v: this.gr.vf }},
-    estAnim () { return this.gr.estAnim(this.gr.mmb.get(this.session.avatarId)) },
-    restn () { const cpt = this.session.compte.qv; return (cpt.qn * (100 - cpt.pcn) / 100) },
-    restv () { const cpt = this.session.compte.qv; return (cpt.qv * (100 - cpt.pcv) / 100) },
-  },
+const nomg = computed(() => session.getCV(session.groupeId).nom)
+const mesav = computed(() => { 
+  const l = []
+  const mav = session.compte.mav
+  gr.value.tid.forEach(id => {if (mav.has(id)) l.push(id)})
+  return l
+})
+const idg = computed(() => session.groupeId)
+const sav = computed(() => session.compte.mpg.get(idg.value) || new Set())
+const gr = computed(() => gSt.egrC ? gSt.egrC.groupe : null)
+const actuelAnim = computed(() => gr.value.imh && gr.value.st[gr.value.imh] === 5)
+const dejaHeb = computed(() => sav.value.has(gr.value.tid[gr.value.imh]))
+const nbiv = computed(() => gr.value.nbInvites)
+const amb = computed(() => gSt.ambano[0])
+const lst = computed(() => gSt.pgLmFT[0])
+const nb = computed(() => gSt.pgLmFT[1])
+const vols = computed(() => { return { qn: gr.value.qn, qv: gr.value.qv, nn: gr.value.nn, v: gr.value.vf }})
+const estAnim = computed(() => gr.value.estAnim(gr.value.mmb.get(session.avatarId)) )
+const restn = computed(() => { const cpt = session.compte.qv; return (cpt.qn * (100 - cpt.pcn) / 100) })
+const restv = computed(() => { const cpt = session.compte.qv; return (cpt.qv * (100 - cpt.pcv) / 100) })
 
-  methods: {
-    nom (im) {
-      const id = this.gr.tid[im]
-      return id ? this.session.getCV(id).nomC : this.$t('inconnu')
-    },
+const nom = (im) => {
+  const id = gr.value.tid[im]
+  return id ? session.getCV(id).nomC : $t('inconnu')
+}
 
-    async editUna () {
-      this.cfu = 0
-      this.lstVotes = []
-      if (this.gr.msu) {
-        for (let ids = 1; ids < this.gr.flags.length; ids++) {
-          if (this.gr.st[ids] === 5)
-            this.lstVotes.push({ nom: this.nom(ids), oui: this.gr.msu.indexOf(ids) !== -1 })
-        }
-      }
-      this.ui.oD('AGediterUna', this.idc)
-    },
-
-    async rafCvs () {
-      let nc = 0, nv = 0
-      const r = await new RafraichirCvsGr().run()
-      if (typeof r ==='number') await afficher8000(r, 0, this.session.groupeId)
-      else {
-        const [x, y] = r
-        nc += x; nv += y
-        stores.ui.afficherMessage(this.$t('CVraf2', [nc, nv]), false)
-      }
-    },
-
-    async chgU () {
-      await new ModeSimple().run(this.cfu === 1)
-      this.cfu = 0
-      this.ui.fD()
-    },
-
-    setCas () {
-      /* Pour être / devenir hébergeur, il faut:
-      - a) que le nn et vf actuels du groupe ne fasse pas excéder les quotas du compte
-      - b) que l'avatar choisi ait accès aux notes en écriture
-      Si l'hébergeur actuel est animateur et un autre compte, il faut être animateur pour prendre l'hébergment.
-      */
-      this.actions = []
-      this.nvHeb = null
-      this.action = 0
-      this.nbSubst = 0
-      this.cas = 0
-      this.hko = 0
-      /*
-      AGhko1: 'Je ne peux pas être hébergeur, aucun de mes avatars n\'a accès aux notes du groupe.',
-      AGhko2: 'Je suis hébergeur, mais je ne peux pas transférer l\'hébergement à un autre de mes avatars, aucun n\'ayant accès aux notes du groupe',
-      AGhko3: 'L\'hébergeur actuel étant animateur, je ne peux pas me substituer à lui aucun de mes avatars ayant accès aux notes du groupe n\'est animateur.',
-      */
-
-      /* Liste des avatars du compte pouvant être hébergeur (sauf celui actuel):
-        - options : [{ label, value, cv, im}] - mes avatars pouvant être hébergeur
-        - nvHeb : nouvel hébergeur pré-sélectionné
-      */
-      this.options = []
-      for (const id of this.sav) {
-        const im = this.gr.mmb.get(id)
-        if (im) {
-          if (im === this.gr.imh) continue
-          if (this.gr.accesNote2(im) === 2) { // accès aux notes en écriture
-            this.nbSubst++
-            if (this.actuelAnim && !this.dejaHeb 
-              && this.gr.st[im] !== 5) continue
-            const cv = this.session.getCV(id)
-            this.options.push({ label: cv.nom, value: id, cv, im })
-          }
-        }
-      }
-      if (this.options.length) this.nvHeb = this.options[0]
-      if (this.nbSubst === 0) this.hko = 1
-
-      if (!this.gr.imh) { // Cas 1 : il n'y a pas d'hébergeur.
-        this.cas = 1
-        return
-      }
-
-      if (this.dejaHeb) { // Cas 2 : je suis hébergeur
-        this.cas = 2
-        if (this.options.length === 0) this.hko = 2
-        return
-      }
-
-      /* cas 3 : il y a un hébergeur mais ce n'est pas un des avatars de mon compte */
-      this.cas = 3
-      if (this.nbSubst !== 0 && this.options.length === 0) this.hko = 3
-    },
-
-    async gererheb () {
-      this.setCas()
-      const cpt = this.session.compte.qv
-      this.restqn = Math.floor(((cpt.qn * UNITEN) * (100 - cpt.pcn) / 100) / UNITEN) + (this.dejaHeb ? this.gr.qn : 0)
-      this.restqv =  Math.floor(((cpt.qv * UNITEV) * (100 - cpt.pcv) / 100) / UNITEV) + (this.dejaHeb ? this.gr.qv : 0)
-      this.q.qn = this.gr.qn || 0
-      this.q.qv = this.gr.qv || 0
-      this.q.minn = 0
-      this.q.minv = 0
-      this.q.maxn = this.restqn
-      this.q.maxv = this.restqv
-      this.q.err = false
-      this.onChgQ()
-      this.ui.oD('AGgererheb', this.idc)
-    },
-
-    onChgQ () {
-      const cpt = this.session.compte.qv
-      this.aln = this.gr.nn > (this.q.qn * UNITEN)
-      this.alv = this.gr.vf > (this.q.qv * UNITEV)
-      const rn = (this.restqn - this.q.qn) * UNITEN
-      const rv = (this.restqv - this.q.qv) * UNITEV
-      this.rstn = rn >= 0 ? rn : 0
-      this.rstv = edvol(rv >=0 ? rv : 0)
-      this.arn = rn < (cpt.qn * UNITEN * 0.1)
-      this.arv = rv < (cpt.qv * UNITEV * 0.1)
-    },
-
-    async chgQ () {
-      if (this.action === 5) this.action = 1
-      const r = await new HebGroupe().run(this.action, this.nvHeb.value, this.q.qn, this.q.qv )
-      if (r) await afficher8000(r, 0, this.session.groupeId, this.nvHeb.value)
-      this.ui.fD()
-    },
-  },
-
-  data () {
-    return {
-      cfu: 0,
-      options: [],
-      nvHeb: 0,
-      hko: 0,
-      q: {},
-      action: 0,
-      aln: false, alv: false, arn: false, arv: false, rstn: 0, rstv: 0
-    }
-  },
-
-  setup () {
-    const ui = stores.ui
-    const idc = ui.getIdc()
-    return {
-      bcf, dhcool, styp, dkli, edvol, AMJ,
-      ui, idc,
-      session: stores.session,
-      gSt: stores.groupe
+async function editUna () {
+  cfu.value = 0
+  lstVotes.value = []
+  if (gr.value.msu) {
+    for (let ids = 1; ids < gr.value.flags.length; ids++) {
+      if (gr.value.st[ids] === 5)
+        lstVotes.value.push({ nom: this.nom(ids), oui: gr.value.msu.indexOf(ids) !== -1 })
     }
   }
+  ui.oD('AGediterUna', idc)
+}
 
+async function rafCvs () {
+  let nc = 0, nv = 0
+  const r = await new RafraichirCvsGr().run()
+  if (typeof r ==='number') await afficher8000(r, 0, session.groupeId)
+  else {
+    const [x, y] = r
+    nc += x; nv += y
+    stores.ui.afficherMessage($t('CVraf2', [nc, nv]), false)
+  }
+}
+
+async function chgU () {
+  await new ModeSimple().run(cfu.value === 1)
+  cfu.value = 0
+  ui.fD()
+}
+
+function setCas () {
+  /* Pour être / devenir hébergeur, il faut:
+  - a) que le nn et vf actuels du groupe ne fasse pas excéder les quotas du compte
+  - b) que l'avatar choisi ait accès aux notes en écriture
+  Si l'hébergeur actuel est animateur et un autre compte, il faut être animateur pour prendre l'hébergment.
+  */
+  nvHeb.value = null
+  action.value = 0
+  nbSubst.value = 0
+  cas.value = 0
+  hko.value = 0
+  /*
+  AGhko1: 'Je ne peux pas être hébergeur, aucun de mes avatars n\'a accès aux notes du groupe.',
+  AGhko2: 'Je suis hébergeur, mais je ne peux pas transférer l\'hébergement à un autre de mes avatars, aucun n\'ayant accès aux notes du groupe',
+  AGhko3: 'L\'hébergeur actuel étant animateur, je ne peux pas me substituer à lui aucun de mes avatars ayant accès aux notes du groupe n\'est animateur.',
+  */
+
+  /* Liste des avatars du compte pouvant être hébergeur (sauf celui actuel):
+    - options : [{ label, value, cv, im}] - mes avatars pouvant être hébergeur
+    - nvHeb : nouvel hébergeur pré-sélectionné
+  */
+  options.value = []
+  for (const id of sav.value) {
+    const im = gr.value.mmb.get(id)
+    if (im) {
+      if (im === gr.value.imh) continue
+      if (gr.value.accesNote2(im) === 2) { // accès aux notes en écriture
+        nbSubst.value++
+        if (actuelAnim.value && !dejaHeb.value 
+          && gr.value.st[im] !== 5) continue
+        const cv = session.getCV(id)
+        options.value.push({ label: cv.nom, value: id, cv, im })
+      }
+    }
+  }
+  if (options.value.length) nvHeb.value = options.value[0]
+  if (nbSubst.value === 0) hko.value = 1
+
+  if (!gr.value.imh) { // Cas 1 : il n'y a pas d'hébergeur.
+    cas.value = 1
+    return
+  }
+
+  if (dejaHeb.value) { // Cas 2 : je suis hébergeur
+    cas.value = 2
+    if (options.value.length === 0) hko.value = 2
+    return
+  }
+
+  /* cas 3 : il y a un hébergeur mais ce n'est pas un des avatars de mon compte */
+  cas.value = 3
+  if (nbSubst.value !== 0 && options.value.length === 0) hko.value = 3
+}
+
+async function gererheb () {
+  setCas()
+  const cpt = session.compte.qv
+  restqn.value = Math.floor(((cpt.qn * UNITEN) * (100 - cpt.pcn) / 100) / UNITEN) + (dejaHeb.value ? gr.value.qn : 0)
+  restqv.value =  Math.floor(((cpt.qv * UNITEV) * (100 - cpt.pcv) / 100) / UNITEV) + (dejaHeb.value ? gr.value.qv : 0)
+  q.value.qn = gr.value.qn || 0
+  q.value.qv = gr.value.qv || 0
+  q.value.minn = 0
+  q.value.minv = 0
+  q.value.maxn = restqn.value
+  q.value.maxv = restqv.value
+  q.value.err = false
+  onChgQ()
+  ui.oD('AGgererheb', idc)
+}
+
+function onChgQ () {
+  const cpt = session.compte.qv
+  aln.value = gr.value.nn > (q.value.qn * UNITEN)
+  alv.value = gr.value.vf > (q.value.qv * UNITEV)
+  const rn = (restqn.value - q.value.qn) * UNITEN
+  const rv = (restqv.value - q.value.qv) * UNITEV
+  rstn.value = rn >= 0 ? rn : 0
+  rstv.value = edvol(rv >=0 ? rv : 0)
+  arn.value = rn < (cpt.qn * UNITEN * 0.1)
+  arv.value = rv < (cpt.qv * UNITEV * 0.1)
+}
+
+async function chgQ () {
+  if (action.value === 5) action.value = 1
+  const r = await new HebGroupe().run(action.value, nvHeb.value.value, q.value.qn, q.value.qv )
+  if (r) await afficher8000(r, 0, session.groupeId, nvHeb.value.value)
+  ui.fD()
 }
 </script>
 

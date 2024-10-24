@@ -33,7 +33,7 @@
   </q-page>
 </template>
 
-<script>
+<script setup>
 import stores from '../stores/stores.mjs'
 import BoutonBulle from '../components/BoutonBulle.vue'
 import { dhcool, html } from '../app/util.mjs'
@@ -41,31 +41,11 @@ import { deconnexion } from '../app/synchro.mjs'
 import ShowHtml from '../components/ShowHtml.vue'
 import BtnCond from '../components/BtnCond.vue'
 
-export default {
-  name: 'PageClos',
+const session = stores.session
+const pSt = stores.people
 
-  components: { BtnCond, BoutonBulle, ShowHtml },
+async function deconnex() { await deconnexion() }
 
-  computed: { },
-
-  methods: {
-    async deconnex() { await deconnexion() }
-  },
-
-  data () {
-    return {
-    }
-  },
-
-  setup () {
-    return {
-      session: stores.session,
-      pSt: stores.people,
-      html, dhcool, deconnexion
-    }
-  }
-
-}
 </script>
 
 <style lang="sass" scoped>

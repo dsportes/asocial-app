@@ -62,8 +62,8 @@
   </q-page>
 </template>
 
-<script>
-import { onUnmounted } from 'vue'
+<script setup>
+import { ref, computed, watch, onUnmounted } from 'vue'
 
 import { saveAs } from 'file-saver'
 import mime2ext from 'mime2ext'
@@ -84,126 +84,98 @@ const img1 = '![photo](./'
 const img2 = ')'
 const encoder = new TextEncoder('utf-8')
 
-export default {
-  name: 'PageChats',
+const ui = stores.ui
+const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
+const aSt = stores.avatar
+const gSt = stores.groupe
+const session = stores.session
+const fStore = stores.filtre
 
-  components: { BtnCond, SelAvid, MicroChat, MicroChatgr, NouveauChat, ApercuGenx },
+const idI = ref(0)
+const optb64 = ref(false)
+const chatc = ref(null)
 
-  computed: {
-    fusion () {
-      const f = this.fStore.filtre.chats // afin d'être sensible au changement de filtre
-      const r = []
-      this.aSt.tousChats.forEach(c => { r.push(c)})
-      this.gSt.tousChats.forEach(c => { r.push(c)})
-      r.sort((a, b) => { return a.dh > b.dh ? -1 : (a.dh === b.dh ? 0 : 1) })
-      this.ui.fmsg(r.length)
-      // console.log(Date.now())
-      return r
-    },
-    avid () { return this.session.avatarId }
-  },
+const avid = computed(() => session.avatarId)
+const fusion = computed(() => {
+  const f = fStore.filtre.chats // afin d'être sensible au changement de filtre
+  const r = []
+  aSt.tousChats.forEach(c => { r.push(c)})
+  gSt.tousChats.forEach(c => { r.push(c)})
+  r.sort((a, b) => a.dh > b.dh ? -1 : (a.dh === b.dh ? 0 : 1))
+  ui.fmsg(r.length)
+  return r
+})
 
-  watch: {
-    avid (ap) {
-      console.log(ap)
-    }
-  },
-
-  methods: {
-    async rafCvs () {
-      let nc = 0, nv = 0
-      if (this.session.avatarId) {
-          const r = await new RafraichirCvsAv().run(this.session.avatarId)
-          if (typeof r ==='number') {
-            await afficher8000(r, this.session.avatarId, 0)
-            return
-          }
-          const [x, y] = r
-          nc += x; nv += y
-      } else
-        for (const id of this.session.compte.mav) {
-          const r = await new RafraichirCvsAv().run(id)
-          if (typeof r ==='number') {
-            await afficher8000(r, id, 0)
-            return
-          }
-          const [x, y] = r
-          nc += x; nv += y
-        }
-      stores.ui.afficherMessage(this.$t('CVraf2', [nc, nv]), false)
-    },
-
-    creerChat () {
-      this.ui.oD('CCouvrir', this.idc)
-    },
-
-    saveph (nf, u8, mime) {
-      const blob = new Blob([u8], { type: mime })
-      if (blob) saveAs(blob, nf)
-    },
-
-    async exp () { // export des chats
-      const expPfx = new Date().toISOString().replaceAll(':', '_')
-      const res = []
-      let nb = 1
-      for (const c of this.fusion) {
-        const cv = this.session.getCV(ID.estGroupe(c.id) ? c.id : c.idE)
-        if (ID.estGroupe(c.id)) {
-          res.push('## ' + this.$t('CHoch2', [cv.nomc]) + '\n\n')
-        } else {
-          const cvI = this.session.getCV(c.id)
-          res.push('## ' + this.$t('CHoch3', [cvI.nom, cv.nomc]) + '\n\n')
-        }
-        if (cv.ph) {
-          const [mime, bin] = photoToBin(cv.photo)
-          if (!this.optb64) {
-            const nf = encodeURI(expPfx + '_' + (nb++) + '.' + mime2ext(mime))
-            this.saveph(nf, bin, mime)
-            res.push('\n' + img1 + nf + img2 + '\n\n')
-          } else {
-            res.push('\n\n![Image en base64](' + cv.photo + ')\n\n')
-          }
-        }
-        if (cv.tx) res.push(cv.tx + '\n')
-        res.push('\n\n> ' + this.$t('CHdhc', [dhstring(c.dh)]) + '\n')
-        res.push('\n' + c.txt + '\n\n---\n')
+async function rafCvs () {
+  let nc = 0, nv = 0
+  if (session.avatarId) {
+      const r = await new RafraichirCvsAv().run(session.avatarId)
+      if (typeof r ==='number') {
+        await afficher8000(r, avid.value, 0)
+        return
       }
-      const buf = encoder.encode(res.join(''))
-      const blob = new Blob([buf], { type: 'text/markdown' })
-      const url = URL.createObjectURL(blob)
-      if (blob) {
-        const nf = encodeURI(expPfx + '_chats.md')
-        saveAs(blob, nf)
-        await afficherDiag(this.$t('CHexpok'))
-      } else {
-        await afficherDiag(this.$t('CHerr'))
+      const [x, y] = r
+      nc += x; nv += y
+  } else
+    for (const id of session.compte.mav) {
+      const r = await new RafraichirCvsAv().run(id)
+      if (typeof r ==='number') {
+        await afficher8000(r, id, 0)
+        return
       }
+      const [x, y] = r
+      nc += x; nv += y
     }
-  },
-
-  data () {
-    return {
-      idI: 0,
-      optb64: false,
-      chatc: null
-    }
-  },
-
-  setup () {
-    const ui = stores.ui
-    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
-    const aSt = stores.avatar
-    const gSt = stores.groupe
-    const session = stores.session
-    const fStore = stores.filtre
-
-    return {
-      session, ui, idc, aSt, gSt, fStore, 
-      ID, dkli, dhcool
-    }
-  }
-
+  ui.afficherMessage($t('CVraf2', [nc, nv]), false)
 }
+
+function creerChat () {
+  ui.oD('CCouvrir', idc)
+}
+
+function saveph (nf, u8, mime) {
+  const blob = new Blob([u8], { type: mime })
+  if (blob) saveAs(blob, nf)
+}
+
+async function exp () { // export des chats
+  const expPfx = new Date().toISOString().replaceAll(':', '_')
+  const res = []
+  let nb = 1
+  for (const c of fusion.value) {
+    const cv = session.getCV(ID.estGroupe(c.id) ? c.id : c.idE)
+    if (ID.estGroupe(c.id)) {
+      res.push('## ' + $t('CHoch2', [cv.nomc]) + '\n\n')
+    } else {
+      const cvI = session.getCV(c.id)
+      res.push('## ' + $t('CHoch3', [cvI.nom, cv.nomc]) + '\n\n')
+    }
+    if (cv.ph) {
+      const [mime, bin] = photoToBin(cv.photo)
+      if (!this.optb64) {
+        const nf = encodeURI(expPfx + '_' + (nb++) + '.' + mime2ext(mime))
+        this.saveph(nf, bin, mime)
+        res.push('\n' + img1 + nf + img2 + '\n\n')
+      } else {
+        res.push('\n\n![Image en base64](' + cv.photo + ')\n\n')
+      }
+    }
+    if (cv.tx) res.push(cv.tx + '\n')
+    res.push('\n\n> ' + $t('CHdhc', [dhstring(c.dh)]) + '\n')
+    res.push('\n' + c.txt + '\n\n---\n')
+  }
+  const buf = encoder.encode(res.join(''))
+  const blob = new Blob([buf], { type: 'text/markdown' })
+  const url = URL.createObjectURL(blob)
+  if (blob) {
+    const nf = encodeURI(expPfx + '_chats.md')
+    saveAs(blob, nf)
+    await afficherDiag($t('CHexpok'))
+  } else {
+    await afficherDiag($t('CHerr'))
+  }
+}
+
 </script>
 
 <style lang="sass" scoped>

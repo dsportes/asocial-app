@@ -247,8 +247,8 @@
   </q-page>
 </template>
 
-<script>
-import { ref, onUnmounted} from 'vue'
+<script setup>
+import { ref, computed, watch, onUnmounted} from 'vue'
 
 import mime2ext from 'mime2ext'
 import stores from '../stores/stores.mjs'
@@ -285,386 +285,361 @@ const styles = [
 const enc = new TextEncoder()
 const dec = new TextDecoder()
 
-export default {
-  name: 'PageNotes',
+const ui = stores.ui
+const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
+const session = stores.session
+const pSt = stores.people
+const gSt = stores.groupe
+const cfg = stores.config
+const nSt = stores.note
 
-  components: { ShowHtml, NoteEdit, NotePlus, BtnCond, HashTags,
-    NoteExclu, NoteFichier, NoteConfirme, BoutonHelp, ListeAuts },
+nSt.resetRatt(false) // tous KO
+nSt.calculNfnt()
 
-  computed: {
-    nodesTries () {
-      const t = this.nSt.nodes
-      t.sort((a, b) => {
-        const noma = a.type + this.pSt.getCV(a.ids).nom
-        const nomb = b.type + this.pSt.getCV(b.ids).nom
-        return noma > nomb ? 1 : (noma < nomb ? -1 : 0)
-      })
-      return t
-    },
+const selected = ref('')
+const expanded = ref([])
+const nodeDiag = ref('')
+const ht = ref(new Set())
+const htg = ref(new Set ())
+const op = ref('') // suppr arch react
+const expandAll = ref(false)
+const rec = ref(0) // rattachement en cours
+const noderatt = ref(null)
+const lstn = ref([]) // liste des notes restant à télécharger
+const dlnbntot = ref(0) // nombre total initial de notes à télécharger
+const dlnbnc = ref(0) // nombre restant de notes à télécharger
+const lstr = ref([]) // liste des racines
+const lstrm = ref(new Map()) // donne l'indice d'une racine depuis son nom
+const dlst = ref(0) // statut du dl
+const dlnc = ref(null) // note en cours de dl
+const dlnbn = ref(0)
+const dlnbf = ref(0)
+const dlv2f = ref(0)
+const portupload = ref(cfg.portupload)
+const dirloc = ref('./temp')
 
-    estAnim () {
-      if (this.nSt.node.type !== 5) return false
-      const e = this.gSt.egr(this.nSt.note.id)
-      return e && e.estAnim
-    },
+const nodesTries = computed(() => {
+  const t = nSt.nodes
+  t.sort((a, b) => {
+    const noma = a.type + pSt.getCV(a.ids).nom
+    const nomb = b.type + pSt.getCV(b.ids).nom
+    return noma > nomb ? 1 : (noma < nomb ? -1 : 0)
+  })
+  return t
+})
 
-    presel () {  return this.nSt.presel },
+const estAnim = computed(() => {
+  if (nSt.node.type !== 5) return false
+  const e = gSt.egr(nSt.note.id)
+  return e && e.estAnim
+})
 
-    lib2 () { return this.lib(this.nSt.node) },
+const presel = computed(() => nSt.presel)
+const lib2 = computed(() => lib(nSt.node))
+const rattaut = computed(() => { const n = nSt.node; return n && n.type >= 4 && n.type <= 5 })
+const modifie = computed(() => { 
+  if (!nSt.note) return false
+  return !egalite(nSt.note.ht, ht.value) || (estAnim.value && !egalite(nSt.note.htg, htg.value))
+})
 
-    rattaut () { const n = this.nSt.node; return n && n.type >= 4 && n.type <= 5 },
+watch(presel, (ap) => {
+  if (ap) {
+    selected.value = ap
+    expanded.value = nSt.getAncetres(ap)
+    // nSt.setCourant(ap)
+    nSt.setPreSelect('')
+  }
+})
 
-    modifie () { 
-      if (!this.nSt.note) return false
-      return !egalite(this.nSt.note.ht, this.ht) || (this.estAnim && !egalite(this.nSt.note.htg, this.htg))
-    }
-  },
-
-  watch: {
-    presel (ap) {
-      if (ap) {
-        this.selected = ap
-        this.expanded = this.nSt.getAncetres(ap)
-        // this.nSt.setCourant(ap)
-        this.nSt.setPreSelect('')
-      }
-    },
-
-    selected (ap, av) {
-      if (!this.nSt.node || this.nSt.node.ids !== ap) {
-        this.nSt.setCourant(ap)
-        if (this.nSt.estGroupe) {
-          const idC = this.nSt.idC
-          const session = stores.session
-          if (session.groupeId !== idC) session.setGroupeId(idC)
-        }
-      }
-    }
-  },
-
-  data () {
-    return {
-      selected: '',
-      expanded: [],
-      nodeDiag: '',
-
-      ht: new Set(),
-      htg: new Set (),
-
-      op: '', // suppr arch react
-      expandAll: false,
-      rec: 0, // rattachement en cours
-      noderatt: null,
-      lstn: [], // liste des notes restant à télécharger
-      dlnbntot: 0, // nombre total initial de notes à télécharger
-      dlnbnc: 0, // nombre restant de notes à télécharger
-      lstr: [], // liste des racines
-      lstrm: new Map(), // donne l'indice d'une racine depuis son nom
-      dlst: 0, // statut du dl
-      dlnc: null, // note en cours de dl
-      dlnbn: 0,
-      dlnbf: 0,
-      dlv2f: 0,
-      portupload: this.cfg.portupload,
-      dirloc: './temp'
-    }
-  },
-
-  methods: {
-    cl (t) { return t > 3 ? '' : 'cl' + t },
-
-    styn (n) { const s1 = styles[n ? n.type : 0] 
-      return s1 + (n && this.nSt.node && (n.ids === this.nSt.node.ids) ? ' msg' : '')
-    },
-
-    fermer () { if (this.modifie) this.ui.oD('confirmFerm', this.idc); else this.ui.fD() },
-
-    s2Str (s) { return Array.from(s).sort().join(' ')},
-
-    ovHT () {
-      this.ht.clear()
-      this.nSt.note.ht.forEach(t => { this.ht.add(t)})
-      this.nSt.note.htg.forEach(t => { this.htg.add(t)})
-      this.ui.oD('NM', this.idc)
-    },
-  
-    async validerHt () {
-      await new HTNote().run(this.nSt.note, this.s2Str(this.ht), 
-        this.nSt.note.deGroupe ? this.s2Str(this.htg) : null)
-      this.ui.fD()
-    },
-
-    nbf(node) {
-      const n = node.note
-      return n && n.mfa ? n.mfa.size : 0
-    },
-    pc (i, j) { return !i ? '' : Math.round((j * 100) / i) + '%' },
-
-    clicknode (n) {
-      this.nodeDiag = ''
-      switch (this.rec) {
-        case 0 : { this.selected = n.ids; return }
-        case 1 : { 
-          if (n.ratt) {
-            const idas = Note.idasEdit(this.nSt.node)
-            if (!idas.size) this.nodeDiag = this.$t('PNOnoedit')
-            this.rec = 2
-            this.noderatt = n
-          }
-          return }
-        case 2 : { return }
-      }
-    },
- 
-    lib (n) {
-      const nfnt = this.nSt.nfnt[n.ids] || { nf: 0, nt:0 }
-      switch (n.type) {
-        case 1 : {
-          const nom = this.pSt.nom(n.ids)
-          return this.$t('avatar1', [nom, nfnt.nf, nfnt.nt])
-        }
-        case 2 : {
-          const nom = this.pSt.nom(n.ids, 1)
-          return this.$t('groupe1', [nom, nfnt.nf, nfnt.nt])
-        }
-        case 3 : {
-          const nom = this.pSt.nom(n.ids, 24)
-          return this.$t('groupe1', [nom, nfnt.nf, nfnt.nt])
-        }
-        case 4 : 
-        case 5 : {
-          const s1 = (nfnt.nt ? ('[' + nfnt.nf + ' / ' + nfnt.nt + '] ') : '') 
-          const r = n.note.ref
-          const s2 = r && r[0] !== n.note.id ? '(' + this.pSt.nom(n.note.id, 16)+ ') ' : ''
-          return s1 + s2 + n.note.titre
-        }
-        case 6 : 
-        case 7 : {
-          const s1 = (nfnt.nt ? ('[' + nfnt.nf + ' / ' + nfnt.nt + '] ') : '') 
-          return s1 + '#' + n.ids
-        }
-      }
-    },
-
-    libF (n) {
-      switch (n.type) {
-        case 1 : {
-          const nom = this.pSt.nom(n.ids)
-          return this.$t('avatar2', [nom])
-        }
-        case 2 : {
-          const nom = this.pSt.nom(n.ids, 1)
-          return this.$t('groupe2', [nom])
-        }
-        case 3 : {
-          const nom = this.pSt.nom(n.ids, 24)
-          return this.$t('groupe2', [nom])
-        }
-        case 4 : 
-        case 5 : {
-          const r = n.note.ref
-          const s2 = r && r[0] !== n.note.id ? '(' + this.pSt.nom(n.note.id, 16)+ ') ' : ''
-          return s2 + n.note.titre
-        }
-        case 6 : 
-        case 7 : {
-          return '#' + n.ids
-        }
-      }
-    },
-
-    // Rattachement d'une note *********************************************
-    async rattacher () {
-      this.rec = 1
-      this.noderatt = null
-      this.nSt.resetRatt(false) // tous KO
-      this.nSt.scanTop()
-    },
-
-    anrattacher () { 
-      this.rec = 0
-      this.noderatt = null
-      this.nSt.resetRatt(false)
-    },
-
-    async okrattacher () {
-      const n = this.nSt.note
-      const r = this.noderatt
-      const pid = r.id
-      const pids = r.type > 3 ? r.note.ids : null
-      await new RattNote().run(n.id, n.ids, pid, pids)
-      this.rec = 0
-      this.noderatt = null
-      this.nSt.resetRatt(false)
-    },
-
-    // Download de la sélection des notes **************************************
-    nf (v, id, type) {
-      const s = normNomFichier(v)
-      let ext = ''
-      if (type) {
-        const x = mime2ext(type)
-        if (x) ext = '.' + x
-      }
-      return s + (id ? '@' + id : '') + ext
-    },
-
-    scanNode (node, rac, path, lstn) {
-      const label = this.libF(node)
-      if (node.type > 5) {
-        // note "fake" - push de son path, pas de note
-        if (node.children.length) {
-          const p = path + '/' + label
-          for (const c of node.children) this.scanNode(c, rac, p, lstn)
-        } 
-      } else {
-        // c'est une vraie note
-        const n = node.note
-        const p2 = this.nf(label.substring(0, 32), n.ids)
-        const p = path + '/' + p2
-        if (this.nSt.filtrage(node)) {
-          rac.v2 += n.vf
-          rac.nbn++
-          lstn.push({ r: rac.nom, p, n })
-        }
-        if (node.children.length) {
-          for (const c of node.children) this.scanNode(c, rac, p, lstn)
-        }
-      }
-    },
-
-    listeNotes () {
-      const lr = []
-      this.lstn.length = 0
-      for (const r of this.nSt.nodes) {
-        const nom = this.nf(this.libF(r))
-        const path = nom
-        const rac = { nom, v2: 0, v2d: 0, nbn: 0, v1d: 0, nbnd: 0}
-        for (const node of r.children) this.scanNode(node, rac, path, this.lstn)
-        lr.push(rac)
-      }
-      this.dlnbntot = this.lstn.length
-      this.dlnbnc = this.lstn.length
-      this.lstr = lr
-      this.lstrm.clear()
-      for (let i = 0; i < lr.length; i++) this.lstrm.set(lr[i].nom, i)
-    },
-
-    async dlopen () {
-      this.listeNotes()
-      // preSelect()
-      if (this.lstn.length) {
-        this.dlnc = this.lstn[0]
-        this.dlst = 1
-        this.ui.oD('PNdl', this.idc)
-      } else {
-        await afficherDiag($t('PNOdlvide'))
-      }
-    },
-
-    async testup () {
-      const u = 'http://localhost:' + this.portupload + '/ping'
-      try {
-        const res = dec.decode(await getData(u))
-        afficherDiag($t('PNOdltok', [u, res]))
-      } catch (e) {
-        afficherDiag($t('PNOdltko', [u, e.message]))
-      }
-    },
-
-    url (u) { 
-      const d = this.dirloc + '/'
-      return 'http://localhost:' + this.portupload + '/' + u8ToB64(enc.encode(d + u), true) 
-    },
-
-    async dlnote (n, avecf) {
-      // console.log(n.p)
-      // await sleep(2000)
-      this.dlnbn++
-      const buf = enc.encode(n.n.texte)
-      const u = this.url(n.p + '/_.md')
-      const er = await putData(u, buf)
-      if (er) throw new AppExc(E_WS, 6, [er])
-      if (avecf) {
-        for (const [, f] of n.n.mfa) {
-          const nf = n.n.nomFichier(f)
-          const buf = await n.n.getFichier(f)
-          if (buf) {
-            const u = this.url(n.p + '/' + nf)
-            const er = await putData(u, buf)
-            if (er) throw new AppExc(E_WS, 6, [er])
-            else {
-              this.dlnbf++
-              this.dlv2f += buf.length
-            }
-          }
-        }
-      }
-    },
-
-    dlgo (avecf) {
-      this.dlst = 2
-      this.dlnbn = 0
-      this.dlnbf = 0
-      this.dlv2f = 0
-
-      setTimeout(async () => {
-        try {
-          while (this.lstn.length !== 0) {
-            if (this.dlst !== 2) {
-              await sleep(1000)
-              continue
-            }
-            const n = this.lstn[0]
-            this.dlnc = n
-            await this.dlnote(n, avecf)
-            const ir = this.lstrm.get(n.r)
-            const r = this.lstr[ir]
-            r.v2d += n.n.v2
-            r.nbnd++
-            this.lstn.shift()
-          }
-          this.dlst = 4
-        } catch (e) {
-          this.ui.afficherExc(appexc(e))
-        }
-      }, 50)
-    },
-
-    dlpause () {
-      this.dlst = 3
-    },
-
-    dlreprise () {
-      this.dlst = 2
-    },
-
-    dlfin () {
-      this.dlst = 0
-      this.ui.fD()
-    }
-  },
-
-  setup () {
-    const ui = stores.ui
-    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
-    const nSt = stores.note
-    nSt.resetRatt(false) // tous KO
-    nSt.calculNfnt()
-
-    return {
-      tree: ref(null),
-      session: stores.session, 
-      ui, idc, 
-      pSt: stores.people, 
-      gSt: stores.groupe, 
-      cfg: stores.config,
-      nSt,
-      dhcool, edvol, dkli, sty, styp, ID, icons, colors, styles
+watch(selected, (ap, av) => {
+  if (!nSt.node || nSt.node.ids !== ap) {
+    nSt.setCourant(ap)
+    if (nSt.estGroupe) {
+      const idC = nSt.idC
+      const session = stores.session
+      if (session.groupeId !== idC) session.setGroupeId(idC)
     }
   }
+})
 
+const cl = (t) => t > 3 ? '' : 'cl' + t
+const styn = (n) => { 
+  const s1 = styles[n ? n.type : 0] 
+  return s1 + (n && nSt.node && (n.ids === nSt.node.ids) ? ' msg' : '')
 }
+
+function fermer () { if (modifie.value) ui.oD('confirmFerm', idc); else ui.fD() }
+
+const s2Str = (s) => Array.from(s).sort().join(' ')
+
+function ovHT () {
+  ht.value.clear()
+  nSt.note.ht.forEach(t => { ht.value.add(t)})
+  nSt.note.htg.forEach(t => { htg.value.add(t)})
+  ui.oD('NM', idc)
+}
+
+async function validerHt () {
+  await new HTNote().run(nSt.note, s2Str(ht.value), 
+    nSt.note.deGroupe ? s2Str(htg.value) : null)
+  ui.fD()
+}
+
+const nbf = (node) => {
+  const n = node.note
+  return n && n.mfa ? n.mfa.size : 0
+}
+
+const pc = (i, j) => !i ? '' : Math.round((j * 100) / i) + '%'
+
+function clicknode (n) {
+  nodeDiag.value = ''
+  switch (rec.value) {
+    case 0 : { 
+      selected.value = n.ids
+      return
+    }
+    case 1 : { 
+      if (n.ratt) {
+        const idas = Note.idasEdit(nSt.node)
+        if (!idas.size) nodeDiag.value = $t('PNOnoedit')
+        rec.value = 2
+        noderatt.value = n
+      }
+      return
+    }
+    case 2 : return
+  }
+}
+
+const lib = (n) => {
+  const nfnt = nSt.nfnt[n.ids] || { nf: 0, nt:0 }
+  switch (n.type) {
+    case 1 : {
+      const nom = pSt.nom(n.ids)
+      return $t('avatar1', [nom, nfnt.nf, nfnt.nt])
+    }
+    case 2 : {
+      const nom = pSt.nom(n.ids, 1)
+      return $t('groupe1', [nom, nfnt.nf, nfnt.nt])
+    }
+    case 3 : {
+      const nom = pSt.nom(n.ids, 24)
+      return $t('groupe1', [nom, nfnt.nf, nfnt.nt])
+    }
+    case 4 : 
+    case 5 : {
+      const s1 = (nfnt.nt ? ('[' + nfnt.nf + ' / ' + nfnt.nt + '] ') : '') 
+      const r = n.note.ref
+      const s2 = r && r[0] !== n.note.id ? '(' + pSt.nom(n.note.id, 16)+ ') ' : ''
+      return s1 + s2 + n.note.titre
+    }
+    case 6 : 
+    case 7 : {
+      const s1 = (nfnt.nt ? ('[' + nfnt.nf + ' / ' + nfnt.nt + '] ') : '') 
+      return s1 + '#' + n.ids
+    }
+  }
+}
+
+const libF = (n) => {
+  switch (n.type) {
+    case 1 : {
+      const nom = pSt.nom(n.ids)
+      return $t('avatar2', [nom])
+    }
+    case 2 : {
+      const nom = pSt.nom(n.ids, 1)
+      return $t('groupe2', [nom])
+    }
+    case 3 : {
+      const nom = pSt.nom(n.ids, 24)
+      return $t('groupe2', [nom])
+    }
+    case 4 : 
+    case 5 : {
+      const r = n.note.ref
+      const s2 = r && r[0] !== n.note.id ? '(' + pSt.nom(n.note.id, 16)+ ') ' : ''
+      return s2 + n.note.titre
+    }
+    case 6 : 
+    case 7 : {
+      return '#' + n.ids
+    }
+  }
+}
+
+// Rattachement d'une note *********************************************
+function rattacher () {
+  rec.value = 1
+  noderatt.value = null
+  nSt.resetRatt(false) // tous KO
+  nSt.scanTop()
+}
+
+function anrattacher () { 
+  rec.value = 0
+  noderatt.value = null
+  nSt.resetRatt(false)
+}
+
+async function okrattacher () {
+  const n = nSt.note
+  const r = noderatt.value
+  const pid = r.id
+  const pids = r.type > 3 ? r.note.ids : null
+  await new RattNote().run(n.id, n.ids, pid, pids)
+  rec.value = 0
+  noderatt.value = null
+  nSt.resetRatt(false)
+}
+
+// Download de la sélection des notes **************************************
+function nf (v, id, type) {
+  const s = normNomFichier(v)
+  let ext = ''
+  if (type) {
+    const x = mime2ext(type)
+    if (x) ext = '.' + x
+  }
+  return s + (id ? '@' + id : '') + ext
+}
+
+function scanNode (node, rac, path, lstn) {
+  const label = libF(node)
+  if (node.type > 5) {
+    // note "fake" - push de son path, pas de note
+    if (node.children.length) {
+      const p = path + '/' + label
+      for (const c of node.children) scanNode(c, rac, p, lstn)
+    } 
+  } else {
+    // c'est une vraie note
+    const n = node.note
+    const p2 = nf(label.substring(0, 32), n.ids)
+    const p = path + '/' + p2
+    if (nSt.filtrage(node)) {
+      rac.v2 += n.vf
+      rac.nbn++
+      lstn.push({ r: rac.nom, p, n })
+    }
+    if (node.children.length) {
+      for (const c of node.children) scanNode(c, rac, p, lstn)
+    }
+  }
+}
+
+function listeNotes () {
+  const lr = []
+  lstn.value.length = 0
+  for (const r of nSt.nodes) {
+    const nom = nf(libF(r))
+    const path = nom
+    const rac = { nom, v2: 0, v2d: 0, nbn: 0, v1d: 0, nbnd: 0}
+    for (const node of r.children) scanNode(node, rac, path, lstn.value)
+    lr.push(rac)
+  }
+  dlnbntot.value = lstn.value.length
+  dlnbnc.value = lstn.value.length
+  lstr.value = lr
+  lstrm.value.clear()
+  for (let i = 0; i < lr.length; i++) lstrm.value.set(lr[i].nom, i)
+}
+
+async function dlopen () {
+  listeNotes()
+  // preSelect()
+  if (lstn.value.length) {
+    dlnc.value = lstn.value[0]
+    dlst.value = 1
+    ui.oD('PNdl', idc)
+  } else {
+    await afficherDiag($t('PNOdlvide'))
+  }
+}
+
+async function testup () {
+  const u = 'http://localhost:' + portupload.value + '/ping'
+  try {
+    const res = dec.decode(await getData(u))
+    afficherDiag($t('PNOdltok', [u, res]))
+  } catch (e) {
+    afficherDiag($t('PNOdltko', [u, e.message]))
+  }
+}
+
+const url = (u) => { 
+  const d = dirloc.value + '/'
+  return 'http://localhost:' + portupload.value + '/' + u8ToB64(enc.encode(d + u), true) 
+}
+
+async function dlnote (n, avecf) {
+  // console.log(n.p)
+  // await sleep(2000)
+  dlnbn.value++
+  const buf = enc.encode(n.n.texte)
+  const u = url(n.p + '/_.md')
+  const er = await putData(u, buf)
+  if (er) throw new AppExc(E_WS, 6, [er])
+  if (avecf) {
+    for (const [, f] of n.n.mfa) {
+      const nf = n.n.nomFichier(f)
+      const buf = await n.n.getFichier(f)
+      if (buf) {
+        const u = url(n.p + '/' + nf)
+        const er = await putData(u, buf)
+        if (er) throw new AppExc(E_WS, 6, [er])
+        else {
+          dlnbf.value++
+          dlv2f.value += buf.length
+        }
+      }
+    }
+  }
+}
+
+function dlgo (avecf) {
+  dlst.value = 2
+  dlnbn.value = 0
+  dlnbf.value = 0
+  dlv2f.value = 0
+
+  setTimeout(async () => {
+    try {
+      while (lstn.value.length !== 0) {
+        if (dlst.value !== 2) {
+          await sleep(1000)
+          continue
+        }
+        const n = lstn.value[0]
+        dlnc.value = n
+        await dlnote(n, avecf)
+        const ir = lstrm.value.get(n.r)
+        const r = lstr.value[ir]
+        r.v2d += n.n.v2
+        r.nbnd++
+        lstn.value.shift()
+      }
+      dlst.value = 4
+    } catch (e) {
+      ui.afficherExc(appexc(e))
+    }
+  }, 50)
+}
+
+function dlpause () {
+  dlst.value = 3
+}
+
+function dlreprise () {
+  dlst.value = 2
+}
+
+function dlfin () {
+  dlst.value = 0
+  ui.fD()
+}
+
 </script>
 
 <style lang="css">

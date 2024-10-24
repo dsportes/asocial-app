@@ -131,8 +131,8 @@
 </q-page>
 </template>
 
-<script>
-import { toRef, onUnmounted } from 'vue'
+<script setup>
+import { ref, computed, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import { edvol, $t, dkli, styp, afficher8000 } from '../app/util.mjs'
@@ -147,101 +147,77 @@ import InvitationAcceptation from '../components/InvitationAcceptation.vue'
 import { UNITEN, UNITEV } from '../app/api.mjs'
 import { NouveauGroupe, AnnulerContact } from '../app/operations4.mjs'
 
-export default {
-  name: 'PageGroupes',
+const props = defineProps({ tous: Boolean })
 
-  props: { tous: Boolean },
+const ui = stores.ui
+const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
+const session = stores.session
+const aSt = stores.avatar
+const fStore = stores.filtre
+const stats = fStore.stats
+const gSt = stores.groupe
 
-  components: { ApercuChatgr,SelAvid, BtnCond, ChoixQuotas, NomAvatar, BoutonHelp, ApercuGenx, InvitationAcceptation },
+const options = [
+  { label: $t('AGsimple'), value: false },
+  { label: $t('AGunanime'), value: true, color: 'warning' }
+]
 
-  computed: {
-    stt () { return this.gSt.pgLgFT[1] || { nn:0, qn: 0, vf: 0, qv: 0 }},
-    lg () { return this.gSt.pgLgFT[0] || [] },
-    nomgi () { return this.session.getCV(this.inv.idg).nom }
-  },
+fStore.filtre.groupes.tous = props.tous || false
 
-  methods: {
-    oknom (n) { this.nom = n },
-    am (idg) { return this.gSt.amb(idg) },
-    edqn (n) { return n * UNITEN },
-    edqv (n) { return edvol(n * UNITEV) },
-    edv (n) { return edvol(n) },
+const quotas = ref(null) // { q1) q2) min1) min2) max1) max2) err}
+const nom = ref('')
+const una = ref(false)
+const inv = ref(null) // invitation courante
 
-    nbiv (e) { return this.gSt.nbMesInvits(e) },
+const stt = computed(() => gSt.pgLgFT[1] || { nn:0, qn: 0, vf: 0, qv: 0 })
+const lg = computed(() => gSt.pgLgFT[0] || [] )
+const nomgi = computed(() => session.getCV(inv.value.idg).nom)
 
-    async ouvaccinv (inv) {
-      this.inv = inv
-      if (inv.invpar.size) this.ui.oD('IAaccinvit', this.idc)
-      else this.ui.oD('PGctc', this.idc)
-    },
+function oknom (n) { nom.value = n }
+const am = (idg) => gSt.amb(idg)
+const edqn = (n) => n * UNITEN 
+const edqv = (n) => edvol(n * UNITEV)
+const edv = (n) => edvol(n)
+const nbiv = (e) => gSt.nbMesInvits(e)
 
-    async ovpageGr (elt) {
-      this.session.setGroupeId(elt.groupe.id)
-      this.ui.setPage('groupe', 'groupe')
-    },
-
-    async chat (elt) {
-      this.session.setGroupeId(elt.groupe.id)
-      this.ui.oD('PGACGouvrir', this.idc)
-    },
-
-    async nvGr () {
-      const cpt = this.session.compte.qv // { qc, qn, qv, pcc, pcn, pcv, nbj }
-      const maxn = Math.floor(cpt.qn * (100 - cpt.pcn) / 100)
-      const maxv = Math.floor(cpt.qn * (100 - cpt.pcv) / 100)
-      this.quotas = { qn: 0, qv: 0, qc: 0, minn: 0, minv: 0, maxn, maxv, err: ''}
-      this.nom = ''
-      this.una = false
-      this.ui.oD('PGcrgr', this.idc)
-    },
-
-    async ctc(ln) {
-      this.ui.fD()
-      const r = await new AnnulerContact().run(this.inv.idg, this.inv.ida, ln)
-      if (r) await afficher8000(r, this.inv.ida, this.inv.idg)
-    },
-    
-    async okCreation () {
-      // console.log(this.nom, this.quotas.qn, this.quotas.qv, this.una)
-      await new NouveauGroupe().run(this.nom, this.una, this.quotas)
-      this.ui.fD()
-    }
-  },
-
-  data () {
-    return {
-      quotas: null, // { q1, q2, min1, min2, max1, max2, err}
-      nom: '',
-      una: false,
-      inv: null // invitation courante
-    }
-  },
-
-  setup (props) {
-    const ui = stores.ui
-    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
-    const session = stores.session
-    const aSt = stores.avatar
-    const fStore = stores.filtre
-    const stats = fStore.stats
-    const gSt = stores.groupe
-
-    const options = [
-      { label: $t('AGsimple'), value: false },
-      { label: $t('AGunanime'), value: true, color: 'warning' }
-    ]
-
-    const tous = toRef(props, 'tous')
-    fStore.filtre.groupes.tous = tous.value || false
-
-    return {
-      ui, session, aSt, gSt, dkli, styp, idc,
-      stats,
-      options
-    }
-  }
-
+async function ouvaccinv (invx) {
+  inv.value = invx
+  if (invx.invpar.size) ui.oD('IAaccinvit', idc)
+  else ui.oD('PGctc', idc)
 }
+
+async function ovpageGr (elt) {
+  session.setGroupeId(elt.groupe.id)
+  ui.setPage('groupe', 'groupe')
+}
+
+async function chat (elt) {
+  session.setGroupeId(elt.groupe.id)
+  ui.oD('PGACGouvrir', idc)
+}
+
+async function nvGr () {
+  const cpt = session.compte.qv // { qc, qn, qv, pcc, pcn, pcv, nbj }
+  const maxn = Math.floor(cpt.qn * (100 - cpt.pcn) / 100)
+  const maxv = Math.floor(cpt.qn * (100 - cpt.pcv) / 100)
+  quotas.value = { qn: 0, qv: 0, qc: 0, minn: 0, minv: 0, maxn, maxv, err: ''}
+  nom.value = ''
+  una.value = false
+  ui.oD('PGcrgr', idc)
+}
+
+async function ctc(ln) {
+  ui.fD()
+  const r = await new AnnulerContact().run(inv.value.idg, inv.value.ida, ln)
+  if (r) await afficher8000(r, inv.value.ida, inv.value.idg)
+}
+
+async function okCreation () {
+  // console.log(nom.value, quotas.value.qn, quotas.value.qv, una.value)
+  await new NouveauGroupe().run(nom.value, una.value, quotas.value)
+  ui.fD()
+}
+
 </script>
 
 <style lang="sass" scoped>
