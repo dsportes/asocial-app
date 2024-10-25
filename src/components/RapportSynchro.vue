@@ -37,31 +37,15 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import stores from '../stores/stores.mjs'
 import { dkli } from '../app/util.mjs'
 
-export default ({
-  name: 'RapportSynchro',
+const session = stores.session
+const aSt = stores.avatar
+const gSt = stores.groupe
 
-  props: { },
-
-  computed: {
-  },
-
-  methods: {
-    nom (id) { return this.session.getCV(id).nom }
-  },
-
-  setup () {
-    return {
-      session: stores.session,
-      aSt: stores.avatar,
-      gSt: stores.groupe,
-      dkli
-    }
-  }
-})
+const nom = (id) => session.getCV(id).nom 
 </script>
 
 <style lang="sass" scoped>

@@ -101,7 +101,7 @@ export default {
 
   data () { return {
     txt: '',
-    avid: 0,
+    avid: '',
     im: 0,
     dh: 0
   }},

@@ -32,61 +32,42 @@
   </q-dialog>
 </div>
 </template>
-<script>
 
-import { onUnmounted, toRef } from 'vue'
+<script setup>
+import { ref, computed, onUnmounted } from 'vue'
+
 import stores from '../stores/stores.mjs'
 import { sty } from '../app/util.mjs'
 import BtnCond from './BtnCond.vue'
 import SdNb from './SdNb.vue'
 
-export default ({
-  name: 'ShowHtml',
+const ui = stores.ui
+const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 
-  components: { SdNb, BtnCond },
-
-  props: { 
-    texte: String, 
-    idx: Number, 
-    maxh: String, 
-    zoom: Boolean, 
-    edit: Boolean,
-    scroll: Boolean
-    },
-
-  computed: {
-    dk () { const d = this.$q.dark.isActive 
-      return d ? (this.idx === -1 ? true : false) : (this.idx === -1 ? false : true)
-    },
-    idx0 () { return this.idx === -1 || !this.idx || (this.idx % 2 === 0) },
-    styx () { 
-      return 'min-height:2rem' + 
-        ';height:' + (this.maxh ? this.maxh + ';' : '') +
-        'overflow-y:' + (this.scroll ? 'scroll' : 'auto') 
-    }
-  },
-
-  data () {
-    return {
-    }
-  },
-
-  methods: {
-    editer () {
-      this.$emit('edit')
-    }
-  },
-
-  setup (props) {
-    const ui = stores.ui
-    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
-    const t = toRef(props, 'texte')
-
-    return {
-      ui, idc, sty
-    }
-  }
+const props = defineProps({ 
+  texte: String, 
+  idx: Number, 
+  maxh: String, 
+  zoom: Boolean, 
+  edit: Boolean,
+  scroll: Boolean
 })
+
+const emit = defineEmits(['edit'])
+
+const dk = computed(() => { 
+  const d = this.$q.dark.isActive 
+  return d ? (props.idx === -1 ? true : false) : (props.idx === -1 ? false : true)
+})
+const idx0 = computed(() => props.idx === -1 || !props.idx || (props.idx % 2 === 0))
+const styx = computed(() => 
+  'min-height:2rem' + 
+  ';height:' + (props.maxh ? props.maxh + ';' : '') +
+  'overflow-y:' + (props.scroll ? 'scroll' : 'auto') 
+)
+
+function editer () { emit('edit') }
+
 </script>
 
 <style lang="sass" scoped>

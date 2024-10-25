@@ -4,23 +4,14 @@
   <sd-blanc v-else :texte="texte"/>
 </div>
 </template>
-<script>
+
+<script setup>
 import SdNoir from './SdNoir.vue'
 import SdBlanc from './SdBlanc.vue'
 
-export default ({
-  name: 'SdNb',
-
-  components: { SdNoir, SdBlanc },
-
-  computed: {
-    // idxPair () { return this.idx === undefined || this.idx % 2 === 0 }
-  },
-
-  props: { 
-    texte: String, 
-    idx: Number
-  }
+const props = defineProps({ 
+  texte: String, 
+  idx: Number // ???
 })
 </script>
 

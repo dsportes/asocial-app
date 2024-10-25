@@ -34,38 +34,21 @@
   </div>
 </template>
 
-<script>
-import { toRef, ref, watch } from 'vue'
+<script setup>
+import { ref, computed, watch } from 'vue'
+
 import { UNITEN, UNITEV } from '../app/api.mjs'
 import { edvol, mon, nbn } from '../app/util.mjs'
 
-export default {
-  name: 'TuileCnv',
+const props = defineProps({ 
+  src: Object, // {qc qn qv ac an av c n v}
+  occupation: Boolean, // si true c n v sont interprétés comme "occupation / utilisation"
+  type: String, //'qc': limite coûts, 'qn' 'qv'
+})
 
-  props: { 
-    src: Object, // {qc qn qv ac an av c n v}
-    occupation: Boolean, // si true c n v sont interprétés comme "occupation / utilisation"
-    type: String, //'qc': limite coûts, 'qn' 'qv'
-  },
+const uti = computed(() => props.type === 'qc' ? props.src.pcc : (props.type === 'qn' ? props.src.pcn : props.src.pcv))
+const aff = computed(() => props.type === 'qc' ? props.src.pcac : (props.type === 'qn' ? props.src.pcan : props.src.pcav))
 
-  computed: {
-    uti () { return this.type === 'qc' ? this.src.pcc : (this.type === 'qn' ? this.src.pcn : this.src.pcv) },
-    aff () { return this.type === 'qc' ? this.src.pcac : (this.type === 'qn' ? this.src.pcan : this.src.pcav) }
-  },
-
-  methods: {
-  },
-
-  data () { return {
-  }},
-
-  setup (props) {
-    return {
-      edvol, mon, nbn, UNITEN, UNITEV
-    }
-  }
-
-}
 </script>
 
 <style lang="sass" scoped>

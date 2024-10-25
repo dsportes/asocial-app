@@ -1,14 +1,12 @@
 <template>
   <vue-showdown class="markdown-body" :markdown="texte" :key="texte" flavor="github" :options="{ emoji: true }" />
 </template>
-<script>
+
+<script setup>
 import { VueShowdown } from 'vue-showdown'
-export default ({
-  name: 'SdBlanc',
 
-  components: { VueShowdown },
-
-  props: { texte: String }
+const props = defineProps({ 
+  texte: String
 })
 </script>
 

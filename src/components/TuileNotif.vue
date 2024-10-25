@@ -36,35 +36,16 @@
   </div>
 </template>
 
-<script>
-// import { toRef } from 'vue'
+<script setup>
 
-export default {
-  name: 'TuileNotif',
+const props = defineProps({ 
+  src: Object, // {ntr0, ntr1, ntr2, nco0, nco1, nco2}
+  occupation: Boolean // grande largeur pour harmonisation TuileCnv
+})
 
-  props: { 
-    src: Object, // {ntr0, ntr1, ntr2, nco0, nco1, nco2}
-    occupation: Boolean // grande largeur pour harmonisation TuileCnv
-  },
+const cw = (v) => 'col-4 text-center font-mono ' + (v ? 'bg-yellow-3 text-bold text-warning' : '')
+const cn = (v) => 'col-4 text-center font-mono ' + (v ? 'bg-yellow-3 text-bold text-negative' : '')
 
-  computed: {
-  },
-
-  methods: {
-    cw (v) { return 'col-4 text-center font-mono ' + (v ? 'bg-yellow-3 text-bold text-warning' : '')},
-    cn (v) { return 'col-4 text-center font-mono ' + (v ? 'bg-yellow-3 text-bold text-negative' : '')},
-  },
-
-  data () { return {
-  }},
-
-  setup (props) {
-    // const src = toRef(props, 'src')
-    return {
-    }
-  }
-
-}
 </script>
 
 <style lang="sass" scoped>

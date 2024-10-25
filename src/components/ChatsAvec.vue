@@ -1,5 +1,5 @@
 <template>
-<div>
+<div v-if="!estAvc">
   <div v-if="chDuC.length">
     <div class="row">
       <div class="text-italic text-bold titre-md q-mr-sm">{{$t('CAVtit')}}</div>
@@ -47,6 +47,7 @@ const props = defineProps({
   urgence: Boolean // true si invoqué depuis tab URGENCE
 })
 
+const estAvc = computed(() => session.compte.mav.has(props.idE))
 const chDuC = computed(() => aSt.chatsDuCompte(props.idE))
 
 const chat = ref(null)

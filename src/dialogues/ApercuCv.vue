@@ -17,7 +17,7 @@
   </q-card>
 </template>
 
-<script>
+<script setup>
 import stores from '../stores/stores.mjs'
 import { GetCv } from '../app/operations4.mjs'
 import { styp } from '../app/util.mjs'
@@ -25,33 +25,18 @@ import { styp } from '../app/util.mjs'
 import ShowHtml from '../components/ShowHtml.vue'
 import BtnCond from '../components/BtnCond.vue'
 
-export default {
-  name: 'ApercuCv',
+const props = defineProps({ 
+  cv: Object 
+})
 
-  props: { cv: Object },
+const session = stores.session
+const ui = stores.ui
+const net = session.accesNet
 
-  components: { BtnCond, ShowHtml },
-
-  computed: { },
-
-  data () { return { } },
-
-  methods: {
-    async refresh () {
-      await new GetCv().run(this.cv.id)
-    }
-  },
-
-  setup () {
-    const session = stores.session
-    
-    return {
-      styp, session, 
-      ui: stores.ui,
-      net: session.accesNet
-    }
-  }
+async function refresh () {
+  await new GetCv().run(props.cv.id)
 }
+
 </script>
 <style lang="sass" scoped>
 @import '../css/app.sass'

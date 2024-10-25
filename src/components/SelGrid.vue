@@ -7,73 +7,50 @@
 </span>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, watch } from 'vue'
 
-import { toRef, ref } from 'vue'
 import stores from '../stores/stores.mjs'
 
-export default {
-  name: 'SelGrid',
+const props = defineProps({ 
+  aucun: Boolean
+})
 
-  props: { 
-    aucun: Boolean
-  },
+const cav = ref()
+const session = stores.session
 
-  computed: {
-    options () {
-      const l = []
-      this.session.compte.mpg.forEach((v, id) => { 
-        l.push({ label: this.session.getCV(id).nom, value: id }) 
-      })
-      const cid = this.session.groupeId
-      l.sort((a,b) => { return a.value === cid ? - 1 : (b.value === cid ? 1 : 
-        (a.label < b.label ? -1 : (b.label > a.label ? 1 : 0)))})
-      if (this.aucun) l.unshift({ label: '-', value: 0 })
-      return l
-    }
-  },
-
-  watch: {
-    cav (ap) { this.session.setGroupeId(ap.value) }
-  },
-
-  methods: {
-  },
-
-  data () {
-    return {
-    }
-  },
-
-  setup (props) {
-    const aucun = toRef(props, 'aucun')
-    const cav = ref()
-    const session = stores.session
-
-    if (session.groupeId) {
-      cav.value = { 
-        label: session.getCV(session.groupeId).nom, 
-        value: session.groupeId 
-      }
-    } else if (aucun.value) {
-      cav.value = { label: '-', value: '' }
-    } else {
-      const [gid] = session.compte.mpg.keys()
-      if (gid) {
-        session.setGroupeId(gid)
-        cav.value = { 
-          label: session.getCV(session.groupeId).nom, 
-          value: session.groupeId 
-        }
-      } else cav.value = { label: '-', value: '' }
-    }
-
-    return {
-      session, cav
-    }
+if (session.groupeId) {
+  cav.value = { 
+    label: session.getCV(session.groupeId).nom, 
+    value: session.groupeId 
   }
-
+} else if (props.aucun) {
+  cav.value = { label: '-', value: '' }
+} else {
+  const [gid] = session.compte.mpg.keys()
+  if (gid) {
+    session.setGroupeId(gid)
+    cav.value = { 
+      label: session.getCV(session.groupeId).nom, 
+      value: session.groupeId 
+    }
+  } else cav.value = { label: '-', value: '' }
 }
+
+const options = computed(() => {
+  const l = []
+  session.compte.mpg.forEach((v, id) => { 
+    l.push({ label: session.getCV(id).nom, value: id }) 
+  })
+  const cid = session.groupeId
+  l.sort((a,b) => { return a.value === cid ? - 1 : (b.value === cid ? 1 : 
+    (a.label < b.label ? -1 : (b.label > a.label ? 1 : 0)))})
+  if (props.aucun) l.unshift({ label: '-', value: 0 })
+  return l
+})
+
+watch(cav, (ap) => { session.setGroupeId(ap.value) })
+
 </script>
 
 <style lang="sass" scoped>

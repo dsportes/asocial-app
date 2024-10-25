@@ -8,73 +8,45 @@
 </span>
 </template>
 
-<script>
-
-import { toRef, ref } from 'vue'
+<script setup>
+import { ref, computed, watch } from 'vue'
 import stores from '../stores/stores.mjs'
 
-export default {
-  name: 'SelAvmbr',
+const props = defineProps({ 
+  acnote: Number, // 1: accès en lecture, 2: accès en écriture
+  acmbr: Boolean 
+})
 
-  props: { 
-    acnote: Number, // 1: accès en lecture, 2: accès en écriture
-    acmbr: Boolean 
-  },
+const model = defineModel({type: String})
 
-  emits: ['update:modelValue'],
+const session = stores.session
+const gSt = stores.groupe
 
-  computed: {
-    options () {
-      return this.setOptions()
+function setOptions () {
+  const g = gSt.egrC.groupe
+  const l = []
+  session.compte.mav.forEach(ida => { 
+    const im = g.mmb.get(ida)
+    if (im) {
+      if ((props.acmbr && g.accesMembre(im)) 
+        || (props.acnote && ((g.accesNote2(im) >= props.acnote))))
+          l.push({ label: session.getCV(ida).nom, value: ida })
     }
-  },
-
-  watch: {
-    cav (ap) { this.$emit('update:modelValue', ap.value) }
-  },
-
-  methods: {
-  },
-
-  data () {
-    return {
-    }
-  },
-
-  setup (props, context) {
-    const cav = ref()
-    const session = stores.session
-    const gSt = stores.groupe
-    const acnote = toRef(props, 'acnote')
-    const acmbr = toRef(props, 'acmbr')
-
-    function setOptions () {
-      const g = gSt.egrC.groupe
-      const l = []
-      session.compte.mav.forEach(ida => { 
-        const im = g.mmb.get(ida)
-        if (im) {
-          if ((acmbr.value && g.accesMembre(im)) 
-            || (acnote.value && ((g.accesNote2(im) >= acnote.value))))
-              l.push({ label: session.getCV(ida).nom, value: ida })
-        }
-      })
-      const cid = session.avatarId
-      l.sort((a,b) => { return a.value === cid ? - 1 : (b.value === cid ? 1 : 
-        (a.label < b.label ? -1 : (b.label > a.label ? 1 : 0)))})
-      return l
-    }
-
-    const l = setOptions()
-    cav.value = l.length > 0 ? l[0] : { label: '?', value: 0}
-    context.emit('update:modelValue', cav.value.value)
-
-    return {
-      session, cav, setOptions
-    }
-  }
-
+  })
+  const cid = session.avatarId
+  l.sort((a,b) => { return a.value === cid ? - 1 : (b.value === cid ? 1 : 
+    (a.label < b.label ? -1 : (b.label > a.label ? 1 : 0)))})
+  return l
 }
+
+const options = ref(setOptions())
+const cav = ref(options.value.length > 0 ? options.value[0] : { label: '?', value: ''})
+model.value = cav.value.value
+
+watch(cav, (ap) => { 
+  model.value = ap.value
+})
+
 </script>
 
 <style lang="sass" scoped>
