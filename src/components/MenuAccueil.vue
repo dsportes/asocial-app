@@ -21,6 +21,12 @@
       <q-item-label lines="1">{{$t('ACpartitions')}}</q-item-label>
     </q-item-section>
   </q-item>
+  <q-item v-if="!session.estComptable && session.estDelegue && !session.estA && session.accesNet" 
+    clickable  @click="maPartition()">
+    <q-item-section>
+      <q-item-label lines="1">{{$t('ACgpart')}}</q-item-label>
+    </q-item-section>
+  </q-item>
 
   <q-separator v-if="session.estComptable" color="orange"/>
 
@@ -33,18 +39,18 @@
 
     <q-item clickable>
       <q-item-section clickable @click="ui.setPage('groupes')">
-        <q-item-label>
-          <span>{{$t('ACmesgr')}}
+        <q-item-label class="row q-gutter-sm">
+          <span>{{$t('ACmesgr', nbparts, {count: nbparts})}}</span>
+          <span v-if="nbgrpsT">{{$t('ACmesgra')}}
             <q-badge color="primary" rounded>{{nbgrpsT}}</q-badge>
           </span>
-          <div class="q-ml-lg">
-            <span>{{$t('ACmesinva')}}
-              <q-badge :color="nbInvits ? 'warning' : 'primary'" rounded>{{nbInvits}}</q-badge>
-            </span>
-            <span class="q-ml-md">{{$t('ACmesinvc')}}
-              <q-badge color="primary" rounded>{{nbContacts}}</q-badge>
-            </span>
-          </div>
+          <span v-if="nbInvits">{{$t('ACmesgri')}}
+            <q-badge :color="nbInvits ? 'warning' : 'primary'" rounded>{{nbInvits}}</q-badge>
+          </span>
+          <span v-if="nbContacts">{{$t('ACmesgrc')}}
+            <q-badge color="primary" rounded>{{nbContacts}}</q-badge>
+          </span>
+          <span v-if="nbparts">)</span>
         </q-item-label>
       </q-item-section>
     </q-item>
@@ -59,11 +65,6 @@
         <q-item-label lines="1">{{$t('ACchats')}}
           <q-badge color="primary" rounded>{{nbchats}}</q-badge>
         </q-item-label>
-      </q-item-section>
-    </q-item>
-    <q-item v-if="session.accesNet && !session.estA" clickable  @click="maPartition()">
-      <q-item-section>
-        <q-item-label lines="1">{{$t(session.pow <= 3 ? 'ACgpart' : 'ACdeleg')}}</q-item-label>
       </q-item-section>
     </q-item>
     <q-separator color="orange"/>
@@ -145,6 +146,7 @@ const nbgrps = computed(() => session.compte.idGroupes(session.avatarId).size )
 const nbgrpsT = computed(() => session.compte.idGroupes().size )
 const nbInvits = computed(() => gSt.invitsAtt.length )
 const nbContacts = computed(() => gSt.contactsAtt.length )
+const nbparts = computed(() => nbgrpsT.value + nbInvits.value || nbContacts.value )
 const nbMembres = computed(() => gSt.nbMbC )
 const bloc = computed(() => session.mini )
 const nomg = computed(() => { const idg = session.groupeid; return idg ? session.getCV(idg).nom : '' })

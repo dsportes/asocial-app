@@ -1,29 +1,24 @@
 <template>
 <div>
-  <div class="row">
-    <div v-if="estCtc">
+  <div v-if="chDuC.length">
+    <div class="row">
       <div class="text-italic text-bold titre-md q-mr-sm">{{$t('CAVtit')}}</div>
-      <div v-for="(e, idx) in aSt.chatsDuCompte(idE)" :key="e.id">
-        <span v-if="idx === 0 && (e.ch || (!e.ch && del))" class="q-mr-md bord">
+      <div v-for="e in chDuC" :key="e.id">
+        <span class="q-mr-md bord">
           <span class="fs-md q-mr-sm">{{e.nom}}</span>
           <btn-cond v-if="e.ch" round icon="open_in_new" cond="cVisu" @ok="ouvrirChat(e.ch)"/>
-          <btn-cond v-if="!e.ch" round icon="add" cond="cEdit" @ok="creerChat()"/>
-        </span>
-        <span v-else>
-          <span v-if="e.ch" class="q-mr-md bord">
-            <span class="fs-md q-mr-sm">{{e.nom}}</span>
-            <btn-cond round icon="open_in_new" cond="cVisu" @ok="ouvrirChat(e.ch)"/>
-          </span>
+          <btn-cond v-else round icon="add" color="warning" cond="cEdit" @ok="creerChat()"/>
         </span>
       </div>
     </div>
-    <div v-else class="text-italic text-bold titre-md q-mr-sm">{{$t('CAVtit2')}}</div>
   </div>
+  <div v-else class="text-italic text-bold titre-md q-mr-sm">{{$t('CAVtit2')}}</div>
 
-  <nouveau-chat v-if="ui.d[idc] && ui.d[idc].CCouvrir" :idc="idc" :idI="session.compteId" :idE="idE" :mode="2"/>
+  <nouveau-chat v-if="ui.d[idc] && ui.d[idc].CCouvrir" 
+    :idc="idc" :idI="session.compteId" :idE="idE" :mode="2" :urgence="urgence"/>
 
   <q-dialog v-model="ui.d[idc].CAACouvrir" full-height position="left" persistent>
-    <apercu-chat :id="chat.id" :ids="chat.ids"/>
+    <apercu-chat :id="chat.id" :ids="chat.ids" :urgence="urgence"/>
   </q-dialog>
 
 </div>
@@ -48,12 +43,11 @@ const props = defineProps({
   idE: String, 
   /* Quand idE est délégué de la partition du compte. 
   Si le compte n'a pas de chat, le bouton de création propose la création */
-  del: Boolean
+  del: Boolean,
+  urgence: Boolean // true si invoqué depuis tab URGENCE
 })
 
-const estCtc = computed(() => { const x = RegCles.get(props.idE)
-  return x
-})
+const chDuC = computed(() => aSt.chatsDuCompte(props.idE))
 
 const chat = ref(null)
 

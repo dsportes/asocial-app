@@ -36,56 +36,33 @@
   </q-page>
 </template>
 
-<script>
+<script setup>
+import { ref, computed } from 'vue'
 
 import RapportSynchro from '../components/RapportSynchro.vue'
 import stores from '../stores/stores.mjs'
-import { dhcool, edvol, mon } from '../app/util.mjs'
+import { edvol, mon, $t } from '../app/util.mjs'
 import { Tarif, AMJ } from '../app/api.mjs'
 
-export default {
-  name: 'PageSession',
+const ui = stores.ui
+const session = stores.session
+const config = stores.config
+const aSt = stores.avatar
+const fSt = stores.fetat
 
-  components: { RapportSynchro },
+const nc = computed(() => session.getCV(session.compteId).nom )
+const couts = computed(() => Tarif.evalConso(session.consocumul))
+const st = computed(() => $t('ISst' + (session.status < 2 ? session.status : 2)))
+const mo = computed(() => session.synchro ? $t('sync') : (session.avion ? $t('avion') : 'incognito'))
 
-  computed: {
-    nc () { return this.session.getCV(this.session.compteId).nom },
-    couts () { return Tarif.evalConso(this.session.consocumul) },
-    st () { 
-      const n = this.session.status < 2 ? this.session.status : 2
-      return this.$t('ISst' + n)
-    },
-    mo () { return this.session.synchro ? this.$t('sync') : 
-      (this.session.avion ? this.$t('avion') : 'incognito')}
-  },
+async function retry (idf) {
+  const e = fSt.getFetat(idf)
+  await e.retry()
+}
 
-  methods: {
-    dhcool (x) { return x ? dhcool(x, true) : '---' },
-    async retry (idf) {
-      const e = this.fSt.getFetat(idf)
-      await e.retry()
-    },
-    async abandon (idf) {
-      const e = this.fSt.getFetat(idf)
-      await e.abandon()
-    }
-  },
-
-  data () {
-    return {
-    }
-  },
-
-  setup () {
-    return {
-      edvol, mon, AMJ,
-      ui: stores.ui,
-      session: stores.session,
-      config: stores.config,
-      aSt: stores.avatar,
-      fSt: stores.fetat
-    }
-  }
+async function abandon (idf) {
+  const e = fSt.getFetat(idf)
+  await e.abandon()
 }
 
 </script>

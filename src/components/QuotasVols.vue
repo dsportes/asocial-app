@@ -6,44 +6,24 @@
   </div>
 </template>
 
-<script>
-// import { toRef } from 'vue'
+<script setup>
+import { ref, computed } from 'vue'
+
 import { UNITEN, UNITEV } from '../app/api.mjs'
 import { edvol, nbn, mon } from '../app/util.mjs'
 
-export default {
-  name: 'QuotasVols',
+const props = defineProps({ 
+  noutil: Boolean, // sans % utilisation
+  vols: Object, // {qn qv qc v n}
+  groupe: Boolean
+})
 
-  props: { 
-    noutil: Boolean, // sans % utilisation
-    vols: Object, // {qn qv qc v n}
-    groupe: Boolean
-  },
+const qnn= computed(() => props.vols.qn * UNITEN)
+const qvv= computed(() => props.vols.qv * UNITEV)
+const nn= computed(() => (props.vols.nn || 0) + (props.vols.nc || 0) + (props.vols.ng || 0))
+const pcn= computed(() => this.qnn ? Math.round(nn.value * 100 / (this.qnn)) : 0)
+const pcv= computed(() => qvv.value ? Math.round(props.vols.v * 100 / (qvv.value)) : 0)
 
-  computed: {
-    qnn () { return this.vols.qn * UNITEN },
-    qvv () { return this.vols.qv * UNITEV },
-    nn () { return (this.vols.nn || 0) + (this.vols.nc || 0) + (this.vols.ng || 0) },
-    pcn () { return this.qnn ? Math.round(this.nn * 100 / (this.qnn)) : 0 },
-    pcv () { return this.qvv ? Math.round(this.vols.v * 100 / (this.qvv)) : 0 },
-  },
-
-  methods: {
-  },
-
-  data () {
-    return {
-    }
-  },
-
-  setup (props) {
-    // const vols = toRef(props, 'vols')
-    return {
-      edvol, nbn, mon
-    }
-  }
-
-}
 </script>
 
 <style lang="sass" scoped>

@@ -69,7 +69,7 @@
       </div>
 
       <!-- Chats d'urgence -->
-      <div class="btn2" @click="clickChats">
+      <div v-if="!session.estComptable" class="btn2" @click="clickChats">
         <n3-icon :niv="1"/>
         <span class="q-ml-xs">{{$t('MLAchats')}}</span>
       </div>

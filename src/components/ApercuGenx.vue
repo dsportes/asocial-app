@@ -22,20 +22,19 @@
 
       <mc-memo v-if="!estComptable" :id="id" :idx="idx"/>     
 
-      <div class="row">
+      <div v-if="!nodet" class="row">
         <div class="col">
-          <div v-if="chats.length" class="row q-gutter-sm">
-            <span class="text-italic titre-md">{{$t('CAVtit')}}</span>
-            <span v-for="e in chats" :key="e.id" class="fs-md bord">{{e.nom}}</span>
-          </div>
+          <chats-avec :idE="id" :del="del" :urgence="urgence"/>
 
           <div v-if="groupes.size" class="row q-gutter-sm">
             <span class="text-italic titre-md">{{$t('CAVmb')}}</span>
             <span v-for="idg in groupes" :key="idg" class="fs-md bord">{{session.getCV(idg).nomC}}</span>
           </div>
         </div>
-        <btn-cond class="col-auto self-start" v-if="!nodet && !estAvc && !estGroupe && !det" size="sm"
-            icon="open_in_new" :label="$t('detail')" stop @ok="ouvrirdetails"/>
+        <!-- v-if="!nodet && !estAvc && !estGroupe && !det" -->
+        <btn-cond class="col-auto self-start" 
+          v-if="estPeople" size="sm"
+          icon="open_in_new" :label="$t('detail')" stop @ok="ouvrirdetails"/>
       </div>
     </div>
   </div>
@@ -58,6 +57,7 @@ import stores from '../stores/stores.mjs'
 import { ID } from '../app/api.mjs'
 import { dkli, titre } from '../app/util.mjs'
 import ApercuCv from '../dialogues/ApercuCv.vue'
+import ChatsAvec from './ChatsAvec.vue'
 import CarteVisite from '../dialogues/CarteVisite.vue'
 import BtnCond from './BtnCond.vue'
 import McMemo from './McMemo.vue'
@@ -69,8 +69,9 @@ const props = defineProps({
   id: String, // id du groupe, avatar du compte ou contact
   del: Boolean, // true si délégué, pour l'afficher
   im: Number, // pour un membre pour l'afficher
-  nodet: Boolean, // true si le panel de détail ne peut PAS être ouvert
-  idx: Number
+  nodet: Boolean, // true si le panel de détail ne DOIT PAS être visible
+  idx: Number,
+  urgence: Boolean // true si invoqué depuis tab URGENCE
 })
 
 const ui = stores.ui
@@ -81,7 +82,6 @@ const gSt = stores.groupe
 const pSt = stores.people
 const session = stores.session
 
-const chats = computed(() => aSt.chatsDuCompte(props.id, true))
 const groupes = computed(() => pSt.getSgr(props.id))
 const estGroupe = computed(() => ID.estGroupe(props.id))
 const estAnim = computed(() => gSt.estAnim(props.id))
@@ -91,7 +91,8 @@ const cv = computed(() => session.getCV(props.id))
 // true si le panel de détail est déjà ouvert
 const det = computed(() => session.peopleId === props.id && ui.estOuvert('detailspeople'))
     // Peut être choisi pour devenir contact du groupe courant
-const diagC  = computed(() => gSt.diagContact(props.id))
+const diagC = computed(() => gSt.diagContact(props.id))
+const estPeople = computed(() => pSt.estPeople(props.id))
 
 function ovcv () {
   ui.oD('ACVouvrir', idc)

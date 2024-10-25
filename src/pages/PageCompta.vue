@@ -75,8 +75,8 @@
 
     <q-card v-for="(e, idx) in lurg" :key="e.id">
       <div :class="'q-my-sm q-px-sm ' + dkli(idx)">
-        <apercu-genx :id="e.id" :del="e.del" :idx="idx" />
-        <micro-chat :id-e="e.id" :id-i="session.compteId" :del="e.del" urgence/>
+        <apercu-genx :id="e.id" :del="e.del" :idx="idx" urgence/>
+        <!--micro-chat :id-e="e.id" :id-i="session.compteId" :del="e.del" urgence/-->
       </div>
     </q-card>
   </div>
@@ -93,7 +93,7 @@ import PanelCompta from '../components/PanelCompta.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
 import PanelCredits from '../components/PanelCredits.vue'
-import MicroChat from '../components/MicroChat.vue'
+// import MicroChat from '../components/MicroChat.vue'
 import BtnCond from '../components/BtnCond.vue'
 import { $t, dkli, edvol, afficher8000 } from '../app/util.mjs'
 import N3Icon from '../components/N3Icon.vue'
@@ -105,6 +105,7 @@ import { GetPartition } from '../app/synchro.mjs'
 const al = 'titre-md text-italic bg-yellow-3 text-negative text-bold q-mb-xs q-ml-xl'
 
 const session = stores.session
+const pSt = stores.people
 const ui = stores.ui
 
 if (session.accesNet) onMounted( async () => { 
@@ -125,11 +126,12 @@ const nj = computed(() => c.value.nbj(session.compta.solde))
 const nnj = computed(() => nj.value > 40 ? 1 : (nj.value > 10 ? 2 : 3))
 const lurg = computed(() => {
   const p = session.partition
-  if (!p) return [{ del: true, id: ID.duComptable() }]
   const l = []
+  if (!session.estComptable) l.push({ del: true, id: ID.duComptable() })
+  if (!p) return l
   for (const id in p.mcpt) {
     const e = p.mcpt[id]
-    if (id !== session.compteId && e.del)
+    if (!ID.estComptable(id) && pSt.estPeople(id) && id !== session.compteId && e.del)
       l.push({ del: e.del, id: id })
   }
   return l

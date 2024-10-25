@@ -11,13 +11,13 @@
 
   <q-page-container>
     <q-card class="q-pa-sm">
-      <apercu-genx :id="id" />
+      <apercu-genx :id="id" nodet/>
 
       <barre-people v-if="session.estComptable || session.estDelegue" :id="id"/>
 
       <q-separator color="orange" class="q-my-md q-mx-sm"/>
 
-      <div class="titre-md text-italic y-mb-sm">{{$t('PPchats')}}</div>
+      <!--div class="titre-md text-italic y-mb-sm">{{$t('PPchats')}}</div-->
 
       <chats-avec :id-e="id" :del="del"/>
 
@@ -40,9 +40,10 @@
 </q-layout>
 </q-dialog>
 </template>
-<script>
 
-// import { ref } from 'vue'
+<script setup>
+import { ref, computed } from 'vue'
+
 import stores from '../stores/stores.mjs'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -51,52 +52,27 @@ import ChatsAvec from '../components/ChatsAvec.vue'
 import BtnCond from '../components/BtnCond.vue'
 import { styp } from '../app/util.mjs'
 
-export default {
-  name: 'PanelPeople',
+const session = stores.session
+const pSt = stores.people
+const gSt = stores.groupe
+const ui = stores.ui
 
-  components: { BtnCond, ApercuGenx, BoutonHelp, BarrePeople, ChatsAvec },
+const id = computed(() => session.peopleId)
+const del = computed(() => { 
+  const p = session.partition
+  return p && p.estDel(id.value)
+})
 
-  props: { },
+const gr = (idg) => { const e = gSt.egr(idg); return e ? e.groupe : null }
+const im = (idg) => { const g = gr.value(idg); return g ? g.tid[id.value] : 0 }
+const stmb = (idg) => { const im = im.value(idg); return im ? g.statutMajeur(im) : 0 }
 
-  computed: {
-    id () { return this.session.peopleId },
-    del () { const p = this.session.partition
-      return p && p.estDel(this.id)
-    }
-  },
-
-  watch: {
-  },
-  
-  data () {
-    return {
-    }
-  },
-
-  methods: {
-    gr (idg) { const e = this.gSt.egr(idg); return e ? e.groupe : null },
-
-    im (idg) { const g = this.gr(idg); return g ? g.tid[this.id] : 0 },
-
-    stmb (idg) { const im = this.im(idg); return im ? g.statutMajeur(im) : 0 },
-
-    voirgr (idg) {
-      this.session.setGroupeId(idg)
-      this.session.setMembreId(this.im(idg))
-      this.ui.setPage('groupe', 'membres')
-    }
-  },
-
-  setup () {
-    return {
-      styp, 
-      session: stores.session,
-      pSt: stores.people,
-      gSt: stores.groupe, 
-      ui: stores.ui
-    }
-  }
+function voirgr (idg) {
+  session.setGroupeId(idg)
+  session.setMembreId(im.value(idg))
+  ui.setPage('groupe', 'membres')
 }
+
 </script>
 <style lang="sass" scoped>
 @import '../css/app.sass'

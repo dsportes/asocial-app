@@ -53,9 +53,6 @@
 
           <barre-people v-if="session.estComptable || session.estDelegue" :id="c.id" part />
 
-          <chats-avec v-if="session.compteId !== c.id" class="q-mt-xs" 
-            :idE="c.id" :del="(session.estComptable || session.estDelegue) || c.del"/>
-
           <apercu-notif v-if="session.estDelegue || session.estComptable" class="q-my-xs" editable
             :notif="c.notif" :type="2" :idx="idx" :cible="c.id"/>
 
@@ -113,7 +110,6 @@ import ApercuGenx from '../components/ApercuGenx.vue'
 import QuotasVols from '../components/QuotasVols.vue'
 import NouveauSponsoring from '../panels/NouveauSponsoring.vue'
 import BarrePeople from '../components/BarrePeople.vue'
-import ChatsAvec from '../components/ChatsAvec.vue'
 import { SetQuotas } from '../app/operations4.mjs'
 import { GetPartition, GetNotifC } from '../app/synchro.mjs'
 import { styp } from '../app/util.mjs'
@@ -160,7 +156,7 @@ async function selCpt (c) {
 
 function voirpage (c) { 
   session.setPeopleId(c.id)
-  ui.oD('detailspeople', idc)
+  ui.oD('detailspeople', 'a')
 }
 
 async function editerq (c) {

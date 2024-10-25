@@ -23,63 +23,40 @@
   </q-page>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, onMounted } from 'vue'
 
-import { onMounted } from 'vue'
 import stores from '../stores/stores.mjs'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import BtnCond from '../components/BtnCond.vue'
 import { RafraichirCvsAv } from '../app/operations4.mjs'
 import { GetPartition } from '../app/synchro.mjs'
-import { afficher8000 } from '../app/util.mjs'
+import { afficher8000, $t } from '../app/util.mjs'
 
-export default {
-  name: 'PagePeople',
+const session = stores.session
+const ui = stores.ui
+const pSt = stores.people
 
-  components: { ApercuGenx, BtnCond },
-
-  computed: {
-  },
-
-  methods: {
-    async rafCvs () {
-      let nc = 0, nv = 0
-      for (const id of this.session.compte.mav) {
-        const r = await new RafraichirCvsAv().run(id, true)
-        if (typeof r ==='number') {
-          await afficher8000(r, id, 0)
-          continue
-        }
-        const [x, y] = r
-        nc += x; nv += y
-      }
-      stores.ui.afficherMessage(this.$t('CVraf2', [nc, nv]), false)
-    }
-  },
-
-  data () {
-    return {
-    }
-  },
-
-  setup () {
-    const session = stores.session
-
-    async function reload () {
-      // await beep()
-      if (session.accesNet && !session.estA) await new GetPartition().run(session.compte.idp)
-    }
-
-    if (session.accesNet) onMounted(async () => { await reload() })
-
-    return {
-      ui: stores.ui,
-      session, reload,
-      pSt: stores.people
-    }
-  }
-
+async function reload () {
+  if (session.accesNet && !session.estA) await new GetPartition().run(session.compte.idp)
 }
+
+if (session.accesNet) onMounted(async () => { await reload() })
+
+async function rafCvs () {
+  let nc = 0, nv = 0
+  for (const id of session.compte.mav) {
+    const r = await new RafraichirCvsAv().run(id, true)
+    if (typeof r ==='number') {
+      await afficher8000(r, id, 0)
+      continue
+    }
+    const [x, y] = r
+    nc += x; nv += y
+  }
+  ui.afficherMessage($t('CVraf2', [nc, nv]), false)
+}
+
 </script>
 
 <style lang="sass" scoped>

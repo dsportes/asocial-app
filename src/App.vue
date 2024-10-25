@@ -92,7 +92,7 @@
         <q-tab name="compta" :label="$t('PNCabo')" @click="ui.setTab('compta')"/>
         <q-tab v-if="session.estComptable || session.compte.estA"
           name="credits" :label="$t('PNCcre')" @click="ui.setTab('credits')"/>
-        <q-tab name="chats" :label="$t('PNCurg')" @click="ui.setTab('chats')"/>
+        <q-tab v-if="!session.estComptable" name="chats" :label="$t('PNCurg')" @click="ui.setTab('chats')"/>
       </q-tabs>
       <btn-cond v-if="ui.pagetab==='notif' && session.alire" class="col-auto q-px-sm" 
         color="warning" icon="check" :label="$t('jailu')" 
@@ -263,7 +263,7 @@
       <page-groupe class="page" v-if="ui.page === 'groupe'"/>    
       <page-invitation class="page" v-if="ui.page === 'invitation'"/>    
       <page-notes class="page" v-if="ui.page === 'notes'"/>    
-      <page-ficavion2 class="page" v-if="ui.page === 'ficavion'"/>
+      <page-ficav class="page" v-if="ui.page === 'ficavion'"/>
     </transition-group>
   </q-page-container>
 
@@ -479,7 +479,7 @@ import PhraseSecrete from './dialogues/PhraseSecrete.vue'
 
 // niveau 2
 import PageSession from './pages/PageSession.vue'
-import PageFicavion2 from './pages/PageFicavion2.vue'
+import PageFicav from './pages/PageFicav.vue'
 import OutilsTests from './panels/OutilsTests.vue'
 
 // Niveau 3

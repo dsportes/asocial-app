@@ -76,7 +76,7 @@ const mode = computed(() => {
   return l.length ? l[0] : 0
 })
 
-const nomE = computed(() => session.getCV(this.idE).nom)
+const nomE = computed(() => session.getCV(props.idE).nom)
 const nomG = computed(() => session.getCV(mode.value).nom)
 
 function ouvrirChat () { ui.oD('MCACouvrir', idc) }
