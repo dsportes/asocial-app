@@ -1,5 +1,4 @@
 <template>
-<q-dialog v-model="ui.d[idc].CVedition" persistent>
   <q-card :class="styp('md')">
     <q-toolbar class="bg-secondary text-white">
       <btn-cond color="warning" icon="close" @ok="ui.fD"/>
@@ -14,11 +13,12 @@
     <q-card-section class="row justify-start">
       <img  class="col-auto classeph q-mr-sm" :src="ncv.ph" :width="taillephoto.width" :height="taillephoto.height"/>
       <div class="col column jusitify-center">
-        <btn-cond icon="mode_edit" :label="$t('CVcph')" @ok="enEdition=true" />
+        <btn-cond icon="mode_edit" :label="$t('CVcph')" @ok="setEnEdition" />
         <btn-cond :disable="!modifph" icon="undo" :label="$t('CVgph')" @ok="undoph" />
       </div>
     </q-card-section>
     <q-separator />
+    <!-- v-if="enEdition" -->
     <q-card-section v-if="enEdition">
       <div class="q-mb-sm column justify-center">
         <q-file v-model="fileList" :label="$t('CVcph')" accept=".jpg, .jpeg, .png" max-file-size="4000000" max-file="1"/>
@@ -41,11 +41,11 @@
         <div>
           <video ref="webcam" autoplay playsinline width="240" height="180" :class="camOn ? '' : 'd-none'"></video>
           <canvas ref="canvas" class="d-none"></canvas>
-          <audio ref="sound" :src="cliccamera()" preload = "auto"></audio>
+          <audio ref="sound" :src="clic" preload = "auto"></audio>
           <div v-if="!camOn" class="camoff">{{$t('CVoff')}}</div>
         </div>
-        <div class=" q-py-md">
-          <cropper ref="cropper" class="cropper"
+        <div class=" q-py-md"> <!--  -->
+          <cropper ref="crop" class="cropper"
             :src="file.b64"
             :stencil-props="{aspectRatio:1/1}"
             :canvas="taillephoto"></cropper>
@@ -64,11 +64,10 @@
       <btn-cond :disable="!modif" icon="check" :label="$t('valider')" @ok="valider" />
     </q-card-actions>
   </q-card>
-</q-dialog>
 </template>
 
-<script>
-import { ref, toRef, onUnmounted } from 'vue'
+<script setup>
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 
 import Webcam from 'webcam-easy'
 import { Cropper } from 'vue-advanced-cropper'
@@ -83,125 +82,99 @@ import { MajCv } from '../app/operations4.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 
-const TPH = { height: 32, width: 32 }
+const taillephoto = { height: 32, width: 32 }
 
-export default ({
-  name: 'CarteVisite',
+const props = defineProps({
+  cv: Object
+})
 
-  props: {
-    cv: Object
-  },
+const crop = ref()
+const webcam = ref()
+const sound = ref()
+const canvas = ref()
+const md = ref()
 
-  components: {
-    BoutonHelp, Cropper, EditeurMd, BtnCond
-  },
+const ui = stores.ui
+const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
+const config = stores.config
+const clic = stores.config.cliccamera
+const ncv = ref(new CV(props.cv.id, props.cv.v, props.cv.photo, props.cv.tx))
 
-  computed: {
-    sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
-    taillephoto () { return TPH },
-    modif () {
-      return this.ncv.tx !== this.cv.tx || this.modifph
-    },
-    modifph () {
-      return this.ncv.ph !== this.cv.ph
-    }
-  },
+const sty = computed(() => this.$q.dark.isActive ? 'sombre' : 'clair')
+const modif = computed(() => ncv.value.tx !== props.cv.tx || modifph.value)
+const modifph = computed(() => ncv.value.ph !== props.cv.ph)
 
-  watch: {
-    async fileList (file) {
-      if (file) {
-        this.file = await readFile(file)
-        console.log('file')
-      }
-    }
-  },
+const silence = ref(false)
+const enEdition = ref(false)
+const fileList = ref(null)
+const file = ref({ b64: '' })
+const cam = ref(null)
+const camOn = ref(false)
 
-  data () {
-    return {
-      silence: false,
-      enEdition: false,
-      fileList: null,
-      file: { b64: '' },
-      cam: null,
-      camOn: false
-    }
-  },
+function setEnEdition () {
+  enEdition.value = true
+}
 
-  methods: {
-    undogen () {
-      this.undoph()
-      // this.md.undo()
-      this.ncv.tx = this.cv.tx
-      // this.$emit('ok', false)
-      this.ui.fD()
-    },
-    async valider () {
-      await new MajCv().run(this.ncv)
-      this.ui.fD()
-      this.ui.fD()
-    },
-    undoph () {
-      this.enEdition = false
-      this.ncv.ph = this.cv.photo
-      this.stopCam()
-    },
-    phok () {
-      // eslint-disable-next-line no-unused-vars
-      const { coordinates, canvas } = this.cropper.getResult()
-      this.ncv.ph = canvas.toDataURL()
-      this.enEdition = false
-      this.stopCam()
-    },
-    startCam () {
-      if (!this.cam) {
-        this.cam = new Webcam(this.webcam, 'user', this.canvas, 
-          this.silence ? null : this.sound)
-      }
-      this.cam.start()
-      this.camOn = true
-    },
-    stopCam () {
-      if (this.cam) {
-        this.cam.stop()
-      }
-      this.camOn = false
-    },
-    snapCam () {
-      if (this.camOn) {
-        const x = this.cam.snap()
-        this.file.type = x.substring(x.indexOf(':') + 1, x.indexOf(';'))
-        this.file.b64 = x
-      }
-    },
-    flipCam () {
-      if (!this.camOn) this.cam.flip()
-    },
-    cliccamera () {
-      return this.clic
-    }
-  },
-
-  setup (props) {
-    const md = ref(null)
-    const webcam = ref(null)
-    const sound = ref(null)
-    const cropper = ref(null)
-    const canvas = ref(null)
-
-    const ui = stores.ui
-    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
-    const config = stores.config
-    const clic = stores.config.cliccamera
-
-    const cv = toRef(props, 'cv')
-    const ncv = ref(new CV(cv.value.id, cv.value.v, cv.value.photo, cv.value.tx))
-
-    return {
-      ui, idc, styp, config, clic, md, webcam, sound, cropper, canvas, ncv, ID,
-      session: stores.session
-    }
+watch(fileList, async (filex) => {
+  if (filex) {
+    file.value = await readFile(filex)
   }
 })
+
+function undogen () {
+  undoph()
+  ncv.value.tx = props.cv.tx
+  ui.fD()
+}
+
+async function valider () {
+  await new MajCv().run(ncv.value)
+  ui.fD()
+  ui.fD()
+}
+
+function undoph () {
+  enEdition.value = false
+  ncv.value.ph = props.cv.photo
+  stopCam()
+}
+
+function phok () {
+  // eslint-disable-next-line no-unused-vars
+  const { coordinates, canvas } = crop.value.getResult()
+  ncv.value.ph = canvas.toDataURL()
+  enEdition.value = false
+  stopCam()
+}
+
+function startCam () {
+  if (!cam.value) {
+    cam.value = new Webcam(webcam.value, 'user', canvas.value, 
+      silence.value ? null : sound.value)
+  }
+  cam.value.start()
+  camOn.value = true
+}
+
+function stopCam () {
+  if (cam.value) {
+    cam.value.stop()
+  }
+  camOn.value = false
+}
+
+function snapCam () {
+  if (camOn.value) {
+    const x = cam.value.snap()
+    file.value.type = x.substring(x.indexOf(':') + 1, x.indexOf(';'))
+    file.value.b64 = x
+  }
+}
+
+function flipCam () {
+  if (!camOn.value) cam.value.flip()
+}
+
 </script>
 <style lang="css">
 @import '../css/cropper.css'

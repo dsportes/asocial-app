@@ -45,7 +45,9 @@
   </q-dialog>
 
   <!-- Dialogue d'édition de la carte de visite -->
-  <carte-visite v-model="ui.d[idc].CVedition2" :cv="cv"/>
+  <q-dialog v-model="ui.d[idc].CVedition" persistent>
+    <carte-visite :cv="cv"/>
+  </q-dialog>
 
 </div>
 </template>
@@ -99,7 +101,7 @@ function ovcv () {
 }
 
 function edcv () {
-  ui.oD('CVedition2', idc)
+  ui.oD('CVedition', idc)
 }
 
 function ouvrirdetails () {
