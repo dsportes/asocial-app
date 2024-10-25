@@ -67,10 +67,11 @@
 </q-dialog>
 </template>
 
-<script>
+<script setup>
+import { ref, watch, computed, onMounted } from 'vue'
+
 import Keyboard from 'simple-keyboard'
 import 'simple-keyboard/build/css/index.css'
-import { ref, watch, onMounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
 
@@ -79,217 +80,191 @@ import BtnCond from '../components/BtnCond.vue'
 import { $t, styp, afficherDiag } from '../app/util.mjs'
 
 const lgph = 24
+const layout = {
+  default: [
+    '` 1 2 3 4 5 6 7 8 9 0 \u00B0 + {bksp}',
+    '{tab} a z e r t y u i o p ^ $',
+    '{lock} q s d f g h j k l m \u00F9 * {enter}',
+    '{shift} < w x c v b n , ; : ! {shift}',
+    '.com @ {space}'
+  ],
+  shift: [
+    "\u00B2 & \u00E9 \" ' ( - \u00E8 _ \u00E7 \u00E0 ) = {bksp}",
+    '{tab} A Z E R T Y U I O P \u00A8 \u00A3',
+    '{lock} Q S D F G H J K L M % \u00B5 {enter}',
+    '{shift} > W X C V B N ? . / \u00A7 {shift}',
+    '.com @ {space}'
+  ]
+}
+const keyboard = { v: null }
 
-export default ({
-  name: 'PhraseSecrete',
+const ui = stores.ui
+const config = stores.config
+const session = stores.session
 
-  props: {
-  },
-  
-  components: { BtnCond },
+const vkb = ref(false)
 
-  computed: {
-    secligne1 () { return this.isPwd ? ''.padStart(this.ligne1.length, '*') : this.ligne1 }
-  },
+const iconValider = ref(ui.ps.iconValider || 'check')
+const verif = ref(ui.ps.verif || false) // vérifier par double saisie
+const labelValider = ref(ui.ps.labelValider || '')
+// Vient de login: proposer le raz de la base locale ET enregistrer org
+const login = ref(ui.ps.login || false)
+const orgext = ref(ui.ps.orgext || '') // le code de l'organisation a été saisi en dehors de ce dialogue
+const initVal = ref(ui.ps.initVal || '') // valeur initiale de la phrase (SyncSp)
 
-  data () {
-    return {
-      phase: 0,
-      razdb: false,
-      encours: false,
-      isPwd: false,
-      vligne1: ''
-    }
-  },
+const orgL = ref()
+const ligne1 = ref(initVal.value || '')
+const phase = ref(0)
+const razdb = ref(false)
+const encours = ref(false)
+const isPwd = ref(false)
+const vligne1 = ref('')
 
-  watch: {
-    ligne1 (ap) {
-      if (ap && ap.length === 3 && ap.startsWith('*')) {
-        const c = ap.substring(1, 3)
-        let s = ''
-        for (let i = 0; i < (lgph / 2); i++) s += c
-        this.forceInput(s)
-      }
-    },
-    async razdb (ap) {
-      if (ap === true) await afficherDiag($t('LOGrazbl'))
-      this.ui.razdb = ap
-    }
-  },
+if (orgext.value) { // PageAdmin SyncSp PageCompte
+  if (orgext.value !== session.org) {
+    /* l'organisation a été saisie préalablement: 
+    - PageAdmin: juste avant dans le dialogue
+    - SyncSp: saisie pour accéder à la phrase de sponsoring et au sponsoring
+    */
+    session.setOrg(orgext.value)
+  }
+  // Dans le cas de PageCompte, changement de PS, orgext EST déjà session.org
+  orgL.value = orgext.value
+} else { // PageLogin OutilsTests
+  orgL.value = session.org || config.search || ''
+}
 
-  methods: {
-    selph (p) {
-      this.forceInput(p)
-    },
-    labelVal () {
-      if (!this.verif) return $t(this.labelValider || 'PSval')
-      return this.phase < 2 ? $t('ok') : $t((this.labelValider || 'PSval'))
-    },
-    ok2 () {
-      if (this.ligne1.length >= lgph) this.ok()
-    },
-    ok () {
-      if (!this.verif) {
-        this.okem()
-      } else {
-        if (this.phase < 2) {
-          this.vligne1 = this.ligne1
-          this.forceInput('')
-          this.phase = 2
-        } else {
-          if (this.ligne1 === this.vligne1) {
-            this.okem()
-          } else {
-            this.raz()
-            this.phase = 1
-          }
-        }
-      }
-    },
-    okem () {
-      this.encours = true
-      this.ui.fD()
-      setTimeout(async () => {
-        const pc = new Phrase()
-        await pc.init(this.ligne1)
-        // await sleep(5000)
-        if (this.login) this.session.setOrg(this.orgL)
-        await this.ui.ps.ok(pc)
-        this.raz()
-      }, 300)
-    },
-    ko () {
-      this.raz()
-      this.ui.fD()
-      this.ui.ps.ok(null)
-    },
-    raz () {
-      this.encours = false
-      this.ligne1 = ''
-      this.vligne1 = ''
-      this.phase = 0
-    }
-  },
-
-  setup () {
-    const ui = stores.ui
-
-    const config = stores.config
-    const session = stores.session
-
-    const iconValider = ref(ui.ps.iconValider || 'check')
-    const verif = ref(ui.ps.verif || false) // vérifier par double saisie
-    const labelValider = ref(ui.ps.labelValider || '')
-    // Vient de login: proposer le raz de la base locale ET enregistrer org
-    const login = ref(ui.ps.login || false)
-    const orgext = ref(ui.ps.orgext || '') // le code de l'organisation a été saisi en dehors de ce dialogue
-    const initVal = ref(ui.ps.initVal || '') // valeur initiale de la phrase (SyncSp)
-
-    const orgL = ref()
-    const ligne1 = ref('')
-
-    if (orgext.value) { // PageAdmin SyncSp PageCompte
-      if (orgext.value !== session.org) {
-        /* l'organisation a été saisie préalablement: 
-        - PageAdmin: juste avant dans le dialogue
-        - SyncSp: saisie pour accéder à la phrase de sponsoring et au sponsoring
-        */
-        session.setOrg(orgext.value)
-      }
-      // Dans le cas de PageCompte, changement de PS, orgext EST déjà session.org
-      orgL.value = orgext.value
-    } else { // PageLogin OutilsTests
-      orgL.value = session.org || config.search || ''
-    }
-
-    if (initVal.value) ligne1.value = initVal.value
-
-    const layout = {
-      default: [
-        '` 1 2 3 4 5 6 7 8 9 0 \u00B0 + {bksp}',
-        '{tab} a z e r t y u i o p ^ $',
-        '{lock} q s d f g h j k l m \u00F9 * {enter}',
-        '{shift} < w x c v b n , ; : ! {shift}',
-        '.com @ {space}'
-      ],
-      shift: [
-        "\u00B2 & \u00E9 \" ' ( - \u00E8 _ \u00E7 \u00E0 ) = {bksp}",
-        '{tab} A Z E R T Y U I O P \u00A8 \u00A3',
-        '{lock} Q S D F G H J K L M % \u00B5 {enter}',
-        '{shift} > W X C V B N ? . / \u00A7 {shift}',
-        '.com @ {space}'
-      ]
-    }
-
-    const keyboard = { v: null }
-    const vkb = ref(false)
-
-    onMounted(() => {
-      ligne1.value = ''
-      vkb.value = false
-      if (keyboard.v) {
-        keyboard.v.destroy()
-        keyboard.v = null
-      }
-    })
-
-    function onChange (input) {
-      ligne1.value = input
-      // console.log(ligne1.value)
-    }
-
-    function handleShift () {
-      const currentLayout = keyboard.value.options.layoutName
-      const shiftToggle = currentLayout === 'default' ? 'shift' : 'default'
-      keyboard.v.setOptions({
-        layoutName: shiftToggle
-      })
-    }
-
-    function onKeyPress (button) {
-      if (button === '{shift}' || button === '{lock}') handleShift()
-      if (button === '{enter}') {
-        if (keyboard.v) keyboard.v.destroy()
-        keyboard.v = null
-      }
-    }
-
-    function setKB () {
-      if (!vkb.value || keyboard.v) return
-      keyboard.v = new Keyboard({
-        onChange: input => onChange(input),
-        onKeyPress: button => onKeyPress(button),
-        layout: layout,
-        theme: 'hg-theme-default'
-      })
-      const s = ligne1.value
-      keyboard.v.setInput(s)
-    }
-
-    function forceInput (inp) {
-      ligne1.value = inp
-      if (keyboard.v) 
-        keyboard.v.setInput(inp)
-    }
-
-    watch(() => vkb.value, (ap, av) => {
-      if (!ap && keyboard.v) {
-        keyboard.v.destroy()
-        keyboard.v = null
-      }
-      if (ap) setKB()
-    })
-
-    return {
-      ui, config, session, styp,
-      iconValider, labelValider, orgext, login, verif,
-      orgL, ligne1, lgph,
-      setKB, keyboard,
-      forceInput,
-      vkb
-    }
+onMounted(() => {
+  ligne1.value = ''
+  vkb.value = false
+  if (keyboard.v) {
+    keyboard.v.destroy()
+    keyboard.v = null
   }
 })
+
+function onChange (input) {
+  ligne1.value = input
+  // console.log(ligne1.value)
+}
+
+function handleShift () {
+  const currentLayout = keyboard.v.options.layoutName
+  const shiftToggle = currentLayout === 'default' ? 'shift' : 'default'
+  keyboard.v.setOptions({
+    layoutName: shiftToggle
+  })
+}
+
+function onKeyPress (button) {
+  if (button === '{shift}' || button === '{lock}') handleShift()
+  if (button === '{enter}') {
+    if (keyboard.v) keyboard.v.destroy()
+    keyboard.v = null
+  }
+}
+
+function setKB () {
+  if (!vkb.value || keyboard.v) return
+  keyboard.v = new Keyboard({
+    onChange: input => onChange(input),
+    onKeyPress: button => onKeyPress(button),
+    layout: layout,
+    theme: 'hg-theme-default'
+  })
+  const s = ligne1.value
+  keyboard.v.setInput(s)
+}
+
+function forceInput (inp) {
+  ligne1.value = inp
+  if (keyboard.v) 
+    keyboard.v.setInput(inp)
+}
+
+watch(vkb, (ap, av) => {
+  if (!ap && keyboard.v) {
+    keyboard.v.destroy()
+    keyboard.v = null
+  }
+  if (ap) setKB()
+})
+
+const secligne1 = computed(() => isPwd.value ? ''.padStart(ligne1.value.length, '*') : ligne1.value)
+
+watch(ligne1, (ap) => {
+  if (ap && ap.length === 3 && ap.startsWith('*')) {
+    const c = ap.substring(1, 3)
+    let s = ''
+    for (let i = 0; i < (lgph / 2); i++) s += c
+    forceInput(s)
+  }
+})
+
+watch(razdb, async (ap) => {
+  if (ap === true) await afficherDiag($t('LOGrazbl'))
+  ui.razdb = ap
+})
+
+function selph (p) { 
+  forceInput(p)
+}
+
+function labelVal () {
+  if (!verif.value) return $t(labelValider.value || 'PSval')
+  return phase.value < 2 ? $t('ok') : $t((labelValider.value || 'PSval'))
+}
+
+function ok2 () {
+  if (ligne1.value.length >= lgph) ok()
+}
+
+function ok () {
+  if (!verif.value) {
+    okem()
+  } else {
+    if (phase.value < 2) {
+      vligne1.value = ligne1.value
+      forceInput('')
+      phase.value = 2
+    } else {
+      if (ligne1.value === vligne1.value) {
+        okem()
+      } else {
+        raz()
+        phase.value = 1
+      }
+    }
+  }
+}
+
+function okem () {
+  encours.value = true
+  ui.fD()
+  setTimeout(async () => {
+    const pc = new Phrase()
+    await pc.init(ligne1.value)
+    // await sleep(5000)
+    if (login.value) session.setOrg(orgL.value)
+    // ui.ps.ok est la fonction de callback quand ok
+    await ui.ps.ok(pc)
+    raz()
+  }, 300)
+}
+
+function ko () {
+  raz()
+  ui.fD()
+  ui.ps.ok(null)
+}
+
+function raz () {
+  encours.value = false
+  ligne1.value = ''
+  vligne1.value = ''
+  phase.value = 0
+}
+
 </script>
 
 <style lang="sass" scoped>

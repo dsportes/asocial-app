@@ -220,7 +220,7 @@ export const useUiStore = defineStore('ui', {
 
     fermerHelp () { this.fD(); this.helpstack.length = 0 },
     pushhelp (page) {
-      if (this.helpstack.length === 0) this.oD('dialoguehelp')
+      if (this.helpstack.length === 0) this.oD('dialoguehelp', 'a')
       this.helpstack.push(page)
     },
     pophelp () {

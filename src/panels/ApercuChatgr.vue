@@ -71,9 +71,10 @@
 
 </q-layout>
 </template>
-<script>
 
-import { ref, onUnmounted } from 'vue'
+<script setup>
+
+import { ref, computed, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import SdBlanc from '../components/SdBlanc.vue'
@@ -85,81 +86,57 @@ import ApercuGenx from '../components/ApercuGenx.vue'
 import BtnCond from '../components/BtnCond.vue'
 import { ItemChatgr } from '../app/operations4.mjs'
 
-export default {
-  name: 'ApercuChatgr',
+const session = stores.session
+const ui = stores.ui
+const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
+const gSt = stores.groupe
+const aSt = stores.avatar
+const naAut = ref()
+const imAut = ref()
 
-  props: { },
+const txt = ref('')
+const avid = ref('')
+const im = ref(0)
+const dh = ref(0)
 
-  components: { SdBlanc, EditeurMd, BoutonHelp, ApercuGenx, BtnCond, SelAvmbr },
-
-  computed: { 
-    egr () { return this.gSt.egrC },
-    cvg () { return this.session.getCV(this.session.groupeId)},
-    gr () { return this.egr.groupe },
-    items () { return this.gSt.chatgr && this.gSt.chatgr.items ? this.gSt.chatgr.items : []}
-  },
-
-  data () { return {
-    txt: '',
-    avid: '',
-    im: 0,
-    dh: 0
-  }},
-
-  methods: {
-    cvm (im) {
-      const idm = this.gr.tid[im]
-      return this.session.getCV(idm)
-    },
-
-    async effacer (im, dh) {
-      this.im = im
-      this.dh = dh
-      this.ui.oD('ACGconfirmeff', this.idc)
-    },
-
-    async effop () {
-      const r = await new ItemChatgr().run(0, this.dh, null)
-      if (r) await afficher8000(r, 0, this.session.groupeId)
-      this.im = 0
-      this.dh = 0
-      this.ui.fD()
-    },
-
-    async addop () {
-      const r = await new ItemChatgr().run(this.avid, 0, this.txt)
-      if (r) await afficher8000(r, this.avid, this.session.groupeId)
-      this.txt = ''
-      this.ui.fD()
-    },
-
-    async editer () {
-      this.txt = ''
-      this.ui.oD('ACGchatedit', this.idc)
-    }
-  },
-
-  setup () {
-    const session = stores.session
-    const ui = stores.ui
-    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
-    const gSt = stores.groupe
-    const aSt = stores.avatar
-    const naAut = ref()
-    const imAut = ref()
-
-    function selAut(elt) {
-      naAut.value = elt.na
-      imAut.value = elt.im
-    }
-
-    return {
-      selAut, naAut, imAut,
-      styp, dkli, dhcool,
-      session, ui, idc, gSt, aSt
-    }
-  }
+function selAut(elt) {
+  naAut.value = elt.na
+  imAut.value = elt.im
 }
+
+const egr = computed(() => gSt.egrC)
+const cvg = computed(() => session.getCV(session.groupeId))
+const gr = computed(() => egr.value.groupe )
+const items = computed(() => gSt.chatgr && gSt.chatgr.items ? gSt.chatgr.items : [])
+
+const cvm = (im) => session.getCV(gr.value.tid[im])
+
+async function effacer (im, dh) {
+  im.value = im
+  dh.value = dh
+  ui.oD('ACGconfirmeff', idc)
+}
+
+async function effop () {
+  const r = await new ItemChatgr().run(0, dh.value, null)
+  if (r) await afficher8000(r, 0, session.groupeId)
+  im.value = 0
+  dh.value = 0
+  ui.fD()
+}
+
+async function addop () {
+  const r = await new ItemChatgr().run(avid.value, 0, txt.value)
+  if (r) await afficher8000(r, avid.value, session.groupeId)
+  txt.value = ''
+  ui.fD()
+}
+
+async function editer () {
+  txt.value = ''
+  ui.oD('ACGchatedit', idc)
+}
+
 </script>
 <style lang="sass" scoped>
 @import '../css/app.sass'

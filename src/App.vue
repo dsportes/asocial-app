@@ -368,7 +368,7 @@
   </q-dialog>
 
   <dialogue-erreur v-if="ui.d.a.dialogueerreur"/>
-  <dialogue-help v-if="ui.d.dialoguehelp"/>
+  <dialogue-help v-if="ui.d.a.dialoguehelp"/>
   <presse-papier v-if="ui.d.a.pressepapier"/>
   <panel-people v-if="ui.d.a.detailspeople"/>
   <outils-tests v-if="ui.d.a.outilsTests"/>
