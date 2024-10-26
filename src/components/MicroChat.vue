@@ -35,7 +35,8 @@
     :urgence="urgence"
     :mode="mode"/>
 
-  <q-dialog v-model="ui.d[idc].MCACouvrir" full-height position="left" persistent>
+  <!-- full-height -->
+  <q-dialog v-model="ui.d[idc].MCACouvrir" position="left" persistent>
     <apercu-chat :id="chatx.id" :ids="chatx.ids" :urgence="urgence"/>
   </q-dialog>
 </div>

@@ -1,5 +1,7 @@
 [
-  { "id": "pa", "lp": ["presentation", "comptes", "coutshebergement", "page2"] },
+  { "id": "DOCpg", "lp": [] },
+  { "id": "page_login_cn", "lp": ["page_login_m", "page_login_fa", "page_login_pp" ]},
+  { "id": "sponsoring", "lp": ["sponsoring_d", "sponsoring_a"] },
   { "id": "av", "lp": []},
   { "id": "faq", "lp": ["page3"]},
   { "id": "dev", "lp": ["documents", "crypto"]}

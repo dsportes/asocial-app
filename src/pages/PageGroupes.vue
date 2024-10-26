@@ -124,7 +124,7 @@
     </q-card>
   </q-dialog>
 
-  <q-dialog v-model="ui.d[idc].PGACGouvrir" full-height position="left" persistent>
+  <q-dialog v-model="ui.d[idc].PGACGouvrir" position="left" persistent>
     <apercu-chatgr />
   </q-dialog>
 

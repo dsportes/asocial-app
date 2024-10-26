@@ -65,7 +65,7 @@ const del = computed(() => {
 
 const gr = (idg) => { const e = gSt.egr(idg); return e ? e.groupe : null }
 const im = (idg) => { const g = gr.value(idg); return g ? g.tid[id.value] : 0 }
-const stmb = (idg) => { const im = im.value(idg); return im ? g.statutMajeur(im) : 0 }
+const stmb = (idg) => { const i = im.value(idg); return i ? g.statutMajeur(i) : 0 }
 
 function voirgr (idg) {
   session.setGroupeId(idg)

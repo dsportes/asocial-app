@@ -9,13 +9,12 @@
     </div>
     <div v-if="chat.items.length" class="fs-md">{{chat.tit}}</div>
 
-    <q-btn class="absolute-bottom-right"
-      color="primary" dense icon="open_in_new" padding="xs" size="sm"
-      :label="$t('CHbtnov')"
-      @click="ouvrirChat()"/>
+    <btn-cond class="absolute-bottom-right" icon="open_in_new"
+      :label="$t('CHbtnov')" @click="ouvrirChat()"/>
   </div>
 
-  <q-dialog v-model="ui.d[idc].MCACGouvrir" full-height position="left" persistent>
+  <!-- full-height  -->
+  <q-dialog v-model="ui.d[idc].MCACGouvrir" position="left" persistent>
     <apercu-chatgr />
   </q-dialog>
 
@@ -27,6 +26,7 @@ import { onUnmounted } from 'vue'
 import stores from '../stores/stores.mjs'
 import { dhcool } from '../app/util.mjs'
 import ApercuChatgr from '../panels/ApercuChatgr.vue'
+import BtnCond from './BtnCond.vue'
 
 const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))

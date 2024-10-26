@@ -36,7 +36,7 @@
     <div :class="ui.portrait ? 'column' : 'row justify-between'">
       <q-scroll-area :class="!ui.portrait ? 'col-6' : ''" 
         :style="ui.portrait ? 'height: 50vh;padding-bottom:10px;border-bottom:5px solid grey' : 'height: 80vh;'">
-        <show-html v-if="intro" class="q-mx-sm q-mb-md" :texte="intro"/>
+        <show-html v-if="intro" class="q-mx-sm q-my-md" :texte="intro"/>
         <q-expansion-item v-for="c in chaps" :key="c.t" 
           group="somegroup" expand-separator>
           <template v-slot:header>
@@ -160,7 +160,8 @@ function setChaps (id) {
         const titre = ($t('A_' + code) || '').trim()
         if (!titre) continue
         m.push({ label: titre, value: code })
-      } if (l.startsWith('<a href="$$/')) {
+        tx.push('_(' + titre + ')_')
+      } else if (l.startsWith('<a href="$$/')) {
         const x = l.substring(11)
         tx.push('<a href="' + docsurl + x)
       } else {

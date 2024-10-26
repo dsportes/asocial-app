@@ -215,7 +215,7 @@
     </q-layout>
   </q-dialog>
 
-  <q-dialog v-model="ui.d[idc].ACGouvrir" full-height position="left" persistent>
+  <q-dialog v-model="ui.d[idc].ACGouvrir" position="left" persistent>
     <apercu-chatgr />
   </q-dialog>
 

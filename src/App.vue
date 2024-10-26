@@ -55,7 +55,7 @@
         </div>
       </q-toolbar-title>
 
-      <bouton-help :page="'pg_' + ui.page"/>
+      <bouton-help :page="'page_' + ui.page"/>
 
       <!-- Fichiers avion -->
       <btn-cond v-if="session.ok" :disable="session.incognito" 
@@ -111,7 +111,7 @@
 
   <q-footer>
     <q-toolbar class="sombre overflow-hidden">
-      <bouton-help page="pa"/>
+      <bouton-help page="DOCpg"/>
 
       <bouton-langue style="position:relative;top:2px;"/>
 

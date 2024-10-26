@@ -1,5 +1,5 @@
-<template> <!-- BtnCond incorporés -->
-  <q-layout container view="hHh lpR fFf" :class="styp('md')">
+<template>
+  <q-layout container view="hHh lpR fFf" :class="styp('md')" style="max-height:90vh">
     <q-header elevated>
       <q-toolbar class="bg-secondary text-white">
         <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>

@@ -17,7 +17,7 @@
   <nouveau-chat v-if="ui.d[idc] && ui.d[idc].CCouvrir" 
     :idc="idc" :idI="session.compteId" :idE="idE" :mode="2" :urgence="urgence"/>
 
-  <q-dialog v-model="ui.d[idc].CAACouvrir" full-height position="left" persistent>
+  <q-dialog v-model="ui.d[idc].CAACouvrir" position="left" persistent>
     <apercu-chat :id="chat.id" :ids="chat.ids" :urgence="urgence"/>
   </q-dialog>
 

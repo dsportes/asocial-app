@@ -2270,6 +2270,16 @@ Le "volume des fichiers" est celui total de ceux attachés aux notes personnelle
 La "consommation mensuelle" de calcul est en centimes et est la somme des coûts des lectures, écritures et de transfert de volume montant et descendant.
 `,
 
+  A_DOCpg: 'L\'application "a-social"',
+  A_page_login_cn: 'Se connecter / créer son compte',
+  A_page_login_m: 'Modes synchronisé / incognito / avion',
+  A_page_login_fa: 'Fichiers accessibles en mode avion',
+  A_page_login_pp: 'Le "presse-papier" de notes et fichiers',
+
+  A_sponsoring: 'Sponsoriser des comptes',
+  A_sponsoring_d: 'Déclarer un sponsoring',
+  A_sponsoring_a: 'Accepter ou refuser un sponsoring',
+
   A_pa: 'L\'application "a-social"',
   A_av: 'Les vues, interprétation et saisie',
   A_faq: 'Comment faire pour, questions et réponses',

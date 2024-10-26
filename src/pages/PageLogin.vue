@@ -12,7 +12,7 @@
     <template v-slot:header>
       <div class="full-width titre-lg row justify-between bord1">
         <div>{{$t('LOGconn2')}}</div>
-        <bouton-help page="page1" class="col-auto"/>
+        <bouton-help page="page_login_cn" class="col-auto"/>
       </div>
     </template>
     <div class="row justify-center q-gutter-sm q-mt-sm q-mr-xl">
@@ -37,7 +37,7 @@
     <template v-slot:header>
       <div class="full-width titre-lg row justify-between bord1">
         <div>{{$t('LOGconn3')}}</div>
-        <bouton-help page="page1" class="col-auto"/>
+        <bouton-help page="page_login_cn" class="col-auto"/>
       </div>
     </template>
 
