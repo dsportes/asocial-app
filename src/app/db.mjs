@@ -388,11 +388,11 @@ class IDB {
     }
   }
 
-  async FLset (nom, info, type, u8) {
+  async FLset (idf, nom, info, type, u8) {
     const session = stores.session
     const ppSt = stores.pp
     try {
-      const fl = new FichierLocal().nouveau(nom, info, type, u8)
+      const fl = new FichierLocal().nouveau(idf, nom, info, type, u8)
       ppSt.setFichier(fl)
       if (session.accesIdb) {
         const cle = u8ToB64(await crypter(session.clek, '' + fl.idf, 1), true)

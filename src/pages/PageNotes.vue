@@ -643,7 +643,8 @@ function dlfin () {
 </script>
 
 <style lang="css">
-.q-tree__arrow { font-size: 24px !important; position: relative; top: 20px }
+.q-tree__arrow { font-size: 25px !important; position: relative; right: 4px }
+.q-tree__node-header { align-items: end !important; }
 </style>
 
 <style lang="sass" scoped>

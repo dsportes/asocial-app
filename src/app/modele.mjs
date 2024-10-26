@@ -1388,8 +1388,8 @@ locdata: contenu d'un fichier local
 export class FichierLocal {
   constructor () { }
 
-  nouveau (nom, info, type, u8) {
-    this.idf = ID.fic()
+  nouveau (idf, nom, info, type, u8) {
+    this.idf = idf || ID.fic()
     this.nom = nom
     this.info = info
     this.dh = Date.now()

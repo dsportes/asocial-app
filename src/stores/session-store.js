@@ -94,6 +94,12 @@ export const useSessionStore = defineStore('session', {
     estComptable (state) { return ID.estComptable(state.compteId) },
     estAdmin (state) { return !state.compteId },
     estDelegue (state) { return state.compte && state.compte.del },
+    oad (state) { 
+      if (!state.compte || state.estComptable) return ''
+      if (state.compte.estA) return 'A'
+      if (state.compte.del) return 'D'
+      return 'O'
+    },
     estA (state) { return state.compte && state.compte.estA },
     estAvc: (state) => { return (id) => { return state.compte && state.compte.mav.has(id) } },
 

@@ -14,7 +14,6 @@
           :filter="filter"
           v-model:selected="selected"
           v-model:expanded="expanded"
-          no-connectors
         >
         <template v-slot:default-header="prop">
           <div @click.stop="goto(prop.node.id)">
@@ -73,7 +72,7 @@
     dense size="md" icon="arrow_back" @click="back">
     <q-tooltip class="bg-white text-primary">{{$t('HLPprec')}}</q-tooltip>
   </q-btn>
-  <q-toolbar-title class="titre-lg">{{$t('A_' + selected.value)}}</q-toolbar-title>
+  <q-toolbar-title class="titre-lg">{{$t('A_' + selected)}}</q-toolbar-title>
 </q-toolbar>
 
 <q-toolbar class="bg-black text-white bb">
@@ -201,7 +200,7 @@ function remplaceImg (l) {
 setChaps(selected.value)
 
 watch(selected, (ap) => {
-  expanded.value = parents.value(ap)
+  expanded.value = parents(ap)
 })
 
 const stackvide = computed(() => ui.helpstack.length <= 1)
@@ -225,9 +224,9 @@ function back () {
 
 </script>
 
-<style lang="sass">
-.q-tree__node-header
-  align-items: start !important
+<style lang="css">
+.q-tree__arrow { font-size: 25px !important; position: relative; right: 4px }
+.q-tree__node-header { align-items: end !important; }
 </style>
 
 <style lang="sass" scoped>

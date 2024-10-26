@@ -82,7 +82,7 @@
     <q-dialog v-model="ui.d[idc].PPnvfic" persistent>
       <q-card :class="styp('md')">
       <q-card-section>
-        <div class="titre-lg">{{$t(fic.id ? 'PPl1' : 'PPl2')}}</div>
+        <div class="titre-lg">{{$t(fic.idf ? 'PPl1' : 'PPl2')}}</div>
         <q-file class="full-width" v-model="fileList" :label="$t('PPl3')"
           max-file-size="50000000" max-file="1"/>
         <div v-if="fic.lg" class="font-mono fs-sm">{{fic.nom}} - {{fic.type}} - {{fic.lg}}o</div>
@@ -93,7 +93,10 @@
       </q-card-section>
       <q-card-actions align="right" class="q-gutter-sm">
         <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
-        <btn-cond icon="check" :label="$t('valider')" :disable="!valide" @ok="majfic"/>
+        <btn-cond v-if="fic.idf" icon="check" :label="$t('PPmaj')"
+          :disable="!valide" @ok="majfic(true)"/>
+        <btn-cond icon="add" :label="$t('PPajo')"
+          :disable="!valide" @ok="majfic(false)"/>
       </q-card-actions>
       </q-card>
     </q-dialog>
@@ -130,162 +133,146 @@
 </q-dialog>
 </template>
 
-<script>
-import { ref, onUnmounted } from 'vue'
+<script setup>
+import { ref, computed, watch, onUnmounted } from 'vue'
 
 import { saveAs } from 'file-saver'
 import stores from '../stores/stores.mjs'
 import ShowHtml from '../components/ShowHtml.vue'
-import { readFile, dhcool, edvol, afficherDiag, dkli, styp, interdits, regInt } from '../app/util.mjs'
+import { $t, readFile, dhcool, edvol, afficherDiag, dkli, styp, interdits, regInt } from '../app/util.mjs'
 import EditeurMd from '../components/EditeurMd.vue'
 import { idb } from '../app/db.mjs'
 import NomGenerique from '../components/NomGenerique.vue'
 import BtnCond from '../components/BtnCond.vue'
 
-export default ({
-  name: 'PressePapier',
+const session = stores.session
+const ui = stores.ui
+const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
+const ppSt = stores.pp
+const cfg = stores.config
+const lgmax = cfg.maxlgtextenote
 
-  components: { ShowHtml, EditeurMd, NomGenerique, BtnCond },
+const info = ref('')
+const nomfic = ref('')
+const rec = ref(null)
+const txt = ref('')
+const min = ref(4)
+const max1 = ref(32)
+const max2 = ref(16)
+const fileList = ref()
+const fic = ref({ nom: '', info: '', lg: 0, type: '', u8: null })
 
-  data () {
-    return {
-      dhcool: dhcool,
-      edvol: edvol,
-      info: '',
-      nomfic: '',
-      rec: null,
-      fic: { nom: '', info: '', lg: 0, type: '', u8: null },
-      txt: '',
-      min: 4,
-      max1: 32,
-      max2: 16
-    } 
-  },
+const valide = computed(() => fic.value.lg && nomfic.value)
 
-  computed: {
-    valide () { return this.fic.lg && this.nomfic }
-  },
-
-  watch: {
-    async fileList (file) {
-      if (file) {
-        const { size, name, type, u8 } = await readFile(file, true)
-        this.fic = {nom: name, lg: size, type, u8 }
-      }
-    },
-    fic (ap) {
-      this.nomfic = ap.nom || ''
-      this.info = ''
-      this.fileList = null
-    }
-  },
-
-  methods: {
-    ajouternote () {
-      this.rec = null
-      this.txt = ''
-      this.ui.oD('PPnvnote', this.idc)
-    },
-    editernote (rec) {
-      this.rec = rec
-      this.txt = ''
-      this.ui.oD('PPnvnote', this.idc)
-    },
-    supprn (rec) {
-      this.rec = rec
-      this.ui.oD('PPsupprnote', this.idc)
-    },
-    async cfSupprnote () {
-      await idb.NLdel(this.rec.id)
-      this.ui.fD()
-    },
-    async majnote () {
-      await idb.NLset(this.txt, this.rec ? this.rec.id : 0)
-      this.ui.fD()
-    },
-
-    async majfic () {
-      const f = this.fic
-      await idb.FLset(this.nomfic, this.info, f.type, f.u8)
-      this.ui.fD()
-    },
-    ajouterfichier () {
-      this.fic = { nom: '', info: '', lg: 0, type: '', u8: null }
-      this.ui.oD('PPnvfic', this.idc)
-    },
-    async editerfichier (fic) {
-      this.info = fic.info
-      this.nomfic = fic.nom
-      const u8 = await fic.getU8()
-      this.fic = { idf: fic.id, nom: fic.nom, info: fic.info, 
-        lg: fic.lg, type: fic.type, u8 }
-      this.ui.oD('PPnvfic', this.idc)
-    },
-    supprfichier (fic) {
-      this.fic = fic
-      this.ui.oD('PPsupprfic', this.idc)
-    },
-    async cfSupprfic () {
-      await idb.FLdel(this.fic.idf)
-      this.ui.fD()
-    },
-
-    async blobde (f, b) {
-      const buf = await f.getU8()
-      if (!buf || !buf.length) return null
-      const blob = new Blob([buf], { type: f.type })
-      return b ? blob : URL.createObjectURL(blob)
-    },
-
-    async selFic (fx) {
-      const u8 = await fx.getU8()
-      if (!u8) {
-        await afficherDiag(this.$t('PPerrb'))
-        this.ui.fD()
-        this.ppSt.copiercollerfic(false)
-      } else {
-        fx.u8 = u8
-        this.ui.fD()
-        this.ppSt.copiercollerfic(fx)
-      }
-    },
-
-    async affFic (f) {
-      const url = await this.blobde(f)
-      if (url) {
-        setTimeout(() => { window.open(url, '_blank') }, 500)
-      } else {
-        afficherDiag(this.$t('PPerrb'))
-      }
-    },
-
-    async enregFic (f) {
-      const blob = await this.blobde(f, true)
-      if (blob) {
-        saveAs(blob, f.nomFichier)
-      } else {
-        afficherDiag(this.$t('PPerrb'))
-      }
-    }
-
-  },
-
-  setup () {
-    const session = stores.session
-    const ui = stores.ui
-    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
-    const ppSt = stores.pp
-    const cfg = stores.config
-    const lgmax = cfg.maxlgtextenote
-    const fileList = ref(null)
-
-    return {
-      dkli, styp,
-      session, ppSt, ui, idc,
-      lgmax, fileList, interdits
-    }
+watch(fileList, async (file) => {
+  if (file) {
+    const { size, name, type, u8 } = await readFile(file, true)
+    const idf = fic.value && fic.value.idf ? fic.value.idf : ''
+    fic.value = {idf, nom: name, lg: size, type, u8 }
   }
 })
+
+watch(fic, (ap) => {
+  nomfic.value = ap.nom || ''
+  info.value = ''
+  fileList.value = null
+})
+
+function ajouternote () {
+  rec.value = null
+  txt.value = ''
+  ui.oD('PPnvnote', idc)
+}
+
+function editernote (rex) {
+  rec.value = rex
+  txt.value = ''
+  ui.oD('PPnvnote', idc)
+}
+
+function supprn (rex) {
+  rec.value = rex
+  ui.oD('PPsupprnote', idc)
+}
+
+async function cfSupprnote () {
+  await idb.NLdel(rec.value.id)
+  ui.fD()
+}
+
+async function majnote () {
+  await idb.NLset(txt.value, rec.value ? rec.value.id : 0)
+  ui.fD()
+}
+
+async function majfic (maj) {
+  const f = fic.value
+  await idb.FLset(maj ? f.idf : '', nomfic.value, info.value, f.type, f.u8)
+  ui.fD()
+}
+
+function ajouterfichier () {
+  fic.value = { nom: '', info: '', lg: 0, type: '', u8: null }
+  ui.oD('PPnvfic', idc)
+}
+
+async function editerfichier (fix) {
+  info.value = fix.info
+  nomfic.value = fix.nom
+  const u8 = await fix.getU8()
+  fic.value = { idf: fix.idf, nom: fix.nom, info: fix.info, 
+    lg: fix.lg, type: fix.type, u8 }
+  ui.oD('PPnvfic', idc)
+}
+
+function supprfichier (fix) {
+  fic.value = fix
+  ui.oD('PPsupprfic', idc)
+}
+
+async function cfSupprfic () {
+  await idb.FLdel(fic.value.idf)
+  ui.fD()
+}
+
+async function blobde (f, b) {
+  const buf = await f.getU8()
+  if (!buf || !buf.length) return null
+  const blob = new Blob([buf], { type: f.type })
+  return b ? blob : URL.createObjectURL(blob)
+}
+
+async function selFic (fx) {
+  const u8 = await fx.getU8()
+  if (!u8) {
+    await afficherDiag($t('PPerrb'))
+    ui.fD()
+    ppSt.copiercollerfic(false)
+  } else {
+    fx.u8 = u8
+    ui.fD()
+    ppSt.copiercollerfic(fx)
+  }
+}
+
+async function affFic (f) {
+  const url = await blobde(f)
+  if (url) {
+    setTimeout(() => { window.open(url, '_blank') }, 500)
+  } else {
+    afficherDiag($t('PPerrb'))
+  }
+}
+
+async function enregFic (f) {
+  const blob = await blobde(f, true)
+  if (blob) {
+    saveAs(blob, f.nomFichier)
+  } else {
+    afficherDiag($t('PPerrb'))
+  }
+}
+
 </script>
 
 <style lang="sass" scoped>

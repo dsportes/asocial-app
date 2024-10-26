@@ -147,6 +147,8 @@
       <q-toolbar-title class="row justify-end items-center titre-md text-right q-mx-xs">
         <img v-if="session.ok" :src="people.getCV(session.compteId).photo" 
           height="28" width="28" class="q-pa-none q-mr-sm img"/>
+        <btn-cond v-if="session.oad" round padding="none sm" 
+          class="q-mr-xs cursor-none" :label="session.oad"/>
         <span v-if="session.ok" class="titre-lg">{{people.getCV(session.compteId).nom}}</span>
         <span v-else class="titre-md text-italic">{{$t('MLAsfer')}}</span>
         <span v-if="session.org" class="q-ml-md titre-md">[{{session.org}}]</span>

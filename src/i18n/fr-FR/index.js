@@ -758,10 +758,16 @@ export default {
   PPndf: 'Nom du fichier',
   PPapf: 'A propos du fichier (facultatif)',
   PPphf: 'monfic.jpg',
+  PPmaj: 'Remplacer',
+  PPajo: 'Ajouter',
+  PPl1: 'Modifier un fichier existant',
+  PPl2: 'Ajouter un nouveau fichier',
   PPl3: 'Choisir un fichier local (50Mo max)',
   PPminmax: 'Au plus {0} signes.',
   PPci: 'et non imprimables (CR TAB ...) interdits.',
   PPnoi: '(sans commentaires)',
+  PPnv1: 'Edition d\'une note existante',
+  PPnv2: 'Création d\'une nouvelle note',
 
   // Critères de tri
   TRIespace0: 'Numéro de tranche ↑',
