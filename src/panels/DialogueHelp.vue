@@ -1,43 +1,41 @@
 <template>
-<q-dialog v-model="ui.d.a.dialoguehelp" full-height position="left" persistent >
-<div style="position:relative;height:100vh" :class="styp('xl')">
-  <q-splitter :vertical="!ui.portrait" :horizontal="ui.portrait" 
-    v-model="splitterModel" :limits="[20, 80]" 
-    style="height: 100vh">
+<q-dialog v-model="ui.d.a.dialoguehelp" position="left" persistent>
+<q-layout container view="hHh lpR fFf" :class="styp('xl')">
+  <q-header elevated class="bg-secondary text-white">
+    <q-toolbar class="bg-secondary text-white">
+      <q-btn dense size="md" icon="chevron_left" color="warning" 
+        @click="ui.fermerHelp">
+        <q-tooltip class="bg-white text-primary">{{$t('HLPfermer')}}</q-tooltip>
+      </q-btn>
+      <q-btn v-if="!stackvide" class="q-ml-xs" 
+        dense size="md" icon="arrow_back" @click="back">
+        <q-tooltip class="bg-white text-primary">{{$t('HLPprec')}}</q-tooltip>
+      </q-btn>
+      <q-toolbar-title class="titre-lg">{{$t('A_' + selected)}}</q-toolbar-title>
+    </q-toolbar>
+  </q-header>
 
-    <template v-slot:after>
-      <div class="q-pa-xs" :style="'margin-bottom:2.5rem;' + (!ui.portrait ? 'margin-top:2.5rem' : '')">
-        <q-tree ref="tree"
-          dense
-          :nodes="arbre"
-          node-key="id"
-          :filter="filter"
-          v-model:selected="selected"
-          v-model:expanded="expanded"
-        >
-        <template v-slot:default-header="prop">
-          <div @click.stop="goto(prop.node.id)">
-            <div v-if="prop.node.type === 1" class="row items-start no-wrap"
-              :style="!prop.node.children.length ? 'margin-left:8px;' : ''">
-              <q-icon name="library_books" color="orange" size="24px" class="col-auto q-mr-sm" />
-              <div :class="'col text-bold text-italic' + cl(prop.node.id)">{{ prop.node.label }}</div>
-            </div>
-            <div v-if="prop.node.type === 2" class="row items-start no-wrap">
-              <q-icon name="note" color="primary" size="24px" class="col-auto q-mr-sm" />
-              <div :class="'col ' + cl(prop.node.id)">{{ prop.node.label }}</div>
-            </div>
-          </div>
+  <q-footer elevated class="bg-black text-white">
+    <q-toolbar>
+      <q-input ref="filterRef" dense v-model="filter" :label="$t('HLPfiltre')">
+        <template v-slot:append>
+          <q-icon v-if="filter !== ''" name="clear" class="cursor-pointer" @click="resetFilter" />
         </template>
-        </q-tree>
-      </div>
-    </template>
+      </q-input>
+      <q-space />
+      <q-btn v-if="!expandAll" 
+        dense size="md" color="primary" icon="unfold_more" padding="none"
+        :label="$t('PNOdep')" @click="tree.expandAll();expandAll=true"/>
+      <q-btn v-if="expandAll" 
+        dense size="md" color="primary" icon="unfold_less" padding="none"
+        :label="$t('PNOrep')" @click="tree.collapseAll();expandAll=false"/>
+    </q-toolbar>
+  </q-footer>
 
-    <template v-slot:separator>
-      <q-avatar color="primary" text-color="white" size="24px" icon="drag_indicator" />
-    </template>
-
-    <template v-slot:before>
-      <div class="q-pa-xs" :style="'margin-top:2.5rem;' + (!ui.portrait ? 'margin-bottom:2.5rem' : '')">
+  <q-page-container>
+    <div :class="ui.portrait ? 'column' : 'row justify-between'">
+      <q-scroll-area :class="!ui.portrait ? 'col-6' : ''" 
+        :style="ui.portrait ? 'height: 50vh;padding-bottom:10px;border-bottom:5px solid grey' : 'height: 80vh;'">
         <show-html v-if="intro" class="q-mx-sm q-mb-md" :texte="intro"/>
         <q-expansion-item v-for="c in chaps" :key="c.t" 
           group="somegroup" expand-separator>
@@ -58,39 +56,36 @@
           </template>
           <show-html class="q-mx-sm q-mb-md" :texte="c.tx"/>
         </q-expansion-item>
-      </div>
-    </template>
+      </q-scroll-area>
 
-  </q-splitter>
-
-<q-toolbar class="bg-secondary text-white tb">
-  <q-btn dense size="md" icon="chevron_left" color="warning" 
-    @click="ui.fermerHelp">
-    <q-tooltip class="bg-white text-primary">{{$t('HLPfermer')}}</q-tooltip>
-  </q-btn>
-  <q-btn v-if="!stackvide" class="q-ml-xs" 
-    dense size="md" icon="arrow_back" @click="back">
-    <q-tooltip class="bg-white text-primary">{{$t('HLPprec')}}</q-tooltip>
-  </q-btn>
-  <q-toolbar-title class="titre-lg">{{$t('A_' + selected)}}</q-toolbar-title>
-</q-toolbar>
-
-<q-toolbar class="bg-black text-white bb">
-  <q-input ref="filterRef" dense v-model="filter" :label="$t('HLPfiltre')">
-    <template v-slot:append>
-      <q-icon v-if="filter !== ''" name="clear" class="cursor-pointer" @click="resetFilter" />
-    </template>
-  </q-input>
-  <q-space />
-  <q-btn v-if="!expandAll" 
-    dense size="md" color="primary" icon="unfold_more" padding="none"
-    :label="$t('PNOdep')" @click="tree.expandAll();expandAll=true"/>
-  <q-btn v-if="expandAll" 
-    dense size="md" color="primary" icon="unfold_less" padding="none"
-    :label="$t('PNOrep')" @click="tree.collapseAll();expandAll=false"/>
-</q-toolbar>
-
-</div>
+      <q-scroll-area :class="!ui.portrait ? 'col-6' : ''" 
+        :style="ui.portrait ? 'height: 30vh;' : 'height: 80vh;'">
+        <q-tree ref="tree"
+          dense
+          :nodes="arbre"
+          node-key="id"
+          :filter="filter"
+          v-model:selected="selected"
+          v-model:expanded="expanded"
+        >
+        <template v-slot:default-header="prop">
+          <div @click.stop="goto(prop.node.id)">
+            <div v-if="prop.node.type === 1" class="row items-start no-wrap bord"
+              :style="!prop.node.children.length ? 'margin-left:8px;' : ''">
+              <q-icon name="library_books" color="orange" size="24px" class="col-auto q-mr-sm" />
+              <div :class="'col text-bold text-italic' + cl(prop.node.id)">{{ prop.node.label }}</div>
+            </div>
+            <div v-if="prop.node.type === 2" class="row items-start no-wrap">
+              <q-icon name="note" color="primary" size="24px" class="col-auto q-mr-sm" />
+              <div :class="'col ' + cl(prop.node.id)">{{ prop.node.label }}</div>
+            </div>
+          </div>
+        </template>
+        </q-tree>
+      </q-scroll-area>
+    </div>
+  </q-page-container>
+</q-layout>
 </q-dialog>
 </template>
 
@@ -224,21 +219,6 @@ function back () {
 
 </script>
 
-<style lang="css">
-.q-tree__arrow { font-size: 25px !important; position: relative; right: 4px }
-.q-tree__node-header { align-items: end !important; }
-</style>
-
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.tb
-  position: absolute
-  top: 0
-  left: 0
-.bb
-  position: absolute
-  bottom: 0
-  left: 0
-.filler
-  height: 3rem
 </style>
