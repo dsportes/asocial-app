@@ -15,7 +15,7 @@
     <q-page-container>
 
     <div v-if="ppSt.tab==='notes'" class="q-pa-sm">
-      <q-btn icon="add" dense flat color="primary" :label="$t('PPano')" @click="ajouternote"/>
+      <btn-cond icon="add" flat color="primary" :label="$t('PPano')" @ok="ajouternote"/>
       <div v-if="!ppSt.lstn.length" class="titre-lg text-italic">{{$t('PPnno')}}</div>
       <div v-else>
         <div v-for="(rec, idx) in ppSt.lstn" :key="rec.id" :class="'q-my-sm zone ' + dkli(idx)">
@@ -31,7 +31,7 @@
     </div>
 
     <div v-if="ppSt.tab==='fichiers'" class="q-pa-sm">
-      <q-btn icon="add" dense flat color="primary" :label="$t('PPafi')" @click="ajouterfichier"/>
+      <btn-cond icon="add" flat color="primary" :label="$t('PPafi')" @ok="ajouterfichier"/>
       <div v-if="!ppSt.lstf.length" class="titre-lg text-italic">{{$t('PPnfi')}}</div>
       <div v-else>
         <div v-for="(fic, idx) in ppSt.lstf" :key="fic.idf" :class="'q-my-sm zone ' + dkli(idx)">
@@ -56,7 +56,7 @@
               icon="content_copy"/>
             <btn-cond v-if="!ppSt.modecc" @ok="editerfichier(fic)"
               round icon="mode_edit" color="primary"/>
-            <btn-cond v-if="!ppSt.modecc" @click="supprfichier(fic)"
+            <btn-cond v-if="!ppSt.modecc" @ok="supprfichier(fic)"
               round icon="delete" color="warning"/>
           </div>
         </div>
@@ -74,7 +74,7 @@
         <q-card-actions align="right" class="q-gutter-sm">
           <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
           <btn-cond icon="check"
-            :label="$t('valider')" :disable="!txt || (rec && txt === rec.txt)" @click="majnote"/>
+            :label="$t('valider')" :disable="!txt || (rec && txt === rec.txt)" @ok="majnote"/>
         </q-card-actions>
       </q-card>
     </q-dialog>

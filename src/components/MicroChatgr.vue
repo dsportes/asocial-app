@@ -10,7 +10,7 @@
     <div v-if="chat.items.length" class="fs-md">{{chat.tit}}</div>
 
     <btn-cond class="absolute-bottom-right" icon="open_in_new"
-      :label="$t('CHbtnov')" @click="ouvrirChat()"/>
+      :label="$t('CHbtnov')" @ok="ouvrirChat()"/>
   </div>
 
   <!-- full-height  -->

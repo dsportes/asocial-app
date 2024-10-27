@@ -126,8 +126,6 @@
           <div v-else class="column q-gutter-xs items-center">
             <btn-cond v-if="gr.msu" :label="$t('AGums')" color="warning" @ok="cfu = 1" cond="cEdit"/>
             <btn-cond v-if="gr.msu" :label="$t('AGrumu')" color="warning" @ok="cfu = 2" cond="cEdit"/>
-            <!--q-btn v-if="!eg.groupe.msu" :label="$t('AGumu')" dense size="md" 
-              color="warning" @click="cfu = 2"/-->
             <btn-cond v-if="!gr.msu" :label="$t('AGumu')" color="warning" @ok="cfu = 2" cond="cEdit"/>
             <div class="q-mt-md row justify-center items-center q-gutter-md">
               <btn-cond flat class="q-mrlg" :label="$t('renoncer')" @ok="ui.fD"/>

@@ -11,7 +11,7 @@
 
       <div class="col-4 row items-center justify-start q-pl-sm">
         <btn-cond v-if="!lecture" :disable="model.qn === qni" 
-          class="q-ml-sm" icon="undo" size="sm" color="warning" @click="undo1"/>
+          class="q-ml-sm" icon="undo" size="sm" color="warning" @ok="undo1"/>
         <div :class="'q-px-xs ' + stmx(model.qn, model.minn, model.maxn)">{{model.minn + '...' + model.maxn}}</div>
       </div>
     </div>
@@ -26,7 +26,7 @@
 
       <div class="col-4 row items-center justify-start q-pl-sm">
         <btn-cond v-if="!lecture" :disable="model.qv === qvi" 
-          class="q-ml-sm" icon="undo" size="sm" color="warning" @click="undo2"/>
+          class="q-ml-sm" icon="undo" size="sm" color="warning" @ok="undo2"/>
         <div :class="'q-px-xs ' + stmx(model.qv, model.minv, model.maxv)">{{model.minv + '...' + model.maxv}}</div>
       </div>
     </div>
@@ -40,7 +40,7 @@
 
       <div class="col-4 row items-center justify-start q-pl-sm">
         <btn-cond v-if="!lecture" :disable="model.qc === qci" 
-          class="q-ml-sm" icon="undo" size="sm" color="warning" @click="undoc"/>
+          class="q-ml-sm" icon="undo" size="sm" color="warning" @ok="undoc"/>
         <div :class="'q-px-xs ' + stmx(model.qc, model.minc, model.maxc)">{{model.minc + '...' + model.maxc}}</div>
       </div>
     </div>

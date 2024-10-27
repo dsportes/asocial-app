@@ -1,6 +1,6 @@
 <template>
   <div :class="'q-pa-xs full-width ' + dkli(0)">
-    <q-btn no-caps flat :label="$t('FInotif', [$t('gravite' + val)])">
+    <btn-cond no-caps flat :label="$t('FInotif', [$t('gravite' + val)])">
     <q-menu anchor="bottom left" self="top left">
       <q-list style="min-width: 50px">
         <q-item clickable v-close-popup @click="val=0">
@@ -14,7 +14,7 @@
         </q-item>
       </q-list>
     </q-menu>
-    </q-btn>
+    </btn-cond>
   </div>
 </template>
 

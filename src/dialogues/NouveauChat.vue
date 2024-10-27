@@ -2,7 +2,7 @@
 <q-dialog v-model="ui.d[idc].CCouvrir" persistent>
   <q-card :class="styp('sm')">
   <q-toolbar class="bg-secondary text-white">
-    <q-btn dense size="md" color="warning" padding="none" icon="close" @click="ui.fD"/>
+    <btn-cond color="warning" icon="close" @ok="ui.fD"/>
     <q-toolbar-title class="titre-lg full-size text-center">{{$t('CChtit')}}</q-toolbar-title>
     <bouton-help page="page1"/>
   </q-toolbar>
@@ -16,8 +16,7 @@
     <editeur-md mh="20rem" v-model="txt" :texte="''" editable modetxt/>
   </q-card-section>
   <q-card-actions v-if="step===2" align="right">
-    <q-btn dense flat size="md" color="primary" :label="$t('renoncer')"
-      padding="none" icon="close" @click="ui.fD"/>
+    <btn-cond flat :label="$t('renoncer')" icon="close" @ok="ui.fD"/>
     <btn-cond color="warning" icon="check" @ok="creer" 
       :label="$t('valider')"
       :disable="!txt.length"

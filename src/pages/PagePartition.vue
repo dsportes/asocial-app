@@ -74,7 +74,7 @@
     <q-dialog v-model="ui.d[idc].PTedq" persistent>
       <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
-          <q-btn dense size="md" color="warning" padding="xs" icon="close" @click="ui.fD"/>
+          <btn-cond color="warning" icon="close" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTqu')}}</q-toolbar-title>
         </q-toolbar>
         <choix-quotas class="q-mt-sm" v-model="quotas"/>
@@ -89,7 +89,7 @@
   <div v-else class="titre-lg text-italic full-width text-center">{{$t('TUnopart')}}</div>
 
   <q-page-sticky position="top-left" :offset="[3, 3]">
-    <q-btn size="md" color="primary" icon="refresh" padding="none" @click="reload()"/>
+    <btn-cond icon="refresh" @ok="reload()"/>
   </q-page-sticky>
 
 </q-page>

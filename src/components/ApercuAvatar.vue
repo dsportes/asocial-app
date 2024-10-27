@@ -23,7 +23,7 @@
     <q-dialog v-model="ui.d[idc].AAeditionpc" persistent>
       <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
-          <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
+          <btn-cond color="warning" icon="close" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center">{{$t('FAphc')}}</q-toolbar-title>
           <bouton-help page="page1"/>
         </q-toolbar>

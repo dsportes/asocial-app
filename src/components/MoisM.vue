@@ -1,10 +1,8 @@
 <template>
 <span class="row items-center">
-  <q-btn size="md" icon="chevron_left" color="primary" padding="none" round
-    :disable="idm===0" @click="plus"/>
+  <btn-cond icon="chevron_left" round :disable="idm===0" @ok="plus"/>
   <span class="larg font-mono fs-md text-center">{{lib}}</span>
-  <q-btn size="md" icon="chevron_right" color="primary" padding="none" round
-    :disable="idm===3" @click="moins"/>
+  <btn-cond icon="chevron_right" round :disable="idm===3" @ok="moins"/>
 </span>
 </template>
 

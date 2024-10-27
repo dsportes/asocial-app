@@ -12,8 +12,8 @@
     <q-select class="font-mono text-bold fs-md" v-model="mm" dense :options="mois"
       style="width:2.5rem;position:relative;top:-9px;"/>
   </span>
-  <q-btn class="self-start q-ml-sm" dense color="warning" padding="none" size="md" 
-    :icon="icon" round @click="ok" :disable="err"/>
+  <btn-cond class="self-start q-ml-sm" color="warning"
+    :icon="icon" round @ok="ok" :disable="err"/>
 </span>
 </template>
 

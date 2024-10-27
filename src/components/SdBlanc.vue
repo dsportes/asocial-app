@@ -16,6 +16,7 @@ const props = defineProps({
   background-color: transparent !important;
   color: white !important;
   line-height: 1.2rem;
+  font-size: 1.1rem;
 }
 @import 'github-markdown-css/github-markdown-dark.css'
 </style>

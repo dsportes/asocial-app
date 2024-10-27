@@ -1,7 +1,7 @@
 <template>
   <q-card :class="styp('md')">
     <q-toolbar class="bg-secondary text-white">
-      <q-btn dense color="warning" size="md" icon="close" @click="ui.fD"/>
+      <btn-cond icon="close" @ok="ui.fD"/>
       <q-toolbar-title class="titre-lg full-width text-center">{{$t('ANnot' + type)}}</q-toolbar-title>
       <bouton-help page="page1"/>
     </q-toolbar>

@@ -41,7 +41,39 @@
       <btn-cond :disable="!aHome" flat icon="home"
         :color="aHome ? 'green-5' : 'grey'" @ok="gotoAccueilLogin()"/>
 
-      <btn-cond v-if="ui.pageback && (ui.page !== 'accueil')" icon="arrow_back" round @ok="ui.gotoBack()"/>
+      <btn-cond :disable="!ui.pageback || (ui.pageback === 'accueil')" icon="arrow_back" round @ok="ui.gotoBack()"/>
+
+      <!-- Information session : mode synchro -->
+      <btn-cond class="q-mr-xs" v-if="session.synchro"
+        icon="autorenew" round @ok="infoSession()">
+        <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
+      </btn-cond>
+
+      <!-- Information session : mode incognito -->
+      <q-avatar class="cursor-pointer q-mr-xs" v-if="session.incognito" @click="infoSession()"
+        size="sm" square>
+        <img src="~assets/incognito_blanc.svg">
+        <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
+      </q-avatar>
+
+      <!-- Information session : mode avion -->
+      <btn-cond class="q-mr-xs" v-if="session.avion" @ok="infoSession()"
+        icon="airplanemode_active" round>
+        <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
+      </btn-cond>
+
+      <!-- Fichiers avion -->
+      <btn-cond v-if="session.ok" :disable="session.incognito" 
+        icon="save" round color="none" @ok="pageFicavion">
+        <q-tooltip>{{$t('MLAfav')}}</q-tooltip>
+        <queue-icon />
+      </btn-cond>
+
+      <!-- Presse papier -->
+      <btn-cond v-if="session.ok" icon="content_paste" round 
+        @ok="ui.oD('pressepapier', 'a')">
+        <q-tooltip>{{$t('MLApp')}}</q-tooltip>
+      </btn-cond>
 
       <q-toolbar-title>
         <div style="position:relative">
@@ -55,31 +87,16 @@
         </div>
       </q-toolbar-title>
 
-      <bouton-help :page="'page_' + ui.page"/>
-
-      <!-- Fichiers avion -->
-      <btn-cond v-if="session.ok" :disable="session.incognito" 
-        icon="save" round color="none" @ok="pageFicavion">
-        <q-tooltip>{{$t('MLAfav')}}</q-tooltip>
-        <queue-icon />
+      <btn-cond v-if="session.ok && ui.aUnFiltre" 
+        color="warning" round icon="search" @ok="ui.ouvrFiltre">
+        <q-tooltip>{{$t('MLAfiltre')}}</q-tooltip>
       </btn-cond>
 
-      <!-- Presse papier -->
-      <q-btn v-if="session.ok" dense size="md" 
-        icon="content_paste" round padding="none"
-        @click="ui.oD('pressepapier', 'a')">
-        <q-tooltip>{{$t('MLApp')}}</q-tooltip>
-      </q-btn>
-
-      <q-btn v-if="session.ok && ui.aUnFiltre" 
-        color="warning" round padding="none" dense size="md" icon="search" 
-        @click="ui.ouvrFiltre">
-        <q-tooltip>{{$t('MLAfiltre')}}</q-tooltip>
-      </q-btn>
+      <bouton-help :page="'page_' + ui.page"/>
 
       <q-page-sticky v-if="session.signalOp" position="top" :offset="offset"
         style="z-index:1000!important">
-        <q-btn round color="warning" icon="wifi" padding="0"/>
+        <btn-cond round color="warning" icon="wifi" padding="0"/>
       </q-page-sticky>
 
     </q-toolbar>
@@ -111,7 +128,7 @@
 
   <q-footer>
     <q-toolbar class="sombre overflow-hidden">
-      <bouton-help page="DOCpg"/>
+      <!--bouton-help page="DOCpg"/-->
 
       <bouton-langue style="position:relative;top:2px;"/>
 
@@ -121,27 +138,8 @@
       </btn-cond>
 
       <!-- Outils et tests -->
-      <btn-cond icon="settings" round @click="ui.oD('outilsTests', 'a')">
+      <btn-cond icon="settings" round @ok="ui.oD('outilsTests', 'a')">
         <q-tooltip>{{$t('MLAout')}}</q-tooltip>
-      </btn-cond>
-
-      <!-- Information session : mode synchro -->
-      <btn-cond class="q-mr-xs" v-if="session.synchro"
-        icon="autorenew" round @click="infoSession()">
-        <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
-      </btn-cond>
-
-      <!-- Information session : mode incognito -->
-      <q-avatar class="cursor-pointer q-mr-xs" v-if="session.incognito" @click="infoSession()"
-        size="sm" square>
-        <img src="~assets/incognito_blanc.svg">
-        <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
-      </q-avatar>
-
-      <!-- Information session : mode avion -->
-      <btn-cond class="q-mr-xs" v-if="session.avion" @click="infoSession()"
-        icon="airplanemode_active" round>
-        <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
       </btn-cond>
 
       <q-toolbar-title class="row justify-end items-center titre-md text-right q-mx-xs">
@@ -174,8 +172,8 @@
     <q-scroll-area :class="'fit ' + dkli(1)">
       <div>
         <div class="row justify-bettween q-mb-md">
-          <q-btn class="q-mr-sm" icon="chevron_right" 
-            color="warning" size="md" dense @click="ui.fermFiltre"/>
+          <btn-cond class="q-mr-sm" icon="chevron_right" 
+            color="warning" @ok="ui.fermFiltre"/>
           <div class="titre-lg">{{$t('MLArech')}}</div>
         </div>
         <div v-if="ui.page === 'chats'" class="column justify-start">
@@ -283,8 +281,7 @@
       <div class="text-center titre-lg q-my-sm">{{$t('MLAatt')}}</div>
       <div class="fs-md text-center q-b-md" v-html="ui.diag"></div>
       <div class="row q-my-md justify-end"> 
-        <q-btn flat dense color="primary" size="md" padding="xs" icon="check"
-          :label="$t('jailu')" @click="ui.fD(); ui.diagresolve()"/>
+        <btn-cond flat icon="check" :label="$t('jailu')" @ok="ui.fD(); ui.diagresolve()"/>
       </div>
     </q-card>
   </q-dialog>
@@ -298,8 +295,7 @@
       <div class="col column items-center">
         <div class="titre-lg">{{$t('MLAcptz', session.compte.nbj, {count: session.compte.nbj})}}</div>
         <div class="titre-md">{{$t('MLAcptz' + (session.compte.estA ? 'A' : '0'))}}</div>
-        <q-btn class="q-mt-lg self-end" flat dense color="primary" size="md" padding="xs" icon="check"
-            :label="$t('jailu')" @click="ui.fD()"/>
+        <btn-cond class="q-mt-lg self-end" icon="check" :label="$t('jailu')" @ok="ui.fD()"/>
       </div>
     </q-card>
   </q-dialog>
@@ -309,10 +305,10 @@
     <q-card :class="styp('sm') + 'q-pa-sm'">
       <q-card-section class="q-my-lg titre-md">{{$t('EMDqss')}}</q-card-section>
       <q-card-actions vertical align="right">
-        <q-btn flat dense size="md" padding="xs" color="primary" 
-          :label="$t('EMDjr')" @click="ui.fD" />
-        <q-btn dense size="md" padding="xs" color="warning"  
-          :label="$t('EMDjq')" @click="fermerqm" />
+        <btn-cond flat dense size="md" padding="xs" color="primary" 
+          :label="$t('EMDjr')" @ok="ui.fD" />
+        <btn-cond dense size="md" padding="xs" color="warning"  
+          :label="$t('EMDjq')" @ok="fermerqm" />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -320,8 +316,10 @@
   <!-- Information / option d'installation d'une nouvelle version -->
   <q-dialog v-model="ui.d.a.reload" persistent>
     <q-card :class="styp('sm') + ' q-pa-sm'">
-      <q-btn size="md" padding="xs" color="primary" dense icon="close"
-        :label="$t('plustard')" @click="ui.fD"/>
+      <div class="row justify-between items-start">
+        <btn-cond dense icon="close" :label="$t('plustard')" @ok="ui.fD"/>
+        <bouton-help page="recharger-app"/>
+      </div>
       <div class="titre-lg text-center text-warning q-my-md">{{$t('RLnvver2')}}</div>
       <div class="titre-md q-mb-sm">{{$t('RLtit1')}}</div>
       <div class="titre-md q-mb-sm">{{$t('RLtit2')}}</div>
@@ -331,8 +329,7 @@
           <div class="titre-md text-bold text-primary q-pr-sm lg1">{{$t('RLopt', ['1'])}}</div>
           <div class="col-auto">
             <span class="titre-md q-pr-sm">{{$t('RLopt1')}}</span>
-            <q-btn size="md" padding="none" icon="system_update" dense color="primary"
-              :label="$t('RLinstal')" @click="reload"/>
+            <btn-cond icon="system_update" :label="$t('RLinstal')" @ok="reload"/>
           </div>
         </div>
         <bouton-bulle idtext="rl1"/>
@@ -403,10 +400,8 @@
       <q-card-section class="q-pa-md fs-md text-center">
         {{$t('MLAcf', [session.opEncours ? session.opEncours.label : '???'])}}</q-card-section>
       <q-card-actions vertical align="right" class="q-gutter-sm">
-        <q-btn flat dense size="md" padding="xs" color="primary"
-          :label="$t('MLAcf3')" @click="ui.fD"/>
-        <q-btn dense size="md" padding="xs" color="warning"
-          :label="$t('MLAcf4')" @click="stopop"/>
+        <btn-cond flat :label="$t('MLAcf3')" @ok="ui.fD"/>
+        <btn-cond color="warning" :label="$t('MLAcf4')" @ok="stopop"/>
       </q-card-actions>
     </q-card>
   </q-dialog>

@@ -3,16 +3,19 @@
 <q-layout container view="hHh lpR fFf" :class="styp('xl')">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar class="bg-secondary text-white">
-      <q-btn dense size="md" icon="chevron_left" color="warning" 
-        @click="ui.fermerHelp">
+      <btn-cond icon="chevron_left" color="warning" @ok="ui.fermerHelp">
         <q-tooltip class="bg-white text-primary">{{$t('HLPfermer')}}</q-tooltip>
-      </q-btn>
-      <q-btn v-if="!stackvide" class="q-ml-xs" 
-        dense size="md" icon="arrow_back" @click="back">
+      </btn-cond>
+      <btn-cond v-if="!stackvide" class="q-ml-xs" icon="arrow_back" @ok="back">
         <q-tooltip class="bg-white text-primary">{{$t('HLPprec')}}</q-tooltip>
-      </q-btn>
+      </btn-cond>
       <q-toolbar-title class="titre-lg">{{$t('A_' + selected)}}</q-toolbar-title>
     </q-toolbar>
+    <div class="bg-primary text-right">
+      <a class="q-mr-sm text-italic text-white text-underlined titre-lg text-bold cursor-pointer"
+        :href="docsurl + '/index.html'" target="_blank">
+        {{$t('HLPdg')}}</a>
+    </div>
   </q-header>
 
   <q-footer elevated class="bg-black text-white">
@@ -23,12 +26,10 @@
         </template>
       </q-input>
       <q-space />
-      <q-btn v-if="!expandAll" 
-        dense size="md" color="primary" icon="unfold_more" padding="none"
-        :label="$t('PNOdep')" @click="tree.expandAll();expandAll=true"/>
-      <q-btn v-if="expandAll" 
-        dense size="md" color="primary" icon="unfold_less" padding="none"
-        :label="$t('PNOrep')" @click="tree.collapseAll();expandAll=false"/>
+      <btn-cond v-if="!expandAll" icon="unfold_more" 
+        :label="$t('PNOdep')" @ok="tree.expandAll();expandAll=true"/>
+      <btn-cond v-if="expandAll" icon="unfold_less" padding="none"
+        :label="$t('PNOrep')" @ok="tree.collapseAll();expandAll=false"/>
     </q-toolbar>
   </q-footer>
 
@@ -42,7 +43,7 @@
           <template v-slot:header>
             <div class="full-width row justify-between items-center bg-primary text-white">
               <div class="text-bold titre-md">{{c.t}}</div>
-              <q-btn v-if="c.m.length" color="secondary" icon="menu" padding="none" size="md" rounded>
+              <btn-cond v-if="c.m.length" color="secondary" icon="menu" rounded>
                 <q-menu>
                   <q-list v-for="m in c.m" :key="m.value" 
                     style="min-width:30rem" class="bg-secondary text-white">
@@ -51,7 +52,7 @@
                     </q-item>
                   </q-list>
                 </q-menu>
-              </q-btn>
+              </btn-cond>
             </div>
           </template>
           <show-html class="q-mx-sm q-mb-md" :texte="c.tx"/>
@@ -98,6 +99,7 @@ import stores from '../stores/stores.mjs'
 import { styp, sty, $t } from '../app/util.mjs'
 
 import ShowHtml from '../components/ShowHtml.vue'
+import BtnCond from '../components/BtnCond.vue'
 
 const $i18n = useI18n()
 const locale = $i18n.locale.value

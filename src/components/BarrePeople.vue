@@ -167,7 +167,7 @@
     <q-layout container view="hHh lpR fFf" :class="styp('md')">
       <q-header elevated class="bg-secondary text-white">
         <q-toolbar>
-          <q-btn dense size="md" color="warning" icon="chevron_left" @click="ui.fD"/>
+          <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">
             {{$t('PTcompta', [cv.nomC])}}</q-toolbar-title>
         </q-toolbar>

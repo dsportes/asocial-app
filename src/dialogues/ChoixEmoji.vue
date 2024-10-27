@@ -7,8 +7,8 @@
       :i18n="cfgi18n()" :emoji-size="18" @select="showEmoji" />
     <div class="bg-white row" style="position:absolute;top:35px;right:8px">
       <div class="col fs-xl" style="width:6rem;min-height:2rem;">{{entree}}</div>
-      <q-btn class="col-auto" dense size="md" icon="backspace" color="primary" @click="bs"/>
-      <q-btn class="col-auto" dense size="md" icon="check" color="green-5" @click="ok"/>
+      <btn-cond class="col-auto" icon="backspace" color="primary" @ok="bs"/>
+      <btn-cond class="col-auto" icon="check" color="green-5" @ok="ok"/>
     </div>
   </div>
 </q-dialog>

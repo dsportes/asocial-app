@@ -7,7 +7,7 @@
   <q-dialog v-model="ui.d[idc].PEdlvat" persistent>
     <q-card :class="styp('sm')">
       <q-toolbar class="bg-secondary text-white">
-        <q-btn dense size="md" color="warning" icon="close" @click="fin"/>
+        <btn-cond color="warning" icon="close" @ok="fin"/>
         <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTdlvat')}}</q-toolbar-title>
       </q-toolbar>
       <q-card-section class="q-ma-sm">

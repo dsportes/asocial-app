@@ -1,7 +1,7 @@
 <template>
   <div :class="'q-pa-xs full-width ' + dkli()">
     <div class="fs-md text-italic">{{$t('FIavgrt')}}</div>
-    <q-btn no-caps flat :label="tit" icon-right="expand_more">
+    <btn-cond no-caps flat :label="tit" icon-right="expand_more">
     <q-menu anchor="bottom left" self="top left" max-height="10rem" 
       max-width="20rem">
       <q-list class="bg-secondary text-white">
@@ -20,7 +20,7 @@
         </q-item>
       </q-list>
     </q-menu>
-    </q-btn>
+    </btn-cond>
   </div>
 </template>
 

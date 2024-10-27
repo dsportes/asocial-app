@@ -18,7 +18,7 @@
   </div>
 
   <div class="q-my-md row justify-center items-center q-gutter-md">
-    <q-btn class="q-pa-xs btn" size="md" dense :label="$t('renoncer')" color="primary" @click="ui.fD"/>
+    <btn-cond class="q-pa-xs btn" :label="$t('renoncer')" @ok="ui.fD"/>
     <bouton-confirm v-if="!session.dialog && !msg" actif :confirmer="noteSuppr"/>
   </div>
 

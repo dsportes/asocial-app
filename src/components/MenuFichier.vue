@@ -1,5 +1,5 @@
 <template>
-<q-btn dense size="md" round padding="none" icon="more_vert" color="primary">
+<btn-cond round icon="more_vert" color="primary">
   <q-menu anchor="bottom left" self="top left" max-height="20rem" 
     max-width="32rem">
     <q-list class="q-py-xs bord1 bg-black text-white fs-md ">
@@ -132,7 +132,7 @@
     </q-card>
   </q-dialog>
 
-</q-btn>
+</btn-cond>
 </template>
 
 <script setup>

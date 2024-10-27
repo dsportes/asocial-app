@@ -1,6 +1,6 @@
 <template>
 <div>
-  <q-btn v-if="!estAv && lna" dense class="q-mr-xs" no-caps 
+  <btn-cond v-if="!estAv && lna" class="q-mr-xs" no-caps 
     :label="$t('NPLnote', [lna[0].nom])" 
     icon="control_point" color="primary" size="md" padding="none"
     icon-right="expand_more">
@@ -13,13 +13,13 @@
         </q-item>
       </q-list>
     </q-menu>
-  </q-btn>
+  </btn-cond>
 
-  <q-btn v-if="estAv" dense class="q-mr-xs" no-caps 
+  <btn-cond v-if="estAv" class="q-mr-xs" no-caps 
     :label="$t('NPLnote', [nom])" 
     icon="control_point" color="primary" @click="ok(false)" padding="none" size="md"/>
 
-  <q-btn v-if="!estAv" dense class="q-mr-xs" no-caps 
+  <btn-cond v-if="!estAv" class="q-mr-xs" no-caps 
     :label="$t('NPLnote', [nom])" 
     icon="control_point" color="orange" @click="ok(true)" padding="none" size="md"/>
 

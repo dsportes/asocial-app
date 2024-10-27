@@ -229,7 +229,7 @@
           <div v-if="nodeDiag" class="msg">{{nodeDiag}}</div>
           <div class="q-mt-sm row q-gutter-sm">
             <btn-cond v-if="!nodeDiag" icon="check" :label="$t('PNOcfratt')" color="warning" 
-              @click="okrattacher" cond="cEdit"/>
+              @ok="okrattacher" cond="cEdit"/>
             <btn-cond icon="account_tree" :label="$t('PNOratt2')" @ok="rattacher"/>
             <btn-cond icon="undo" :label="$t('PNOanratt')" @ok="anrattacher"/>
           </div>

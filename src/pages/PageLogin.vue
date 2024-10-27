@@ -12,24 +12,20 @@
     <template v-slot:header>
       <div class="full-width titre-lg row justify-between bord1">
         <div>{{$t('LOGconn2')}}</div>
-        <bouton-help page="page_login_cn" class="col-auto"/>
+        <!--bouton-help page="page_login_cn" class="col-auto"/-->
       </div>
     </template>
     <div class="row justify-center q-gutter-sm q-mt-sm q-mr-xl">
-      <q-btn class="titre-lg" icon="autorenew" 
-        dense padding="xs" size="md" no-caps color="primary" right-icon="send"
-        :label="$t('sync')" @click="ouvrirPS(1)"/>
-      <q-btn class="titre-lg" 
-        dense padding="xs"  size="md" no-caps color="primary" right-icon="send"
-        @click="ouvrirPS(2)">
+      <btn-cond class="titre-lg" icon="autorenew" no-caps
+        :label="$t('sync')" @ok="ouvrirPS(1)"/>
+      <btn-cond class="titre-lg" no-caps @ok="ouvrirPS(2)">
         <div class="row items-center q-gutter-sm">
           <q-icon size="sm"><img src="~assets/incognito_blanc.svg"/></q-icon>
           <div>{{$t('incognito')}}</div>
         </div>
-      </q-btn>
-      <q-btn class="titre-lg" icon="airplanemode_active" 
-        dense padding="xs" size="md" no-caps color="primary"  right-icon="send"
-        :label="$t('avion')" @click="ouvrirPS(3)"/>
+      </btn-cond>
+      <btn-cond class="titre-lg" icon="airplanemode_active" no-caps
+        :label="$t('avion')" @ok="ouvrirPS(3)"/>
     </div>
   </q-expansion-item>
 
@@ -37,7 +33,7 @@
     <template v-slot:header>
       <div class="full-width titre-lg row justify-between bord1">
         <div>{{$t('LOGconn3')}}</div>
-        <bouton-help page="page_login_cn" class="col-auto"/>
+        <!--bouton-help page="page_login_cn" class="col-auto"/-->
       </div>
     </template>
 

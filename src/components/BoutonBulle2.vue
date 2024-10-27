@@ -1,6 +1,5 @@
 <template>
-  <q-btn class="q-mx-xs" size="md" padding="none"
-    :icon="icon || 'info'" :label="label">
+  <btn-cond class="q-mx-xs" :icon="icon || 'info'" :label="label">
     <q-popup-proxy ref="qpp">
       <q-banner class="bord bordgris" @click="hide">
         <template v-slot:avatar>
@@ -9,7 +8,7 @@
         <sd-nb :texte="texte"/>
       </q-banner>
     </q-popup-proxy>
-  </q-btn>
+  </btn-cond>
 </template>
 
 <script setup>
