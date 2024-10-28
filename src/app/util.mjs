@@ -5,6 +5,11 @@ import { useQuasar } from 'quasar'
 import { toByteArray, fromByteArray } from './base64.mjs'
 import { AMJ, appexc } from './api.mjs'
 
+/* i18n : fonction $t() ********************************************/
+export let $t
+export let $q
+export function set$t (t, q) { $t = t; $q = q}
+
 let pako
 
 export const interdits = '< > : " / \\ | ? *'
@@ -19,8 +24,6 @@ export function setRequiredModules (m) {
   pako = m.pako
 }
 
-let $q
-
 export function random (nbytes) {
   const u8 = new Uint8Array(nbytes)
   window.crypto.getRandomValues(u8)
@@ -33,25 +36,24 @@ export function arrayBuffer (u8) {
 }
 
 export function dkli (idx) {
-  if (!$q) $q = useQuasar()
+  // if (!$q) $q = useQuasar()
   return ($q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0')) + ' '
 }
 
 export function bcf () { return $q.dark.isActive ? ' bordfonce' : ' bordclair' }
 
 export function styp (sz) { 
-  if (!$q) $q = useQuasar()
+  // if (!$q) $q = useQuasar()
   return ($q.dark.isActive ? 'sombre bsf pw' : 'clair bsc pw') + (sz || 'md') + ' '
 }
 
 export function sty () { 
-  if (!$q) $q = useQuasar()
+  // if (!$q) $q = useQuasar()
   return $q.dark.isActive ? 'sombre ' : 'clair '
 }
 
 const decoder = new TextDecoder('utf-8')
 const encoder = new TextEncoder('utf-8')
-
 
 let audioContext = null
 
@@ -67,13 +69,6 @@ export async function beep() {
   source.buffer = b                  // tell the source which sound to play
   source.connect(audioContext.destination)       // connect the source to the context's destination (the speakers)
   source.start()                          // play the source now
-}
-
-/* i18n : fonction $t() ********************************************/
-let fnt
-export function set$t (f) { fnt = f}
-export function $t (a, b, c) { 
-  return fnt(a, b, c)
 }
 
 export function html (exc) {
@@ -457,7 +452,6 @@ export function setTrigramme (nombase, trig) {
 }
 
 export function getTrigramme () {
-  const $q = stores.config.$q
   return new Promise((resolve) => {
     function ko (val) {
       return val.length !== 3 || val.search(/[^a-zA-Z]+/) !== -1

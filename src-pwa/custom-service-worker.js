@@ -13,8 +13,6 @@ import { precacheAndRoute } from 'workbox-precaching'
 
 const broadcast = new BroadcastChannel('channel-pubsub')
 
-console.log('Dans mon SW')
-
 self.addEventListener('push', (event) => {
   const payload = event.data ? event.data.text() : ''
   broadcast.postMessage({ type: 'pubsub', payload: payload})

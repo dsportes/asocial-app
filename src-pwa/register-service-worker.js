@@ -15,7 +15,7 @@ register(process.env.SERVICE_WORKER_FILE, {
 
   async ready (registration) {
     console.log('Service worker is active.')
-    await stores.session.setRegistration(registration)
+    await stores.config.setRegistration(registration)
   },
 
   registered (registration) {
@@ -29,7 +29,7 @@ register(process.env.SERVICE_WORKER_FILE, {
   updatefound (/* registration */) {
     console.log('New content is downloading.')
     try {
-      stores.session.setSwev('updatefound')
+      stores.config.setSwev('updatefound')
     } catch (e) {
       console.log('swev 1', e.toString())
     }
@@ -38,7 +38,7 @@ register(process.env.SERVICE_WORKER_FILE, {
   updated (/* registration */) {
     console.log('New content is available; please refresh.')
     try {
-      stores.session.setSwev('updated')
+      stores.config.setSwev('updated')
     } catch (e) {
       console.log('swev 2', e.toString())
     }

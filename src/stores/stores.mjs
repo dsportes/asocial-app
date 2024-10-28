@@ -24,7 +24,6 @@ class Stores {
   get groupe() { return this.groupeStore || (this.groupeStore = useGroupeStore()) }
   get people() { return this.peopleStore || (this.peopleStore = usePeopleStore()) }
   get note() { return this.noteStore || (this.noteStore = useNoteStore()) }
-  get syncitem() { return this.syncitemStore || (this.syncitemStore = useSyncitemStore()) }
   get ficav() { return this.ficavStore || (this.ficavStore = useFicavStore()) }
   get pp() { return this.ppStore || (this.ppStore = usePpStore()) }
   get filtre() { return this.filtreStore || (this.filtreStore = useFiltreStore()) }

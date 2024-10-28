@@ -78,7 +78,7 @@
       <q-toolbar-title>
         <div style="position:relative">
           <div class="titre-lg text-right full-width">{{titrePage}}</div>
-          <div v-if="session.swev2" @click="ui.oD('reload', 'a')" 
+          <div v-if="config.nouvelleVersion" @click="ui.oD('reload', 'a')" 
             style="position:absolute;top:-4px;left:0"
             class="row cursor-pointer items-center bg-negative q-px-xs">
             <div class="titre-md text-bold text-white q-mr-sm">{{$t('RLnvver')}}</div>
@@ -512,7 +512,9 @@ import PageGroupe from './pages/PageGroupe.vue'
 import PageInvitation from './pages/PageInvitation.vue'
 
 const $t = useI18n().t
-set$t($t)
+const $q = useQuasar()
+set$t($t, $q)
+
 const session = stores.session
 const aSt = stores.avatar 
 const gSt = stores.groupe
@@ -520,8 +522,6 @@ const people = stores.people
 const config = stores.config
 const ui = stores.ui
 
-const $q = useQuasar()
-config.$q = $q
 $q.dark.set(true)
 
 ui.setScreenWH($q.screen.width, $q.screen.height)

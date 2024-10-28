@@ -13,10 +13,6 @@ import { b64ToU8 } from '../app/util.mjs'
 
 export const useSessionStore = defineStore('session', {
   state: () => ({
-    swev1: false,
-    swev2: false,
-    registration: null,
-
     status: 0, // 0:fermée, 1:en chargement, 2: ouverte, 3: admin
     mode: 0, // 1:synchronisé, 2:incognito, 3:avion
 
@@ -297,33 +293,6 @@ export const useSessionStore = defineStore('session', {
   },
 
   actions: {
-    async setRegistration(registration) {
-      this.registration = registration
-      await this.setSubscription()
-      console.log('SW ready. subJSON: ' + this.config.subJSON.substring(0, 50))
-    },
-
-    async setSubscription () {
-      if (!this.registration) return
-      try {
-        let subscription = await this.registration.pushManager.getSubscription() // déjà faite
-        if (!subscription) subscription = await this.registration.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: b64ToU8(stores.config.vapid_public_key)
-          })
-        this.config.subJSON = JSON.stringify(subscription)
-      } catch (e) {
-        this.config.subJSON = '???' + e.message
-      }
-    },
-
-    // ServiceWorker : événements de détection de changement de version
-    setSwev (x) {
-      // console.log(x + 'event reçu')
-      if (x === 'updatefound') this.swev1 = true
-      else if (x === 'updated') this.swev2 = true
-    },
-
     setMode (mode) { this.mode = mode },
 
     setOrg (org) { this.org = org || '' },

@@ -93,7 +93,7 @@ const perm = ref(Notification.permission)
 config.permission = perm.value === 'granted'
 
 onMounted(async () => {
-  if (config.permission) await session.setSubscription()
+  if (config.permission) await config.setSubscription()
 })
 
 const clrInfx = computed(() => config.subJSON.startsWith('???') ? 'warning': 'green')

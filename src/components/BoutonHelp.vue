@@ -14,6 +14,7 @@ const $t = useI18n().t
 import { computed } from 'vue'
 import stores from '../stores/stores.mjs'
 import { afficherDiag } from '../app/util.mjs'
+import BtnCond from './BtnCond.vue'
 
 const props = defineProps({ 
   size: String, 
