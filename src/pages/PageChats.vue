@@ -95,16 +95,66 @@ const idI = ref(0)
 const optb64 = ref(false)
 const chatc = ref(null)
 
+const avChats = computed(() => {
+  const f = fStore.filtre.chats
+  const ci = session.compti
+  const flimj = f.nbj ? (Date.now() - (f.nbj * 86400000)) : 0
+  const fsetp = f.mcp && f.mcp.size ? f.mcp : null
+  const fsetn = f.mcn && f.mcn.size ? f.mcn : null
+  const r = []
+  for (const [,elt] of aSt.map) {
+    if (!f.tous && session.avatarId !== elt.avatar.id) continue
+    for (const [,c] of elt.chats) {
+      if (f.rac === c.stI) continue
+      if (flimj && c.dh < flimj) continue
+      if (f.nom) {
+        const cv = session.getCV(c.idE)
+        if (!cv.nom.startsWith(f.nom)) continue
+      }
+      if (f.txt && (!c.txt || c.txt.indexOf(f.txt) === -1)) continue
+      if (fsetp && !ci.aHT(c.idE, fsetp)) continue
+      if (fsetn && ci.aHT(c.idE, fsetn)) continue
+      r.push(c)
+    }
+  }
+  return r
+})
+
+const grChats = computed(() => {
+  const f = fStore.filtre.chats
+  const ci = session.compti
+  const r = []
+  if (!f.tous) return r
+  const flimj = f.nbj ? (Date.now() - (f.nbj * 86400000)) : 0
+  const fsetp = f.mcp && f.mcp.size ? f.mcp : null
+  const fsetn = f.mcn && f.mcn.size ? f.mcn : null
+  for (const [,elt] of gSt.map) {
+    const c = elt.chatgr
+    const cv = session.getCV(c.idE)
+    if (c) {
+      if (f.rac === 2) continue
+      if (flimj && c.dh < flimj) continue
+      if (f.nom && !cv.nom.startsWith(f.nom)) continue
+      if (f.txt && (!c.txt || c.txt.indexOf(f.txt) === -1)) continue
+      if (fsetp && !ci.aHT(c.idE, fsetp)) continue
+      if (fsetn && ci.aHT(c.idE, fsetn)) continue
+      r.push(c)
+    }
+  }
+  return r
+})
+
 const avid = computed(() => session.avatarId)
 const fusion = computed(() => {
   const f = fStore.filtre.chats // afin d'être sensible au changement de filtre
   const r = []
-  aSt.tousChats.forEach(c => { r.push(c)})
-  gSt.tousChats.forEach(c => { r.push(c)})
+  avChats.value.forEach(c => { r.push(c)})
+  grChats.value.forEach(c => { r.push(c)})
   r.sort((a, b) => a.dh > b.dh ? -1 : (a.dh === b.dh ? 0 : 1))
-  ui.fmsg(r.length)
   return r
 })
+
+watch(pg, (ap) => { ui.fmsg(ap.length)})
 
 async function rafCvs () {
   let nc = 0, nv = 0

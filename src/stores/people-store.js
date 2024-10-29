@@ -109,33 +109,6 @@ export const usePeopleStore = defineStore('people', {
         const vcv = e.cv ? e.cv.v : 0
         return { idE, vcv, lch, lmb }
       }
-    },
-
-    // PagePeople ********************************************
-    peLpF: (state) => {
-      const ci = state.session.compti
-      const part = state.session.partition
-      const f = stores.filtre.filtre.people
-      const fsetp = f.mcp && f.mcp.size ? f.mcp : null
-      const fsetn = f.mcn && f.mcn.size ? f.mcn : null
-      const r = []
-      for (const [id, p] of state.map) {
-        const cv = state.getCV(id)
-        if (f.nom && !cv.nom.startsWith(f.nom)) continue
-        if (f.rolepart && part) {
-          if (!part.estCpt(id)) continue
-          if (f.rolepart === 2 && !part.estDel(id)) continue
-        } 
-        if (f.avecgr && (!p.sgr.size)) continue
-        if (fsetp && !ci.aHT(id, fsetp)) continue
-        if (fsetn && ci.aHT(id, fsetn)) continue
-        r.push({ id, cv, nom: cv.nom, sgr: p.sgr, sch: p.sch })
-      }
-      r.sort((a, b) => { 
-        return (ID.estComptable(a.id) || a.nom < b.nom) ? -1 : (a.nom > b.nom ? 1 : 0)
-      })
-      stores.ui.fmsg(r.length)
-      return r
     }
 
   },

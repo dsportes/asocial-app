@@ -4,7 +4,7 @@
 
     <btn-cond class="q-my-sm" :label="$t('PGcrea')" @ok="nvGr" cond="cEdit"/>
 
-    <div class="q-my-sm full-width">
+    <div v-if="pg" class="q-my-sm full-width">
       <div class="row">
         <div class="col-6">{{$t('PGstatsh')}}</div>
         <div class="col-3 fs-md text-italic text-center">{{$t('nbnotes')}}</div>
@@ -12,13 +12,13 @@
       </div>
       <div class="row">
         <div class="col-6 fs-md text-italic text-right">{{$t('PGvut')}}</div>
-        <div class="col-3 fs-md font-mono text-center">{{stt.nn}}</div>
-        <div class="col-3 fs-md font-mono text-center">{{edv(stt.vf)}}</div>
+        <div class="col-3 fs-md font-mono text-center">{{pg.stt.nn}}</div>
+        <div class="col-3 fs-md font-mono text-center">{{edv(pg.stt.vf)}}</div>
       </div>
       <div class="row">
         <div class="col-6 fs-md text-italic text-right">{{$t('PGvq')}}</div>
-        <div class="col-3 fs-md font-mono text-center">{{'[' + stt.nn + '] / ' + edqn(stt.nn)}}</div>
-        <div class="col-3 fs-md font-mono text-center">{{ '[' + stt.qv + '] / ' + edqv(stt.qv)}}</div>
+        <div class="col-3 fs-md font-mono text-center">{{'[' + pg.stt.nn + '] / ' + edqn(pg.stt.nn)}}</div>
+        <div class="col-3 fs-md font-mono text-center">{{ '[' + pg.stt.qv + '] / ' + edqv(pg.stt.qv)}}</div>
       </div>
     </div>
   </q-card>
@@ -46,12 +46,12 @@
     </div>
   </q-card>
 
-  <div v-if="!lg.length" class="q-my-lg titre-lg text-italic text-center">
-    {{$t('PGvide', [gSt.pgLg.size])}}
+  <div v-if="!pg || !pg.r.length" class="q-my-lg titre-lg text-italic text-center">
+    {{$t('PGvide', [pgLg.length])}}
   </div>
 
-  <div class="spmd" v-if="lg.length">
-    <q-card v-for="(e, idx) in lg" :key="e.groupe.id" :class="dkli(idx) + 'q-mb-md'">
+  <div class="spmd" v-else>
+    <q-card v-for="(e, idx) in pg.r" :key="e.groupe.id" :class="dkli(idx) + 'q-mb-md'">
       <apercu-genx :id="e.groupe.id" :idx="idx" />
       <div class="row full-width items-center justify-between">
         <div>
@@ -132,7 +132,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onUnmounted } from 'vue'
+import { ref, computed, watch, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import { edvol, $t, dkli, styp, afficher8000 } from '../app/util.mjs'
@@ -169,9 +169,56 @@ const nom = ref('')
 const una = ref(false)
 const inv = ref(null) // invitation courante
 
-const stt = computed(() => gSt.pgLgFT[1] || { nn:0, qn: 0, vf: 0, qv: 0 })
-const lg = computed(() => gSt.pgLgFT[0] || [] )
 const nomgi = computed(() => session.getCV(inv.value.idg).nom)
+
+const pgLg = computed(() => {
+  const f = fStore.filtre.groupes
+  const m = []
+  if (f.tous) {
+    gSt.map.forEach(e => {
+      const x = { ...e, nom: session.getCV(e.groupe.id).nom }
+      m.push(x) 
+    })
+  } else {
+    const s = session.compte.idGroupes(session.avatarId)
+    s.forEach(idg => { 
+      const x = { ...gSt.map.get(idg), nom: session.getCV(idg).nom }
+      m.push(x) 
+    })
+  }
+  return m
+})
+
+const pg = computed(() => {
+  const ci = session.compti
+  const f = fStore.filtre.groupes
+  const fsetp = f.mcp && f.mcp.size ? f.mcp : null
+  const fsetn = f.mcn && f.mcn.size ? f.mcn : null
+  const stt = { nn: 0, vf: 0, qn: 0, qv: 0 }
+  const r = []
+  for (const e of pgLg.value) {
+    const g = e.groupe
+    if (e.estHeb) {
+      stt.nn += g.nn || 0
+      stt.vf += g.vf || 0
+      stt.qn += g.qn || 0
+      stt.qv += g.qv || 0
+    }
+    if (f.ngr && e.nom.startsWith(f.ngr)) continue
+    if (f.sansheb && !g.dfh) continue
+    if (f.excedent && ((g.qn * UNITEN) > g.nn) && ((g.qv * UNITEV) > g.vf )) continue
+    const mc = ci.mc.get(g.id)
+    if (f.infmb && (!mc.tx || mc.tx.indexOf(f.infmb)) === -1) continue
+    if (fsetp && !ci.aHT(g.id, fsetp)) continue
+    if (fsetn && ci.aHT(g.id, fsetn)) continue
+    if (f.invits && g.nbInvites === 0) continue
+    r.push(e)
+  }
+  r.sort((a,b) => { return a.nom < b.nom ? -1 : (a.nom > b.nom ? 1 : 0)})
+  return { r, stt }
+})
+
+watch(pg, (ap) => { ui.fmsg(ap.r.length)})
 
 function oknom (n) { nom.value = n }
 const am = (idg) => gSt.amb(idg)

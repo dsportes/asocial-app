@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { useI18n } from 'vue-i18n'
 import { Tarif } from '../app/api.mjs'
+import { b64ToU8 } from '../app/util.mjs'
 
 export const useConfigStore = defineStore('config', {
   state: () => ({
@@ -81,7 +82,7 @@ export const useConfigStore = defineStore('config', {
         let subscription = await this.registration.pushManager.getSubscription() // déjà faite
         if (!subscription) subscription = await this.registration.pushManager.subscribe({
             userVisibleOnly: true,
-            applicationServerKey: b64ToU8(stores.config.vapid_public_key)
+            applicationServerKey: b64ToU8(this.vapid_public_key)
           })
         this.subJSON = JSON.stringify(subscription)
       } catch (e) {

@@ -15,6 +15,7 @@
 import { ref } from 'vue'
 
 import SdNb from './SdNb.vue'
+import BtnCond from './BtnCond.vue'
 
 const props = defineProps({ 
   icon: String, 

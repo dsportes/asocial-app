@@ -956,7 +956,7 @@ export class Groupe extends GenDoc {
     const cv = await CV.set(row.cvG || CV.fake(this.id))
     cv.store()
     const nx = [0, 0, 0, 0, 0, 0]
-    this.st.forEach(st => { nx[st]++ });
+    this.st.forEach(st => { nx[st]++ })
     this.nbContacts = nx[1]
     this.nbPreInvites = nx[2]
     this.nbInvites = nx[3]
@@ -1026,6 +1026,10 @@ export class Groupe extends GenDoc {
   accesNote (im) {
     const f = this.flags[im] || 0;
     return im && this.estActif(im) && (f & FLAGS.AN) && (f & FLAGS.DN) 
+  }
+  accesEcrNote (im) {
+    const f = this.flags[im] || 0;
+    return im && this.estActif(im) && (f & FLAGS.AN) && (f & FLAGS.DN) && (f & FLAGS.DE) 
   }
   accesNote2 (im) {
     const f = this.flags[im] || 0;

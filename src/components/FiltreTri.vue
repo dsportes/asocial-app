@@ -22,7 +22,7 @@ for(let i = 0; i < props.nbOptions; i++){
 val.value = options[x || 0]
 
 watch(val, (ap) => { 
-  st.setTri(props.nom, ap)
+  st.setTri(props.nom, ap.value)
 })
 
 </script>

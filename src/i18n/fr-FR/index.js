@@ -732,7 +732,7 @@ export default {
 
   FIjours: 'Modifiés dans les N jours',
   FIinvits: 'Groupes ayant des invitations en cours',
-  FIavecsp: 'Comptes "sponsor" seulement',
+  FIavecsp: 'Seulement les délégués',
   FIchel: 'Chats en ligne seulement', // ???
   FIavecgr: 'Membre d\'un groupe',
   FInotif: 'Ayant une notification ... {0}',

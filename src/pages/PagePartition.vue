@@ -29,7 +29,7 @@
         :label="$t('PTnvc')" @ok="ui.oD('NSnvsp', idc)"/>
     </q-toolbar>
 
-    <div v-for="(c, idx) in session.ptLcFT" :key="c.id" class="spmd q-my-xs">
+    <div v-for="(c, idx) in ptLcFT" :key="c.id" class="spmd q-my-xs">
       <q-expansion-item v-if="vis2(c)" dense switch-toggle-side group="g1" :class="dkli(idx)" @click="selCpt(c)">
         <template v-slot:header>
           <div class="row full-width items-center justify-between">
@@ -125,12 +125,90 @@ const session = stores.session
 const aSt = stores.avatar
 const pSt = stores.people
 const cfg = stores.config
+const fSt = stores.filtre
 
 const quotas = ref({})
 
 const p = computed(() => session.partition)
 const ntfp = computed(() => session.notifPX(p.value.id))
 const lg = computed(() => p.value ? p.value.synth : {})
+
+const ptLc = computed(() => {
+  const p = session.partition
+  const t = []
+  if (p) for (const id in p.mcpt) {
+    const e = p.mcpt[id]
+    const cv = session.getCV(e.id)
+    t.push( { ...e, cv} )
+  }
+  return t
+})
+
+const ptLcF = computed(() => {
+  const f = fSt.filtre.partition
+  if (!f) return ptLc.value
+  const r = []
+  for (const c of ptLc.value) {
+    if (f.avecsp && !c.del) continue
+    if (f.nomc && !c.cv.nom.startsWith(f.nomc)) continue
+    /* 
+    - `mcpt` : map (object) des comptes attachés à la partition. 
+      - _clé_: id du compte.
+      - _valeur_: `{ id, nr, del, q }`
+        - `nr`: niveau de restriction de la notification de niveau _compte_ (0 s'il n'y en a pas, 1 (sans restriction), 2 ou 3).
+        - `notif`: notification du compte cryptée par la clé P de la partition (redonde celle dans compte).            - `del`: `true` si c'est un délégué.
+        - `q` : `qc qn qv c2m nn nc ng v` extraits du document `comptas` du compte.
+          - `c2m` est le compteur `conso2M` de compteurs, montant moyen _mensualisé_ de consommation de calcul observé sur M/M-1 (observé à `dhic`). 
+
+        Ajout à q :
+        - pcc : pourcentage d'utilisation de la consommation journalière c2m / qc
+        - pcn : pourcentage d'utilisation effective de qn : nn + nc ng / qn
+        - pcv : pourcentage d'utilisation effective de qc : v / qv
+    */
+    if (f.notif && c.nr === 0) continue
+    if (f.notif && c.nr < f.notif) continue
+    r.push(c)
+  }
+  return r
+})
+
+const ptLcFT = computed(() => {
+  const lcF = ptLcF.value
+  const f = fSt.tri.partition
+
+  /*
+  TRIpartition1: 'Quota nb notes, chats ↑',
+  TRIpartition2: 'Quota nb notes, chats ↓',
+  TRIpartition3: 'Quota fichiers des notes ↑',
+  TRIpartition4: 'Quota fichiers des notes ↓',
+  TRIpartition5: '% util. quota nb notes... ↑',
+  TRIpartition6: '% util. quota nb notes... ↓',
+  TRIpartition7: '% util. quota fichiers ↑',
+  TRIpartition8: '% util. quota fichiers ↓'
+  */
+  function vf (x) {
+    if (f === 0) return 0
+    return f === 1 || f === 2 ? x.q.qn 
+      : (f === 3 || f === 4 ? x.q.qv 
+      : (f === 5 || f === 6 ? x.pcn : x.pcv))
+  }
+
+  const ctm = (f % 2) === 1 ? 1 : -1
+  function comp (x, y) {
+    const nx = x.cv.nom
+    const n1 = (x.del ? '1' : '2') + (nx.startsWith('#') ? '2' : '1') + nx
+    const ny = y.cv.nom
+    const n2 = (y.del ? '1' : '2') + (ny.startsWith('#') ? '2' : '1') + ny
+     const a = vf(x)
+    const b = vf(y)
+    return a > b ? ctm : (a < b ? -ctm : (n1 < n2 ? -1 : (n1 > n2 ? 1 : 0))) 
+  }
+  const r = [...lcF]
+  r.sort(comp)
+  return r
+})
+
+watch(ptLcFT, (ap) => {ui.fmsg(ap.length)})
 
 async function reload () {
   if (session.accesNet && !session.estA) 

@@ -150,37 +150,10 @@ export const useAvatarStore = defineStore('avatar', {
         return e ? Array.from(e.tickets.values()) : []
     },
 
-    // PageChats ******************************************
     nbchats: (state) => {
       let n = 0
       for (const [,elt] of state.map) if (elt.chats) n += elt.chats.size
       return n
-    },
-
-    tousChats: (state) => {
-      const f = state.filtre.filtre.chats
-      const ci = state.session.compti
-      const flimj = f.nbj ? (Date.now() - (f.nbj * 86400000)) : 0
-      const fsetp = f.mcp && f.mcp.size ? f.mcp : null
-      const fsetn = f.mcn && f.mcn.size ? f.mcn : null
-      const r = []
-      for (const [,elt] of state.map) {
-        if (!f.tous && state.session.avatarId !== elt.avatar.id) continue
-        for (const [,c] of elt.chats) {
-          if (f.rac === 0 && c.stI !== 1) continue
-          if (f.rac === 1 && c.stI !== 0) continue
-          if (flimj && c.dh < flimj) continue
-          if (f.nom) {
-            const cv = state.session.getCV(c.idE)
-            if (!cv.nom.startsWith(f.nom)) continue
-          }
-          if (f.txt && (!c.txt || c.txt.indexOf(f.txt) === -1)) continue
-          if (fsetp && !ci.aHT(c.idE, fsetp)) continue
-          if (fsetn && ci.aHT(c.idE, fsetn)) continue
-          r.push(c)
-        }
-      }
-      return r
     }
   },
 

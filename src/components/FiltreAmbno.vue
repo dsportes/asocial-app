@@ -1,6 +1,6 @@
 <template>
   <div :class="'q-pa-xs full-width ' + dkli(idx)">
-    <btn-cond no-caps flat><div>{{$t('FIambno')}}<br>{{$t('ambno' + val)}}</div>
+    <q-btn padding="1px 1px" dense no-caps flat><div>{{$t('FIambno')}}<br>{{$t('ambno' + val)}}</div>
     <q-menu anchor="bottom left" self="top left">
       <q-list style="min-width: 50px">
         <q-item clickable v-close-popup @click="val=0">
@@ -23,7 +23,7 @@
         </q-item>
       </q-list>
     </q-menu>
-    </btn-cond>
+    </q-btn>
   </div>
 </template>
 

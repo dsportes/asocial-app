@@ -87,7 +87,7 @@
     <div v-else class="titre-lg text-italic">{{$t('PGnoamb')}}</div>
   </div>
 
-<!-- Gérer le mode simple / unanime -->
+  <!-- Gérer le mode simple / unanime -->
   <q-dialog v-model="ui.d[idc].AGediterUna" full-height position="left" persistent>
     <q-layout container view="hHh lpR fFf" :class="styp('md')">
       <q-header elevated class="bg-primary text-white">
@@ -221,7 +221,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onUnmounted } from 'vue'
+import { ref, computed, watch, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import { UNITEN, UNITEV, AMJ } from '../app/api.mjs'
@@ -270,12 +270,46 @@ const actuelAnim = computed(() => gr.value.imh && gr.value.st[gr.value.imh] === 
 const dejaHeb = computed(() => sav.value.has(gr.value.tid[gr.value.imh]))
 const nbiv = computed(() => gr.value.nbInvites)
 const amb = computed(() => gSt.ambano[0])
-const lst = computed(() => gSt.pgLmFT[0])
-const nb = computed(() => gSt.pgLmFT[1])
+const lst = computed(() => pgLmFT.value.r)
+const nb = computed(() => pgLmFT.value.n)
 const vols = computed(() => { return { qn: gr.value.qn, qv: gr.value.qv, nn: gr.value.nn, v: gr.value.vf }})
 const estAnim = computed(() => gr.value.estAnim(gr.value.mmb.get(session.avatarId)) )
 const restn = computed(() => { const cpt = session.compte.qv; return (cpt.qn * (100 - cpt.pcn) / 100) })
 const restv = computed(() => { const cpt = session.compte.qv; return (cpt.qv * (100 - cpt.pcv) / 100) })
+
+/* PageGroupe - membres people **************************************************/
+const pgLmFT = computed(() => {
+  const f = stores.filtre.filtre.groupe
+  const c = session.compte
+  const r = []
+  let n = 0
+  const g = gSt.egrC.groupe
+  for (let im = 1; im < g.st.length; im++) {
+    const stm = g.st[im]
+    if (!stm) continue
+    const idm = g.tid[im]
+    if (!idm) continue
+    if (c.mav.has(idm)) continue
+    n++
+    const nom = session.getCV(idm).nomC
+    if (f.nmb && !nom.startsWith(f.nmb)) continue
+    if (f.stmb && stm + 1 !== f.stmb) continue
+    if (f.ambno) {
+      const mb = g.accesMembre(im)
+      const no = g.accesNote(im)
+      if (f.ambno === 1 && !(mb && !no)) continue
+      if (f.ambno === 2 && !(no && !mb)) continue
+      if (f.ambno === 3 && !(mb && no)) continue
+      if (f.ambno === 4 && !(!mb && !no)) continue
+      if (f.ambno === 5 && !g.accesEcrNote(im)) continue
+    } 
+    r.push({ id: idm, im, nom })
+  }
+  r.sort((a, b) => { return a.nom < b.nom ? -1 : (a.nom > b.nom ? 1 : 0) })
+  return { r, n }
+})
+
+watch(pgLmFT, (ap) => { ui.fmsg(ap.r.length) })
 
 const nom = (im) => {
   const id = gr.value.tid[im]
