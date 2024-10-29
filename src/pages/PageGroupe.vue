@@ -293,7 +293,7 @@ const pgLmFT = computed(() => {
     n++
     const nom = session.getCV(idm).nomC
     if (f.nmb && !nom.startsWith(f.nmb)) continue
-    if (f.stmb && stm + 1 !== f.stmb) continue
+    if (f.stmb && stm !== f.stmb) continue
     if (f.ambno) {
       const mb = g.accesMembre(im)
       const no = g.accesNote(im)

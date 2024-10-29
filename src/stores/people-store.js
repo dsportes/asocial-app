@@ -1,8 +1,6 @@
 import { defineStore } from 'pinia'
 import stores from './stores.mjs'
-import { ID } from '../app/api.mjs'
-import { CV, NomGenerique } from '../app/modele.mjs'
-// import { difference, intersection } from '../app/util.mjs'
+import { CV } from '../app/modele.mjs'
 
 /* 
 Un people est un avatar (pas du compte):

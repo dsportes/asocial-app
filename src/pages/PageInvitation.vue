@@ -72,16 +72,15 @@ const propos = ref(true)
 const nomg = computed(() => session.getCV(session.groupeId).nom)
     
 const lst = computed(() => { 
-  const src = pSt.peLpF
   const l = []
   session.compte.lstAvatars.forEach(x => {
     const y = { id: x.id }
     y.d = gSt.diagContact(x.id)
     if (!y.d[0] || propos.value) l.push(y)
   })
-  src.forEach(x => {
-    const y = { id: x.id }
-    y.d = gSt.diagContact(x.id)
+  pSt.map.forEach((x, id) => {
+    const y = { id: id }
+    y.d = gSt.diagContact(id)
     if (!y.d[0] || propos.value) l.push(y)
   })
   return l
