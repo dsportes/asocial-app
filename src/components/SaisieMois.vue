@@ -22,6 +22,7 @@ import { ref, watch } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import { AMJ } from '../app/api.mjs'
+import BtnCond from './BtnCond.vue'
 
 const props = defineProps({ 
   dmin: Number, 

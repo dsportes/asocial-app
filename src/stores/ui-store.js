@@ -4,7 +4,7 @@ import { $t, hms } from '../app/util.mjs'
 const seuillarge = 900
 const pagesF = new Set(['chats', 'espace', 'partition', 'people', 'groupes', 'groupesac', 'groupe', 'invitation', 'notes'])
 const tabF = new Set(['membres'])
-const pagesB = new Set(['espace', 'compte', 'groupes', 'groupesac', 'notes'])
+const pagesB = new Set(['espace', 'compte', 'groupes', 'groupesac'])
 
 // Le compteur de dialogues ouverts DOIT ne pas être remis à 0
 // à la déconnexion (en fait au reset du store ui)

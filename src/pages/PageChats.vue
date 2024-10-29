@@ -154,7 +154,7 @@ const fusion = computed(() => {
   return r
 })
 
-watch(pg, (ap) => { ui.fmsg(ap.length)})
+watch(fusion, (ap) => { ui.fmsg(ap.length)})
 
 async function rafCvs () {
   let nc = 0, nv = 0

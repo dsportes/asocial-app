@@ -373,7 +373,7 @@
   <outils-tests v-if="ui.d.a.outilsTests"/>
   <phrase-secrete v-if="ui.d.a.phrasesecrete"/>
 
-  <!-- Opération en cours et son arrêt -->
+  <!-- Affiche l'opération en cours et propose son interruption -->
   <q-dialog v-model="ui.d.a.opDialog" seamless position="top" full-width persistent
     transition-show="scale" transition-hide="scale">
     <div class="q-mt-sm column items-center" style="width:20rem">
@@ -395,6 +395,7 @@
     </div>
   </q-dialog>
 
+  <!-- Confirmation d'interruption de l'opération en cours -->
   <q-dialog v-model="ui.d.a.confirmstopop">
     <q-card :class="styp('sm')">
       <q-card-section class="q-pa-md fs-md text-center">
@@ -406,7 +407,8 @@
     </q-card>
   </q-dialog>
 
-  <q-dialog v-model="ui.d.a.sync" persistent> <!-- bouton synchro -->
+  <!-- Gestion de la synchronisation automatique -->
+  <q-dialog v-model="ui.d.a.sync" persistent>
     <q-card :class="styp('sm') + ' q-pa-sm column items-center'">
       <div v-if="config.permission" class="titre-lg q-my-md text-center">{{$t('MLAnba')}}</div>
       <div v-if="!config.permission" class="titre-lg q-mt-md text-center msg">{{$t('MLAnbb1')}}</div>
@@ -513,6 +515,7 @@ import PageInvitation from './pages/PageInvitation.vue'
 
 const $t = useI18n().t
 const $q = useQuasar()
+$q.dark.set(true)
 set$t($t, $q)
 
 const session = stores.session
@@ -521,8 +524,6 @@ const gSt = stores.groupe
 const people = stores.people
 const config = stores.config
 const ui = stores.ui
-
-$q.dark.set(true)
 
 ui.setScreenWH($q.screen.width, $q.screen.height)
 watchEffect(() => {

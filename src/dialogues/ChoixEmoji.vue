@@ -24,6 +24,7 @@ import { Picker, EmojiIndex } from 'emoji-mart-vue-fast/src'
 import '../css/emoji.css'
 
 import stores from '../stores/stores.mjs'
+import BtnCond from '../components/BtnCond.vue'
 import { $t } from '../app/util.mjs'
 
 const props = defineProps({ 
