@@ -410,6 +410,7 @@
   <!-- Gestion de la synchronisation automatique -->
   <q-dialog v-model="ui.d.a.sync" persistent>
     <q-card :class="styp('sm') + ' q-pa-sm column items-center'">
+      <bouton-help class="self-end" page="syncauto-man"/>
       <div v-if="config.permission" class="titre-lg q-my-md text-center">{{$t('MLAnba')}}</div>
       <div v-if="!config.permission" class="titre-lg q-mt-md text-center msg">{{$t('MLAnbb1')}}</div>
       <div v-if="!config.permission" class="titre-md q-mt-sm q-mb-md text-center">{{$t('MLAnbb2')}}</div>

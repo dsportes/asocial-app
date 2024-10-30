@@ -330,7 +330,9 @@ export async function connexion(phrase, razdb) {
 
 /* classe OperationS *******************************************************/
 export class OperationS extends Operation {
-  constructor(nomop) { super(nomop) }
+  constructor(nomop) { 
+    super(nomop, true) 
+  }
 
   /* Chargment en Store des avatars / groupes connus en IDB (avion et synchro).
   Remarque en mode synchro,
@@ -720,7 +722,7 @@ args.ns : pour l'administrateur seulement
 Retour:
 - rowSynthse
 */
-export class GetEspace extends OperationS {
+export class GetEspace extends Operation {
   constructor () { super('GetEspace') }
 
   async run (ns) { 

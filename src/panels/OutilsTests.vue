@@ -249,7 +249,11 @@ function traceq (q) {
 }
 
 async function testErr () {
-  await new ErreurFonc().run($t('OTer'), 1)
+  try {
+    await new ErreurFonc().run($t('OTer'), 1)
+  } catch (e) {
+    console.log(e.toString())
+  }
 }
 
 function htok (r) { 

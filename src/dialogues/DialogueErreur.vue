@@ -23,6 +23,8 @@
           :label="$t('ERrlog')" @ok="continuer"/>
         <btn-cond v-if="!fige && mod" icon="arrow_forward" 
           :label="$t('ERmod')" @ok="continuer"/>
+        <btn-cond v-if="exc.code === 9010" icon="arrow_forward" 
+          :label="$t('ERmod')" @ok="continuer"/>
       </q-card-actions>
       <q-card-section class="q-pt-none">
         <div v-if="exc.stack">

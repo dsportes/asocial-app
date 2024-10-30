@@ -5,10 +5,10 @@ import { post } from '../app/net.mjs'
 
 /* Opération générique ******************************************/
 export class Operation {
-  constructor (nomop) { 
+  constructor (nomop, modeSync) { 
     this.nom = nomop 
-    this.modeSync = this.nom.startsWith('Sync')
-    if (!this.modeSync) {
+    this.modeSync = modeSync || false
+    if (!modeSync) {
       stores.session.startOp(this)
       this.cancelToken = null
       this.break = false
