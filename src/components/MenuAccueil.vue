@@ -127,7 +127,7 @@ import { computed } from 'vue'
 import stores from '../stores/stores.mjs'
 import SelAvid from './SelAvid.vue'
 import SelGrid from './SelGrid.vue'
-import { GetPartition } from '../app/synchro.mjs'
+import { GetPartition } from '../app/operations4.mjs'
 
 const props = defineProps({ 
   menu: Boolean 

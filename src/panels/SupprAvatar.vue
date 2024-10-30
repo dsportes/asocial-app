@@ -135,8 +135,8 @@ import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import { styp, edvol, sleep, dkli } from '../app/util.mjs'
 import BtnCond from '../components/BtnCond.vue'
-import { SupprAvatar, SupprCompte } from '../app/operations4.mjs'
-import { GetPartition, deconnexion } from '../app/synchro.mjs'
+import { GetPartition, SupprAvatar, SupprCompte } from '../app/operations4.mjs'
+import { deconnexion } from '../app/synchro.mjs'
 
 const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))    

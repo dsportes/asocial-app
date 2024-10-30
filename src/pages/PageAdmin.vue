@@ -187,10 +187,9 @@ import SaisieMois from '../components/SaisieMois.vue'
 import NotifIcon from '../components/NotifIcon.vue'
 import QuotasVols from '../components/QuotasVols.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
-import { CreationEspace, MajSponsEspace, SetEspaceQuotas, InitTachesGC, 
+import { GetEspaces, CreationEspace, MajSponsEspace, SetEspaceQuotas, InitTachesGC, 
   DownloadStatC, DownloadStatC2, GetTaches, DelTache, GoTache } from '../app/operations4.mjs'
 import { get } from '../app/net.mjs'
-import { GetEspaces } from '../app/synchro.mjs'
 import { compile } from '../app/modele.mjs'
 import { Cles, ID, AMJ, UNITEN, UNITEV } from '../app/api.mjs'
 import { styp, edvol, mon, nbn, dkli, afficherDiag, dhstring } from '../app/util.mjs'

@@ -120,9 +120,9 @@
 import { ref, computed, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
-import { NouvelAvatar, ChangementPS, MuterCompteA } from '../app/operations4.mjs'
+import { GetSynthese, GetPartition, GetCompta, NouvelAvatar, ChangementPS, MuterCompteA } from '../app/operations4.mjs'
 import { SetQuotas } from '../app/operations4.mjs'
-import { ExistePhrase } from '../app/synchro.mjs'
+import { ExistePhrase } from '../app/operations4.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ApercuAvatar from '../components/ApercuAvatar.vue'
 import NomAvatar from '../components/NomAvatar.vue'
@@ -132,7 +132,6 @@ import ChoixQuotas from '../components/ChoixQuotas.vue'
 import BtnCond from '../components/BtnCond.vue'
 import { $t, styp, afficherDiag } from '../app/util.mjs'
 import { isAppExc, ID } from '../app/api.mjs'
-import { GetCompta, GetPartition, GetSynthese } from '../app/synchro.mjs'
 
 const session = stores.session
 const ui = stores.ui

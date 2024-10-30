@@ -197,9 +197,8 @@ import ChoixQuotas from '../components/ChoixQuotas.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 import PhraseContact from '../components/PhraseContact.vue'
 import { $t, styp, edvol, afficherDiag } from '../app/util.mjs'
-import { StatutAvatar, ChangerPartition, DeleguePartition, 
-  GetAvatarPC, MuterCompteO, MuterCompteA } from '../app/operations4.mjs'
-import { GetCompta, GetComptaQv, GetSynthese, GetPartition } from '../app/synchro.mjs'
+import { StatutAvatar, ChangerPartition, DeleguePartition, GetCompta, GetComptaQv,  
+  GetAvatarPC, MuterCompteO, MuterCompteA, GetSynthese, GetPartition } from '../app/operations4.mjs'
 
 const session = stores.session
 const aSt = stores.avatar
@@ -218,6 +217,7 @@ if (!props.part) {
     idcpt.value = c
   })
 }
+
 const idp = ref(props.part ? session.partition.id : '')
 const idcpt = ref(props.id)
 const idpCpt = ref(null)
@@ -294,7 +294,8 @@ async function muterA () {
 }
 
 async function mut () {
-  await new MuterCompteO().run(idcpt.value, quotas.value, chat.value, texte.value, pc.value)
+  await new MuterCompteO().run(idcpt.value, quotas.value, chat.value, 
+    texte.value || txtdefO.value, pc.value)
   idp.value = session.partition.id
   pc.value = null
   await new GetPartition().run(session.partition.id)
@@ -303,7 +304,8 @@ async function mut () {
 }
 
 async function mutA () {
-  await new MuterCompteA().run(idcpt.value, chat.value, texte.value, pc.value)
+  await new MuterCompteA().run(idcpt.value, chat.value, 
+    texte.value || txtdefA.value, pc.value)
   idp.value = null
   pc.value = null
   await new GetPartition().run(session.partition.id)

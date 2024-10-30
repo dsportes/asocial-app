@@ -73,7 +73,7 @@ import { ref, onMounted, computed, onUnmounted } from 'vue'
 import { decode } from '@msgpack/msgpack'
 
 import { afficherDiag, beep, styp } from '../app/util.mjs'
-import { connexion, GetSponsoring } from '../app/synchro.mjs'
+import { connexion } from '../app/synchro.mjs'
 import { Sponsoring, RegCles } from '../app/modele.mjs'
 import { AMJ } from '../app/api.mjs'
 import PhraseContact from '../components/PhraseContact.vue'
@@ -81,7 +81,7 @@ import AcceptationSponsoring from '../panels/AcceptationSponsoring.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BtnCond from '../components/BtnCond.vue'
 import { decrypter } from '../app/webcrypto.mjs'
-import { CreationComptable } from '../app/operations4.mjs'
+import { CreationComptable, GetSponsoring } from '../app/operations4.mjs'
 
 const config = stores.config
 const session = stores.session

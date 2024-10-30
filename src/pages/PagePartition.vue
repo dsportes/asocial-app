@@ -110,8 +110,7 @@ import ApercuGenx from '../components/ApercuGenx.vue'
 import QuotasVols from '../components/QuotasVols.vue'
 import NouveauSponsoring from '../panels/NouveauSponsoring.vue'
 import BarrePeople from '../components/BarrePeople.vue'
-import { SetQuotas } from '../app/operations4.mjs'
-import { GetPartition, GetNotifC } from '../app/synchro.mjs'
+import { GetNotifC, GetPartition, SetQuotas } from '../app/operations4.mjs'
 import { styp } from '../app/util.mjs'
 
 const ui = stores.ui

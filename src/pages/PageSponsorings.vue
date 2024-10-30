@@ -68,7 +68,7 @@ import ShowHtml from '../components/ShowHtml.vue'
 import NouveauSponsoring from '../panels/NouveauSponsoring.vue'
 import BtnCond from '../components/BtnCond.vue'
 import QuotasVols from '../components/QuotasVols.vue'
-import { ProlongerSponsoring, GetPartition } from '../app/synchro.mjs'
+import { ProlongerSponsoring, GetPartition } from '../app/operations4.mjs'
 
 const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))

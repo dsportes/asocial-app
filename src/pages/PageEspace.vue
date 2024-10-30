@@ -191,8 +191,7 @@ import QuotasVols from '../components/QuotasVols.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
 import { dkli, styp, $t, afficherDiag } from '../app/util.mjs'
 import { ID, AMJ } from '../app/api.mjs'
-import { GetSynthese, GetPartition } from '../app/synchro.mjs'
-import { SetEspaceOptionA, NouvellePartition, SetQuotasPart, SetQuotasA,
+import { GetSynthese, GetPartition, SetEspaceOptionA, NouvellePartition, SetQuotasPart, SetQuotasA,
   SetCodePart, SupprPartition, DownloadStatC, DownloadStatC2 } from '../app/operations4.mjs'
 
 const ui = stores.ui

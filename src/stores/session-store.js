@@ -8,8 +8,7 @@ import { crypter, decrypter } from '../app/webcrypto.mjs'
 import { u8ToB64, $t } from '../app/util.mjs'
 import { AMJ, ID, AppExc, A_SRV, HBINSECONDS } from '../app/api.mjs'
 import { RegCles, Notification as MaNotification } from '../app/modele.mjs'
-import { GetCompta, GetPartition } from '../app/synchro.mjs'
-import { b64ToU8 } from '../app/util.mjs'
+import { GetPartition, GetCompta } from '../app/operations4.mjs'
 
 export const useSessionStore = defineStore('session', {
   state: () => ({

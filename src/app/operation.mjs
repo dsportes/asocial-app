@@ -1,6 +1,7 @@
 import { AppExc, appexc } from './api.mjs'
 import { $t } from './util.mjs'
 import stores from '../stores/stores.mjs'
+import { post } from '../app/net.mjs'
 
 /* Opération générique ******************************************/
 export class Operation {
@@ -12,6 +13,22 @@ export class Operation {
       this.cancelToken = null
       this.break = false
       this.nbretry = 0
+    }
+  }
+
+  async getPub (id, org) {
+    try {
+      if (org) {
+        const ret = await post(null, 'GetPubOrg', { id, org })
+        return ret.pub
+      } else {
+        const session = stores.session
+        const args = { token: session.authToken, id }
+        const ret = await post(null, 'GetPub', args)
+        return ret.pub
+      }
+    } catch (e) {
+      throw appexc(e)
     }
   }
 

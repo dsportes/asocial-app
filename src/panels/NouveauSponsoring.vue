@@ -116,8 +116,7 @@ import BoutonHelp from '../components/BoutonHelp.vue'
 import BtnCond from '../components/BtnCond.vue'
 import PhraseContact from '../components/PhraseContact.vue'
 import QuotasVols from '../components/QuotasVols.vue'
-import { ExistePhrase, GetCompta, GetSynthese } from '../app/synchro.mjs'
-import { AjoutSponsoring } from '../app/operations4.mjs'
+import { GetSynthese, GetCompta, AjoutSponsoring, ExistePhrase } from '../app/operations4.mjs'
 
 const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))

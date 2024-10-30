@@ -40,8 +40,8 @@ import BoutonBulle from './BoutonBulle.vue'
 import BtnCond from './BtnCond.vue'
 import EditeurMd from './EditeurMd.vue'
 import { styp, dhcool } from '../app/util.mjs'
-import { SetNotifE, SetNotifP, SetNotifC } from '../app/operations4.mjs'
-import { deconnexion, GetSynthese, GetPartition } from '../app/synchro.mjs'
+import { SetNotifE, SetNotifP, SetNotifC, GetSynthese, GetPartition } from '../app/operations4.mjs'
+import { deconnexion } from '../app/synchro.mjs'
 import { RegCles } from '../app/modele.mjs'
 
 const props = defineProps({  

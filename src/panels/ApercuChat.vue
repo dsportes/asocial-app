@@ -119,7 +119,7 @@
   import stores from '../stores/stores.mjs'
 
   import { styp, sty, dhcool, dkli, afficherDiag } from '../app/util.mjs'
-  import { MajChat, StatutAvatar, PassifChat } from '../app/operations4.mjs'
+  import { GetCompta, MajChat, StatutAvatar, PassifChat } from '../app/operations4.mjs'
   import { ID } from '../app/api.mjs'
 
   import SdBlanc from '../components/SdBlanc.vue'
@@ -127,7 +127,6 @@
   import ApercuGenx from '../components/ApercuGenx.vue'
   import BoutonHelp from '../components/BoutonHelp.vue'
   import BtnCond from '../components/BtnCond.vue'
-  import { GetCompta } from '../app/synchro.mjs'
 
   const props = defineProps({ 
     id: String, 

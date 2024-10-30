@@ -99,8 +99,7 @@ import { $t, dkli, edvol, afficher8000 } from '../app/util.mjs'
 import N3Icon from '../components/N3Icon.vue'
 import NotifIcon from '../components/NotifIcon.vue'
 import { ID, UNITEN, UNITEV } from '../app/api.mjs'
-import { RafraichirCvsAv } from '../app/operations4.mjs'
-import { GetPartition } from '../app/synchro.mjs'
+import { RafraichirCvsAv, GetPartition } from '../app/operations4.mjs'
 
 const al = 'titre-md text-italic bg-yellow-3 text-negative text-bold q-mb-xs q-ml-xl'
 
