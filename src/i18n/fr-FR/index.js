@@ -574,6 +574,7 @@ export default {
   HLPprec: 'Page d\'aide précédente',
   HLPfiltre: 'Filtre sur les titres',
   HLPdg: 'Site de documentaion de l\'application',
+  HLPmenu: 'Voir le détail dans le menu ci-dessus, rubrique _{0}_',
 
   // Page sponsorings - Nouveau sponsoring
   NPnouv: 'Sponsoriser un nouveau compte',
@@ -2264,6 +2265,11 @@ La "consommation mensuelle" de calcul est en centimes et est la somme des coûts
 `,
 
   A_DOCpg: 'L\'application "a-social"',
+
+  A_pages: 'Disposition générale d\'une page',
+  A_page_accueil: 'Page d\'accueil',
+  A_top_bar: 'Barre du haut',
+  A_bottom_bar: 'Barre du bas',
   A_page_login: 'Se connecter / créer son compte',
   A_page_login_m: 'Modes synchronisé / incognito / avion',
   A_page_login_fa: 'Fichiers accessibles en mode avion',

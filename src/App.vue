@@ -84,6 +84,12 @@
 
       <bouton-help :page="'page_' + ui.page"/>
 
+      <!-- Déconnexion -->
+      <btn-cond v-if="session.status > 1" color="warning" icon="logout" 
+        @ok="discon" round>
+        <q-tooltip style="height:1.2rem">{{$t('MLAdrc')}}</q-tooltip>
+      </btn-cond>
+
       <q-page-sticky v-if="session.signalOp" position="top" :offset="offset"
         style="z-index:1000!important">
         <btn-cond round color="warning" icon="wifi" padding="0"/>
@@ -141,13 +147,6 @@
         <span v-else class="titre-md text-italic">{{$t('MLAsfer')}}</span>
         <span v-if="session.org" class="q-ml-md titre-md">[{{session.org}}]</span>
       </q-toolbar-title>
-
-      <!-- Déconnexion -->
-      <btn-cond v-if="session.status > 1" color="warning" icon="logout" 
-        @ok="discon">
-        <q-tooltip style="height:4rem">{{$t('MLAdrc')}}</q-tooltip>
-        <span class="fs-sm font-mono">{{hms(session.dh)}}</span>
-      </btn-cond>
 
     </q-toolbar>
   </q-footer>
@@ -349,9 +348,13 @@
         <bouton-help page="page1"/>
       </q-toolbar>
       <q-card-actions vertical align="stretch" class="titre-md q-gutter-sm">
-        <btn-cond color="warning" flat icon="logout" :label="$t('MLAdecon')" @ok="deconnexion"/>
-        <btn-cond color="warning" flat icon="logout" :label="$t('MLArecon')" @ok="reconnexion"/>
-        <btn-cond color="primary" flat :label="$t('MLAcont')" @ok="ui.fD"/>
+        <q-btn flat dense :label="$t('MLAdecon')" @click="deconnexion()">
+          <q-icon right name="logout" color="warning" size="lg"/>
+        </q-btn>
+        <q-btn flat dense :label="$t('MLArecon')" @click="reconnexion()">
+          <q-icon right name="logout" color="warning" size="lg"/>
+        </q-btn>
+        <q-btn flat dense :label="$t('MLAcont')" @click="ui.fD"/>
       </q-card-actions>
     </q-card>
   </q-dialog>

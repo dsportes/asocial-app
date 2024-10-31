@@ -46,7 +46,7 @@
               <btn-cond v-if="c.m.length" color="secondary" icon="menu" rounded>
                 <q-menu>
                   <q-list v-for="m in c.m" :key="m.value" 
-                    style="min-width:30rem" class="bg-secondary text-white">
+                    style="min-width:20rem;overflow:hidden" class="bg-secondary text-white">
                     <q-item clickable v-close-popup @click.stop="goto(m.value)">
                       <q-item-section class="titre-md text-italic">{{m.label}}</q-item-section>
                     </q-item>
@@ -162,7 +162,7 @@ function setChaps (id) {
         const titre = ($t('A_' + code) || '').trim()
         if (!titre) continue
         m.push({ label: titre, value: code })
-        tx.push('_(' + titre + ')_')
+        tx.push($t('HLPmenu', [titre]))
       } else if (l.startsWith('<a href="$$/')) {
         const x = l.substring(11)
         tx.push('<a href="' + docsurl + x)

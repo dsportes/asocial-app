@@ -1,5 +1,8 @@
 [
   { "id": "DOCpg", "lp": [] },
+  { "id": "pages", "lp": [
+    "top_bar", "bottom_bar", "page_accueil"
+  ]},
   { "id": "page_login", "lp": ["page_login_m", "page_login_fa", "page_login_pp", "nouvelle_version" ]},
   { "id": "sponsoring", "lp": ["sponsoring_d", "sponsoring_a"] },
   { "id": "av", "lp": []},
