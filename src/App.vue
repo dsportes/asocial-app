@@ -4,7 +4,7 @@
     <q-toolbar class="full-width">
 
       <btn-cond v-if="session.ok && !session.avion && !session.estAdmin" 
-        :color="clrsync" :icon="iconsync" @ok="ui.oD('sync', 'a')"/>
+        :color="session.syncautoIC.c" :icon="session.syncautoIC.ic" @ok="ui.oD('sync', 'a')"/>
       
       <!-- Notifications -->
       <notif-icon v-if="session.status === 2" class="q-ml-xs" 
@@ -44,23 +44,13 @@
       <btn-cond :disable="!ui.pageback || (ui.pageback === 'accueil')" icon="arrow_back" round @ok="ui.gotoBack()"/>
 
       <!-- Information session : mode synchro -->
-      <btn-cond class="q-mr-xs" v-if="session.synchro"
-        icon="autorenew" round @ok="infoSession()">
-        <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
-      </btn-cond>
-
-      <!-- Information session : mode incognito -->
-      <q-avatar class="cursor-pointer q-mr-xs" v-if="session.incognito" @click="infoSession()"
+      <q-avatar class="cursor-pointer q-mr-xs" @ok="infoSession()"
         size="sm" square>
-        <img src="~assets/incognito_blanc.svg">
+        <img v-if="session.synchro" src="~assets/sync_saved_locally.svg">
+        <img v-if="session.incognito" src="~assets/incognito_blanc.svg">
+        <q-icon v-if="session.avion" color="white" size="sm" name="airplanemode_active"/>
         <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
       </q-avatar>
-
-      <!-- Information session : mode avion -->
-      <btn-cond class="q-mr-xs" v-if="session.avion" @ok="infoSession()"
-        icon="airplanemode_active" round>
-        <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
-      </btn-cond>
 
       <!-- Fichiers avion -->
       <btn-cond v-if="session.ok" :disable="session.incognito" 
@@ -532,8 +522,6 @@ watchEffect(() => {
   ui.setScreenWH($q.screen.width, $q.screen.height)
 })
 
-const iconsync = computed(() => session.syncauto ? 'sync' : 'sync_problem')
-const clrsync = computed(() => session.syncauto ? 'green-5' : 'warning')
 const offset = computed(() => ui.pagetab ? [0, -55] : [0, -25])
 const lidk = computed(() => $q.dark.isActive ? 'sombre0' : 'clair0')
 const aHome = computed(() => session.status === 2 && ui.page !== 'accueil')

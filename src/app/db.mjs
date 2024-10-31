@@ -8,12 +8,12 @@ import { isAppExc, AppExc, E_DB, DataSync, IDBOBS } from './api.mjs'
 import { u8ToB64, edvol, sleep } from './util.mjs'
 
 const STORES = {
-  singletons: 'n',
-  collections: '[id+n+ids]',
-  ficav: 'id',
-  loctxt: 'id',
-  locfic: 'id',
-  fdata: 'id'
+  singletons: 'n', // La clé est le nom du document
+  collections: '[id+n+ids]', // La clé est le triplet id, nom ,ids du document
+  ficav: 'id', // La clé est l'id du fichier (idf dans une note)
+  loctxt: 'id', // La clé est l'id de la note dans le presse-papier
+  locfic: 'id', // La clé est l'id du fichier dans le presse-papier
+  fdata: 'id' // La clé est l'id du fichier et sa data donne son contenu
 }
 
 /*************************************************************************

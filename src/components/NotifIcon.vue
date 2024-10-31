@@ -1,6 +1,6 @@
 <template>
 <span :class="tclr + ' ' + bgclr + ' cursor-pointer'">
-  <q-icon size="28px" class="relative-position" :name="ico">
+  <q-icon size="24px" class="relative-position" :name="ico">
     <span v-if="alire" class="rond"></span>
   </q-icon>
   <!--q-tooltip v-if="apptb" class="bg-indigi text-white font-sm">{{$t('MLAnot')}}</q-tooltip-->

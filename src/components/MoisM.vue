@@ -11,6 +11,7 @@ import { ref, toRef, watch } from 'vue'
 
 import { AMJ } from '../app/api.mjs'
 import { $t } from '../app/util.mjs'
+import BtnCond from './BtnCond.vue'
 
 const im = defineModel({ 
   type: Number

@@ -133,8 +133,8 @@ export const useSessionStore = defineStore('session', {
 
     /* NotifIcon.niv :  
     /* niveau d'information / restriction: 
-    - 0 : aucune notification
-    - 1 : au moins une notification informative
+    - 0 : aucune alert
+    - 1 : au moins une alerte informative
     - 2 : accroissement de volume interdit
     - 3 : accés en lecture seule (sauf urgence)
     - 4 : accés en lecture seule (strict, figé)
@@ -213,7 +213,10 @@ export const useSessionStore = defineStore('session', {
       const x = def ? def.split(' ') : []
       x.forEach(t => { s.add(t)})
       return s
-    }
+    },
+
+    syncautoIC: (state) => state.syncauto ? {ic: 'notifications_active', c: 'green-5'} : { ic: 'notifications_off', c: 'red'}
+
   },
 
   actions: {

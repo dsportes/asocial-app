@@ -15,9 +15,15 @@
         <!--bouton-help page="page_login_cn" class="col-auto"/-->
       </div>
     </template>
+
     <div class="row justify-center q-gutter-sm q-mt-sm q-mr-xl">
-      <btn-cond class="titre-lg" icon="autorenew" no-caps
-        :label="$t('sync')" @ok="ouvrirPS(1)"/>
+      <btn-cond class="titre-lg" no-caps @ok="ouvrirPS(1)">
+       <div class="row items-center q-gutter-sm">
+          <q-icon size="sm"><img src="~assets/sync_saved_locally.svg"/></q-icon>
+          <div>{{$t('sync')}}</div>
+        </div>
+      </btn-cond>
+
       <btn-cond class="titre-lg" no-caps @ok="ouvrirPS(2)">
         <div class="row items-center q-gutter-sm">
           <q-icon size="sm"><img src="~assets/incognito_blanc.svg"/></q-icon>
@@ -40,8 +46,18 @@
     <div class="q-px-sm">
       <div class="titre-md q-my-md">{{$t('LOGpar')}}</div>
       <div class="col q-py-sm q-gutter-md row justify-center">
-        <q-radio dense v-model="session.mode" :val="1" :label="$t('sync')" />
-        <q-radio dense v-model="session.mode" :val="2" :label="$t('incognito')" />
+        <q-radio dense v-model="session.mode" :val="1">
+          <div class="row items-center q-gutter-sm">
+            <q-icon size="sm"><img src="~assets/sync_saved_locally.svg"/></q-icon>
+            <div>{{$t('sync')}}</div>
+          </div>
+        </q-radio>
+        <q-radio dense v-model="session.mode" :val="2">
+          <div class="row items-center q-gutter-sm">
+            <q-icon size="sm"><img src="~assets/incognito_blanc.svg"/></q-icon>
+            <div>{{$t('incognito')}}</div>
+          </div>
+        </q-radio>
       </div>
       <phrase-contact v-if="session.mode" class="full-width"
         :init-val="initval" @ok="crypterphrase"/>

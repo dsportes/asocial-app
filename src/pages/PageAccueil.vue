@@ -9,10 +9,6 @@
       </div>
 
       <div class="btn2">
-        <bouton-help page="page1" :label="$t('aide')"/>
-      </div>
-
-      <div class="btn2">
         <bouton-langue :label="$t('langue')"/>
       </div>
 
@@ -28,50 +24,45 @@
         <span class="q-ml-xs">{{$t('MLAout')}}</span>
       </div>
 
-      <!-- Information session : mode synchro -->
-      <div v-if="session.synchro" class="btn2" @click="infoSession">
-        <btn-cond class="q-mr-xs" icon="autorenew"/>
-        <span>{{$t('MLAinfm')}}</span>
+      <div v-if="!session.avion && !session.estAdmin" class="btn2" @click="ui.oD('sync', 'a')">
+        <btn-cond :color="session.syncautoIC.c" :icon="session.syncautoIC.ic"/>
+        <span class="q-ml-xs">{{$t('MLAnotif')}}</span>
       </div>
 
-      <!-- Information session : mode incognito -->
-      <div v-if="session.incognito" class="btn2" @click="infoSession">
-        <q-avatar class="q-mr-xs" size="sm" square color="primary">
-          <img src="~assets/incognito_blanc.svg">
+      <div class="btn2" @click="infoSession">
+        <q-avatar class="cursor-pointer q-mr-xs bg-primary" size="sm" square>
+          <img v-if="session.synchro" src="~assets/sync_saved_locally.svg">
+          <img v-if="session.incognito" src="~assets/incognito_blanc.svg">
+          <q-icon v-if="session.avion" color="white" size="sm" name="airplanemode_active"/>
+          <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
         </q-avatar>
         <span>{{$t('MLAinfm')}}</span>
       </div>
 
-      <!-- Information session : mode avion -->
-      <div v-if="session.avion" class="btn2" @click="infoSession">
-        <btn-cond class="q-mr-xs" icon="airplanemode_active" />
-        <span>{{$t('MLAinfm')}}</span>
-      </div>
-
-      <!-- Notifications -->
-      <div class="btn2" @click="clickNotif">
-        <notif-icon 
+      <!-- Alertes -->
+      <div class="btn2 row items-center" @click="clickNotif">
+        <notif-icon
           :alire="session.alire && (session.ntfIco !== 0)" :niv="session.ntfIco"/>
-        <span class="q-ml-xs">{{$t('MLAntf')}}</span>
+        <span class="q-ml-xs">{{$t('PNCntf')}}</span>
       </div>
 
       <!-- Abonnement -->
-      <div class="btn2" @click="clickAbo">
+      <div class="btn2 row items-center" @click="clickAbo">
         <n3-icon :niv="session.quotmax"/>
-        <span class="q-ml-xs">{{$t('MLAabo')}}</span>
+        <span class="q-ml-xs">{{$t('PNCabo')}}</span>
       </div>
 
       <!-- credits -->
       <div v-if="session.estComptable || session.compte.estA"
-        class="btn2" @click="clickCred">
-        <n3-icon :niv="session.ral"/>
-        <span class="q-ml-xs">{{$t('MLAcred')}}</span>
+        class="btn2 row items-center" @click="clickCred">
+        <n3-icon :niv="session.ral" class="t1"/>
+        <span class="q-ml-xs">{{$t('PNCcre')}}</span>
       </div>
 
       <!-- Chats d'urgence -->
-      <div v-if="!session.estComptable" class="btn2" @click="clickChats">
-        <n3-icon :niv="1"/>
-        <span class="q-ml-xs">{{$t('MLAchats')}}</span>
+      <div v-if="!session.estComptable" class="btn2 row items-center" @click="clickChats">
+        <btn-cond icon="chat"/>
+        <span class="q-ml-xs">{{$t('PNCurg')}}</span>
       </div>
 
       <!-- Fichiers avion -->
@@ -116,6 +107,8 @@ const ui = stores.ui
 const session = stores.session
 const aSt = stores.avatar
 
+const iconsync = computed(() => session.syncauto ? 'sync' : 'sync_problem')
+const clrsync = computed(() => session.syncauto ? 'green-5' : 'red')
 const pccl = computed(() => aSt.compta.pc < 80 ? 'bg-transparent' : (aSt.compta.pc < 100 ? 'bg-yellow-3' : 'bg-negative'))
 
 function tgdark () { $q.dark.toggle() }

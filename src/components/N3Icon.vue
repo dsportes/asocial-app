@@ -1,15 +1,15 @@
 <template>
-  <q-icon size="md" :class="tclr" :name="ico"/>
+  <q-icon size="24px" :class="tclr" :name="ico"/>
 </template>
 
 <script setup>
 import { computed } from 'vue'
 
-const txt = ['grey', 'green-5', 'orange-5', 'negative']
-const ic = ['circle', 'circle', 'warning', 'crisis_alert']
+const txt = ['green-5', 'orange-5', 'negative']
+const ic = ['circle', 'warning', 'crisis_alert']
 
 const props = defineProps({ 
-  niv: Number // 1: vert, 2: orange, 3:rouge
+  niv: Number // 0: vert, 1: orange, 2:rouge
 })
 
 const i = computed(() => props.niv || 0)
