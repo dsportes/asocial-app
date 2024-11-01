@@ -3,6 +3,18 @@
   <q-header elevated>
     <q-toolbar class="full-width">
 
+      <btn-cond v-if="session.ok && !session.mini && (session.ral !== 3)"
+        icon="menu" round color="none">
+        <q-menu v-model="ui.menug" max-height="90vh" class="sombre1 text-white">
+          <menu-accueil menu/>
+        </q-menu>
+      </btn-cond>
+
+      <btn-cond :disable="!aHome" flat icon="home"
+        :color="aHome ? 'green-5' : 'grey'" @ok="gotoAccueilLogin()"/>
+
+      <btn-cond :disable="!ui.pageback || (ui.page === 'accueil')" icon="arrow_back" round @ok="ui.gotoBack()"/>
+
       <btn-cond v-if="session.ok && !session.avion && !session.estAdmin" 
         :color="session.syncautoIC.c" :icon="session.syncautoIC.ic" @ok="ui.oD('sync', 'a')"/>
       
@@ -30,34 +42,6 @@
         <img src="~assets/zombi.png">
         <q-tooltip>{{$t('MLAcptz', session.compte.nbj, {count: session.compte.nbj})}}</q-tooltip>
       </q-avatar>
-
-      <btn-cond v-if="session.ok && !session.mini && (session.ral !== 3)"
-        icon="menu" round color="none">
-        <q-menu v-model="ui.menug" max-height="90vh" class="sombre1 text-white">
-          <page-menu menu/>
-        </q-menu>
-      </btn-cond>
-
-      <btn-cond :disable="!aHome" flat icon="home"
-        :color="aHome ? 'green-5' : 'grey'" @ok="gotoAccueilLogin()"/>
-
-      <btn-cond :disable="!ui.pageback || (ui.pageback === 'accueil')" icon="arrow_back" round @ok="ui.gotoBack()"/>
-
-      <!-- Information session : mode synchro -->
-      <q-avatar class="cursor-pointer q-mr-xs" @ok="infoSession()"
-        size="sm" square>
-        <img v-if="session.synchro" src="~assets/sync_saved_locally.svg">
-        <img v-if="session.incognito" src="~assets/incognito_blanc.svg">
-        <q-icon v-if="session.avion" color="white" size="sm" name="airplanemode_active"/>
-        <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
-      </q-avatar>
-
-      <!-- Fichiers avion -->
-      <btn-cond v-if="session.ok" :disable="session.incognito" 
-        icon="save" round color="none" @ok="pageFicavion">
-        <q-tooltip>{{$t('MLAfav')}}</q-tooltip>
-        <queue-icon />
-      </btn-cond>
 
       <!-- Presse papier -->
       <btn-cond v-if="session.ok" icon="content_paste" round 
@@ -139,12 +123,13 @@
       </btn-cond>
 
       <q-toolbar-title class="row justify-end items-center titre-md text-right q-mx-xs">
+        <icon-mode class="cursor-none"/>
         <img v-if="session.ok" :src="people.getCV(session.compteId).photo" 
           height="28" width="28" class="q-pa-none q-mr-sm img"/>
         <btn-cond v-if="session.oad" round padding="none sm" 
-          class="q-mr-xs cursor-none" :label="session.oad"/>
+          class="q-mr-xs" :label="session.oad"/>
         <span v-if="session.ok" class="titre-lg">{{people.getCV(session.compteId).nom}}</span>
-        <span v-else class="titre-md text-italic">{{$t('MLAsfer')}}</span>
+        <span v-else class="titre-md text-italic cursor-none">{{$t('MLAsfer')}}</span>
         <span v-if="session.org" class="q-ml-md titre-md">[{{session.org}}]</span>
       </q-toolbar-title>
 
@@ -445,6 +430,7 @@ import { CV } from './app/modele.mjs'
 import { SetDhvuCompte } from './app/operations4.mjs'
 
 import BtnCond from './components/BtnCond.vue'
+import IconMode from './components/IconMode.vue'
 import BoutonHelp from './components/BoutonHelp.vue'
 import BoutonLangue from './components/BoutonLangue.vue'
 import BoutonBulle from './components/BoutonBulle.vue'
@@ -467,7 +453,7 @@ import FiltreAvgr from './components/FiltreAvgr.vue'
 import FiltreVols from './components/FiltreVols.vue'
 import FiltreRac from './components/FiltreRac.vue'
 import DialogueErreur from './dialogues/DialogueErreur.vue'
-import PageMenu from './components/MenuAccueil.vue'
+import MenuAccueil from './components/MenuAccueil.vue'
 import PhraseSecrete from './dialogues/PhraseSecrete.vue'
 
 // niveau 2
@@ -596,8 +582,6 @@ function stopop () {
 }
 
 function clickNotif () { ui.setPage('compta', 'notif') }
-function pageFicavion () { ui.setPage('ficavion') }
-function infoSession () { if (session.status === 2) ui.setPage('session') }
 function gotoAccueilLogin () { ui.setPage(session.status === 2 ? 'accueil' : 'login') }
 function fermerqm () {
   ui.fD()

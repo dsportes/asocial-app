@@ -22,7 +22,7 @@
       <div v-if="note.deGroupe">
         <liste-auts class="q-my-sm"/>
 
-        <note-ecritepar :note="nSt.note" @ok="selNa"/>
+        <note-ecritepar2 :note="nSt.note" @ok="selNa"/>
 
         <div v-if="xav">
           <div class="text-italic titre-md text-bold">{{$t('PNOext2')}}</div>
@@ -51,7 +51,7 @@ import BoutonHelp from '../components/BoutonHelp.vue'
 import { MajNote } from '../app/operations4.mjs'
 import EditeurMd from '../components/EditeurMd.vue'
 import ListeAuts from '../components/ListeAuts.vue'
-import NoteEcritepar from '../components/NoteEcritepar.vue'
+import NoteEcritepar2 from '../components/NoteEcritepar2.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import NodeParent from '../components/NodeParent.vue'
 import BtnCond from '../components/BtnCond.vue'

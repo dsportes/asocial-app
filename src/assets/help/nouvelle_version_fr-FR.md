@@ -17,7 +17,7 @@ L'utilisateur continue sa session (connexion, etc.).
 ### Cas plus exceptionnel: une nouvelle version est disponible sur le site
 Le browser recharge cette application en tâche de fond, du moins les seules parties ayant changé, sans que l'utilisateur n'en sache rien.
 
-Une fois la nouvelle version disponible, le message **Nouvelle version disponible** apparaît en rouge en haut ... MAIS l'utilisateur a, en général, déjà commencé à travailler. L'interrompre brutalement pour relancer l'application serait discourtois.
+Une fois la nouvelle version totalement chargée, le message **Nouvelle version disponible** apparaît en rouge en haut ... MAIS l'utilisateur a, en général, déjà commencé à travailler. L'interrompre brutalement pour relancer l'application serait discourtois.
 
 ## Que faire ?
 Il FAUT utiliser cette nouvelle version au plus tôt: elle corrige peut-être des bugs problématiques et à la limite certaines opérations pourraient être bloquées si le serveur n'accepte pas d'appels d'une application trop ancienne.
@@ -35,7 +35,7 @@ Poursuivez votre saisie puis dès que la relance de l'application n'est pas trop
 
 ### Si l'application n'est ouverte que dans un seul onglet
 **Solution 1:** appuyer sur le message en rouge **Nouvelle version disponible** qui ouvre un dialogue simple avec un bouton pour relancer l'application.
-- mais pour certains browsers, en particulier Chrome, ça ne fonctionne pas.
+- mais pour certains browsers, en particulier Google Chrome, ça ne fonctionne pas.
 
 **Solution 2:** appuyer sur CTRL+F5 (la touche CTRL et en même temps la touche de fonction F5).
 - mais pour certains browsers, dans certaines conditions, ça ne fonctionne pas non plus: appliquer la solution ci-dessous.

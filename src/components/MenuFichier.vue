@@ -139,7 +139,7 @@
 import { ref, watch, computed, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
-import { edvol, dhcool, styp, trapex, afficherDiag } from '../app/util.mjs'
+import { $t, edvol, dhcool, styp, trapex, afficherDiag } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonUndo from '../components/BoutonUndo.vue'
 import BtnCond from '../components/BtnCond.vue'

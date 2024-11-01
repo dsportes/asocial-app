@@ -32,7 +32,7 @@
 
       <div v-if="err" class="msg">{{$t('PNOer' + err)}}</div>
 
-      <note-ecritepar v-if="estgr" :groupe="groupe" @ok="selNa"/>
+      <note-ecritepar2 v-if="estgr" :groupe="groupe" @ok="selNa"/>
 
       <div v-if="!err && !session.cEdit && (!estgr || (estgr && naAut))" class="column spmd">
         <editeur-md mh="50vh" class="col" texte="" :placeholder="$t('PNOdeft')"
@@ -62,7 +62,7 @@ import BoutonUndo from '../components/BoutonUndo.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 import BtnCond from '../components/BtnCond.vue'
 import { NouvelleNote } from '../app/operations4.mjs'
-import NoteEcritepar from '../components/NoteEcritepar.vue'
+import NoteEcritepar2 from '../components/NoteEcritepar2.vue'
 
 const ui = stores.ui
 const session = stores.session

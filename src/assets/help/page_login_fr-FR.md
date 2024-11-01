@@ -5,7 +5,7 @@ Cette aide suppose d'être à peu près familier avec les principes généraux d
 <a href="$$/index.html" target="_blank">Site documentaire de l'application</a>
 
 La page de connexion propose deux possibilités:
-- se connecter à son compte (quand il existe).
+- se connecter à son compte quand il existe.
 - créer son compte après avoir obtenu le _sponsoring_ d'un compte existant.
 
 # Se connecter à son compte | page_login_m
@@ -16,10 +16,10 @@ Il faut indiquer le _code de l'organisation_ où votre compte est enregistré.
 - si l'URL ne donne pas ce code ou que ce n'est pas celui de votre organisation il faut le saisir.
 
 ### Sélectionner son _mode de connexion_, synchronisé, incognito ou avion
-Plus de détail dans rubrique _Modes synchronisé / incognito / avion_.
+Plus de détail dans la rubrique _Modes synchronisé / incognito / avion_.
 
 ### Saisir sa _phrase secrète_
-Elle a au moins 24 signes, n'est connue que de vous et ne peut jamais être récupérée en cas d'oubli (elle n'st stockée nulle part par l'application).
+Elle a au moins 24 signes, n'est connue que de vous et ne peut jamais être récupérée en cas d'oubli (elle n'est stockée nulle part par l'application).
 
 Un avis est retourné si aucun compte n'a été trouvé pour cette phrase. Il n'est pas exclu toutefois q'un incident technique du réseau ou du serveur ait empêché la connexion.
 

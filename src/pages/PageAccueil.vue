@@ -1,6 +1,6 @@
 <template>
   <div>
-    <q-card class="spsm fs-md q-pa-sm">
+    <div class="spsm fs-md q-pa-sm">
       <div class="row justify-center">
       <!-- Déconnexion -->
       <div class="btn2" @click="ui.oD('dialoguedrc', 'a')">
@@ -29,16 +29,6 @@
         <span class="q-ml-xs">{{$t('MLAnotif')}}</span>
       </div>
 
-      <div class="btn2" @click="infoSession">
-        <q-avatar class="cursor-pointer q-mr-xs bg-primary" size="sm" square>
-          <img v-if="session.synchro" src="~assets/sync_saved_locally.svg">
-          <img v-if="session.incognito" src="~assets/incognito_blanc.svg">
-          <q-icon v-if="session.avion" color="white" size="sm" name="airplanemode_active"/>
-          <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
-        </q-avatar>
-        <span>{{$t('MLAinfm')}}</span>
-      </div>
-
       <!-- Alertes -->
       <div class="btn2 row items-center" @click="clickNotif">
         <notif-icon
@@ -65,14 +55,6 @@
         <span class="q-ml-xs">{{$t('PNCurg')}}</span>
       </div>
 
-      <!-- Fichiers avion -->
-      <div v-if="!session.incognito" class="btn2" @click="ficAvion2">
-        <btn-cond icon="save">
-          <queue-icon/>
-        </btn-cond>
-        <span class="q-ml-xs">{{$t('MLAfav')}}</span>
-      </div>
-
       <!-- Presse papier -->
       <div class="btn2" @click="ui.oD('pressepapier', 'a')">
         <btn-cond icon="content_paste"/>
@@ -80,11 +62,11 @@
       </div>
 
       </div>
-    </q-card>
+    </div>
 
-    <q-card class="q-mt-lg spsm q-pa-sm">
+    <div class="q-mt-lg spsm q-pa-sm">
       <menu-accueil/>
-    </q-card>
+    </div>
 
   </div>
 </template>
@@ -98,7 +80,7 @@ import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonLangue from '../components/BoutonLangue.vue'
 import NotifIcon from '../components/NotifIcon.vue'
 import N3Icon from '../components/N3Icon.vue'
-import QueueIcon from '../components/QueueIcon.vue'
+// import QueueIcon from '../components/QueueIcon.vue'
 import MenuAccueil from '../components/MenuAccueil.vue'
 import BtnCond from '../components/BtnCond.vue'
 
@@ -116,8 +98,6 @@ function clickNotif () { ui.setPage('compta', 'notif')}
 function clickChats () { ui.setPage('compta', 'chats')}
 function clickAbo () { ui.setPage('compta', 'compta')}
 function clickCred () { ui.setPage('compta', 'credits')}
-function infoSession () { ui.setPage('session')}
-function ficAvion2 () { ui.setPage('ficavion')}
 
 </script>
 <style lang="sass" scoped>
@@ -133,10 +113,7 @@ function ficAvion2 () { ui.setPage('ficavion')}
   width: 14rem
   height: 2rem
   overflow: hidden
-  padding: 2px
-  margin: 2px
-  border-radius: 5px
-  border:  1px solid grey
+  margin: 3px
   cursor: pointer
 .btn3
   width: 14rem

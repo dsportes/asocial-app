@@ -708,7 +708,7 @@ export default {
   MLAdecon: 'Déconnexion du compte',
   MLArecon: 'Tentative de reconnexion au compte',
   MLAcont: 'J\'ai lu, la session continue',
-  MLAinfm: 'Résumé session',
+  MLAinfm: 'Résumé de la session en cours',
   MLAsync: 'Synchro Auto',
   MLAcptz: 'La suppression du compte est en cours | Suppression du compte demain | Suppression du compte dans {count} jours',
   MLAcptzA: 'Le crédit du compte est presque épuisé',

@@ -29,7 +29,7 @@
           {{$t('PNOlstfic', note.mfa.size, {count: note.mfa.size}) + (note.mfa.size ? ' - ' + edvol(note.vf) : '')}}
         </div>
         <div v-if="!ro" class="col-auto row">
-          <note-ecritepar v-if="groupe" :groupe="groupe" @ok="selAut"/>
+          <note-ecritepar2 v-if="groupe" :groupe="groupe" @ok="selAut"/>
           <btn-cond :disable="groupe && !aut" icon="add" :label="$t('PNFnvf')" 
             @ok="nouveau()"/>
         </div>
@@ -83,7 +83,7 @@ import { styp, dkli, edvol, dhcool, suffixe } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import NouveauFichier from '../dialogues/NouveauFichier.vue'
 import MenuFichier from '../components/MenuFichier.vue'
-import NoteEcritepar from '../components/NoteEcritepar.vue'
+import NoteEcritepar2 from '../components/NoteEcritepar2.vue'
 import BtnCond from '../components/BtnCond.vue'
 import { Note } from '../app/modele.mjs'
 import ListeAuts from '../components/ListeAuts.vue'

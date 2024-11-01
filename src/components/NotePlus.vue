@@ -38,6 +38,7 @@ import { ref, computed, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import NoteNouvelle from '../panels/NoteNouvelle.vue'
+import BtnCond from './BtnCond.vue'
 
 const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
