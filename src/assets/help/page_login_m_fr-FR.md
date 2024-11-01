@@ -10,7 +10,7 @@ Dans ce mode toutes les données intéressant le compte sont stockées dans une 
 
 Une connexion ultérieure d'un compte dans le même navigateur après une session synchronisée est rapide et économique: l'essentiel des données étant déjà dans le navigateur, seules les _mises à jour_ sont tirées du serveur central.
 
-# Mode _avion_
+# Mode _avion_ | page_login_pp page_login_fa
 Pour que ce mode fonctionne il faut qu'une session antérieure en mode _synchronisé_ ait été exécutée dans ce navigateur pour le compte. 
 
 A la connexion le titulaire du compte y voit l'état dans lequel étaient ses données à la fin de sa dernière session synchronisée dans ce navigateur.
@@ -19,10 +19,10 @@ A la connexion le titulaire du compte y voit l'état dans lequel étaient ses do
 
 **Aucun accès à Internet n'est effectué**, ce qui est précieux _en avion_ ou dans les _zones blanches_ ou quand l'Internet est suspecté d'avoir de grandes oreilles indiscrètes.
 - Toutefois on peut enregistrer des textes et des fichiers dans le _presse-papier_ d'où ils pourront être utilisés dans une future session _synchronisée_ (voir ci-après).
-@@page_login_pp
 
-En mode avion les fichiers attachés aux notes ne sont pas accessibles, **sauf** ceux qui ont été déclarés devoir l'être.
-@@page_login_fa
+Plus de détails dans la rubrique _Le "presse-papier" de notes et fichiers_.
+
+En mode avion les fichiers attachés aux notes ne sont pas accessibles, **sauf** ceux qui ont été déclarés devoir l'être. Plus de détails dans la rubrique _Fichiers accessibles en mode avion_.
 
 > On peut couper le réseau (le mode _avion_ sur un mobile), de façon à ce que l'ouverture de la page de l'application ne cherche même pas à vérifier si une version plus récente est disponible.
 

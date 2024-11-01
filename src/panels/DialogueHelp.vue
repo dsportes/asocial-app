@@ -41,18 +41,12 @@
         <q-expansion-item v-for="c in chaps" :key="c.t" 
           group="somegroup" expand-separator>
           <template v-slot:header>
-            <div class="full-width row justify-between items-center bg-primary text-white">
-              <div class="text-bold titre-md">{{c.t}}</div>
-              <btn-cond v-if="c.m.length" color="secondary" icon="menu" rounded>
-                <q-menu>
-                  <q-list v-for="m in c.m" :key="m.value" 
-                    style="min-width:20rem;overflow:hidden" class="bg-secondary text-white">
-                    <q-item clickable v-close-popup @click.stop="goto(m.value)">
-                      <q-item-section class="titre-md text-italic">{{m.label}}</q-item-section>
-                    </q-item>
-                  </q-list>
-                </q-menu>
-              </btn-cond>
+            <div class="full-width column bg-primary text-white">
+              <div class="text-bold titre-lg">{{c.t}}</div>
+              <div v-if="c.m.length" class="self-end q-mr-sm">
+                <div v-for="m in c.m" :key="m.value" @click.stop="goto(m.value)"
+                  class="x1 text-italic titre-md cursor-pointer">{{m.label}}</div>
+              </div>
             </div>
           </template>
           <show-html class="q-mx-sm q-mb-md" :texte="c.tx"/>
@@ -148,22 +142,26 @@ function setChaps (id) {
   for (const l of x) {
     if (l.startsWith('# ')) {
       // clôture du chapitre précédent s'il y en a un, sinon de l'intro
-      if (t) { /*tx.push('\n');*/ chaps.value.push({t, tx: tx.join('\n'), m}) }
-      else if (tx.length) { /*tx.push('\n');*/ intro.value = tx.join('\n') }
+      if (t) { chaps.value.push({t, tx: tx.join('\n'), m}) }
+      else if (tx.length) { intro.value = tx.join('\n') }
       // Init du nouveau chapitre
       tx.length = 0
-      t = l.substring(2)
+      const t1 = l.substring(2)
+      const i = t1.indexOf('|')
+      t = i === -1 ? t1.trim() : t1.substring(0, i).trim()
       m = []
+      if (i !== -1) {
+        const y = t1.substring(i + 1).split(' ')
+        y.forEach(l => {
+          const code = l.trim()
+          if (code && pages.has(code)) {
+            const titre = ($t('A_' + code) || '').trim()
+            if (titre) m.push({ label: titre, value: code })
+          }
+        })
+      }
     } else {
-      if (l.startsWith('@@')) {
-        if (!t) continue // pas de menu dans l'intro
-        const code = l.substring(2).trim()
-        if (!pages.has(code)) continue
-        const titre = ($t('A_' + code) || '').trim()
-        if (!titre) continue
-        m.push({ label: titre, value: code })
-        tx.push($t('HLPmenu', [titre]))
-      } else if (l.startsWith('<a href="$$/')) {
+      if (l.startsWith('<a href="$$/')) {
         const x = l.substring(11)
         tx.push('<a href="' + docsurl + x)
       } else {
@@ -171,8 +169,8 @@ function setChaps (id) {
       }
     }
   }
-  if (!t && tx.length) { /*tx.push('\n');*/ intro.value = tx.join('\n') }
-  if (t) { /*tx.push('\n'); */ chaps.value.push({t, tx: tx.join('\n'), m}) }
+  if (!t && tx.length) { intro.value = tx.join('\n') }
+  if (t) { chaps.value.push({t, tx: tx.join('\n'), m}) }
 }
 
 function remplaceImg (l) {
@@ -224,4 +222,8 @@ function back () {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
+.x1:hover
+  background-color: $yellow-3
+  color: black
+  font-weight: bold
 </style>
