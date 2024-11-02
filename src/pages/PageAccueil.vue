@@ -25,7 +25,7 @@
       </div>
 
       <div v-if="!session.avion && !session.estAdmin" class="btn2" @click="ui.oD('sync', 'a')">
-        <btn-cond :color="session.syncautoIC.c" :icon="session.syncautoIC.ic"/>
+        <btn-cond :color="session.statusPushIC.c" :icon="session.statusPushIC.ic"/>
         <span class="q-ml-xs">{{$t('MLAnotif')}}</span>
       </div>
 
@@ -89,8 +89,6 @@ const ui = stores.ui
 const session = stores.session
 const aSt = stores.avatar
 
-const iconsync = computed(() => session.syncauto ? 'sync' : 'sync_problem')
-const clrsync = computed(() => session.syncauto ? 'green-5' : 'red')
 const pccl = computed(() => aSt.compta.pc < 80 ? 'bg-transparent' : (aSt.compta.pc < 100 ? 'bg-yellow-3' : 'bg-negative'))
 
 function tgdark () { $q.dark.toggle() }

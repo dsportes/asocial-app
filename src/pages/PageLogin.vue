@@ -69,12 +69,18 @@
     <acceptation-sponsoring :sp="sp" :pc="pc" :org="org"/>
   </q-dialog>
 
-  <!-- Dialogue 'a', pas idc - on ne sait pas pourquoi -->
+  <!-- Dialogue de demande de permission de notification -->
   <q-dialog v-if="ui.xD('pubsub', idc)" v-model="ui.d[idc].pubsub" persistent>
     <q-card :class="styp('sm') + ' q-pa-sm column items-center'">
-      <div class="font-mono fs-xs">[{{perm}}]</div>
+      <!--div class="font-mono fs-xs">[{{perm}}]</div-->
       <div class="titre-lg q-my-md text-center">{{$t('LOGpubsub')}}</div>
-      <btn-cond class="q-my-md" flat :label="$t('jailu')" @ok="demperm"/>
+
+      <btn-cond v-if="config.permState === 'prompt'" flat :label="$t('MLAntfr1')" @ok="demperm"/>
+      <div v-else class="column justify-center">
+        <div class="titre-lg text-italic text-center">{{$t('MLAntfr2')}}</div>
+        <btn-cond class="q-my-md" flat :label="$t('jailu')" @ok="ui.fD()"/>
+      </div>
+
     </q-card>
   </q-dialog>
 </q-page>
@@ -105,13 +111,6 @@ const session = stores.session
 const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 
-const perm = ref(Notification.permission)
-config.permission = perm.value === 'granted'
-
-onMounted(async () => {
-  if (config.permission) await config.setSubscription()
-})
-
 const clrInfx = computed(() => config.subJSON.startsWith('???') ? 'warning': 'green')
 
 const infx = ref()
@@ -135,11 +134,7 @@ raz()
 
 async function demperm () {
   const p = await Notification.requestPermission()
-  if (p === 'granted') {
-    config.permission = true
-    await session.setSubscription()
-    console.log(config.subJSON)
-  }
+  console.log('Notification: ', p)
   ui.fD()
 }
 
@@ -234,7 +229,11 @@ async function creationComptable (pc) {
   await afficherDiag($t('LOGcrec'))
 }
 
-if (!config.permission) ui.oD('pubsub', idc)
+setTimeout(() => {
+  if (!config.permission) 
+    ui.oD('pubsub', idc)
+}, 1000)
+
 </script>
 
 <style lang="sass" scoped>

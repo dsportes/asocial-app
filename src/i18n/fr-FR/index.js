@@ -489,7 +489,7 @@ export default {
   OP_SetQuotasA: 'Mise à jour des quotas pour les comptes A',
 
   // Login
-  LOGpubsub: 'Autoriser les "notifications" afin d\'avoir des données à jour en continu suite aux actions des autres sessions',
+  LOGpubsub: 'Autoriser les "notifications" afin d\'avoir des données à jour en continu même suite aux actions des autres sessions',
   LOGcrec: 'Le compte du Comptable a été créé: vous pouvez vous y connecter.',
   LOGreinit: 'Ré-initialiser complètement la base locale',
   LOGrazbl: '<b>Attention:</b> la base locale sera effacée et rechargée totalement.' +
@@ -677,20 +677,16 @@ export default {
   Pficavion: 'Fichiers visibles en avion',
 
   // App.vue
-  MLAnba: 'Le navigateur "accepte" les notifications pour l\'application.',
-  MLAnbb1: 'Le navigateur "bloque les notifications" pour l\'application.',
-  MLAnbb2: 'Pour pouvoir basculer en mise à jour automatique continue des données de la session, se "reconnecter" et faire accepter les notifications par le navigateur pour l\'application.',
+  MLAntfg: 'Le navigateur "accepte" les notifications pour l\'application.',
+  MLAntfd: 'Le navigateur "bloque les notifications" pour l\'application.',
+  MLAntfr1: 'Demander au navigateur d\'autoriser les notifications',
+  MLAntfr2: 'Vous devez modifier les autorisations du navigateur pour cette application afin qu\'il accepte les notifications',
+  MLAhbKO: 'Le service de publication des mises à jour par les autres est temporairement HORS-SERVICE',
+  MLAhbOK: 'Le service de publication des mises à jour par les autres est a priori en service',
+  MLAraf: 'Rafraîchir l\'affichage des données du compte',
+  MLAmajok: 'Les données de la session sont mises à jour en continu, même suite aux actions des autres sessions.',
+  MLAnotif: 'Notifications des maj',
 
-  MLAst: 'Mises à jour des données de la session provoquées par d\'autres sessions: ',
-  MLAsta: 'AUTOMATIQUE EN CONTINU',
-  MLAstd: 'SUR DEMANDE',
-  MLAmodea: 'Passer en AUTOMATIQUE CONTINU',
-  MLAmoded: 'Passer en mode SUR DEMANDE',
-  MLAnotif: 'Notifications on/off',
-  MLAsync: 'RE-SYNCHRONISER',
-  MLAsync1: '"re-synchroniser" remet à niveau les données de la session du fait des actions des autres sessions.',
-  MLAsync2: 'Les données sont a priori déjà à jour, "re-synchroniser" ne nuit pas mais ne devrait rien changer.',
-  
   MLAbrk: 'Opération en cours',
   MLAatt: 'Information importante',
   MLAcf: 'Voulez-vous vraiement arrêter l\'opération en cours "{0}"',

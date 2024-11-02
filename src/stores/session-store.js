@@ -29,7 +29,7 @@ export const useSessionStore = defineStore('session', {
 
     nhb: 0, // numéro de heartbeat dans la connexion
     dhhb: 0, // date-heure du dernier heartbeat de la connexion
-    syncauto: false, // statut de synchro de la connexion
+    statusHB: false, // true: heartbeat fonctionne normalement (a priori)
     pubsubTO: null,
 
     lsk: '', // nom de la variable localStorage contenant le nom de la base
@@ -215,7 +215,11 @@ export const useSessionStore = defineStore('session', {
       return s
     },
 
-    syncautoIC: (state) => state.syncauto ? {ic: 'notifications_active', c: 'green-5'} : { ic: 'notifications_off', c: 'red'}
+    statusPush: (state) => state.statusHB && state.config.permission,
+
+    statusPushIC: (state) => state.statusPush ? {ic: 'notifications_active', c: 'green-5'} : { ic: 'notifications_off', c: 'red'},
+    
+    statusPermIC: (state) => state.config.permission ? {ic: 'notifications_active', c: 'green-5'} : { ic: 'notifications_off', c: 'red'}
 
   },
 
@@ -247,7 +251,7 @@ export const useSessionStore = defineStore('session', {
       this.config.nc++
       this.nhb = 0 // numéro de heartbeat dans la connexion
       this.dhhb = 0 // date-heure du dernier heartbeat de la connexion
-      this.syncauto = false // statut de synchro de la connexion
+      this.statusHB = false // statut de synchro de la connexion
   
       this.setAuthToken(phrase)
 
@@ -263,7 +267,7 @@ export const useSessionStore = defineStore('session', {
 
     // Retour de sync : numéro de heartbeat connu de PUBSUB pour cette session
     setNhb (nhb) {
-      this.syncauto = nhb === this.nhb
+      this.statusHB = nhb === this.nhb
     },
 
     async startHB () {
@@ -273,12 +277,12 @@ export const useSessionStore = defineStore('session', {
         this.nhb++
         const ret = await pubsub('heartbeat', { org: this.org, sid: this.sessionId, nhb: this.nhb })
         if (ret === this.nhb - 1) {
-          this.syncauto = true
+          this.statusHB = true
           this.pubsubTO = setTimeout(async () => {
             await this.startHB()
           }, HBINSECONDS * 1000)
         } else {
-          this.syncauto = false
+          this.statusHB = false
           this.nhb = 0
         }
       }
@@ -288,7 +292,7 @@ export const useSessionStore = defineStore('session', {
       if (this.avion || !this.ok) return
       if (this.pubsubTO) clearTimeout(this.pubsubTO)
       await pubsub('heartbeat', { org: this.org, sid: this.sessionId, nhb: 0 })
-      this.syncauto = false
+      this.statusHB = false
       this.nhb = 0
     },
 

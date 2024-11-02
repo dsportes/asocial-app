@@ -16,8 +16,11 @@
       <btn-cond :disable="!ui.pageback || (ui.page === 'accueil')" icon="arrow_back" round @ok="ui.gotoBack()"/>
 
       <btn-cond v-if="session.ok && !session.avion && !session.estAdmin" 
-        :color="session.syncautoIC.c" :icon="session.syncautoIC.ic" @ok="ui.oD('sync', 'a')"/>
-      
+        :color="session.statusPushIC.c" :icon="session.statusPushIC.ic" @ok="ui.oD('sync', 'a')"/>
+
+      <btn-cond v-if="!session.ok" 
+        :color="session.statusPermIC.c" :icon="session.statusPermIC.ic"/>
+
       <!-- Notifications -->
       <notif-icon v-if="session.status === 2" class="q-ml-xs" 
         :alire="session.alire && (session.ntfIco !== 0)" 
@@ -243,7 +246,7 @@
 
   <!-- Gestion d'un message s'affichant en bas -->
   <q-dialog v-model="ui.d.a.aunmessage" seamless position="bottom">
-    <div :class="'msg q-pa-sm cursor-pointer text-center titre-sm text-bold bg-yellow-5 ' + (ui.message.important ? 'text-negative' : 'text-black')"  
+    <div :class="'msgb q-pa-sm cursor-pointer text-center titre-sm text-bold bg-yellow-5 ' + (ui.message.important ? 'text-negative' : 'text-black')"  
       @click="ui.effacermessage">
       {{ ui.message.texte }}
     </div>
@@ -388,26 +391,26 @@
   <!-- Gestion de la synchronisation automatique -->
   <q-dialog v-model="ui.d.a.sync" persistent>
     <q-card :class="styp('sm') + ' q-pa-sm column items-center'">
-      <bouton-help class="self-end" page="syncauto-man"/>
-      <div v-if="config.permission" class="titre-lg q-my-md text-center">{{$t('MLAnba')}}</div>
-      <div v-if="!config.permission" class="titre-lg q-mt-md text-center msg">{{$t('MLAnbb1')}}</div>
-      <div v-if="!config.permission" class="titre-md q-mt-sm q-mb-md text-center">{{$t('MLAnbb2')}}</div>
+      <bouton-help class="self-end" page="statuspush-man"/>
 
-      <div class="titre-lg q-my-md text-center">
-        <span>{{$t('MLAst')}}</span>
-        <span v-if="session.syncauto" class="q-ml-sm">{{$t('MLAsta')}}</span>
-        <span v-else class="q-ml-sm msg">{{$t('MLAstd')}}</span>
+      <div v-if="config.permission" class="titre-lg q-my-md text-center">{{$t('MLAntfg')}}</div>
+      <div v-else class="msg2 titre-lg text-italic text-bold q-my-md text-center">{{$t('MLAntfd')}}</div>
+
+      <div v-if="!config.permission" class="titre-md q-my-md text-center">
+        <btn-cond v-if="config.permState === 'prompt'" flat :label="$t('MLAntfr1')" @ok="demperm"/>
+        <div v-else class="titre-lg text-italic text-center">{{$t('MLAntfr2')}}</div>
       </div>
 
-      <div v-if="session.syncauto" class="titre-md q-mt-md text-center">{{$t('MLAsync2')}}</div>
-      <btn-cond v-if="session.syncauto" class="q-my-sm" flat :label="$t('MLAsync')" @ok="resync"/>
-      <btn-cond v-if="session.syncauto" class="q-mt-sm q-mb-md" flat 
-        color="warning" :label="$t('MLAmoded')" @ok="moded"/>
+      <div v-if="config.permission && session.statusHB" class="column q-my-md justify-center">
+        <div class="titre-lg text-center">{{$t('MLAhbOK')}}</div>
+        <div class="q-my-md titre-md text-center">{{$t('MLAmajok')}}</div>
+      </div>
 
-      <div v-if="!session.syncauto" class="titre-md q-mt-md text-center">{{$t('MLAsync1')}}</div>
-      <btn-cond v-if="!session.syncauto" class="q-my-sm" flat :label="$t('MLAsync')" @ok="resync"/>
-      <btn-cond v-if="!session.syncauto && config.permission" class="q-mt-sm q-mb-md" flat 
-        color="warning" :label="$t('MLAmodea')" @ok="modea"/>
+      <div v-if="config.permission && !session.statusHB" 
+        class="q-my-md column justify-center">
+        <div class="titre-lg text-center">{{$t('MLAhbKO')}}</div>
+        <btn-cond class="q-my-md" :label="$t('MLAraf')" @ok="resync"/>
+      </div>
 
       <btn-cond class="q-my-md" flat :label="$t('jailu')" @ok="ui.fD"/>
     </q-card>
@@ -533,6 +536,13 @@ const titrePage = computed(() => {
   return $t('P' + p, [arg])
 })
 
+async function demperm () {
+  const p = await Notification.requestPermission()
+  console.log('Notification: ', p)
+  await new SyncFull().run()
+  ui.fD()
+}
+
 async function resync () {
   await new SyncFull().run()
   ui.fD()
@@ -557,16 +567,9 @@ async function discon () {
 }
 
 async function reconnexion () { 
-  if (Notification.permission !== 'granted') {
-    const p = await Notification.requestPermission()
-    if (p === 'granted') {
-      config.permission = true
-      await session.setSubscription()
-      console.log(config.subJSON)
-    }
-  }
   ui.fD()
-  await deconnexion(true) 
+  await deconnexion(true)
+  if (config.permission) await Notification.requestPermission()
 }
 
 function reload () { 
@@ -622,7 +625,7 @@ un élément qui apparaît quand le drawer est caché*/
   max-width: 95vw
 .q-tab
   min-height: 0 !important
-.msg
+.msgb
   min-width:100vw !important
   height:1.9rem
   overflow: hidden
@@ -634,4 +637,8 @@ un élément qui apparaît quand le drawer est caché*/
   line-height: 1rem
   max-height: 4rem
   overflow-y: hidden
+.msg2
+  color: black
+  background-color: $yellow5
+  padding: 1px
 </style>

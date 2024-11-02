@@ -13,7 +13,7 @@ export const useConfigStore = defineStore('config', {
     subJSON: '???', // subscription obtenu de SW sérialisé
     pageSessionId: '', // rnd, identifiant universel du chargement de la page (session browser)
     nc: 0, // numéro d'ordre de connexion dans la session
-    permission: false, // true si la session a accepté les notifications web-push
+    permState: '???',
 
     locales: [],
     motsclesloc: {},
@@ -51,7 +51,8 @@ export const useConfigStore = defineStore('config', {
     motsclesLOC (state) { 
       const lg = useI18n().locale.value
       return state.motsclesloc[lg]
-    }
+    },
+    permission: (state) => state.permState === 'granted'
   },
 
   actions: {
@@ -71,12 +72,23 @@ export const useConfigStore = defineStore('config', {
     },
 
     async setRegistration(registration) {
+      await this.listenPerm()
       this.registration = registration
-      await this.setSubscription()
+      if (this.permState === 'granted') await this.setSubscription()
       console.log('SW ready. subJSON: ' + this.subJSON.substring(0, 50))
     },
 
-    async setSubscription () { // peut être invoqué sur demande permission de web-push
+    async listenPerm () {
+      const notificationPerm = await navigator.permissions.query({ name: 'notifications' })
+      this.permState = notificationPerm.state
+      notificationPerm.onchange = async () => {
+        console.log("User decided to change his seettings. New permission: " + notificationPerm.state)
+        this.permState = notificationPerm.state
+        if (this.permState === 'granted') await this.setSubscription()
+      }
+    },
+
+    async setSubscription () {
       if (!this.registration) return
       try {
         let subscription = await this.registration.pushManager.getSubscription() // déjà faite
@@ -95,6 +107,5 @@ export const useConfigStore = defineStore('config', {
       console.log('SW event reçu:', x)
       if (x === 'updated') this.nouvelleVersion = true
     }
-
   }
 })
