@@ -80,7 +80,6 @@ import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonLangue from '../components/BoutonLangue.vue'
 import NotifIcon from '../components/NotifIcon.vue'
 import N3Icon from '../components/N3Icon.vue'
-// import QueueIcon from '../components/QueueIcon.vue'
 import MenuAccueil from '../components/MenuAccueil.vue'
 import BtnCond from '../components/BtnCond.vue'
 

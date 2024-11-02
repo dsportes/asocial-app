@@ -1,16 +1,25 @@
 <template>
-<span :class="tclr + ' ' + bgclr + ' cursor-pointer'">
-  <q-icon size="24px" class="relative-position" :name="ico">
-    <span v-if="alire" class="rond"></span>
-  </q-icon>
-  <!--q-tooltip v-if="apptb" class="bg-indigi text-white font-sm">{{$t('MLAnot')}}</q-tooltip-->
-  <q-tooltip class="bg-indigi text-white font-sm">{{$t('ANlong' + (niv || 0))}}</q-tooltip>
+<span class="cursor-pointer">
+  <q-avatar v-if="session.compte && session.compte.alerteDlv"
+    size="sm" square>
+    <img src="~assets/zombi.png">
+    <q-tooltip>{{$t('MLAcptz', session.compte.nbj, {count: session.compte.nbj})}}</q-tooltip>
+  </q-avatar>
+  <span v-else :class="tclr + ' ' + bgclr">
+    <q-icon size="24px" class="relative-position" :name="ico">
+      <span v-if="alire" class="rond"></span>
+    </q-icon>
+    <q-tooltip class="bg-indigi text-white font-sm">{{$t('ANlong' + (niv || 0))}}</q-tooltip>
+  </span>
 </span>
 </template>
 
 <script setup>
 
 import { computed } from 'vue'
+import stores from '../stores/stores.mjs'
+
+const session = stores.session
 
 const txt = ['green-5', 'green-5', 'orange-9', 'orange-9', 'negative', 'negative', 'negative', 'orange-9', 'negative']
 const bg = ['none', 'none', 'yellow-1', 'yellow-3', 'yellow-5', 'yellow-7', 'yellow-9', 'yellow-5', 'yellow-7']

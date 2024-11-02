@@ -36,9 +36,7 @@
     </q-item-section>
   </q-item>
 
-  <q-separator v-if="session.estComptable" color="orange"/>
-
-  <div v-if="!bloc">
+  <div v-if="!bloc" class="q-mt-md">
 
     <q-item clickable @click="ui.setPage('compte')">
       <q-item-section>

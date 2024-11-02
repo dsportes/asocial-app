@@ -13,7 +13,7 @@ export const useConfigStore = defineStore('config', {
     subJSON: '???', // subscription obtenu de SW sérialisé
     pageSessionId: '', // rnd, identifiant universel du chargement de la page (session browser)
     nc: 0, // numéro d'ordre de connexion dans la session
-    permState: '???',
+    permState: '???', // granted denied prompt
 
     locales: [],
     motsclesloc: {},

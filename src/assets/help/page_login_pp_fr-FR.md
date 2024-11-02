@@ -1,5 +1,5 @@
 
-## Le _presse-papier_
+# Qu'est-ce que le _presse-papier_ ?
 Cette fonctionnalité est disponible dans les trois modes.
 
 Le _presse-papier_ garde localement des _textes_ et des _fichiers_, chacun portant un code identifiant non significatif.
@@ -27,3 +27,6 @@ Il est possible toutefois de _préparer_ des mises à jour:
 Le contenu du _presse-papier_ est crypté, inaccessible à quiconque n'est pas le compte propriétaire: même si le mobile a été volé, son contenu reste indéchiffrable.
 
 Une fois retourné dans une zone ayant du réseau, on peut ouvrir une session en mode _synchronisé_. Le _brouillon_ de la note mise à jour et les photos mises en _presse-papier_ sont accessibles pour effectuer la véritable mise à jour.
+
+# La page de gestion du presse-papier
+(todo)

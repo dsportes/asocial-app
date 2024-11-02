@@ -37,15 +37,7 @@
       <notif-icon v-if="session.status === 2" class="q-ml-xs" :niv="7"/> 
       <notif-icon v-if="session.status === 2" class="q-ml-xs" :niv="8"/>
       -->
-
-      <!-- Suppression de compte proche -->
-      <q-avatar class="cursor-pointer q-ml-xs" 
-        v-if="session.ok && session.compte && session.compte.alerteDlv" @click="infoSession()"
-        size="sm" square>
-        <img src="~assets/zombi.png">
-        <q-tooltip>{{$t('MLAcptz', session.compte.nbj, {count: session.compte.nbj})}}</q-tooltip>
-      </q-avatar>
-
+      
       <!-- Presse papier -->
       <btn-cond v-if="session.ok" icon="content_paste" round 
         @ok="ui.oD('pressepapier', 'a')">
