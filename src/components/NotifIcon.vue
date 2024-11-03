@@ -2,14 +2,9 @@
 <span class="cursor-pointer">
   <q-avatar v-if="niv >= 9" size="sm" square>
     <img src="~assets/zombi.png">
-    <q-tooltip class="bg-indigo text-white font-sm">{{$t('ANlong' + (niv || 0))}}</q-tooltip>
   </q-avatar>
-  <span v-else :class="tclr + ' ' + bgclr">
-    <q-icon size="24px" class="relative-position" :name="ico">
-      <span v-if="alire" class="rond"></span>
-    </q-icon>
-    <q-tooltip class="bg-indigo text-white font-sm">{{$t('ANlong' + (niv || 0))}}</q-tooltip>
-  </span>
+  <q-icon v-else size="24px" :class="tclr + ' ' + bgclr + (alire ? ' bord2' : ' bord1')" :name="ico"/>
+  <q-tooltip class="bg-indigo text-white font-sm">{{$t('ANlong' + (niv || 0))}}</q-tooltip>
 </span>
 </template>
 
@@ -59,5 +54,11 @@ const ico = computed(() => ic[props.niv || 0])
   background: $red-9
 .bord
   border: 1px solid $grey-5
+  border-radius: 5px
+.bord1
+  border: 2px solid none
+  border-radius: 5px
+.bord2
+  border: 2px solid $negative
   border-radius: 5px
 </style>

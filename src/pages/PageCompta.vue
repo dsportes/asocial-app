@@ -1,12 +1,20 @@
 <template>
-<q-page>
+<q-page class="column">
+  <div class="row justify-center items-center q-mt-sm q-mb-md">
+    <div class="titre-lg text-italic q-mr-xl">
+      <span v-if="ui.pagetab !== 'chats'">{{$t('PCPtab' + ui.pagetab)}}</span>
+      <span v-else>{{$t('CPTtitch' + (session.estA ? 'A' : 'O'))}}</span>
+    </div>
+    <bouton-help :page="'compta_' + ui.pagetab"/>
+  </div>
+
   <panel-compta v-if="ui.pagetab==='compta'" class="spmd q-pa-sm"/>
 
   <panel-credits v-if="ui.pagetab==='credits'"/>
 
   <div v-if="ui.pagetab==='notif' && session.compta" class="spmd q-pa-sm">
 
-    <div class="row q-my-md items-center q-ml-sm">
+    <div class="row q-my-md items-center">
       <notif-icon class="col-auto" :niv="session.ntfIco"/>
       <div class="q-ml-sm titre-lg">{{$t('ANlong' + session.ntfIco)}}</div>
     </div>
@@ -15,7 +23,7 @@
       {{$t('PCPdlvat', [AMJ.editDeAmj(session.dlvat), session.nbjat])}}
     </div>
 
-    <div class="row q-mt-lg items-center">
+    <div class="row q-my-lg items-center">
       <div class="colauto"><n3-icon :niv="nnbj"/></div>
       <div class="col titre-md">{{$t('PCPnbj', [nbj])}}</div>
     </div>
@@ -70,9 +78,6 @@
   </div>
 
   <div v-if="ui.pagetab==='chats'" class="spmd q-pa-sm">
-    <div class="titre-lg text-italic text-center q-py-md">
-      {{$t('CPTtitch' + (session.estA ? 'A' : 'O'))}}
-    </div>
 
     <btn-cond class="q-my-sm" cond="cUrgence"
       :label="$t('CVraf')" @ok="rafCvs"/>
@@ -97,7 +102,7 @@ import PanelCompta from '../components/PanelCompta.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
 import PanelCredits from '../components/PanelCredits.vue'
-// import MicroChat from '../components/MicroChat.vue'
+import BoutonHelp from '../components/BoutonHelp.vue'
 import BtnCond from '../components/BtnCond.vue'
 import { $t, dkli, edvol, afficher8000 } from '../app/util.mjs'
 import N3Icon from '../components/N3Icon.vue'
@@ -162,4 +167,8 @@ async function rafCvs () {
   position: absolute
   top: -24px
   left: 0
+.bh
+  position: absolute
+  top: 0
+  right: -24px
 </style>

@@ -1284,10 +1284,13 @@ export default {
   P11tit: 'Avatar du compte | Avatar du compte | Avatars du compte',
 
   // PageCompta
+  PCPtabnotif: 'Alertes sur le compte',
+  PCPtabcompta: 'Abonnement et consommation',
+  PCPtabcredits: 'Gestion des crédits',
   PCPdlvat: 'L\'Administrateur Technique a fixé la date limite des connexions au {0}, dans {1} jour(s)',
   PCPnbj: '{0} jour(s) avant inaccessibilité totale du compte',
-  PCPqn: 'Quota de notes ...: {0} [{1}%] - {2} note(s), {3} chat(s), {4} groupe(s)',
-  PCPqv: 'Quota de volume de fichiers: {0} [{1}%] - {2} utilisés',
+  PCPqn: 'Quota nombre de documents: {0} [{1}%] - {2} note(s), {3} chat(s), {4} groupe(s)',
+  PCPqv: 'Quota volume de fichiers: {0} [{1}%] - {2} utilisés',
   PCPsolde: 'Solde restant: {0}c - {1} jour(s) de consomation',
   PCPqcal: 'Quota de consommation de calcul mensuel: {0}c [{1}%]',
   PCPnot: 'Aucune Alerte',
@@ -2181,6 +2184,26 @@ export default {
   BULLEnr03: 'Application **bloquée** par l\'administrateur technique',
   BULLEnr3: 'Application en lecture seulement',
   BULLEnr4: 'Accès minimal très restreint à l\'application',
+  BULLEnr12: `Tous les comptes de la partition sont restreints en lecture seulement:
+- la visualisation est libre,
+- les mises à jour sont bloquées,
+- toutefois les opérations d'urgence ("chats", crédits) sont autorisées.
+`,
+  BULLEnr13: `Tous les comptes de la partition sont TRES restreints:
+- la visualisation est bloquée,
+- les mises à jour sont bloquées,
+- toutefois les opérations d'urgence ("chats", crédits) sont autorisées.
+`,
+  BULLEnr22: `Compte restreint en lecture seulement:
+- la visualisation est libre,
+- les mises à jour sont bloquées,
+- toutefois les opérations d'urgence ("chats", crédits) sont autorisées.
+`,
+  BULLEnr23: `Compte très restreint:
+- la visualisation est bloquée,
+- les mises à jour sont bloquées,
+- toutefois les opérations d'urgence ("chats", crédits) sont autorisées.
+`,
   BULLEclos: 'Application figée par l\'administrateur technique: aucune mise à jour possible',
   
   BULLEinv2: `Décliner l\'invitation et rester en tant que "contact" du groupe:

@@ -9,11 +9,15 @@
 
       <div>
         <q-checkbox size="sm" v-model="restrloc"/>
-        <span>{{$t('ANnr' + type + '2')}}<bouton-bulle :idtext="'nr'+ type + '2'"/></span>
+        <span>{{$t('ANnr' + type + '2')}}
+          <bouton-bulle class="q-ml-md" :idtext="'nr'+ type + '2'"/>
+        </span>
       </div>
       <div>
-        <q-checkbox size="sm" v-model="restrbloc"/>
-        <span>{{$t('ANnr' + type + '3')}}<bouton-bulle :idtext="'nr'+ type + '3'"/></span>
+        <q-checkbox size="md" v-model="restrbloc"/>
+        <span>{{$t('ANnr' + type + '3')}}
+          <bouton-bulle class="q-ml-md" :idtext="'nr'+ type + '3'"/>
+        </span>
       </div>
 
     </q-card-section>
@@ -61,8 +65,8 @@ const session = stores.session
 const ui = stores.ui
 
 const n = ref(props.ntf.clone())
-const restrloc = ref(props.restr)
-const restrbloc = ref(props.restrp)
+const restrloc = ref(props.restr || false)
+const restrbloc = ref(props.restrp || false)
 
 watch(restrloc, (ap) => { if (ap && restrbloc.value) restrbloc.value = false })
 watch(restrbloc, (ap) => { if (ap && restrloc.value) restrloc.value = false })

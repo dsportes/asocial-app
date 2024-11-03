@@ -88,7 +88,7 @@
       </q-tabs>
       <btn-cond v-if="ui.pagetab==='notif' && session.alire" class="col-auto q-px-sm" 
         color="warning" icon="check" :label="$t('jailu')" 
-        cond="cEdit" @ok="jailu"/>
+        cond="cUrgence" @ok="jailu"/>
     </q-toolbar>
 
     <q-toolbar v-if="ui.page === 'groupe'" inset 
