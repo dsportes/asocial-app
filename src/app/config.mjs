@@ -37,6 +37,6 @@ export const config = {
 
   maxlgtextegen: 250,
   maxlgtextesecret: 5000,
-  alerteDlv: 15
+  alerteDlv: 31
 
 }

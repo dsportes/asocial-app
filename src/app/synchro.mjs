@@ -630,7 +630,9 @@ export class ConnexionAdmin extends Operation {
 
 /* Connexion à un compte en mode avion *********************************/
 export class ConnexionAvion extends OperationS {
-  constructor() { super('ConnexionCompte') }
+  constructor() { 
+    super('ConnexionCompte') 
+  }
 
   async run() {
     try {
@@ -707,7 +709,8 @@ export class ConnexionSynchroIncognito extends OperationS {
       session.setStatus(2)
       syncQueue.reveil()
       await sleep(300)
-      stores.ui.setPage('accueil')
+      if (session.ntfIco) stores.ui.setPage('compta', 'notif')
+      else stores.ui.setPage('accueil')
       this.finOK()
     } catch (e) {
       // stores.ui.setPage('login')

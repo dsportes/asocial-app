@@ -11,10 +11,10 @@
         <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTdlvat')}}</q-toolbar-title>
       </q-toolbar>
       <q-card-section class="q-ma-sm">
-        <div class="q-my-md row justify-around">
-          <div class="titre-md">
-            {{$t('PTdlvata', [AMJ.editDeAmj(espace.dlvat || 20991231)])}}</div>
-          <div class="titre-md">{{$t('PTdlvatf', [AMJ.editDeAmj(dlv)])}}</div>
+        <div class="q-my-md colmun">
+          <div class="titre-md text-center">{{$t('PTdlvatx')}}</div>
+          <div class="titre-md text-center">{{$t('PTdlvata', [AMJ.editDeAmj(espace.dlvat)])}}</div>
+          <div class="titre-md text-center">{{$t('PTdlvatf', [AMJ.editDeAmj(dlv)])}}</div>
         </div>
       </q-card-section>
 
@@ -34,6 +34,7 @@ import SaisieMois from './SaisieMois.vue'
 import BoutonConfirm from './BoutonConfirm.vue'
 import { SetEspaceDlvat } from '../app/operations4.mjs'
 import { styp } from '../app/util.mjs'
+import BtnCond from './BtnCond.vue'
 
 const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
@@ -45,19 +46,19 @@ const props = defineProps({
 })
 
 const dlvat = ref(0) // dlvat saisie
-const dlv = ref(0) // Premier jour du mois suivant de dlvat saisie
+const dlv = ref(0) // Dernier jour du mois de la dlv saisie
 
-const mindlvat = computed(() => Math.floor(AMJ.djMoisN(AMJ.amjUtc(), 3) / 100))
+const mindlvat = computed(() => Math.floor(AMJ.amjUtc() / 100))
 const initdlvat = computed(() => props.espace.dlvat ? Math.floor(props.espace.dlvat / 100) : mindlvat.value)
 const maxdlvat = computed(() => Math.floor(AMJ.max / 100))
 
 function cfDlvat (dl) {
-  dlv.value = AMJ.pjMoisSuiv((dl * 100) + 1)
+  dlv.value = AMJ.djMois((dl * 100) + 1)
   ui.oD('PEdlvat', idc)
 }
 
 async function chgDlvat () {
-  await new SetEspaceDlvat().run(props.espace.id, dlv.value)
+  await new SetEspaceDlvat().run(props.espace.ns, dlv.value)
   ui.fD()
   emit('close', true)
 }

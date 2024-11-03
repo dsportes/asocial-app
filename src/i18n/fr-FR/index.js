@@ -226,6 +226,7 @@ export default {
   EX8011: 'Sponsoring non trouvée pour cette phrase.',
   EX8012: 'Ce sponsoring a déjà été accepté ou refusé ou est hors limite. ({0})',
   EX8013: '(BUG) Opération: [{0}] - argument incorrect: [{1}]',
+  EX8014: 'Connexion bloquée par l\'Administrateur Technique à partir de {0}.',
 
   EX8055: 'Quota du compte dépassé pour le nombre de notes, chats, groupes. Demande:{0} - Quota:{1}',
   EX8056: 'Quota du compte dépassé pour le volume de fichiers. Demande:{0} - Quota:{1}',
@@ -866,7 +867,7 @@ export default {
   ESgccode: 'Code d\'habilitation',
   ESnsh: '0...9 OU a...z OU A...Z',
   ESnsh2: '* OU 0...9 OU a...z OU A...Z',
-  ESdlvat: 'Hébergment des comptes "O" assuré jusqu\'à :',
+  ESdlvat: 'Connexions des comptes acceptés jusqu\'à :',
   ESdlvat2: 'Hébergment des comptes "O" assuré jusqu\'à  {0}.',
   ESdlvat3: 'Hébergment des comptes "O" assuré sans limite de date.',
   ESchg: 'Changer les quootas globaux de l\'espace',
@@ -1283,7 +1284,8 @@ export default {
   P11tit: 'Avatar du compte | Avatar du compte | Avatars du compte',
 
   // PageCompta
-  PCPnbj: '{0} jour(s) avant suppression automatique du compte',
+  PCPdlvat: 'L\'Administrateur Technique a fixé la date limite des connexions au {0}, dans {1} jour(s)',
+  PCPnbj: '{0} jour(s) avant inaccessibilité totale du compte',
   PCPqn: 'Quota de notes ...: {0} [{1}%] - {2} note(s), {3} chat(s), {4} groupe(s)',
   PCPqv: 'Quota de volume de fichiers: {0} [{1}%] - {2} utilisés',
   PCPsolde: 'Solde restant: {0}c - {1} jour(s) de consomation',
@@ -1376,14 +1378,10 @@ export default {
   PTspn2: 'Il n\'est pas possible de changer de tranche de quotas un compte dont le nom est inconnu.',
   PTspn1c: 'Il n\'est pas possible de changer le statut de sponsor du Comptable.',
   PTspn2c: 'Il n\'est pas possible de changer le Comptable de tranche de quotas.',
-  PTdlvat: 'Mise à jour des DLV restreintes par l\'administrateur',
-  PTdlvat1: 'A changer',
-  PTdlvat2: 'Traités',
-  PTdlvat3: 'Avatars',
-  PTdlvat4: 'Membres',
-  PTdlvata: 'DLV actuelle: {0}',
-  PTdlvatf: 'DLV future: {0}',
-  PTdlterm: 'Terminé: {0} mise(s) à jour faite(s)',
+  PTdlvat: 'Mise à jour de la date limite de connexion restreinte par l\'administrateur',
+  PTdlvatx: 'Dates limites de connexion des comptes',
+  PTdlvata: 'ACTUELLLE : {0}',
+  PTdlvatf: 'FUTURE : {0}',
   PTopt: 'Comptes "autonomes" autorisés',
 
   CAVtit: 'Chats avec :',
@@ -1914,7 +1912,9 @@ export default {
   ANlong6: 'Mises à jour et consultations interdites, même les actions d\'URGENCE sont interdites',
   ANlong7: 'Consommation de calcul excessive, les opérations sont ralenties',
   ANlong8: 'Consommation de calcul au dessus de la limite, les opérations sont TRES ralenties',
-  
+  ANlong9: 'Suppression IMMINENTE du compte',
+  ANlong10: 'Impossibilité IMMINENTE de se connecter au compte',
+
   ANlon0: 'Pas d\'alerte en cours',
   ANlon1: 'Alerte en cours, sans blocage planifié',
   ANlon2: 'Alerte en cours, blocage planifié',

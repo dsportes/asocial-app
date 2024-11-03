@@ -299,7 +299,7 @@ export class Espace extends GenDoc {
     this.moisStatT = row.moisStatT || 0
     this.opt = row.opt || 0
     this.quotas = row.quotas
-    this.dlvat = row.dlvat || 0
+    this.dlvat = row.dlvat || AMJ.max
     this.nbmi = row.nbmi || 6
     this.notifE = row.notifE ? new Notification(row.notifE) : null
     this.tnotifP = row.tnotifP || {}
@@ -490,8 +490,6 @@ export class Compte extends GenDoc {
     this.dlv = row.dlv
     this.nbj = AMJ.diff(this.dlv, session.auj)
     if (this.nbj > 999) this.nbj = 999
-    this.alerteDlv = cfg.alerteDlv > this.nbj
-    // this.alerteDlv = this.nbj > 5 // test
 
     if (this.estComptable) {
       this.mcode = new Map()

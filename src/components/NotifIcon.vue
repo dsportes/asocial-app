@@ -1,15 +1,14 @@
 <template>
 <span class="cursor-pointer">
-  <q-avatar v-if="session.compte && session.compte.alerteDlv"
-    size="sm" square>
+  <q-avatar v-if="niv >= 9" size="sm" square>
     <img src="~assets/zombi.png">
-    <q-tooltip>{{$t('MLAcptz', session.compte.nbj, {count: session.compte.nbj})}}</q-tooltip>
+    <q-tooltip class="bg-indigo text-white font-sm">{{$t('ANlong' + (niv || 0))}}</q-tooltip>
   </q-avatar>
   <span v-else :class="tclr + ' ' + bgclr">
     <q-icon size="24px" class="relative-position" :name="ico">
       <span v-if="alire" class="rond"></span>
     </q-icon>
-    <q-tooltip class="bg-indigi text-white font-sm">{{$t('ANlong' + (niv || 0))}}</q-tooltip>
+    <q-tooltip class="bg-indigo text-white font-sm">{{$t('ANlong' + (niv || 0))}}</q-tooltip>
   </span>
 </span>
 </template>
@@ -36,6 +35,7 @@ const props = defineProps({
   - 6 : accés en lecture seule (strict, figé) SANS accès d'urgence
   - 7 : ralentissement 1
   - 8 : ralentissement 2
+  - 9 : suppression du compte imminente
   */
   niv: Number,
   alire: Boolean // présence de l'indicateur à lire

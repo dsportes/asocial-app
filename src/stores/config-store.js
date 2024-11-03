@@ -40,7 +40,7 @@ export const useConfigStore = defineStore('config', {
     lgtitre: 120,
     maxlgtextegen: 250,
     maxlgtextenote: 5000,
-    alerteDlv: 15,
+    alerteDlv: 31,
 
     /* Autres */
     emojiIndex: null

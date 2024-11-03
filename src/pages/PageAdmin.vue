@@ -76,15 +76,15 @@
           </div>
 
           <div v-if="!esp.hTC">
-            <div class="titre-md q-my-xs">{{$t('ESnbmi2', [esp.nbmi])}}</div>
+            <div class="titre-md q-my-sm">{{$t('ESnbmi2', [esp.nbmi])}}</div>
 
-            <div v-if="esp.opt" class="titre-md q-my-xs">{{$t('PTopt')}}</div>
+            <div v-if="esp.opt" class="titre-md q-my-sm">{{$t('PTopt')}}</div>
 
-            <div class="q-my-xs">
+            <div class="q-my-sm">
               <bouton-dlvat :espace="esp" @close="finDlv"/>
             </div>
 
-            <apercu-notif class="q-my-xs" :notif="esp.notifE" :idx="idx" 
+            <apercu-notif class="q-my-sm" :notif="esp.notifE" :idx="idx" 
               :type="0" :cible="esp.ns"/>
 
             <div class="q-mb-sm">

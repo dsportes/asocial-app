@@ -83,8 +83,10 @@ export const useSessionStore = defineStore('session', {
 
     nomGrC (state) { if (!state.groupeId) return ''; return state.getCV(state.groupeId).nomC },
     
-    dlv (state) { return state.ok && state.compte ? state.compte.dlv : 0 },
-    nbj (state) { return AMJ.diff(AMJ.dlv(state.dlv), state.auj) },
+    dlv: (state) => state.ok && state.compte ? state.compte.dlv : AMJ.max,
+    dlvat: (state) => state.espace && state.espace.dlvat ? state.espace.dlvat : AMJ.max,
+    nbjat: (state) => { const n = AMJ.diff(state.dlvat, state.auj); return n },
+    nbj: (state) => AMJ.diff(state.dlv > state.dlvat ? state.dlvat : state.dlv, state.auj),
 
     estComptable (state) { return ID.estComptable(state.compteId) },
     estAdmin (state) { return !state.compteId },
@@ -133,7 +135,7 @@ export const useSessionStore = defineStore('session', {
 
     /* NotifIcon.niv :  
     /* niveau d'information / restriction: 
-    - 0 : aucune alert
+    - 0 : aucune alerte
     - 1 : au moins une alerte informative
     - 2 : accroissement de volume interdit
     - 3 : accés en lecture seule (sauf urgence)
@@ -141,10 +143,14 @@ export const useSessionStore = defineStore('session', {
     - 5 : accès d'urgence seulement
     - 6 : accés en lecture seule (strict, figé) SANS accès d'urgence
     - 7 : ralentissement 1
-    - 8 : ralentissement 2 
+    - 8 : ralentissement 2
+    - 9 : supression du compte imminente
+    - 10: impossibilité de se connecter au compte imminente
     */
 
     ntfIco (state) {
+      if (state.nbj <= state.config.alerteDlv) 
+        return state.nbjat === state.nbj ? 10 : 9
       const f = state.ntfE && state.ntfE.nr === 2
       if (f && state.mini) return 6
       if (state.mini) return 5

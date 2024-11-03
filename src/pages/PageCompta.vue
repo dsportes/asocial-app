@@ -11,6 +11,10 @@
       <div class="q-ml-sm titre-lg">{{$t('ANlong' + session.ntfIco)}}</div>
     </div>
 
+    <div v-if="session.nbjat < 365" class="msg2 text-center titre-lg">
+      {{$t('PCPdlvat', [AMJ.editDeAmj(session.dlvat), session.nbjat])}}
+    </div>
+
     <div class="row q-mt-lg items-center">
       <div class="colauto"><n3-icon :niv="nnbj"/></div>
       <div class="col titre-md">{{$t('PCPnbj', [nbj])}}</div>
@@ -98,7 +102,7 @@ import BtnCond from '../components/BtnCond.vue'
 import { $t, dkli, edvol, afficher8000 } from '../app/util.mjs'
 import N3Icon from '../components/N3Icon.vue'
 import NotifIcon from '../components/NotifIcon.vue'
-import { ID, UNITEN, UNITEV } from '../app/api.mjs'
+import { ID, UNITEN, UNITEV, AMJ } from '../app/api.mjs'
 import { RafraichirCvsAv, GetPartition } from '../app/operations4.mjs'
 
 const al = 'titre-md text-italic bg-yellow-3 text-negative text-bold q-mb-xs q-ml-xl'
@@ -112,7 +116,7 @@ if (session.accesNet) onMounted( async () => {
   if (!session.estA) await new GetPartition().run(session.partition.id)
 })
 
-const nbj = computed(() => session.compte.nbj)
+const nbj = computed(() => session.nbj)
 const nnbj = computed(() => nbj.value > 40 ? 1 : (nbj.value > 10 ? 2 : 3))
 
 const c = computed(() => session.compta.compteurs)
