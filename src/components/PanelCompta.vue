@@ -1,6 +1,5 @@
 <template>
 <div class="spmd q-pa-sm">
-<div v-if="session.compta && c">
   <q-btn label="print" @click="c.print()"/>
   <q-expansion-item switch-toggle-side default-opened dense
       header-class="titre-md text-bold bg-primary text-white"
@@ -164,7 +163,22 @@
       </div>
 
       <div v-if="estA" class="column q-my-sm full-width">
-        <panel-deta :c="c" :total="session.compta.solde"/>
+        <div>{{$t('PCPprefa' + c.cumref[0], [dhcool(c.cumref[1]), c.cumref[2]])}}</div>
+
+        <div :class="dkli(1) + ' row items-center full-width q-mt-sm'">
+          <div class="col-3 text-center">{{$t('PCPabc')}}</div>
+          <div class="col-3 text-center">{{$t('PCPdb')}}</div>
+          <div class="col-3 text-center">{{$t('PCPcr')}}</div>
+          <div class="col-3 text-center">{{$t('PCPsl')}}</div>
+        </div>
+        <div class="row items-center full-width">
+          <div class="col-3 font-mono text-center">{{mon(c.cumulAbo, 2) + ' + ' + mon(c.cumulConso, 2)}}</div>
+          <div class="col-3 font-mono text-center">{{mon(c.cumulCouts, 2)}}</div>
+          <div class="col-3 font-mono text-center">{{mon(solde)}}</div>
+          <div :class="'col-3 font-mono text-center ' + alsolde">{{mon(solde - c.cumulCouts, 2)}}</div>
+        </div>
+
+        <div v-if="nbj > 2" class="titre-md q-my-sm">{{$t('PCPcouv', [nbj])}}</div>
       </div>
     </div>
   </q-expansion-item>
@@ -242,7 +256,6 @@
     </div>
   </q-expansion-item>
 </div>
-</div>
 </template>
 
 <script setup>
@@ -252,18 +265,18 @@ import stores from '../stores/stores.mjs'
 import { UNITEN, UNITEV, AMJ, Compteurs, Tarif } from '../app/api.mjs'
 import { $t, dhcool, mon, nbn, edvol, dkli } from '../app/util.mjs'
 import MoisM from './MoisM.vue'
-import PanelDeta from '../components/PanelDeta.vue'
 
-const ui = stores.ui
-const session = stores.session
+const props = defineProps({
+  c: Object,
+  solde: Number
+})
 
 const tarifs = Tarif.tarifs
 const cu = ['AN', 'AF', 'lec', 'ecr', 'mon', 'des']
 
 const idm = ref(0)
 
-const c = computed(() => session.compta.compteurs)
-const estA = computed(() => session.compta.estA)
+const estA = computed(() => props.c.estA)
 const icoabo1 = computed(() => abo1w.value ? 'report' : (abo1n.value ? 'lock': 'check'))
 const icoabo2 = computed(() => abo2w.value ? 'report' : (abo2n.value ? 'lock': 'check'))
 const icoconso = computed(() => consow.value ? 'report' : (conson.value ? 'lock': 'check'))
@@ -281,36 +294,41 @@ const consow = computed(() => (estA.value && (nbj.value > 0 && nbj.value < 60)) 
         (!estA.value && (txconso.value > 80 && txconso.value < 100)))
 const conson = computed(() => (estA.value && nbj.value <= 0) ||
         (!estA.value && txconso.value > 100))
-const exM = computed(() => c.value.vd[idm.value][Compteurs.MS] !== 0)
-const q2M = computed(() => c.value.vd[idm.value][Compteurs.QV] * UNITEV)
-const v2M = computed(() => c.value.vd[idm.value][Compteurs.V + Compteurs.X2])
+const exM = computed(() => props.c.vd[idm.value][Compteurs.MS] !== 0)
+const q2M = computed(() => props.c.vd[idm.value][Compteurs.QV] * UNITEV)
+const v2M = computed(() => props.c.vd[idm.value][Compteurs.V + Compteurs.X2])
 const pcutq2M = computed(() => Math.round(v2M.value * 100 / q2M.value))
-const pcutq2 = computed(() => Math.round(c.value.qv.v * 100 / (c.value.qv.qv * UNITEV)))
+const pcutq2 = computed(() => Math.round(props.c.qv.v * 100 / (props.c.qv.qv * UNITEV)))
 
-const q1M = computed(() => c.value.vd[idm.value][Compteurs.QN] * UNITEN)
-const nnM = computed(() => c.value.vd[idm.value][Compteurs.NN  + Compteurs.X1 + Compteurs.X2])
-const ncM = computed(() => c.value.vd[idm.value][Compteurs.NC + Compteurs.X1 + Compteurs.X2])
-const ngM = computed(() => c.value.vd[idm.value][Compteurs.NG  + Compteurs.X1 + Compteurs.X2])
+const q1M = computed(() => props.c.vd[idm.value][Compteurs.QN] * UNITEN)
+const nnM = computed(() => props.c.vd[idm.value][Compteurs.NN  + Compteurs.X1 + Compteurs.X2])
+const ncM = computed(() => props.c.vd[idm.value][Compteurs.NC + Compteurs.X1 + Compteurs.X2])
+const ngM = computed(() => props.c.vd[idm.value][Compteurs.NG  + Compteurs.X1 + Compteurs.X2])
 const pcutq1M = computed(() => Math.round((nnM.value + ncM.value + ngM.value) * 100 / q1M.value))
-const pcutq1 = computed(() => Math.round((c.value.qv.nn + c.value.qv.nc + c.value.qv.ng) * 100 / (c.value.qv.qn * UNITEN)))
+const pcutq1 = computed(() => Math.round((props.c.qv.nn + props.c.qv.nc + props.c.qv.ng) * 100 / (props.c.qv.qn * UNITEN)))
 
-const aboM = computed(() => c.value.vd[idm.value][Compteurs.CA])
-const consoM = computed(() => c.value.vd[idm.value][Compteurs.CC])
-const nbj = computed(() => c.value.nbj(session.compta.solde))
-const txconso = computed(() => c.value.pourcents.pcc)
+const aboM = computed(() => props.c.vd[idm.value][Compteurs.CA])
+const consoM = computed(() => props.c.vd[idm.value][Compteurs.CC])
+const nbj = computed(() => props.c.nbj(props.solde))
+const txconso = computed(() => props.c.pourcents.pcc)
 const alconso = computed(() => txconso.value < 80 ? '' 
   : (' bg-yellow-3 text-bold text-' + (txconso.value > 100 ? 'negative' : 'warning')))
 
-const ex = (m) => c.value.vd[m][Compteurs.MS] !== 0
-const conso = (m) => c.value.vd[m][Compteurs.CC]
-const nl = (m) => c.value.vd[m][Compteurs.X1 + Compteurs.NL]
-const ne = (m) => c.value.vd[m][Compteurs.X1 + Compteurs.NE]
-const vm = (m) => c.value.vd[m][Compteurs.X1 + Compteurs.VM]
-const vd = (m) => c.value.vd[m][Compteurs.X1 + Compteurs.VD]
-const em = (m) => c.value.mm[m] !== 0
+const ex = (m) => props.c.vd[m][Compteurs.MS] !== 0
+const conso = (m) => props.c.vd[m][Compteurs.CC]
+const nl = (m) => props.c.vd[m][Compteurs.X1 + Compteurs.NL]
+const ne = (m) => props.c.vd[m][Compteurs.X1 + Compteurs.NE]
+const vm = (m) => props.c.vd[m][Compteurs.X1 + Compteurs.VM]
+const vd = (m) => props.c.vd[m][Compteurs.X1 + Compteurs.VD]
+const em = (m) => props.c.mm[m] !== 0
+
+const alsolde = computed(() => {
+  const x = ' bg-yellow-3 text-bold text-'
+  return nbj.value <= 0 ? x + 'negative' : (nbj.value < 60 ? x + 'warning' : '')
+})
 
 function libm (idm) {
-  const [ax, mx] = AMJ.am(c.value.dh)
+  const [ax, mx] = AMJ.am(props.c.dh)
   const x = mx - idm
   const m = x <= 0 ? 12 + x : x
   return $t('mois' + m)

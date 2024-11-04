@@ -57,7 +57,8 @@ export const useConfigStore = defineStore('config', {
 
   actions: {
     setConfig(cfg) {
-      Tarif.tarifs = cfg.tarifs
+      if (cfg.tarifs) 
+        Tarif.tarifs = cfg.tarifs
       for(const x in cfg) this[x] = cfg[x]
 
       cfg.planHelp.forEach(s => {

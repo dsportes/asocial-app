@@ -12,12 +12,17 @@
           <q-tab name="tst" class="titre-md text-bold" :label="$t('OTtst')" @click="tab='tst'"/>
           <q-tab name="cpt" class="titre-md text-bold" :label="$t('OTcpt')" @click="ouvCpt()"/>
           <q-tab name="ps" class="titre-md text-bold" :label="$t('OTps')" @click="tab='ps'"/>
+          <q-tab name="compteurs" class="titre-md text-bold" label="Test Compteurs" @click="tab='compteurs'"/>
         </q-tabs>
       </q-toolbar>
     </q-header>
 
     <q-page-container>
       <div class="font-mono fs-sm q-my-sm q-ml-sm">{{$t('OTbuild', [config.BUILD])}}</div>
+
+      <div v-if="tab === 'compteurs'">
+        <test-compteurs/>
+      </div>
 
       <q-card-section v-if="tab === 'tst'" class="column items-center">
         <btn-cond class="q-ma-xs" :label="$t('OTt1')" @ok="testEcho"/>
@@ -142,6 +147,7 @@ import { encode, decode } from '@msgpack/msgpack'
 import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BtnCond from '../components/BtnCond.vue'
+import TestCompteurs from '../components/TestCompteurs.vue'
 import { EchoTexte, ErreurFonc, PingDB } from '../app/operations4.mjs'
 import { styp, dhcool, $t, html, afficherDiag, edvol, b64ToU8, u8ToB64, random } from '../app/util.mjs'
 import { ping } from '../app/net.mjs'
