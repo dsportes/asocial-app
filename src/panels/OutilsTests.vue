@@ -12,7 +12,7 @@
           <q-tab name="tst" class="titre-md text-bold" :label="$t('OTtst')" @click="tab='tst'"/>
           <q-tab name="cpt" class="titre-md text-bold" :label="$t('OTcpt')" @click="ouvCpt()"/>
           <q-tab name="ps" class="titre-md text-bold" :label="$t('OTps')" @click="tab='ps'"/>
-          <q-tab name="compteurs" class="titre-md text-bold" label="Test Compteurs" @click="tab='compteurs'"/>
+          <q-tab v-if="config.phrases" name="compteurs" class="titre-md text-bold" label="Test Compteurs" @click="tab='compteurs'"/>
         </q-tabs>
       </q-toolbar>
     </q-header>

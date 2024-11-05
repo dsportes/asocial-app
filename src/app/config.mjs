@@ -23,7 +23,7 @@ export const config = {
     afaire: { 'fr-FR': 'afaire', 'en-EN': 'todo'}
   },
 
-  // En test pour éviter de frapper les "phrases secrètes" de test. Vide en production
+  // EN TEST pour éviter de frapper les "phrases secrètes" de test. COMMENTER en production
   phrases: [
     'leszsanglotszLONGSzgarezauzGORILLEz',
     'auzvillagezSANSzjaizmauvaisezREPUTATIONz'
