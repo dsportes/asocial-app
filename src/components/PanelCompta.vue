@@ -3,10 +3,10 @@
   <q-btn label="print" @click="c.print()"/>
   <q-expansion-item switch-toggle-side default-opened dense
       header-class="titre-md text-bold bg-primary text-white"
-      :label="$t('PCPsyn') + ' - ' + dhcool(c.dh)">
+      :label="$t('PCPsyn') + ' - ' + dhstring(c.dh, true)">
     <div class="spmd column q-my-sm">
       <div class="titre-md q-my-sm">
-        {{$t('PCPpcum' + c.cumref[0], [dhcool(c.cumref[1]), c.cumref[2]])}}
+        {{$t('PCPpcum' + c.cumref[0], [dhstring(c.cumref[1], true), c.cumref[2]])}}
       </div>
 
       <div :class="dkli(1) + ' row items-center full-width'">
@@ -16,17 +16,22 @@
           <mois-m v-model.number="idm" :dh="c.dh"/>
         </div>
       </div>
-      <div class="row items-center full-width">
+      <div :class="dkli(0) + ' row items-center full-width'">
+        <div class="col-4 text-italic">{{$t('PCPnbjm')}}</div>
+        <div class="col-4 text-center"></div>
+        <div class="col-4 row justify-center">{{pj(nbjm)}}</div>
+      </div>
+      <div :class="dkli(1) + ' row items-center full-width'">
         <div class="col-4 text-italic">{{$t('PCPabcs')}}</div>
         <div class="col-4 font-mono text-center">{{mon(c.cumulCouts, 4)}}</div>
         <div class="col-4 font-mono text-center">{{exM ? mon(aboM + consoM, 4) : '-'}}</div>
       </div>
-      <div class="row items-center full-width">
+      <div :class="dkli(0) + ' row items-center full-width'">
         <div class="col-4 text-italic">{{$t('PCPabo')}}</div>
         <div class="col-4 font-mono text-center">{{mon(c.cumulAbo, 4)}}</div>
         <div class="col-4 font-mono text-center">{{exM ? mon(aboM, 4) : '-'}}</div>
       </div>
-      <div class="row items-center full-width">
+      <div :class="dkli(1) + ' row items-center full-width'">
         <div class="col-4 text-italic">{{$t('PCPconso')}}</div>
         <div class="col-4 font-mono text-center">{{mon(c.cumulConso, 4)}}</div>
         <div class="col-4 font-mono text-center">{{exM ? mon(consoM, 4) : '-'}}</div>
@@ -35,7 +40,7 @@
   </q-expansion-item>
   <q-separator size="3px"/>
 
-  <q-expansion-item switch-toggle-side dense group="trgroup"
+  <q-expansion-item switch-toggle-side dense 
     :header-class="hcabo1" :icon="icoabo1" :label="$t('PCPabo1')">
     <div class="spmd column q-my-sm">
       <div :class="dkli(1) + ' row items-center full-width text-bold text-italic'">
@@ -77,7 +82,7 @@
   <q-separator/>
   <q-separator size="3px"/>
 
-  <q-expansion-item switch-toggle-side dense group="trgroup"
+  <q-expansion-item switch-toggle-side dense 
     :header-class="hcabo2" :icon="icoabo2" :label="$t('PCPabo2')">
     <div class="spmd column q-my-sm">
       <div :class="dkli(1) + ' row items-center full-width text-bold text-italic'">
@@ -102,13 +107,13 @@
       <div :class="dkli(0) + ' row items-center full-width'">
         <div class="col-4">{{$t('PCPv2')}}</div>
         <div class="col-4 font-mono text-center">{{edvol(c.qv.v)}}</div>
-        <div class="col-4 font-mono text-center">{{pv(v2M)}}</div>
+        <div class="col-4 font-mono text-center">{{edvol(v2M)}}</div>
       </div>
     </div>
   </q-expansion-item>
   <q-separator size="3px"/>
 
-  <q-expansion-item switch-toggle-side dense group="trgroup"
+  <q-expansion-item switch-toggle-side dense 
     :header-class="hcconso" :icon="icoconso" :label="$t('PCPcconso')">
     <div class="spmd column q-my-sm">
       <div :class="dkli(1) + ' row items-center full-width'">
@@ -157,13 +162,13 @@
       <div v-if="!estA">
         <div class="titre-md q-my-md">
           <div class="q-pa-xs bg-secondary text-white text-bold">{{$t('PCPplaf', [monx(c.qv.qc)])}}</div>
-          <div>{{$t('PCPprefc' + c.debref[0], [dhcool(c.debref[1]), monx(c.conso2B)], libm(1))}}</div>
+          <div>{{$t('PCPprefc' + c.debref[0], [dhstring(c.debref[1], true), monx(c.conso2B)], libm(1))}}</div>
           <div :class="alconso">{{$t('PCPcmoy', [monx(c.conso2M), txconso, monx(c.qv.qc), libm(1)])}}</div>
         </div>
       </div>
 
       <div v-if="estA" class="column q-my-sm full-width">
-        <div>{{$t('PCPprefa' + c.cumref[0], [dhcool(c.cumref[1]), c.cumref[2]])}}</div>
+        <div>{{$t('PCPprefa' + c.cumref[0], [dhstring(c.cumref[1], true), c.cumref[2]])}}</div>
 
         <div :class="dkli(1) + ' row items-center full-width q-mt-sm'">
           <div class="col-3 text-center">{{$t('PCPabc')}}</div>
@@ -175,7 +180,8 @@
           <div class="col-3 font-mono text-center">{{monx(c.cumulAbo) + ' + ' + monx(c.cumulConso)}}</div>
           <div class="col-3 font-mono text-center">{{monx(c.cumulCouts)}}</div>
           <div class="col-3 font-mono text-center">{{mon(solde)}}</div>
-          <div :class="'col-3 font-mono text-center ' + alsolde">{{monx(solde - c.cumulCouts)}}</div>
+          <div :class="'col-3 font-mono fs-lg bs text-center ' + alsolde">
+            {{mon(solde - c.cumulCouts, 2)}}</div>
         </div>
 
         <div v-if="nbj > 2" class="titre-md q-my-sm">{{$t('PCPcouv', [nbj])}}</div>
@@ -184,7 +190,7 @@
   </q-expansion-item>
   <q-separator size="3px"/>
 
-  <q-expansion-item switch-toggle-side dense group="trgroup"
+  <q-expansion-item switch-toggle-side dense 
     header-class="titre-md text-bold bg-primary text-white"
     :label="$t('PCPrecap')">
     <div class="spmd column q-mb-sm">
@@ -222,7 +228,7 @@
   </q-expansion-item>
   <q-separator size="3px"/>
 
-  <q-expansion-item switch-toggle-side dense group="trgroup"
+  <q-expansion-item switch-toggle-side dense 
     header-class="titre-md text-bold bg-primary text-white"
     :label="$t('PCPtarifs')">
     <div class="spmd column q-mb-sm q-pa-xs">
@@ -259,11 +265,11 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import { UNITEN, UNITEV, AMJ, Compteurs, Tarif } from '../app/api.mjs'
-import { $t, dhcool, mon, nbn, edvol, dkli } from '../app/util.mjs'
+import { $t, dhstring, mon, nbn, edvol, dkli } from '../app/util.mjs'
 import MoisM from './MoisM.vue'
 
 const props = defineProps({
@@ -276,7 +282,7 @@ const cux = (t, idx) => {
   return y === 0 ? '-' : (y < 0.01 ? '<0,01c' : mon(y, 2))
 }
 
-const monx = (v) => v === 0 ? '-' : (v < 0.91 ? '<0,01c' : mon(v, 2))
+const monx = (v) => v === 0 ? '0' : (v < 0.01 ? '<0,01c' : mon(v, 2))
 
 const tarifs = Tarif.tarifs
 const cu = ['AN', 'AF', 'lec', 'ecr', 'mon', 'des']
@@ -303,7 +309,7 @@ const conson = computed(() => (estA.value && nbj.value <= 0) ||
         (!estA.value && txconso.value > 100))
 const exM = computed(() => props.c.vd[idm.value][Compteurs.MS] !== 0)
 const q2M = computed(() => props.c.vd[idm.value][Compteurs.QV] * UNITEV)
-const v2M = computed(() => props.c.vd[idm.value][Compteurs.V + Compteurs.X2])
+const v2M = computed(() => props.c.vd[idm.value][Compteurs.V + Compteurs.X1 + Compteurs.X2])
 const pcutq2M = computed(() => Math.round(v2M.value * 100 / q2M.value))
 const pcutq2 = computed(() => Math.round(props.c.qv.v * 100 / (props.c.qv.qv * UNITEV)))
 
@@ -320,10 +326,12 @@ const nbj = computed(() => props.c.nbj(props.solde))
 const txconso = computed(() => props.c.pourcents.pcc)
 const alconso = computed(() => txconso.value < 80 ? '' 
   : (' bg-yellow-3 text-bold text-' + (txconso.value > 100 ? 'negative' : 'warning')))
+const nbjm = computed(() => Math.round(props.c.vd[idm.value][Compteurs.MS] / 86400000))
 
 const p4 = (x) => !exM.value ? '-' : (x < 0.0001 ? '<0,0001' : x.toPrecision(4))
 const pc = (x) => !exM.value ? '-' : (x < 1 ? '<1%' : (x + '%'))
 const pv = (x) => !exM.value ? '-' : (x < 1 ? '<1' : edvol(x))
+const pj = (x) => !exM.value ? '-' : (x < 1 ? '<1' : x)
 
 const ex = (m) => props.c.vd[m][Compteurs.MS] !== 0
 const conso = (m) => props.c.vd[m][Compteurs.CC]
@@ -351,4 +359,7 @@ function libm (idm) {
 @import '../css/app.sass'
 .bordb
   border-bottom: 1px solid $grey-5
+.bs
+  border: 1px solid $grey-5
+  border-radius: 5px
 </style>

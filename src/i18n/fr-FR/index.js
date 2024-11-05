@@ -1296,6 +1296,7 @@ export default {
   PCPnot: 'Aucune Alerte',
   PCPabo1: 'Abonnement: nombre de notes + chats + groupes',
   PCPabo2: 'Abonnement: volume des fichiers attachés aux notes',
+  PCPnbjm: 'Nb. jours dans le mois',
   PCPactuel: 'Actuel',
   PCPmoy: '(moyenne)',
   PCPnbno: 'Nombre de notes',

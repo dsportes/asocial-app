@@ -186,7 +186,8 @@ export function aaaammjj (t) {
 
 export function dhstring (t, sec) { 
   const d = t instanceof Date ? t : new Date(t)
-  return aaaammjj(d) + ' ' + hms(d, sec)
+  return d.toISOString(d)
+  // return aaaammjj(d) + ' ' + hms(d, sec)
 }
 
 /* data:image/svg+xml;base64,... to binaire ************/

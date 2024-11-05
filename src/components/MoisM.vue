@@ -1,57 +1,33 @@
 <template>
 <span class="row items-center">
-  <btn-cond icon="chevron_left" round :disable="idm===0" @ok="plus"/>
+  <btn-cond icon="chevron_left" round :disable="im===0" @ok="im--"/>
   <span class="larg font-mono fs-md text-center">{{lib}}</span>
-  <btn-cond icon="chevron_right" round :disable="idm===3" @ok="moins"/>
+  <btn-cond icon="chevron_right" round :disable="im===3" @ok="im++"/>
 </span>
 </template>
 
 <script setup>
-import { ref, toRef, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 import { AMJ } from '../app/api.mjs'
-import { $t } from '../app/util.mjs'
+import { $t, dhstring } from '../app/util.mjs'
 import BtnCond from './BtnCond.vue'
 
 const im = defineModel({ 
   type: Number
 })
-const idm = ref(im.value)
 
 const props = defineProps({ 
   dh: Number
 })
 
-const [ax, mx] = AMJ.am(props.dh)
-const lib = ref('')
-const m = ref(0)
+const mx = computed(() => AMJ.am(props.dh)[1])
 
-function mc () {
-  const x = mx - idm.value
-  m.value = x <= 0 ? 12 + x : x
-  lib.value = $t('mois' + m.value)
-}
-
-mc ()
-
-watch(im, (ap, av) => {
-  idm.value = ap
-  mc()
+const lib = computed(() => { 
+  const x = mx.value - im.value
+  return $t('mois' + (x <= 0 ? 12 + x : x))
 })
 
-function plus () {
-  if (idm.value === 0) return
-  idm.value = idm.value - 1
-  mc()
-  im.value = idm.value
-}
-
-function moins () {
-  if (idm.value === 3) return
-  idm.value = idm.value + 1
-  mc()
-  im.value = idm.value
-}
 </script>
 
 <style lang="sass" scoped>
