@@ -21,16 +21,19 @@ const ic = ['circle', 'report', 'trending_down', 'edit_off', 'edit_off', 'emerge
 
 const props = defineProps({ 
   /* niveau d'information / restriction: 
-  - 0 : aucune notification
-  - 1 : au moins une notification informative
-  - 2 : accroissement de volume interdit
-  - 3 : accés en lecture seule (sauf urgence)
-  - 4 : accés en lecture seule (strict, figé)
-  - 5 : accès d'urgence seulement
-  - 6 : accés en lecture seule (strict, figé) SANS accès d'urgence
-  - 7 : ralentissement 1
-  - 8 : ralentissement 2
-  - 9 : suppression du compte imminente
+  ANlong0: 'Aucune Alerte.',
+  ANlong1: 'Au moins une alerte informative.',
+  ANlong2: 'Accroissement de volume des fichiers et du nombre de notes / chats / groupes bloqué.',
+  ANlong2a: 'Accroissement du nombre de notes / chats / groupes bloqué.',
+  ANlong2b: 'Accroissement de volume des fichiers bloqué.',
+  ANlong3: 'Mises à jour interdites, SAUF pour les actions d\'urgence',
+  ANlong4: 'Mises à jour interdites dans TOUS LES CAS',
+  ANlong5: 'Mises à jour et consultations interdites (SAUF pour les actions d\'URGENCE)',
+  ANlong6: 'Mises à jour et consultations interdites, même les actions d\'URGENCE sont interdites',
+  ANlong7: 'Consommation de calcul excessive, les opérations sont ralenties',
+  ANlong8: 'Consommation de calcul au dessus de la limite, les opérations sont TRES ralenties',
+  ANlong9: 'Suppression IMMINENTE du compte',
+  ANlong10: 'Impossibilité IMMINENTE de se connecter au compte',
   */
   niv: Number,
   alire: Boolean // présence de l'indicateur à lire

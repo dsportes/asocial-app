@@ -1,6 +1,6 @@
 <template>
 <div class="spmd q-pa-sm">
-  <!--q-btn label="print" @click="c.print()"/-->
+  <q-btn round size="sm" class="btr" icon="print" @click="c.print()"/>
   <q-expansion-item switch-toggle-side default-opened dense
       header-class="titre-md text-bold bg-primary text-white"
       :label="$t('PCPsyn') + ' - ' + dhstring(c.dh, true)">
@@ -362,4 +362,9 @@ function libm (idm) {
 .bs
   border: 1px solid $grey-5
   border-radius: 5px
+.btr
+  position: absolute
+  top: -25px
+  z-index: 10000
+  right: 0
 </style>

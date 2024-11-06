@@ -1,12 +1,15 @@
 import { defineStore } from 'pinia'
-import { encode, decode } from '@msgpack/msgpack'
+import { encode } from '@msgpack/msgpack'
 
 import stores from './stores.mjs'
 import { useI18n } from 'vue-i18n'
-import { pubsub } from '../app/net.mjs'
+
+// N'est PAS inutile: force à charger net.mjs (raison peu claire cependant)
+import { } from '../app/net.mjs'
+
 import { crypter, decrypter } from '../app/webcrypto.mjs'
 import { u8ToB64, $t } from '../app/util.mjs'
-import { AMJ, ID, AppExc, A_SRV, HBINSECONDS } from '../app/api.mjs'
+import { AMJ, ID, AppExc, A_SRV } from '../app/api.mjs'
 import { RegCles, Notification as MaNotification } from '../app/modele.mjs'
 import { GetPartition, GetCompta } from '../app/operations4.mjs'
 
@@ -26,13 +29,6 @@ export const useSessionStore = defineStore('session', {
     dhConnx: 0, // dh de début de la session
     dh: 0, // dh de la dernière opération
     consocumul: { nl: 0, ne: 0, vm: 0, vd: 0}, // nombres de lectures, écritures, volume montant / descendant sur les POST
-
-    /*
-    nhb: 0, // numéro de heartbeat dans la connexion
-    dhhb: 0, // date-heure du dernier heartbeat de la connexion
-    statusHB: false, // true: heartbeat fonctionne normalement (a priori)
-    pubsubTO: null,
-    */
 
     lsk: '', // nom de la variable localStorage contenant le nom de la base
     nombase: '', // nom de la base locale
@@ -258,15 +254,8 @@ export const useSessionStore = defineStore('session', {
     async initSession(phrase) {
       this.phrase = phrase
       this.config.nc++
-      stores.hb.reset()
-      /*
-      this.nhb = 0 // numéro de heartbeat dans la connexion
-      this.dhhb = 0 // date-heure du dernier heartbeat de la connexion
-      this.statusHB = false // statut de synchro de la connexion
-      */
-  
+      stores.hb.reset()  
       this.setAuthToken(phrase)
-
       this.nombase = localStorage.getItem(this.lsk) || ''
       this.auj = AMJ.amjUtc()
       this.dhConnx = Date.now()
@@ -276,39 +265,6 @@ export const useSessionStore = defineStore('session', {
 
       RegCles.reset()
     },
-
-    /*
-    // Retour de sync : numéro de heartbeat connu de PUBSUB pour cette session
-    setNhb (nhb) {
-      this.statusHB = nhb === this.nhb
-    },
-
-    async startHB () {
-      if (this.avion) return
-      if (this.pubsubTO) clearTimeout(this.pubsubTO)
-      if (this.config.permission) {
-        this.nhb++
-        const ret = await pubsub('heartbeat', { org: this.org, sid: this.sessionId, nhb: this.nhb })
-        if (ret === this.nhb - 1) {
-          this.statusHB = true
-          this.pubsubTO = setTimeout(async () => {
-            await this.startHB()
-          }, HBINSECONDS * 1000)
-        } else {
-          this.statusHB = false
-          this.nhb = 0
-        }
-      }
-    },
-
-    async stopHB () {
-      if (this.avion || !this.ok) return
-      if (this.pubsubTO) clearTimeout(this.pubsubTO)
-      await pubsub('heartbeat', { org: this.org, sid: this.sessionId, nhb: 0 })
-      this.statusHB = false
-      this.nhb = 0
-    },
-    */
 
     chgps (phrase) {
       /*
