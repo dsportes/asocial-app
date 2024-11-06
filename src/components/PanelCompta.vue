@@ -1,6 +1,6 @@
 <template>
 <div class="spmd q-pa-sm">
-  <q-btn label="print" @click="c.print()"/>
+  <!--q-btn label="print" @click="c.print()"/-->
   <q-expansion-item switch-toggle-side default-opened dense
       header-class="titre-md text-bold bg-primary text-white"
       :label="$t('PCPsyn') + ' - ' + dhstring(c.dh, true)">

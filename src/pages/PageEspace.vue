@@ -42,7 +42,7 @@
         <span class="titre-md q-mr-md">{{$t('PIqa')}}</span>
         <btn-cond round icon="edit"  @ok="editerqA()"/>
       </div>
-      <quotas-vols class="q-ml-md" noutil :vols="session.espace.quotas"/>
+      <quotas-vols class="q-ml-md" noutil :vols="session.synthese.qA"/>
     </div>
 
     <div class="q-my-sm">
@@ -166,10 +166,10 @@
             <template v-slot:hint>{{$t('PTinfoh')}}</template>
           </q-input>
         </div>
-        <choix-quotas v-model="quotas" />
+        <choix-quotas v-model="quotasP" />
         <q-card-actions align="right" class="q-gutter-sm">
           <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
-          <btn-cond color="warning" icon="add" :disable="!nom || quotas.err" 
+          <btn-cond color="warning" icon="add" :disable="!nom || quotasP.err" 
             :label="$t('valider')" @ok="creer"/>
         </q-card-actions>
       </q-card>
@@ -295,7 +295,7 @@ async function dlstat2 () {
 
 async function ovnvPart () { 
   nom.value = ''
-  quotas.value = { 
+  quotasP.value = { 
     qc: 1, qn: 1, qv: 1, 
     minc: 0, minn: 0, minv: 0,
     maxc: 9999, maxn: 9999, maxv: 9999, 
@@ -306,7 +306,7 @@ async function ovnvPart () {
 }
 
 async function creer () {
-  await new NouvellePartition().run(nom.value || '', quotas.value)
+  await new NouvellePartition().run(nom.value || '', quotasP.value)
   await refreshSynth()
   ui.fD()
 }

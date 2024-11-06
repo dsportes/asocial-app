@@ -8,7 +8,7 @@
       "type": "chrome",
       "request": "launch",
       "name": "Quasar App: chrome",
-      "url": "http://localhost:8081?doda",
+      "url": "http://localhost:8081?demo",
       "webRoot": "${workspaceFolder}/src",
       "sourceMapPathOverrides": {
         "webpack://asocial/./src/*": "${webRoot}/*"

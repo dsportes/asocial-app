@@ -47,7 +47,7 @@ const props = defineProps({
   declaration: Boolean 
 })
 
-const emit = defineEmits('ok')
+const emit = defineEmits(['ok'])
 
 const session = stores.session
 const config = stores.config
