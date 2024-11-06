@@ -16,10 +16,11 @@
       <btn-cond :disable="!ui.pageback || (ui.page === 'accueil')" icon="arrow_back" round @ok="ui.gotoBack()"/>
 
       <btn-cond v-if="session.ok && !session.avion && !session.estAdmin" 
-        :color="session.statusPushIC.c" :icon="session.statusPushIC.ic" @ok="ui.oD('sync', 'a')"/>
+        :color="session.statusPushIC.c" :icon="session.statusPushIC.ic" @ok="ouvSync">
+        <q-badge v-if="hb.nbRetry" color="negative" class="text-white text-bold font-mono">{{hb.nbRetry}}</q-badge>
+      </btn-cond>
 
-      <btn-cond v-if="!session.ok" 
-        :color="session.statusPermIC.c" :icon="session.statusPermIC.ic"/>
+      <btn-cond v-if="!session.ok" :color="session.statusPermIC.c" :icon="session.statusPermIC.ic"/>
 
       <!-- Notifications -->
       <notif-icon v-if="session.status === 2" class="q-ml-xs" 
@@ -113,7 +114,7 @@
       </btn-cond>
 
       <!-- Outils et tests -->
-      <btn-cond icon="settings" round @ok="ui.oD('outilsTests', 'a')">
+      <btn-cond icon="settings" round @ok="ui.oD('outilsTests', 'a')" color="none">
         <q-tooltip>{{$t('MLAout')}}</q-tooltip>
       </btn-cond>
 
@@ -383,7 +384,7 @@
   <!-- Gestion de la synchronisation automatique -->
   <q-dialog v-model="ui.d.a.sync" persistent>
     <q-card :class="styp('sm') + ' q-pa-sm column items-center'">
-      <bouton-help class="self-end" page="statuspush-man"/>
+      <bouton-help class="self-end" page="boite_automaj"/>
 
       <div v-if="config.permission" class="titre-lg q-my-md text-center">{{$t('MLAntfg')}}</div>
       <div v-else class="msg2 titre-lg text-italic text-bold q-my-md text-center">{{$t('MLAntfd')}}</div>
@@ -391,17 +392,18 @@
       <div v-if="!config.permission" class="titre-md q-my-md text-center">
         <btn-cond v-if="config.permState === 'prompt'" flat :label="$t('MLAntfr1')" @ok="demperm"/>
         <div v-else class="titre-lg text-italic text-center">{{$t('MLAntfr2')}}</div>
+        <btn-cond class="q-mt-md" flat :label="$t('MLAraf')" @ok="rafraichir"/>
       </div>
 
-      <div v-if="config.permission && session.statusHB" class="column q-my-md justify-center">
+      <div v-if="config.permission && hb.statusHB" class="column q-my-md justify-center">
         <div class="titre-lg text-center">{{$t('MLAhbOK')}}</div>
         <div class="q-my-md titre-md text-center">{{$t('MLAmajok')}}</div>
       </div>
 
-      <div v-if="config.permission && !session.statusHB" 
+      <div v-if="config.permission && !hb.statusHB" 
         class="q-my-md column justify-center">
         <div class="titre-lg text-center">{{$t('MLAhbKO')}}</div>
-        <btn-cond class="q-my-md" :label="$t('MLAraf')" @ok="resync"/>
+        <div class="q-mt-md titre-lg text-center msg2">{{$t('MLAhbKO2', [hb.nbRetry])}}</div>
       </div>
 
       <btn-cond class="q-my-md" flat :label="$t('jailu')" @ok="ui.fD"/>
@@ -417,7 +419,6 @@ import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 
 import stores from './stores/stores.mjs'
-import { AMJ, HBINSECONDS } from './app/api.mjs'
 
 import { set$t, hms, dkli, styp } from './app/util.mjs'
 import { deconnexion, SyncFull } from './app/synchro.mjs'
@@ -499,6 +500,7 @@ const gSt = stores.groupe
 const people = stores.people
 const config = stores.config
 const ui = stores.ui
+const hb = stores.hb
 
 ui.setScreenWH($q.screen.width, $q.screen.height)
 watchEffect(() => {
@@ -535,21 +537,13 @@ async function demperm () {
   ui.fD()
 }
 
-async function resync () {
-  await new SyncFull().run()
-  ui.fD()
+async function ouvSync () {
+  await hb.pingHB()
+  ui.oD('sync', 'a')
 }
 
-async function modea () {
+async function rafraichir () {
   await new SyncFull().run()
-  setTimeout(async () => {
-    await session.startHB()
-  }, HBINSECONDS * 500)
-  ui.fD()
-}
-
-async function moded () {
-  await session.stopHB()
   ui.fD()
 }
 

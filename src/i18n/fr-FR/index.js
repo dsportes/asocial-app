@@ -682,9 +682,10 @@ export default {
   MLAntfd: 'Le navigateur "bloque les notifications" pour l\'application.',
   MLAntfr1: 'Demander au navigateur d\'autoriser les notifications',
   MLAntfr2: 'Vous devez modifier les autorisations du navigateur pour cette application afin qu\'il accepte les notifications',
-  MLAhbKO: 'Le service de publication des mises à jour par les autres est temporairement HORS-SERVICE',
+  MLAhbKO: 'Le service de publication des mises à jour par les autres est temporairement HORS-SERVICE.',
+  MLAhbKO2: 'Tentative de reconnexion #{0}',
   MLAhbOK: 'Le service de publication des mises à jour par les autres est a priori en service',
-  MLAraf: 'Rafraîchir l\'affichage des données du compte',
+  MLAraf: 'Rafraîchir les données',
   MLAmajok: 'Les données de la session sont mises à jour en continu, même suite aux actions des autres sessions.',
   MLAnotif: 'Notifications des maj',
 

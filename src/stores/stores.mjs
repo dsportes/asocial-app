@@ -9,6 +9,7 @@ import { useNoteStore } from './note-store.js'
 import { useFicavStore } from './ficav-store.js'
 import { useFiltreStore } from './filtre-store.js'
 import { usePpStore } from './pp-store.js'
+import { useHbStore } from './hb-store.js'
 
 class Stores {
   static listeStores = [ // toutes SAUF config
@@ -27,6 +28,7 @@ class Stores {
   get ficav() { return this.ficavStore || (this.ficavStore = useFicavStore()) }
   get pp() { return this.ppStore || (this.ppStore = usePpStore()) }
   get filtre() { return this.filtreStore || (this.filtreStore = useFiltreStore()) }
+  get hb() { return this.hbStore || (this.hbStore = useHbStore()) }
 
   reset(saufSession) {
     for(const id of Stores.listeStores) {

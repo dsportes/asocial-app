@@ -16,10 +16,10 @@
       :hint="phrase && r1(phrase) ? $t('entree') : $t('NP16', [min])">
       <template v-slot:append>
         <span class="row q-gutter-xs">
-          <btn-cond :icon="isPwd ? 'visibility_off' : 'visibility'" 
-            @ok="isPwd = !isPwd" round/>
-          <btn-cond icon="cancel" round 
-            :disable="phrase.length === 0" @ok="phrase = ''"/>
+          <q-btn padding="none" dense :icon="isPwd ? 'visibility_off' : 'visibility'" 
+            @click="isPwd = !isPwd" round/>
+          <q-btn icon="cancel" round padding="none" dense
+            :disable="phrase.length === 0" @click="phrase = ''"/>
           <q-spinner v-if="encours" color="primary" size="1.5rem" :thickness="8" />
         </span>
       </template>

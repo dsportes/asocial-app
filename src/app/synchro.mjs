@@ -257,7 +257,8 @@ export async function deconnexion(recon) {
   const ui = stores.ui
   // ui.setPage('null')
   const session = stores.session
-  await session.stopHB()
+  const hb = stores.hb
+  await hb.stopHB()
   const mode = session.mode
   const org = session.org
   const phrase = session.phrase
@@ -283,6 +284,7 @@ export async function deconnexion(recon) {
 export async function connexion(phrase, razdb) {
   if (!phrase) return
   const session = stores.session
+  const hb = stores.hb
   await session.initSession(phrase)
 
   if (session.org === 'admin') {
@@ -320,8 +322,8 @@ export async function connexion(phrase, razdb) {
     const op = new ConnexionSynchroIncognito()
     await op.run()
     setTimeout(async () => {
-      await session.startHB()
-    }, HBINSECONDS * 500)
+      await hb.startHB()
+    }, 500)
   } catch (e) { 
     throw e
   }

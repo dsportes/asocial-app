@@ -1,4 +1,4 @@
-import { defineStore } from 'pinia';
+import { defineStore } from 'pinia'
 import { encode, decode } from '@msgpack/msgpack'
 
 import stores from './stores.mjs'
@@ -27,10 +27,12 @@ export const useSessionStore = defineStore('session', {
     dh: 0, // dh de la dernière opération
     consocumul: { nl: 0, ne: 0, vm: 0, vd: 0}, // nombres de lectures, écritures, volume montant / descendant sur les POST
 
+    /*
     nhb: 0, // numéro de heartbeat dans la connexion
     dhhb: 0, // date-heure du dernier heartbeat de la connexion
     statusHB: false, // true: heartbeat fonctionne normalement (a priori)
     pubsubTO: null,
+    */
 
     lsk: '', // nom de la variable localStorage contenant le nom de la base
     nombase: '', // nom de la base locale
@@ -76,8 +78,9 @@ export const useSessionStore = defineStore('session', {
   }),
 
   getters: {
-    config (state) { return stores.config },
-    filtre (state) { return stores.filtre },
+    config: (state) => stores.config,
+    hb: (state) => stores.hb,
+    filtre: (state) => stores.filtre,
     pSt: (state) => stores.people,
     ui: (state) => stores.ui,
 
@@ -221,7 +224,7 @@ export const useSessionStore = defineStore('session', {
       return s
     },
 
-    statusPush: (state) => state.statusHB && state.config.permission,
+    statusPush: (state) => state.hb.statusHB && state.config.permission,
 
     statusPushIC: (state) => state.statusPush ? {ic: 'notifications_active', c: 'green-5'} : { ic: 'notifications_off', c: 'red'},
     
@@ -255,9 +258,12 @@ export const useSessionStore = defineStore('session', {
     async initSession(phrase) {
       this.phrase = phrase
       this.config.nc++
+      stores.hb.reset()
+      /*
       this.nhb = 0 // numéro de heartbeat dans la connexion
       this.dhhb = 0 // date-heure du dernier heartbeat de la connexion
       this.statusHB = false // statut de synchro de la connexion
+      */
   
       this.setAuthToken(phrase)
 
@@ -271,6 +277,7 @@ export const useSessionStore = defineStore('session', {
       RegCles.reset()
     },
 
+    /*
     // Retour de sync : numéro de heartbeat connu de PUBSUB pour cette session
     setNhb (nhb) {
       this.statusHB = nhb === this.nhb
@@ -301,6 +308,7 @@ export const useSessionStore = defineStore('session', {
       this.statusHB = false
       this.nhb = 0
     },
+    */
 
     chgps (phrase) {
       /*
