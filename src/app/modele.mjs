@@ -364,8 +364,7 @@ _data_:
     - `notif`: notification du compte cryptée par la clé P de la partition (redonde celle dans compte).
     - `cleAP` : clé A du compte crypté par la clé P de la partition.
     - `del`: `true` si c'est un délégué.
-    - `q` : `qc qn qv c2m nn nc ng v` extraits du document `comptas.qv` du compte.
-      - `c2m` est le compteur `conso2M` de compteurs, montant moyen _mensualisé_ de consommation de calcul observé sur M/M-1 (observé à `dhic`). 
+    - `q` : `qc qn qv cjm nn nc ng v` extraits du document `comptas.compteurs.qv` du compte.
 
 Compilé:
 - this.sdel: Set des ids des délégués
@@ -377,7 +376,7 @@ Compilé:
 
 this.synth est calculé:
 - `qt` : les totaux des compteurs `q` :
-  (`qc qn qv c2m n (nn+nc+ng) v`) de tous les comptes,
+  (`qc qn qv cjm n (nn+nc+ng) v`) de tous les comptes,
 - `ntf`: [1, 2, 3] - le nombre de comptes ayant des notifications de niveau de restriction 1 / 2 / 3. 
 - `nbc nbd` : le nombre total de comptes et le nombre de délégués.
 - _recopiés de la racine dans `synth`_ : `id nrp q`
@@ -385,7 +384,7 @@ this.synth est calculé:
   - pcac : pourcentage d'affectation des quotas : qt.qc / q.qc
   - pcan : pourcentage d'affectation des quotas : qt.qn / q.qn
   - pcav : pourcentage d'affectation des quotas : qt.qv / q.qv
-  - pcc : pourcentage d'utilisation de la consommation journalière qt.c2m / q.qc
+  - pcc : pourcentage d'utilisation de la consommation journalière qt.cjm * 30 / q.qc
   - pcn : pourcentage d'utilisation effective de qn : qt.n / q.qn
   - pcv : pourcentage d'utilisation effective de qc : qt.v / q.qv
 */
@@ -402,7 +401,7 @@ export class Partition extends GenDoc {
       const e = row.mcpt[id]
       if (e.cleAP) RegCles.set(await decrypter(clep, e.cleAP))
       const q = { ...e.q }
-      q.pcc = !q.qc ? 0 : Math.round(q.c2m * 100 / q.qc) 
+      q.pcc = !q.qc ? 0 : Math.round(q.cjm * 30 * 100 / q.qc) 
       q.pcn = !q.qn ? 0 : Math.round((q.nn + q.nc + q.ng) * 100 / (q.qn * UNITEN)) 
       q.pcv = !q.qv ? 0 : Math.round(q.v * 100 / (q.qv * UNITEV)) 
       const r = { id: id, q: e.q }
@@ -428,7 +427,11 @@ _data_ :
 - `id` : ID du compte = ID de son avatar principal.
 - `v` : 1..N.
 - `hk` : `hXR`, hash du PBKFD d'un extrait de la phrase secrète (en base précédé de `ns`).
-- `dlv` : dernier jour de validité du compte.
+- `dlv`: date limite de validité, dernier jour d'un mois,
+  le compte peut être détruit dès le lendemain.
+
+- `flags`: flags issus du dernier calcul des compteurs de compta.
+- `mdcnx`: aaaamm, mois de dernière connexion.
 
 - `vpe` : version du périmètre
 - `vci` : version de `comptis`
@@ -440,17 +443,7 @@ _data_ :
 - `privK` : clé privée RSA de son avatar principal cryptée par la clé K du compte.
 
 - `dhvuK` : date-heure de dernière vue des notifications par le titulaire du compte, cryptée par la clé K.
-- `qv` : `{ qc, qn, qv, pcc, pcn, pcv, nbj }`
-  - `pcc, pcn, pcv, nbj` : remontés de `compta` en fin d'opération quand l'un d'eux passe un seuil de 5% / 5j, à la montée ou à la descente.
-    - `pcc` : pour un compte O, pourcentage de sa consommation mensualisée sur M/M-1 par rapport à son quota `qc`.
-    - `nbj` : pour un compta A, nombre de jours estimés de vie du compte avant épuisement de son solde en prolongeant sa consommation des 4 derniers mois et son abonnement `qn qv`.
-    - `pcn` : pourcentage de son volume de notes / chats / groupes par rapport à son quota qn.
-    - `pcv` : pourcentage de son volume de fichiers par rapport à son quota qv.
-  - `qc qn qv` : mise à jour immédiate en cas de changement des quotas.
-    - pour un compte "O" identiques à ceux de son entrée dans partition.
-    - pour un compte "A", `qn qv` donné par le compte lui-même.
-    - en cas de changement, les compteurs de consommation sont remontés. 
-    - permet de calculer en session les alertes de quotas et de consommation.
+- `qv` : qv de compta.compteurs.qv (à quelques % près)
 
 _Comptes "O" seulement:_
 - `clePK` : clé P de la partition cryptée par la clé K du compte. Si cette clé a une longueur de 256, la clé P a été cryptée par la clé publique de l'avatar principal du compte suite à une affectation à une partition APRÈS sa création (changement de partition, passage de compte A à O)
@@ -488,8 +481,8 @@ export class Compte extends GenDoc {
     this.qv = row.qv
 
     this.dlv = row.dlv
-    this.nbj = AMJ.diff(this.dlv, session.auj)
-    if (this.nbj > 999) this.nbj = 999
+    this.mdcnx = row.mdcnx
+    this.flags = row.flags || 0
 
     if (this.estComptable) {
       this.mcode = new Map()
@@ -586,36 +579,25 @@ export class Compte extends GenDoc {
 _data_:
 - `id` : ID du compte = ID de son avatar principal.
 - `v` : 1..N.
-- `qv` : `{qc, qn, qv, nn, nc, ng, v}`: quotas et nombre de groupes, chats, notes, volume fichiers. Valeurs courantes.
 - `compteurs` sérialisation des quotas, volumes et coûts.
-- _Comptes "A" seulement_
-  - `solde`: résultat, 
-    - du cumul des crédits reçus depuis le début de la vie du compte (ou de son dernier passage en compte A), 
-    - plus les dons reçus des autres,
-    - moins les dons faits aux autres.
-  - `tickets`: map des tickets / dons:
-    - _clé_: `ids`
-    - _valeur_: `{dg, dr, ma, mc, refa, refc}`
-  - `dons` : liste des dons effectués / reçus `[{ dh, m, iddb }]`
-    - `dh`: date-heure du don
-    - `m`: montant du don (positif ou négatif)
-    - `iddb`: id du donateur / bénéficiaire (selon le signe de `m`).
+- `tickets`: map des tickets / dons:
+  - _clé_: `ids`
+  - _valeur_: `{dg, dr, ma, mc, refa, refc}`
+- `dons` : liste des dons effectués / reçus `[{ dh, m, iddb }]`
+  - `dh`: date-heure du don
+  - `m`: montant du don (positif ou négatif)
+  - `iddb`: id du donateur / bénéficiaire (selon le signe de `m`).
 */
 export class Compta extends GenDoc {
 
   async compile (row) {
-    const clek = stores.session.clek
-
-    this.qv = row.qv
-    this.compteurs = new Compteurs(row.compteurs, this.qv)
-    this.pc = this.compteurs.pourcents // {pcc, pcn, pcv, max}
-    this.solde = row.solde || 0
+    this.idp = row.idp || '' // inscrit par GetCompta (par commodité en session ?)
+    this.compteurs = new Compteurs(row.compteurs)
     this.tickets = row.tickets || {}
     this.dons = row.dons || []
-    if (row.idp) this.idp = row.idp
-    this.estA = row.estA
   }
 
+  get estA() { return this.compteurs.estA }
 }
 
 /* Classe compti ****************************************************
