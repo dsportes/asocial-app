@@ -207,24 +207,25 @@ Une notification a les propriétés suivantes:
 export class Notification {
   // Factory construisant une objet Notification depuis sa forme cryptée
   static async decrypt (ntf, cle) {
-    const n = { nr: ntf.nr || 0, dh: ntf.dh || 0 }
+    const n = { nr: ntf.nr || 0, dh: ntf.dh || 0, dh3: ntf.dh3 || 0 }
     n.texte = ntf.texte ? await decrypterStr(cle, ntf.texte) : ''
     if (ntf.idDel) n.idDel = ntf.idDel
     return new Notification(n)
   }
 
   async crypt(cle) {
-    const n = { nr: this.nr, dh: this.dh }
+    const n = { nr: this.nr, dh: this.dh, dh3: this.dh3 }
     if (this.idDel) n.idDel = this.idDel
     n.texte = this.texte ? await crypter(cle, this.texte) : ''
     return n
   }
 
-  constructor ({nr, dh, texte, idDel}) {
+  constructor ({nr, dh, dh3, texte, idDel}) {
     if (idDel) this.idDel = idDel
     this.nr = nr || 0
     this.texte = texte || ''
-    this.dh = dh || Date.now()  
+    this.dh = dh || Date.now() 
+    this.dh3 = dh3 || 0
   }
 
   clone () {
@@ -431,7 +432,7 @@ _data_ :
   le compte peut être détruit dès le lendemain.
 
 - `flags`: flags issus du dernier calcul des compteurs de compta.
-- `mdcnx`: aaaamm, mois de dernière connexion.
+- `dharF dhopf dharC dhopC dharS dhopS`: dh des ACCES RESTREINT (F, C, S).
 
 - `vpe` : version du périmètre
 - `vci` : version de `comptis`
@@ -481,7 +482,12 @@ export class Compte extends GenDoc {
     this.qv = row.qv
 
     this.dlv = row.dlv
-    this.mdcnx = row.mdcnx
+    this.dharF = row.dharF || 0
+    this.dharC = row.dharC || 0
+    this.dharS = row.dharS || 0
+    this.dhopF = row.dhopF || 0
+    this.dhopC = row.dhopC || 0
+    this.dhopS = row.dhopS || 0
     this.flags = row.flags || 0
 
     if (this.estComptable) {

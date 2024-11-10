@@ -84,8 +84,6 @@ export const useSessionStore = defineStore('session', {
     
     dlv: (state) => state.ok && state.compte ? state.compte.dlv : AMJ.max,
     dlvat: (state) => state.espace && state.espace.dlvat ? state.espace.dlvat : AMJ.max,
-    nbjat: (state) => { const n = AMJ.diff(state.dlvat, state.auj); return n },
-    nbj: (state) => AMJ.diff(state.dlv > state.dlvat ? state.dlvat : state.dlv, state.auj),
 
     estComptable (state) { return ID.estComptable(state.compteId) },
     estAdmin (state) { return !state.compteId },
@@ -111,54 +109,43 @@ export const useSessionStore = defineStore('session', {
 
     ntfE (state) { return state.espace && state.espace.notifE && state.espace.notifE.nr ? state.espace.notifE : null },
     ntfP (state) { return state.notifP && state.notifP.nr ? state.notifP : null },
-    ntfC (state) { return state.compte && state.compte.notif ? state.compte.notif : null },
+    ntfC (state) { return state.compte && state.compte.notif && state.compte.notif.nr ? state.compte.notif : null },
 
-    mini (state) { return (state.ntfP && state.ntfP.nr === 3) || (state.ntfC && state.ntfC.nr === 3) || state.ral === 3 },
-    lect (state) { return (state.ntfP && state.ntfP.nr >= 2) || (state.ntfC && state.ntfC.nr >= 2) },
     estFige (state) { const n = state.ntfE; return n && (n.nr === 2) },
     estClos (state) { const n = state.ntfE; return n && (n.nr === 3) },
-    ral (state) { if (!state.compte) return 0
-      if (state.compte.estA) {
-        const n = state.compte.qv.nbj
-        return n <= 0 ? 3 : (n < 10 ? 2 : (n < 20 ? 1 : 0)) 
-      }
-      const n = state.compte.qv.pcc; return n >= 100 ? 2 : (n >= 90 ? 1 : 0)
+    flags (state) { return state.compte && state.compte.flags ? state.compte.flags : 0},
+    RAL (state) { if (!state.compte) return 0
+      if (AL.has(state.flags, AL.RAL2)) return 2
+      if (AL.has(state.flags, AL.RAL1)) return 1
+      return 0
     },
-    quotn (state) { if (!state.compte) return 0
-      const n = state.compte.pcn; return n >= 100 ? 2 : (n >= 90 ? 1 : 0)
+    hasAR (state) {
+      if (state.ntfP && state.ntfP.nr === 3) return true
+      if (state.ntfC && state.ntfC.nr === 3) return true
+      if (AL.has(state.flags, AL.ARSN)) return true
+      return false
     },
-    quotv (state) { if (!state.compte) return 0
-      const n = state.compte.pcv; return n >= 100 ? 2 : (n >= 90 ? 1 : 0)
+    hasLS (state) {
+      if (state.ntfP && state.ntfP.nr === 2) return true
+      if (state.ntfC && state.ntfC.nr === 2) return true
+      return false
     },
-    quotmax (state) { return state.quotn > state.quotv ? state.quotn : state.quotv },
+    hasNRED (state) { return AL.has(state.flags, AL.NRED) },
+    hasVRED (state) { return AL.has(state.flags, AL.VRED) },
+    nbjAt: (state) => AMJ.diff(state.dlvat, state.auj),
+    nbjDlv: (state) => AMJ.diff(state.dlv, state.auj),
 
-    /* NotifIcon.niv :  
-    /* niveau d'information / restriction: 
-    - 0 : aucune alerte
-    - 1 : au moins une alerte informative
-    - 2 : accroissement de volume interdit
-    - 3 : accés en lecture seule (sauf urgence)
-    - 4 : accés en lecture seule (strict, figé)
-    - 5 : accès d'urgence seulement
-    - 6 : accés en lecture seule (strict, figé) SANS accès d'urgence
-    - 7 : ralentissement 1
-    - 8 : ralentissement 2
-    - 9 : supression du compte imminente
-    - 10: impossibilité de se connecter au compte imminente
+    /* gravité maximale des alertes
+      3 : zombi, compte en suppression ou inaccessibilité imminente
+      2 : Accès restreint
+      1 : Accès avec contraintes, alertes de compte ou partition
+      0 : Pas d'alerte
     */
-
     ntfIco (state) {
-      if (state.nbj <= state.config.alerteDlv) 
-        return state.nbjat === state.nbj ? 10 : 9
-      const f = state.ntfE && state.ntfE.nr === 2
-      if (f && state.mini) return 6
-      if (state.mini) return 5
-      if (f) return 4
-      if (state.lect) return 3
-      if (state.quotn === 2 || state.quotv === 2) return 2
-      if (state.ral === 2) return 8
-      if (state.ral === 1) return 7
-      if (state.ral || state.quotn || state.quotv || state.ntfE || state.ntfP || state.ntfC) return 1
+      if (state.nbjAt < state.config.alerteDlv || state.nbjDlv < state.config.alerteDlv) return 3
+      if (state.hasAR) return 2
+      if (state.RAL || state.hasLS || state.hasNRED || state.hasVRED
+        || state.ntfE || state.ntfC || state.ntfP || state.estFige) return 1
       return 0
     },
 
@@ -166,7 +153,7 @@ export const useSessionStore = defineStore('session', {
       if (state.estAdmin) return ''
       if (state.avion) return $t('condA')
       if (state.estFige) return $t('condF')
-      if (state.lect) return $t('condL')
+      if (state.hasLS) return $t('condL')
       return ''
     },
 
@@ -179,7 +166,7 @@ export const useSessionStore = defineStore('session', {
 
     cVisu (state) {
       if (state.estAdmin) return ''
-      if (state.mini) return $t('condM')
+      if (state.hasAR) return $t('condM')
       return ''
     },
 
