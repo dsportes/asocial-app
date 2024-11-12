@@ -83,8 +83,7 @@
       <q-tabs  class="col titre-md" v-model="ui.pagetab" inline-label outside-arrows mobile-arrows no-caps>
         <q-tab name="notif" :label="$t('PNCntf')" @click="ui.setTab('notif')"/>
         <q-tab name="compta" :label="$t('PNCabo')" @click="ui.setTab('compta')"/>
-        <q-tab v-if="session.estComptable || session.compte.estA"
-          name="credits" :label="$t('PNCcre')" @click="ui.setTab('credits')"/>
+        <q-tab name="credits" :label="$t('PNCcre')" @click="ui.setTab('credits')"/>
         <q-tab v-if="!session.estComptable" name="chats" :label="$t('PNCurg')" @click="ui.setTab('chats')"/>
       </q-tabs>
       <btn-cond v-if="ui.pagetab==='notif' && session.alire" class="col-auto q-px-sm" 

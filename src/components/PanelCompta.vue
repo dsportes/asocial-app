@@ -3,15 +3,13 @@
   <q-btn round size="sm" class="btr" icon="print" @click="c.print()"/>
   <q-expansion-item switch-toggle-side default-opened dense
       header-class="titre-md text-bold bg-primary text-white"
-      :label="$t('PCPsyn') + ' - ' + dhstring(c.dh, true)">
+      :label="$t('PCPref' + tref, [dhstring(c.dhP, true), dhstring(c.dh, true)])">
     <div class="spmd column q-my-sm">
-      <div class="titre-md q-my-sm">
-        {{$t('PCPpcum' + c.cumref[0], [dhstring(c.cumref[1], true), c.cumref[2]])}}
-      </div>
 
+      <div class="titre-md q-my-sm">{{$t('PCPcouts')}}</div>
       <div :class="dkli(1) + ' row items-center full-width'">
         <div class="col-4 text-center"></div>
-        <div class="col-4 text-center">{{$t('PCPactuel')}}</div>
+        <div class="col-4 text-center">{{$t('PCPtotal')}}</div>
         <div class="col-4 row justify-center">
           <mois-m v-model.number="idm" :dh="c.dh"/>
         </div>
@@ -37,6 +35,44 @@
         <div class="col-4 font-mono text-center">{{exM ? mon(consoM, 4) : '-'}}</div>
       </div>
     </div>
+
+    <div v-if="!estA" class="q-my-sm titre-md text-italic">{{$t('PCPcptO')}}</div>
+    <!--
+      PCPsoldeP: 'Solde au début de la période',
+      PCPdons: 'Somme des dons effectués sur la période',
+      PCPcreditsP: 'Somme des crédits enregistrés sur la période',
+      PCPfact: 'Consommation facturée sur la période',
+      PCPsoldeC: 'Solde courant maintenant',
+      PCPnjec: 'Au rythme actuel, le solde courant resterait positif encore {njec} jours.',
+    -->
+    <div :class="dkli(1) + ' row items-center full-width'">
+      <div class="col-8 text-right text-italic titre-md">{{$t('PCPsoldeP')}}</div>
+      <div class="col-1"></div>
+      <div class="col-3 text-center font-mono">{{mon(c.soldeP, 2)}}</div>
+    </div>
+    <div :class="dkli(0) + ' row items-center full-width'">
+      <div class="col-8 text-right text-italic titre-md">{{$t('PCPdons')}}</div>
+      <div class="col-1"></div>
+      <div class="col-3 text-center font-mono">{{mon(c.dons, 2)}}</div>
+    </div>
+    <div :class="dkli(1) + ' row items-center full-width'">
+      <div class="col-8 text-right text-italic titre-md">{{$t('PCPcreditsP')}}</div>
+      <div class="col-1"></div>
+      <div class="col-3 text-center font-mono">{{mon(c.creditsP, 2)}}</div>
+    </div>
+    <div :class="dkli(0) + ' row items-center full-width'">
+      <div class="col-8 text-right text-italic titre-md">{{$t('PCPfact')}}</div>
+      <div class="col-1"></div>
+      <div class="col-3 text-center font-mono">{{c.estA ? mon(c.cumulCouts, 2) : '-'}}</div>
+    </div>
+    <div :class="dkli(1) + ' row items-center full-width'">
+      <div class="col-8 text-right text-italic titre-md">{{$t('PCPsoldeC')}}</div>
+      <div class="col-1"></div>
+      <div :class="'col-3 text-center font-mono' + alsolde">{{mon(c.soldeCourant, 2)}}</div>
+    </div>
+
+    <div v-if="c.estA && c.njec" class="'q-my-sm ' + alnjec">{{$t('PCPnjec', [c.njec])}}</div>
+
   </q-expansion-item>
   <q-separator size="3px"/>
 
@@ -114,7 +150,8 @@
   <q-separator size="3px"/>
 
   <q-expansion-item switch-toggle-side dense 
-    :header-class="hcconso" :icon="icoconso" :label="$t('PCPcconso')">
+    header-class="titre-md text-bold bg-primary text-white"
+    :label="$t('PCPcconso')">
     <div class="spmd column q-my-sm">
       <div :class="dkli(1) + ' row items-center full-width'">
         <div class="col-4 text-center"></div>
@@ -159,6 +196,7 @@
         <div class="col-2 font-mono text-center">{{ex(3) ? edvol(vm(3)) : '-'}}</div>
       </div>
 
+      <!--
       <div v-if="!estA">
         <div class="titre-md q-my-md">
           <div class="q-pa-xs bg-secondary text-white text-bold">{{$t('PCPplaf', [monx(c.qv.qc)])}}</div>
@@ -166,7 +204,6 @@
           <div :class="alconso">{{$t('PCPcmoy', [monx(c.conso2M), txconso, monx(c.qv.qc), libm(1)])}}</div>
         </div>
       </div>
-
       <div v-if="estA" class="column q-my-sm full-width">
         <div>{{$t('PCPprefa' + c.cumref[0], [dhstring(c.cumref[1], true), c.cumref[2]])}}</div>
 
@@ -186,6 +223,7 @@
 
         <div v-if="nbj > 2" class="titre-md q-my-sm">{{$t('PCPcouv', [nbj])}}</div>
       </div>
+      -->
     </div>
   </q-expansion-item>
   <q-separator size="3px"/>
@@ -268,13 +306,12 @@
 import { ref, computed, watch } from 'vue'
 
 import stores from '../stores/stores.mjs'
-import { UNITEN, UNITEV, AMJ, Compteurs, Tarif } from '../app/api.mjs'
+import { UNITEN, UNITEV, AMJ, Compteurs, Tarif, MSPARMOIS } from '../app/api.mjs'
 import { $t, dhstring, mon, nbn, edvol, dkli } from '../app/util.mjs'
 import MoisM from './MoisM.vue'
 
 const props = defineProps({
-  c: Object,
-  solde: Number
+  c: Object
 })
 
 const cux = (t, idx) => {
@@ -290,23 +327,17 @@ const cu = ['AN', 'AF', 'lec', 'ecr', 'mon', 'des']
 const idm = ref(0)
 
 const estA = computed(() => props.c.estA)
+const tref = computed(() => props.c.dhP === props.c.dh0 ? 0 : (props.c.estA ? 1 : 2 ))
 const icoabo1 = computed(() => abo1w.value ? 'report' : (abo1n.value ? 'lock': 'check'))
 const icoabo2 = computed(() => abo2w.value ? 'report' : (abo2n.value ? 'lock': 'check'))
-const icoconso = computed(() => consow.value ? 'report' : (conson.value ? 'lock': 'check'))
 const hcabo1 = computed(() => abo1w.value ? 'titre-md text-bold text-white bg-warning'
       : (abo1n.value ? 'titre-md text-bold text-white bg-negative' : 'titre-md text-bold text-white bg-primary'))
 const hcabo2 = computed(() => abo2w.value ? 'titre-md text-bold text-white bg-warning'
       : (abo2n.value ? 'titre-md text-bold text-white bg-negative' : 'titre-md text-bold text-white bg-primary'))
-const hcconso = computed(() => consow.value ? 'titre-md text-bold text-white bg-warning'
-      : (conson.value ? 'titre-md text-bold text-white bg-negative' : 'titre-md text-bold text-white bg-primary'))
 const abo1w = computed(() => pcutq1.value > 90 && pcutq1.value < 100)
 const abo1n = computed(() => pcutq1.value > 100)
 const abo2w = computed(() => pcutq2.value > 90 && pcutq2.value < 100)
 const abo2n = computed(() => pcutq1.value > 100)
-const consow = computed(() => (estA.value && (nbj.value > 0 && nbj.value < 60)) ||
-        (!estA.value && (txconso.value > 80 && txconso.value < 100)))
-const conson = computed(() => (estA.value && nbj.value <= 0) ||
-        (!estA.value && txconso.value > 100))
 const exM = computed(() => props.c.vd[idm.value][Compteurs.MS] !== 0)
 const q2M = computed(() => props.c.vd[idm.value][Compteurs.QV] * UNITEV)
 const v2M = computed(() => props.c.vd[idm.value][Compteurs.V + Compteurs.X1 + Compteurs.X2])
@@ -322,11 +353,11 @@ const pcutq1 = computed(() => Math.round((props.c.qv.nn + props.c.qv.nc + props.
 
 const aboM = computed(() => props.c.vd[idm.value][Compteurs.CA])
 const consoM = computed(() => props.c.vd[idm.value][Compteurs.CC])
-const nbj = computed(() => props.c.nbj(props.solde))
+
 const txconso = computed(() => props.c.pourcents.pcc)
 const alconso = computed(() => txconso.value < 80 ? '' 
   : (' bg-yellow-3 text-bold text-' + (txconso.value > 100 ? 'negative' : 'warning')))
-const nbjm = computed(() => Math.round(props.c.vd[idm.value][Compteurs.MS] / 86400000))
+const nbjm = computed(() => Math.round(props.c.vd[idm.value][Compteurs.MS] / MSPARMOIS))
 
 const p4 = (x) => !exM.value ? '-' : (x < 0.0001 ? '<0,0001' : x.toPrecision(4))
 const pc = (x) => !exM.value ? '-' : (x < 1 ? '<1%' : (x + '%'))
@@ -341,10 +372,9 @@ const vm = (m) => props.c.vd[m][Compteurs.X1 + Compteurs.VM]
 const vd = (m) => props.c.vd[m][Compteurs.X1 + Compteurs.VD]
 const em = (m) => props.c.mm[m] !== 0
 
-const alsolde = computed(() => {
-  const x = ' bg-yellow-3 text-bold text-'
-  return nbj.value <= 0 ? x + 'negative' : (nbj.value < 60 ? x + 'warning' : '')
-})
+const alsolde = computed(() => props.c.soldeCourant < 0 ? ' bg-yellow-3 text-bold text-black' : '')
+const alnjec = computed(() => props.c.njec > 60 ? '' 
+  : (' bg-yellow-3 text-bold text-' + (props.c.njec < 30 ? 'negative' : 'warning')))
 
 function libm (idm) {
   const [ax, mx] = AMJ.am(props.c.dh)
