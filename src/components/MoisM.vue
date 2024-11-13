@@ -1,8 +1,8 @@
 <template>
 <span class="row items-center">
-  <btn-cond icon="chevron_left" round :disable="im===0" @ok="im--"/>
-  <span class="larg font-mono fs-md text-center">{{lib}}</span>
-  <btn-cond icon="chevron_right" round :disable="im===3" @ok="im++"/>
+  <btn-cond icon="chevron_left" round :disable="courant" @ok="plus"/>
+  <span class="larg font-mono fs-md text-center">{{$t('mois' + im)}}</span>
+  <btn-cond icon="chevron_right" round :disable="dernier" @ok="moins"/>
 </span>
 </template>
 
@@ -18,15 +18,21 @@ const im = defineModel({
 })
 
 const props = defineProps({ 
-  dh: Number
+  imd: Number
 })
 
-const mx = computed(() => AMJ.am(props.dh)[1])
+const courant = computed(() => im.value === imd.value)
+const dernier = computed(() => { let i = imd.value + 1; if (i === 13) i = 1; return im.value === i})
 
-const lib = computed(() => { 
-  const x = mx.value - im.value
-  return $t('mois' + (x <= 0 ? 12 + x : x))
-})
+function plus () {
+  let i = im.value + 1
+  im.value = i === 13 ? 1 : i
+}
+
+function moins () {
+  let i = im.value - 1
+  im.value = i === 0 ? 12 : i
+}
 
 </script>
 

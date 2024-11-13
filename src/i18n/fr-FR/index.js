@@ -1285,6 +1285,30 @@ export default {
   P11tit: 'Avatar du compte | Avatar du compte | Avatars du compte',
 
   // PageCompta
+  PCPref0: '[{1}] - Crée {0} - Compte "O" depuis la création.',
+  PCPref1: '[{1}] - Crée {0} - Compte "A" depuis la création.',
+  PCPref2: '[{1}] - Crée {0} - Passage en compte "O" [{2}].',
+  PCPref3: '[{1}] - Crée {0} - Passage en compte "A" [{2}].',
+
+  PCPqmn: 'Quota moyen de nombre de documents: {0}',
+  PCPnbdoc: 'Nombre de documents: {0} = {1} note(s) + {2} chat(s) + {3} groupe(s)',
+  PCPqmv: 'Quota moyen de volume de fichiers: {0} - Utilisé: {1}',
+  PCPqmc: 'Quota moyen de calcul: {0}c - Consommé: {1}c',
+  PCPcabo: 'Coût d\'abonnement: {0}c --- Facturé(1): {1}c',
+  PCPccon: 'Coût de la consommation: {0}c --- Facturé(2): {1}c',
+  PCPnlne: 'Nombre de lectures: {0} --- d\'écritures: {1}',
+  PVPvdvm: 'Volume de transfert descendant: {0} / montant: {1}',
+  PCPcrdb: 'Somme des crédits(3): {0}c --- des dons(4): {1}',
+  PCPsoldes: 'Soldes au début(5): {0} --- à la fin(5+3-4-2-1): {1}',
+
+  PCPcent: 'Les montants sont en centimes',
+  PCPtAN: 'Abonnement pour 30 jours à 250 notes / chats / groupes',
+  PCPtAF: 'Abonnement pour 30 jours à 100Mo d\'espace de fichiers',
+  PCPtlec: 'Coût par million de lectures',
+  PCPtecr: 'Coût par million d\'écritures',
+  PCPtmon: 'Coût par GB de transfert de fichiers montant du serveur de fichiers',
+  PCPtdes: 'Coût par GB de transfert de fichiers descendant vers le serveur de fichiers',
+
   PCPtabnotif: 'Alertes sur le compte',
   PCPtabcompta: 'Abonnement et consommation',
   PCPtabcredits: 'Gestion des crédits',
@@ -1321,9 +1345,7 @@ export default {
   PCPecr: 'Nombre d\'écritures',
   PCPvd: 'Vol. desc. fichiers',
   PCPvm: 'Vol. montant. fichiers',
-  PCPref0: '[{1}] - La période de référence a commencé à la création du compte [{0}].',
-  PCPref1: '[{1}] - La période de référence a commencé au passage en compte "A" [{0}].',
-  PCPref2: '[{1}] - La période de référence a commencé au passage en compte "O" [{0}].',
+
   PCPcouts: 'Couts en c cumulés sur la période de référence.',
   PCPcptO: 'Le compte est un compte "O", ces coûts sont donnés pour information, ils sont supportés par l\'organisation.',
 
@@ -1347,14 +1369,7 @@ export default {
   PCPqc: '{0} : limite maximale autoriée de consommation en rythme annuel.',
   PCPcouv: 'Sur le rythme des 4 derniers mois, le solde actuel couvre environ {0} jours d\'abonnement et de consommation',
 
-  PCPaamm: 'AAAA/MM',
-  PCPcent: 'Les montants sont en centimes d\'euro',
-  PCPtAN: 'Abonnement pour 30 jours à 250 notes / chats / groupes',
-  PCPtAF: 'Abonnement pour 30 jours à 100Mo d\'espace de fichiers',
-  PCPtlec: 'Coût par million de lectures',
-  PCPtecr: 'Coût par million d\'écritures',
-  PCPtmon: 'Coût par GB de transfert de fichiers montant du serveur de fichiers',
-  PCPtdes: 'Coût par GB de transfert de fichiers descendant vers le serveur de fichiers',
+
 
   // Panel Partition
   PTci: 'Commentaires / information',
