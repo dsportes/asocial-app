@@ -53,7 +53,7 @@ const steps = ref([
     qv: null,
     conso: { nl: 1000, ne: 500, vd: 100000000, vm: 200000000 },
     estA: true,
-    dbcr: 10
+    dbcr: -5
   },
   { 
     d: '02 Jul 2025 10:30:00 UTC',

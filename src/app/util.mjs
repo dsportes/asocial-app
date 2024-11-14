@@ -148,22 +148,22 @@ export function aujhier () {
   hier = [h.getFullYear(), h.getMonth(), h.getDate()]
 }
 
-export function dhcool (timems, sec) {
+export function dhcool (timems, sec, pash) {
   if (!timems) return $t('nondate')
   aujhier()
   const dx = new Date(timems)
   const d = [dx.getFullYear(), dx.getMonth(), dx.getDate()]
   const mm = auj[0] === d[0] && auj[1] === d[1]
   if (mm && auj[2] === d[2]) {
-    return $t('auja', [hms(dx, sec)])
+    return pash ? $t('auja') : $t('aujah', [hms(dx, sec)])
   }
   if (hier[0] === d[0] && hier[1] === d[1] && hier[2] === d[2]) {
-    return $t('hiera', [hms(dx, sec)])
+    return pash ? $t('hiera') : $t('hierah', [hms(dx, sec)])
   }
   if (mm) {
-    return $t('lea', [d[2], hms(dx, sec)])
+    return pash ? $t('lea', [d[2]]) : $t('leah', [d[2], hms(dx, sec)])
   }
-  return aaaammjj(dx) + ' ' + hms(dx, sec)
+  return pash ? $t('ja', [aaaammjj(dx)]) : $t('jah', [aaaammjj(dx), hms(dx, sec)])
 }
 
 export function hms (t, sec) {

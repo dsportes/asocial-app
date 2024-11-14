@@ -508,9 +508,9 @@ export function edvol (vol, u) {
 */
 export class Tarif {
   static tarifs = [
-    { am: 202201, cu: [0.45, 0.10, 80, 200, 15, 15] },
-    { am: 202305, cu: [0.45, 0.10, 80, 200, 15, 15] },
-    { am: 202309, cu: [0.45, 0.10, 80, 200, 15, 15] }
+    { am: 202401, cu: [0.45, 0.10, 80, 200, 15, 15] },
+    { am: 202501, cu: [0.55, 0.15, 80, 180, 15, 15] },
+    { am: 202506, cu: [0.65, 0.10, 80, 150, 15, 15] }
   ]
 
   static init(t) { Tarif.tarifs = t}
@@ -534,7 +534,7 @@ export class Tarif {
   static evalCaCc (a, m, ms, v) {
     const cu = Tarif.cu(a, m)
     let mc = 0, ma = 0
-    const p = MSPARMOIS / ms
+    const p = ms / MSPARMOIS
     ma += v[VQN] * cu[0] * p
     ma += v[VQV] * cu[1] * p
     mc += v[VNL] * cu[2] / MEGA
@@ -696,7 +696,7 @@ export class Compteurs {
     // fin de réactualisation. Préparation début nouvelle situation
     if (qv) this.qv = qv // valeurs de quotas / volumes à partir de maintenant
     
-    // consommation journalière moyenne (en c) relevée sur le mois en cours et le précédent
+    // consommation moyenne (en c) relevée sur le mois en cours et le précédent
     {
       const vc = this.vd[this.mm - 1]
       let mp = this.mm === 1 ? 11 : this.mm - 2
@@ -704,7 +704,9 @@ export class Compteurs {
       const ct = (vc[VCC] * vc[VMS]) + (vp[VCC] * vp[VMS])
       let ms = vc[VMS] + vp[VMS]
       if ((ms / MSPARJOUR) < 10) ms = 10 * MSPARJOUR
-      this.qv.cjm = (ct / ms) * MSPARJOUR
+      const cm = (ct / ms)
+      const nbj = ms / MSPARJOUR
+      this.qv.cjm = cm / nbj
     }
 
     if (conso) {
@@ -716,7 +718,7 @@ export class Compteurs {
     }
 
     if (chgA !== undefined && chgA !== null && chgA !== this.estA) {
-      this.estA = estA
+      this.estA = chgA
       this.dhP = this.dh
     }
   }
@@ -746,12 +748,11 @@ export class Compteurs {
       // insertion de N mois entiers
       let a = aaaa1, m = mm1
       while (true) {
-        m++; if (m === 12) { m = 1; a++ }
+        m++; if (m === 13) { m = 1; a++ }
         if (a === this.aaaa && m === this.mm) break
-        insererM(a, m, solde, this.tfM(a, m))
-        solde = this.soldeDeM(m)
+        solde = this.insererM(a, m, solde, this.tfM(a, m))
       }
-      insererM(a, m, solde, this.now)
+      this.insererM(a, m, solde, this.now)
     }
   }
 
@@ -767,19 +768,28 @@ export class Compteurs {
     v[VNN] = q.nn
     v[VNC] = q.nc
     v[VNG] = q.ng
-    V[XV] = q.v
+    v[VV] = q.v
     const abo = Tarif.cmsAbo(q.qn, q.qv, a, m) * (dhf - t0)
     v[VAC] = abo 
     v[VCC] = 0
+    v[VAF] = this.estA ? v[VAC] : 0
+    v[VCF] = 0
     v[VS] = solde
-    if (this.ddsn || solde >= abo ) return // était déjà négatif au début du mois ou solde en fin positif
-    const ms = Math.floor(solde / abo) // nombre de millis pour épuiser le solde
+    const soldeAp = this.soldeDeM(m)
+    if (this.ddsn || soldeAp >= 0 ) return soldeAp // était déjà négatif au début du mois ou solde en fin positif
+    const ms = Math.floor((v[VMS] * solde) / (solde - soldeAp)) // (soldeAp est < 0) - nombre de millis pour épuiser le solde initial
     this.ddsn = t0 + ms
+    return soldeAp
   }
 
   t0M (a, m) { return Date.UTC(a, m - 1, 1) + 1 }
 
-  tfM (a, m) { return Date.UTC(m=== 11 ? a + 1 : a, m === 11 ? 0 : m + 1, 1) - 1 }
+  tfM (a, m) { 
+    let ax = a; let mx = m; if (mx === 12) { mx = 0; ax++ }
+    const t = Date.UTC(ax, mx, 1) - 1
+    const s = new Date(t).toISOString()
+    return t // premier jour du mois suivant à minuit - 1ms
+  }
 
   // m : indice mois, dhf: limite dans le mois
   prolongerM (a, m, dhf) {
@@ -787,8 +797,8 @@ export class Compteurs {
     const q = this.qv
     const v = this.vd[m - 1]
     const soldeCAv = this.soldeDeM(m) // solde courant AVANT
-    const msav = this.dh - t0
-    const msap = dhf - t0
+    const msav = v[VMS]
+    const msap = this.dh0 <= t0 ? dhf - t0 : dhf - this.dh0
     const delta = msap - msav
     if (delta === 0) return
     // Maj des quotas moyens au prorata de la prolongation
@@ -803,31 +813,26 @@ export class Compteurs {
     v[VV] = ((v[VV] * msav) + (q.v * delta)) / msap
     // Augmentation du COUT de l'abonnement et de la consommation
     const [ma, mc] = Tarif.evalCaCc (a, m, delta, v)
-    v[VAC += ma]
-    v[VCC += mc]
-    if (estA) {
+    v[VAC] += ma
+    v[VCC] += mc
+    if (this.estA) {
       // Augmentaion de la FACTURATION de l'abonnement et de la consommation
       // Etait déjà facturé dans le mois : temps déjà facturé dhP - t0
       // N'a pas été facturé dans le mois: temps déjà facturé 0
       const dfm = this.dhP < t0 ? 0 : (this.dhP - t0)
       const [ma, mc] = Tarif.evalCaCc (a, m, (msap - dfm), v)
-      v[VAF += ma]
-      v[VCF += mc]
+      v[VAF] += ma
+      v[VCF] += mc
     }
     const soldeCAp = this.soldeDeM(m) // solde courant APRES
-    if (soldeCAv < 0) {
-      // était négatif
-      if (soldeCAp > 0) {
-        // devenu positif
+    if (soldeCAv < 0) { // était négatif
+      if (soldeCAp > 0) {// devenu positif
         this.ddsn = 0
       } // else : toujours négatif, ddsn ne change pas
-    } else {
-      // était positif
-      if (soldeCAp > 0) {
-        // toujours positif
+    } else { // était positif
+      if (soldeCAp > 0) { // toujours positif
         this.ddsn = 0 // en fait ça ne change rien
-      } else {
-        // devenu négatif entre dh et dhf
+      } else { // devenu négatif entre dh et dhf
         const consoMs = (soldeCAv - soldeCAp) / (dhf - this.dh) // consommation par ms entre dh et dhf
         const nbms = Math.floor(soldeCAv / consoMs) // nombdre de ms pour ramener soldCav à 0 avec la conso calculée
         this.ddsn = this.dh + nbms
@@ -891,6 +896,7 @@ export class Compteurs {
   QUOTAS -> qn=${this.qv.qn} qv=${this.qv.qn} qc=${this.qv.qn} 
   CPT -> N=${this.qv.nn + this.qv.nc + this.qv.ng} nn=${this.qv.nn} nc=${this.qv.nc} ng=${this.qv.ng} v=${e6(this.qv.v)} 
   cjm*30= ${e6(this.qv.cjm * 30)} njec= ${this.njec}`
+    console.log(p)
   }
   
   printvd (n) {
@@ -905,6 +911,7 @@ export class Compteurs {
   moy vols: nn=${e6(v[VNN])}  nc=${e6(v[VNC])}  ng=${e6(v[VNG])}  v=${e6(v[VV])}
   conso:  nl=${v[VNL]}  ne=${v[VNE]}  vd=${v[VVD]}  vm=${v[VVM]}
   coûts:  ac=${e6(v[VAC])}  af=${e6(v[VAF])}  cc=${e6(v[VCC])}  cf=${e6(v[VAC])}
+  soldes:  DB=${e6(v[VDB])}  CR=${e6(v[VCR])}  début=${e6(v[VS])}  fin=${e6(this.soldeDeM(m))}
 `
       console.log(p)
       m--; if (m === 0) m = 12
