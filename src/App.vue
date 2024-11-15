@@ -23,21 +23,10 @@
       <btn-cond v-if="!session.ok" :color="session.statusPermIC.c" :icon="session.statusPermIC.ic"/>
 
       <!-- Notifications -->
-      <notif-icon v-if="session.status === 2" class="q-ml-xs" 
-        :alire="session.alire && (session.ntfIco !== 0)" 
-        :niv="session.ntfIco" 
-        @click="clickNotif"/>
-      
-      <!-- Test du look des icones de notification
-      <notif-icon v-if="session.status === 2" class="q-ml-xs" alire :niv="1"/>
-      <notif-icon v-if="session.status === 2" class="q-ml-xs" :niv="2"/>
-      <notif-icon v-if="session.status === 2" class="q-ml-xs" alire :niv="3"/>
-      <notif-icon v-if="session.status === 2" class="q-ml-xs" :niv="4"/>
-      <notif-icon v-if="session.status === 2" class="q-ml-xs" :niv="5"/> 
-      <notif-icon v-if="session.status === 2" class="q-ml-xs" :niv="6"/> 
-      <notif-icon v-if="session.status === 2" class="q-ml-xs" :niv="7"/> 
-      <notif-icon v-if="session.status === 2" class="q-ml-xs" :niv="8"/>
-      -->
+      <icon-alerte v-if="session.status === 2" class="q-ml-xs" 
+        :alire="session.alire && (session.nivAlerte !== 0)" 
+        :niv="session.nivAlerte" 
+        @click="clickAlertes"/>
       
       <!-- Presse papier -->
       <btn-cond v-if="session.ok" icon="content_paste" round 
@@ -81,12 +70,12 @@
       class="full-width bg-secondary text-white row justify-between">
       <btn-cond icon="refresh" @ok="session.reloadCompta()"/>
       <q-tabs  class="col titre-md" v-model="ui.pagetab" inline-label outside-arrows mobile-arrows no-caps>
-        <q-tab name="notif" :label="$t('PNCntf')" @click="ui.setTab('notif')"/>
+        <q-tab name="notif" :label="$t('PNCntf')" @click="ui.setTab('alertes')"/>
         <q-tab name="compta" :label="$t('PNCabo')" @click="ui.setTab('compta')"/>
         <q-tab name="credits" :label="$t('PNCcre')" @click="ui.setTab('credits')"/>
         <q-tab v-if="!session.estComptable" name="chats" :label="$t('PNCurg')" @click="ui.setTab('chats')"/>
       </q-tabs>
-      <btn-cond v-if="ui.pagetab==='notif' && session.alire" class="col-auto q-px-sm" 
+      <btn-cond v-if="ui.pagetab==='alertes' && session.alire" class="col-auto q-px-sm" 
         color="warning" icon="check" :label="$t('jailu')" 
         cond="cUrgence" @ok="jailu"/>
     </q-toolbar>
@@ -429,7 +418,7 @@ import IconMode from './components/IconMode.vue'
 import BoutonHelp from './components/BoutonHelp.vue'
 import BoutonLangue from './components/BoutonLangue.vue'
 import BoutonBulle from './components/BoutonBulle.vue'
-import NotifIcon from './components/NotifIcon.vue'
+import IconAlerte from './components/IconAlerte.vue'
 import QueueIcon from './components/QueueIcon.vue'
 import FiltreNom from './components/FiltreNom.vue'
 import FiltreMc from './components/FiltreMc.vue'
@@ -569,7 +558,7 @@ function stopop () {
   ui.fD()
 }
 
-function clickNotif () { ui.setPage('compta', 'notif') }
+function clickAlertes () { ui.setPage('compta', 'alertes') }
 function gotoAccueilLogin () { ui.setPage(session.status === 2 ? 'accueil' : 'login') }
 function fermerqm () {
   ui.fD()

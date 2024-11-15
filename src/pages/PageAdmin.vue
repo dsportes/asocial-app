@@ -59,7 +59,7 @@
               <span v-if="esp.hTC" class="msg q-mx-sm">{{$t('ESencrea')}}</span>
               <span v-if="!esp.hTC && esp.moisStat" class="q-ml-md fs-sm">{{$t('ESdms', [esp.moisStat])}}</span>
             </div>
-            <notif-icon v-if="esp.notifE" class="col-auto" :niv="nvntf(esp.notifE)"/>
+            <icon-alerte v-if="esp.notifE" class="col-auto" :niv="nvntf(esp.notifE)"/>
           </div>
         </template>
 
@@ -184,7 +184,7 @@ import BoutonHelp from '../components/BoutonHelp.vue'
 import BtnCond from '../components/BtnCond.vue'
 import PhraseContact from '../components/PhraseContact.vue'
 import SaisieMois from '../components/SaisieMois.vue'
-import NotifIcon from '../components/NotifIcon.vue'
+import IconAlerte from '../components/IconAlerte.vue'
 import QuotasVols from '../components/QuotasVols.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import { GetEspaces, CreationEspace, MajSponsEspace, SetEspaceQuotas, InitTachesGC, 

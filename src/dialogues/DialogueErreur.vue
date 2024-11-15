@@ -71,7 +71,7 @@ const rec = computed(() =>  session.status > 1)
 const cont = computed(() =>   session.status > 1 && lcont.has(exc.value.majeur))
 const mod = computed(() =>  session.status > 1 && lmod.has(exc.value.majeur) )
 
-function notif () { ui.setPage('compta', 'notif')}
+function notif () { ui.setPage('compta', 'alertes')}
 
 async function deconnecter () {
   ui.resetExc()

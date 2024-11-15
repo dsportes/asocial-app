@@ -8,75 +8,11 @@
     <bouton-help :page="'compta_' + ui.pagetab"/>
   </div>
 
-  <panel-compta v-if="ui.pagetab==='compta' && session.compta" 
-    class="spmd q-pa-sm" :c="session.compta.compteurs" :solde="session.compta.solde"/>
+  <panel-compta v-if="ui.pagetab==='compta' && session.compta"/>
 
   <panel-credits v-if="ui.pagetab==='credits'"/>
 
-  <div v-if="ui.pagetab==='notif' && session.compta" class="spmd q-pa-sm">
-
-    <div class="row q-my-md items-center">
-      <notif-icon class="col-auto" :niv="session.ntfIco"/>
-      <div class="q-ml-sm titre-lg">{{$t('ANlong' + session.ntfIco)}}</div>
-    </div>
-
-    <div v-if="session.nbjat < 365" class="msg2 text-center titre-lg">
-      {{$t('PCPdlvat', [AMJ.editDeAmj(session.dlvat), session.nbjat])}}
-    </div>
-
-    <div class="row q-my-lg items-center">
-      <div class="colauto"><n3-icon :niv="nnbj"/></div>
-      <div class="col titre-md">{{$t('PCPnbj', [nbj])}}</div>
-    </div>
-
-    <div class="row q-mt-sm items-center">
-      <div class="colauto"><n3-icon :niv="npcn"/></div>
-      <div class="col titre-md">
-        {{$t('PCPqn', [(c.qv.qn * UNITEN), pc.pcn, c.qv.nn, c.qv.nc, c.qv.ng])}}</div>
-    </div>
-    <div v-if="npcn===3" :class="al">{{$t('ANlong2a')}}</div>
-
-    <div class="row q-my-sm items-center">
-      <div class="colauto"><n3-icon :niv="npcv"/></div>
-      <div class="col titre-md">
-        {{$t('PCPqv', [edvol(c.qv.qv * UNITEV), pc.pcv, c.qv.v])}}</div>
-    </div>
-    <div v-if="npcv===3" :class="al">{{$t('ANlong2b')}}</div>
-
-    <div v-if="session.compte.estA" class="row q-mt-sm items-center">
-      <div class="colauto"><n3-icon :niv="nnj"/></div>
-      <div class="col titre-md">{{$t('PCPsolde', [s, nj])}}</div>
-    </div>
-    <div v-if="session.compte.estA && nnj===3" :class="al">{{$t('ANlong5')}}</div>
-
-    <div v-if="!session.compte.estA" class="row q-mt-sm items-center">
-      <div class="colauto"><n3-icon :niv="npcc"/></div>
-      <div class="col titre-md">{{$t('PCPqcal', [c.qv.qc, pc.pcc])}}</div>
-    </div>
-    <div v-if="!session.compte.estA && npcc===2" :class="al">{{$t('ANlong7')}}</div>
-    <div v-if="!session.compte.estA && npcc===3" :class="al">{{$t('ANlong8')}}</div>
-
-    <q-separator color="orange" class="q-mt-md"/>
-    <div class="row q-my-sm items-start">
-      <div class="colauto"><n3-icon :niv="session.espace.notifE ? session.espace.notifE.nr : 0"/></div>
-      <apercu-notif class="q-ml-sm col" :idx="0" :type="0" 
-        :cible="session.ns" :notif="session.espace.notifE"/>
-    </div>
-
-    <div v-if="!session.compte.estA">
-      <q-separator color="orange" class="q-mt-md"/>
-      <div class="row q-my-sm items-start">
-        <div class="colauto"><n3-icon :niv="session.notifP ? session.notifP.nr : 0"/></div>
-        <apercu-notif class="q-ml-sm col" :idx="1" :type="1" :cible="session.compte.idp" :notif="session.notifP"/>
-      </div>
-      <q-separator color="orange" class="q-mt-md"/>
-      <div class="row q-my-sm items-start">
-        <div class="colauto"><n3-icon :niv="session.compte.notif ? session.compte.notif.nr : 0"/></div>
-        <apercu-notif  class="q-ml-sm col" :idx="2" :type="2" 
-          :cible="session.compteId" :notif="session.compte.notif"/>
-      </div>
-    </div>
-  </div>
+  <panel-alertes v-if="ui.pagetab==='alertes' && session.compta"/>
 
   <div v-if="ui.pagetab==='chats'" class="spmd q-pa-sm">
 
@@ -86,7 +22,6 @@
     <q-card v-for="(e, idx) in lurg" :key="e.id">
       <div :class="'q-my-sm q-px-sm ' + dkli(idx)">
         <apercu-genx :id="e.id" :del="e.del" :idx="idx" urgence/>
-        <!--micro-chat :id-e="e.id" :id-i="session.compteId" :del="e.del" urgence/-->
       </div>
     </q-card>
   </div>
@@ -103,11 +38,10 @@ import PanelCompta from '../components/PanelCompta.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
 import PanelCredits from '../components/PanelCredits.vue'
+import PanelAlertes from '../components/PanelAlertes.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BtnCond from '../components/BtnCond.vue'
-import { $t, dkli, edvol, afficher8000 } from '../app/util.mjs'
-import N3Icon from '../components/N3Icon.vue'
-import NotifIcon from '../components/NotifIcon.vue'
+import { $t, dkli, afficher8000 } from '../app/util.mjs'
 import { ID, UNITEN, UNITEV, AMJ } from '../app/api.mjs'
 import { RafraichirCvsAv, GetPartition } from '../app/operations4.mjs'
 
@@ -122,10 +56,10 @@ if (session.accesNet) onMounted( async () => {
   if (!session.estA) await new GetPartition().run(session.partition.id)
 })
 
+/*
 const nbj = computed(() => session.nbj)
 const nnbj = computed(() => nbj.value > 40 ? 1 : (nbj.value > 10 ? 2 : 3))
 
-const c = computed(() => session.compta.compteurs)
 const s = computed(() =>session.compta.solde)
 const pc = computed(() => c.value.pourcents)
 const npcn = computed(() => pc.value.pcn < 80 ? 1 : (pc.value.pcn <= 90 ? 2 : 3))
@@ -133,6 +67,7 @@ const npcv = computed(() => pc.value.pcv < 80 ? 1 : (pc.value.pcv <= 90 ? 2 : 3)
 const npcc = computed(() => pc.value.pcc < 80 ? 1 : (pc.value.pcc <= 90 ? 2 : 3))
 const nj = computed(() => c.value.nbj(session.compta.solde))
 const nnj = computed(() => nj.value > 40 ? 1 : (nj.value > 10 ? 2 : 3))
+*/
 const lurg = computed(() => {
   const p = session.partition
   const l = []

@@ -30,22 +30,22 @@
       </div>
 
       <!-- Alertes -->
-      <div class="btn2 row items-center" @click="clickNotif">
-        <notif-icon
-          :alire="session.alire && (session.ntfIco !== 0)" :niv="session.ntfIco"/>
+      <div class="btn2 row items-center" @click="clickAlertes">
+        <icon-alerte
+          :alire="session.alire && (session.nivAlerte !== 0)" :niv="session.nivAlerte"/>
         <span class="q-ml-xs">{{$t('PNCntf')}}</span>
       </div>
 
       <!-- Abonnement -->
       <div class="btn2 row items-center" @click="clickAbo">
-        <n3-icon :niv="session.quotmax"/>
+        <icon-alerte :niv="nivAlerteCpt"/>
         <span class="q-ml-xs">{{$t('PNCabo')}}</span>
       </div>
 
       <!-- credits -->
       <div v-if="session.estComptable || session.compte.estA"
         class="btn2 row items-center" @click="clickCred">
-        <n3-icon :niv="session.ral" class="t1"/>
+        <icon-alerte :niv="session.nivAlerteSN"/>
         <span class="q-ml-xs">{{$t('PNCcre')}}</span>
       </div>
 
@@ -78,8 +78,7 @@ import { useQuasar } from 'quasar'
 import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonLangue from '../components/BoutonLangue.vue'
-import NotifIcon from '../components/NotifIcon.vue'
-import N3Icon from '../components/N3Icon.vue'
+import IconAlerte from '../components/IconAlerte.vue'
 import MenuAccueil from '../components/MenuAccueil.vue'
 import BtnCond from '../components/BtnCond.vue'
 
@@ -91,7 +90,7 @@ const aSt = stores.avatar
 const pccl = computed(() => aSt.compta.pc < 80 ? 'bg-transparent' : (aSt.compta.pc < 100 ? 'bg-yellow-3' : 'bg-negative'))
 
 function tgdark () { $q.dark.toggle() }
-function clickNotif () { ui.setPage('compta', 'notif')}
+function clickAlertes () { ui.setPage('compta', 'alertes')}
 function clickChats () { ui.setPage('compta', 'chats')}
 function clickAbo () { ui.setPage('compta', 'compta')}
 function clickCred () { ui.setPage('compta', 'credits')}

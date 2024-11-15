@@ -1290,6 +1290,25 @@ export default {
 
   P11tit: 'Avatar du compte | Avatar du compte | Avatars du compte',
 
+  // PanelAlerte
+  PALdlvat: 'L\'Administrateur Technique a fixé une date au delà de laquelle toute connexion sera bloquée. Normalement la raison de cette limite est exprimée plus avant dans cette page ("Alerte de l\'Administrateur Technique").',
+  PALdlvc: 'Le compte va s\'auto-détruire bientôt, l\'alerte "ACCÈS RESTREINT" n\'ayant pas été résolue.',
+  PALdlv: 'Pour information, sauf connexion ultérieure le compte s\'auto-détruira à la date ci-dessous.',
+  PALar: 'Le compte est en "ACCÈS RESTREINT": les données ne sont plus NI VISUALISABLES, NI MODIFIABLES. Toutefois il reste possible d\'accéder NORMALEMENT aux autres onglets de cette page "Abonnements, Crédits, Chats d\'Urgence".',
+  PALars: 'Solde négatif (défaut de crédit). Voir l\'onglet "Abonnement".',
+  PALarc: 'Alerte spécifiquement sur le compte levée par le Comptable ou un délégué. Voir plus avant dans cette page ("Alerte spécifique du compte").',
+  PALarp: 'Alerte à tous les comptes de la partition levée par le Comptable ou un délégué. Voir plus avant dans cette page ("Alerte aux comptes de la partition").',
+  PALls: 'Le compte est en "LECTURE SEULEMENT": les données sont VISUALISABLES MAIS PAS MODIFIABLES. Toutefois il reste possible d\'accéder NORMALEMENT aux autres onglets de cette page "Abonnements, Crédits, Chats d\'Urgence".',
+  PALnred: 'Le quota du nombre de documents (notes, chats, groupes) est dépassé. Il \'est plus possible d\'en ajouter jusqu\'à rescente en-dessus du quota.',
+  PALvred: 'Le quota du volume des fichiers attachés aux notes est dépassé. Il \'est plus possible d\'augmenter ce volume jusqu\'à rescente en-dessus du quota.',
+  PALralA: 'Pour information, la moyenne mensuelle de la consommation de calcul sur le mois en cours et le précédent excède le quota que VOUS avez fixé.',
+  PALralO: 'La moyenne mensuelle de la consommation de calcul sur le mois en cours et le précédent excède le quota fixé par le Comptable ou un de ses délégués.',
+  PALr1: 'Les opérations sont volontairement ralenties jusqu\'à passage en dessous du quota.',
+  PALr2: 'Les opérations sont volontairement TRÈS ralenties jusqu\'à passage en dessous du quota.',
+  PALesp: 'Alerte de l\'Administrateur Technique pour tous les comptes.',
+  PALpart: 'Alerte du Comptable ou d\'un de ses délégués pour tous les comptes de la partition.',
+  PALcpt: 'Alerte du Comptable ou d\'un de ses délégués spécifiquement pour ce compte.',
+
   // PageCompta
   PCPsynth: 'Synthèse à {0}',
   PCPdet: 'Détail par mois',
@@ -1328,66 +1347,12 @@ export default {
   PCPsoldac: 'Solde actuel',
   PCPnbjn: 'Au rythme des 2 derniers mois, le solde sera négatif ',
   PCPsneg: 'Date à laquelle le solde est devenu négatif: {0}.',
-
-  PCPtabnotif: 'Alertes sur le compte',
-  PCPtabcompta: 'Abonnement et consommation',
-  PCPtabcredits: 'Gestion des crédits',
-  PCPdlvat: 'L\'Administrateur Technique a fixé la date limite des connexions au {0}, dans {1} jour(s)',
-  PCPnbj: '{0} jour(s) avant inaccessibilité totale du compte',
-  PCPqn: 'Quota nombre de documents: {0} [{1}%] - {2} note(s), {3} chat(s), {4} groupe(s)',
-  PCPqv: 'Quota volume de fichiers: {0} [{1}%] - {2} utilisés',
-  PCPsolde: 'Solde restant: {0}c - {1} jour(s) de consomation',
-  PCPqcal: 'Quota de consommation de calcul mensuel: {0}c [{1}%]',
-  PCPnot: 'Aucune Alerte',
-  PCPnbjm: 'Nb. jours dans le mois',
-  PCPtotal: 'Total',
-  PCPactuel: 'Actuel',
-  PCPmoy: '(moyenne)',
-  PCPnbno: 'Nombre de notes',
-  PCPnbch: 'Nombre de chats',
-  PCPnbgr: 'Nombre de groupes',
-  PCPabo: 'Abonnement',
-  PCPutil: '% d\'utilisation',
-  PCPdet: 'Détail',
-  PCPv2: 'Volume des fichiers',
-  PCPconso: 'Consommation',
-  PCPcconso: 'Contrôle de la consommation',
-  PCPabcs: 'Abo. + conso.',
-  PCPabc: 'Abo. Conso.',
-  PCPdb: 'Débit',
-  PCPcr: 'Crédit',
-  PCPsl: 'Solde',
-  PCPrecap: 'Historique des coûts sur les 18 derniers mois',
   PCPtarifs: 'Tarifs',
+
   PCPlec: 'Nombre de lectures',
   PCPecr: 'Nombre d\'écritures',
   PCPvd: 'Vol. desc. fichiers',
   PCPvm: 'Vol. montant. fichiers',
-
-  PCPcouts: 'Couts en c cumulés sur la période de référence.',
-  PCPcptO: 'Le compte est un compte "O", ces coûts sont donnés pour information, ils sont supportés par l\'organisation.',
-
-  PCPsoldeP: 'Solde au début de la période',
-  PCPdons: 'Somme des dons effectués sur la période',
-  PCPcreditsP: 'Somme des crédits enregistrés sur la période',
-  PCPfact: 'Consommation facturée sur la période',
-  PCPsoldeC: 'Solde courant maintenant',
-  PCPnjec: 'Au rythme actuel, le solde courant resterait positif encore {0} jours.',
-
-  PCPcmoy: 'Moyenne "mensuelle" depuis début {3} : {0}, soit {1}% du plafond alloué {2}.',
-  PCPplaf: 'Plafond alloué: {0}',
-
-  PCPprefa0: 'Débit: consommation depuis la création du compte [{0}] et maintenant ({1} jours).',
-  PCPprefa2: 'Débit: consommation depuis le passage en "compte autonome" [{0}] et maintenant ({1} jours).',
-
-  PCPdeca: '{1} de découvert exceptionnel autorisé. Fin de validité: {0}',
-  PCPdeco: 'La limite maximale de consommation peut être exceptionnellement dépassé de {1}%. Fin de validité: {0}',
-  PCPconso2M: '{0} : consommation sur la période de référence en rythme annuel.',
-  PCPlim: '{0}% de la limite',
-  PCPqc: '{0} : limite maximale autoriée de consommation en rythme annuel.',
-  PCPcouv: 'Sur le rythme des 4 derniers mois, le solde actuel couvre environ {0} jours d\'abonnement et de consommation',
-
-
 
   // Panel Partition
   PTci: 'Commentaires / information',

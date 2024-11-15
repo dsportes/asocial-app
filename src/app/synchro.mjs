@@ -711,7 +711,7 @@ export class ConnexionSynchroIncognito extends OperationS {
       session.setStatus(2)
       syncQueue.reveil()
       await sleep(300)
-      if (session.ntfIco) stores.ui.setPage('compta', 'notif')
+      if (session.nivAlerte) stores.ui.setPage('compta', 'alertes')
       else stores.ui.setPage('accueil')
       this.finOK()
     } catch (e) {

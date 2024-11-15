@@ -141,11 +141,22 @@ export const useSessionStore = defineStore('session', {
       1 : Accès avec contraintes, alertes de compte ou partition
       0 : Pas d'alerte
     */
-    ntfIco (state) {
+    nivAlerte (state) {
       if (state.nbjAt < state.config.alerteDlv || state.nbjDlv < state.config.alerteDlv) return 3
       if (state.hasAR) return 2
       if (state.RAL || state.hasLS || state.hasNRED || state.hasVRED
         || state.ntfE || state.ntfC || state.ntfP || state.estFige) return 1
+      return 0
+    },
+
+    nivAlerteCpt (state) {
+      if (AL.has(state.flags, AL.ARSN)) return 2
+      if (state.RAL || state.hasNRED || state.hasVRED) return 1
+      return 0
+    },
+
+    nivAlerteSN (state) {
+      if (AL.has(state.flags, AL.ARSN)) return 2
       return 0
     },
 
