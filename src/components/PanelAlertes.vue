@@ -7,18 +7,20 @@
     </div>
   </ligne-alerte>
 
-  <ligne-alerte v-if="session.nbjDlv < config.alerteDlv" :niv="3" code="PALdlvc" hlp="alerte_dlvc">
-    <div class="q-ml-md">
-      <span class="font-mono q-mr-md">{{dhcool(dlvt, false, true)}}</span>
-      <span class="font-mono msg2">{{$t('dansjours', session.nbjDlv, {count: session.nbjDlv})}}</span>
-    </div>
-  </ligne-alerte>
-  <ligne-alerte v-else :niv="0" code="PALdlv" hlp="alerte_dlv">
-    <div class="q-ml-md">
-      <span class="font-mono q-mr-md">{{dhcool(dlvt, false, true)}}</span>
-      <span class="font-mono">{{$t('dansjours', session.nbjDlv, {count: session.nbjDlv})}}</span>
-    </div>
-  </ligne-alerte>
+  <div v-if="!ID.estComptable(session.compteId)">
+    <ligne-alerte v-if="session.nbjDlv < config.alerteDlv" :niv="3" code="PALdlvc" hlp="alerte_dlvc">
+      <div class="q-ml-md">
+        <span class="font-mono q-mr-md">{{dhcool(dlvt, false, true)}}</span>
+        <span class="font-mono msg2">{{$t('dansjours', session.nbjDlv, {count: session.nbjDlv})}}</span>
+      </div>
+    </ligne-alerte>
+    <ligne-alerte v-else :niv="0" code="PALdlv" hlp="alerte_dlv">
+      <div class="q-ml-md">
+        <span class="font-mono q-mr-md">{{dhcool(dlvt, false, true)}}</span>
+        <span class="font-mono">{{$t('dansjours', session.nbjDlv, {count: session.nbjDlv})}}</span>
+      </div>
+    </ligne-alerte>
+  </div>
 
   <ligne-alerte v-if="session.hasAR" :niv="2" code="PALar" hlp="alerte_ar">
     <div class="q-ml-md fs-md">
@@ -60,8 +62,7 @@
     </div>
   </ligne-alerte>
 
-  <q-separator color="orange" class="q-mt-md"/>
-
+  <q-separator v-if="session.ntfE" color="orange" class="q-mt-md"/>
   <ligne-alerte v-if="session.ntfE" :niv="session.espace.notifE.nr" code="PALesp" hlp="alerte_esp">
     <apercu-notif :idx="0" :type="0" 
       :cible="session.ns" :notif="session.espace.notifE"/>
@@ -77,7 +78,7 @@
 
     <q-separator color="orange" class="q-mt-md"/>
 
-    <ligne-alerte :niv="niv(session.espace.notifC)" code="PALcpt" hlp="alerte_cpt">
+    <ligne-alerte :niv="nrx(session.espace.notifC)" code="PALcpt" hlp="alerte_cpt">
       <apercu-notif :idx="0" :type="2" 
         :cible="session.compteId" :notif="session.compte.notif"/>
     </ligne-alerte>
@@ -93,16 +94,17 @@ import stores from '../stores/stores.mjs'
 import ApercuNotif from '../components/ApercuNotif.vue'
 
 import BoutonHelp from '../components/BoutonHelp.vue'
-import { $t, edvol } from '../app/util.mjs'
+import { $t, edvol, dhcool } from '../app/util.mjs'
 import LigneAlerte from './LigneAlerte.vue'
 import IconAlerte from './IconAlerte.vue'
-import { AMJ, AL } from '../app/api.mjs'
+import { AMJ, AL, Tarif, UNITEN, UNITEV, ID } from '../app/api.mjs'
 
 
 const session = stores.session
-const cfg = stores.config
+const config = stores.config
 
 const c = computed(() => session.compta.compteurs)
+const cuj = computed(() => Tarif.cu(c.value.aaaa, c.value.mm))
 const qv = computed(() => c.value.qv )
 const cqn = computed(() => qv.value.qn * cuj.value[0])
 const cqv = computed(() => qv.value.qv * cuj.value[1])
@@ -115,6 +117,7 @@ const dlvt = computed(() => AMJ.tDeAmjUtc(session.compte.dlv))
 const oa = computed(() => session.estA ? 'A' : 'O')
 
 const p2 = (x) => x === 0 ? '0' : (x < 0.01 ? '<0,01' : x.toPrecision(2))
+const pc = (x, y) => y === 0 ? 999 : (x * 100) / y
 const pced = (x, y) => { const q = pc(x, y)
   return q >= 999 ? '?' : (q === 0 ? '0%' : (q < 1 ? '<1%' : Math.round(q) + '%'))
 }

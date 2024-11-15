@@ -1,5 +1,5 @@
 <template>
-<div class="q-my-sm row items-center">
+<div class="q-my-sm row items-start">
   <icon-alerte class="col-1 text-center" :niv="niv"/>
   <div class="col-10 column">
     <div class="titre-md">{{$t(code)}}</div>
@@ -11,6 +11,7 @@
 
 <script setup>
 import IconAlerte from './IconAlerte.vue'
+import BoutonHelp from './BoutonHelp.vue'
 
 const props = defineProps({
   niv: Number,

@@ -1310,7 +1310,12 @@ export default {
   PALcpt: 'Alerte du Comptable ou d\'un de ses délégués spécifiquement pour ce compte.',
 
   // PageCompta
+  PCPtabalertes: 'Alertes et restrictions',
+  PCPtabcredits: 'Gestion des crédits',
+  PCPtabcompta: 'Abonnement et consommation',
+
   PCPsynth: 'Synthèse à {0}',
+  PCPnoex: 'Le compte n\'existait pas à cette date.',
   PCPdet: 'Détail par mois',
   PCPref0: 'Crée {0} - Compte "O" depuis la création.',
   PCPref1: 'Crée {0} - Compte "A" depuis la création.',

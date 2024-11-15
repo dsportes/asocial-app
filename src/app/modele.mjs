@@ -596,7 +596,7 @@ export class Compta extends GenDoc {
 
   async compile (row) {
     this.idp = row.idp || '' // inscrit par GetCompta (par commodité en session ?)
-    this.compteurs = new Compteurs(row.compteurs)
+    this.compteurs = new Compteurs(row.serialCompteurs)
     this.tickets = row.tickets || {}
     this.dons = row.dons || []
   }

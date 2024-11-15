@@ -1,5 +1,7 @@
 <template>
 <div>
+<div v-if="v[VMS] === 0" class="titre-lg q-my-md text-italic text-center">{{$t('PCPnoex')}}</div>
+<div v-else>
   <div class="fs-md q-mt-xs text-italic q-mb-sm">{{$t('PCPnbjours', nbj, {count: nbj})}}</div>
 
   <div :class="'row q-mt-xs ' + dkli(1)">
@@ -63,6 +65,7 @@
     <div class="col-2 font-mono text-center">{{p2s(v[VS])}}c</div>
     <div :class="'col-2 font-mono text-center ' + (sap < 0 ? 'p100' : '')">{{p2s(sap)}}c</div>
   </div>
+</div>
 </div>
 </template>
 

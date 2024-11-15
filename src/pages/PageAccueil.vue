@@ -38,7 +38,7 @@
 
       <!-- Abonnement -->
       <div class="btn2 row items-center" @click="clickAbo">
-        <icon-alerte :niv="nivAlerteCpt"/>
+        <icon-alerte :niv="session.nivAlerteCpt"/>
         <span class="q-ml-xs">{{$t('PNCabo')}}</span>
       </div>
 

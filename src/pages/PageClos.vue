@@ -9,6 +9,9 @@
       <div class="q-mt-md q-mb-sm text-center text-italic titre-md">
         {{$t('ECmi', [dhcool(session.excKO.args[1])])}}
       </div>
+      <div v-if="session.excKO.stack">
+        <q-input class="font-mono fs-xs" type="text" readonly outlined dense v-model="session.excKO.stack"/>
+      </div>
       <show-html class="bord" zoom maxh="10rem" :texte="session.excKO.args[0]"/>
       <btn-cond class="q-mt-lg text-center" flat size="lg"
         color="warning" :label="$t('jailu')" @ok="deconnex"/>
@@ -27,6 +30,9 @@
     <q-card v-if="session.excKO && session.excKO.code < 9900" class="q-mt-lg spsm column justify-center">
       <div class="text-center titre-lg titre-italic">{{$t('sessionKO')}}</div>
       <div class="text-center titre-sm q-my-md q-mx-md" v-html="html(session.excKO)"/>
+      <div v-if="session.excKO.stack">
+        <q-input class="font-mono fs-xs" type="text" readonly outlined dense v-model="session.excKO.stack"/>
+      </div>
       <btn-cond class="q-mt-lg text-center" flat size="lg"
         color="warning" :label="$t('jailu')" @ok="deconnex"/>
     </q-card>

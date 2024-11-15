@@ -58,8 +58,8 @@ export const useHbStore = defineStore('hb', () => {
     if (session.avion) return false
     try {
       const ret = await pubsub('ping', { })
-      if (ret !== 'OK') { statusHB.value = false; return false }
-      return true
+      statusHB.value = ret === 'OK'
+      return statusHB.value
     } catch (e) {
       statusHB.value = false
       return false
@@ -72,7 +72,7 @@ export const useHbStore = defineStore('hb', () => {
       if (await pingHB()) {
         await new SyncFull().run()
         setTimeout(async () => {
-          await hb.startHB()
+          await startHB()
         }, 500)
         break
       }
