@@ -132,7 +132,7 @@
           <btn-cond color="warning" icon="close" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTquta')}}</q-toolbar-title>
         </q-toolbar>
-        <choix-quotas class="q-mt-sm" v-model="quotasA" />
+        <choix-quotas class="q-mt-sm" v-model="quotasA" groupe/>
         <q-card-actions align="right" class="q-gutter-sm">
           <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
           <btn-cond :disable="quotasA.err || !quotasA.chg" icon="check" cond="cUrgence"
@@ -381,12 +381,10 @@ async function editerqA () {
   const maxn = rqn < 0 ? q.qn : rqn
   const rqv = qe.qv - qpt.qv + q.qv
   const maxv = rqv < 0 ? q.qv : rqv
-  const rqc = qe.qc - qpt.qc + q.qc
-  const maxc = rqc < 0 ? q.qc : rqc
   quotasA.value = { 
-    qc: q.qc, qn: q.qn, qv: q.qv,
+    qc: 0, qn: q.qn, qv: q.qv,
     minc: 0, minn: 0, minv: 0,
-    maxc, maxn, maxv,
+    maxc: 0, maxn, maxv,
     err: ''
   }
   ui.oD('PEedqA', idc)

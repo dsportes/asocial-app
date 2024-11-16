@@ -61,7 +61,7 @@ const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 
 const props = defineProps({ 
   lecture: Boolean,
-  groupe: Boolean
+  groupe: Boolean // Ne présente pas de qc (groupe et quotas des comptes A)
 })
 
 const model = defineModel({ type: Object }) // quotas

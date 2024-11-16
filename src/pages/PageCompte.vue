@@ -222,14 +222,15 @@ async function oknom (nom) {
 
 async function editerq () {
   await new GetCompta().run()
-  const c = session.compta
+  const c = session.compta.compteurs
   if (estA.value) {
     await new GetSynthese().run()
     const synth = session.synthese
     const qA = synth.qA
     const qtA = synth.qtA
     let maxn = qA.qn - qtA.qn + c.qv.qn; if (maxn <= 0) maxn = c.qv.qn
-    let maxc = qA.qc - qtA.qc + c.qv.qc; if (maxc <= 0) maxc = c.qv.qc
+    // let maxc = qA.qc - qtA.qc + c.qv.qc; if (maxc <= 0) maxc = c.qv.qc
+    const maxc = 1000
     let maxv = qA.qv - qtA.qv + c.qv.qv; if (maxv <= 0) maxv = c.qv.qv
     quotas.value = { qn: c.qv.qn, qv: c.qv.qv, qc: c.qv.qc, minn: 0, minv: 0, minc: 0,
       maxn, maxv, maxc,

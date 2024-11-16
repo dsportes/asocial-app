@@ -55,7 +55,7 @@
         <div class="col-8 titre-lg">{{$t('PCPsoldac')}}</div>
         <div class="col-2"></div>
         <div class="col-2 text-right">
-          <span :class="'font-mono text-bold fs-lg ' + (sc < 0 ? 'p100' : '')">{{p4s(sc)}}c</span>
+          <span :class="'font-mono text-bold fs-lg ' + (sc < 0 ? 'p100' : '')">{{p5s(sc)}}c</span>
         </div>
       </div>
 
@@ -142,9 +142,11 @@ const njec = computed(() => c.value.njec )
 const p0 = (x) => x === 0 ? '0' : (x < 1 ? '<1' : Math.round(x))
 const p2 = (x) => x === 0 ? '0' : (x < 0.01 ? '<0,01' : x.toPrecision(2))
 const p4 = (x) => x === 0 ? '0' : (x < 0.0001 ? '<0,0001' : x.toPrecision(4))
+const p5 = (x) => x === 0 ? '0' : (x < 0.0001 ? '<0,0001' : x.toPrecision(5))
 const pv = (x) => x === 0 ? '0B' : (x < 1 ? '<1B' : edvol(x))
 const p2s = (x) => x < 0 ? '-' + p2(-x) : p2(x)
 const p4s = (x) => x < 0 ? '-' + p4(-x) : p4(x)
+const p5s = (x) => x < 0 ? '-' + p5(-x) : p5(x)
 
 const pc = (x, y) => y === 0 ? 999 : (x * 100) / y
 const pced = (x, y) => { const q = pc(x, y)

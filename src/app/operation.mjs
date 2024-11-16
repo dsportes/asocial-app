@@ -37,15 +37,6 @@ export class Operation {
     return $t('OP_' + this.nom) 
   }
 
-  //Utilisé dans PlusTicket
-  async retry () {
-    if (this.modeSync) return
-    if (this.nbretry++ > 5) 
-      throw new AppExc(E_BRO, 21, [this.label])
-    if (this.retry > 1) await sleep((this.retry * 300))
-    return true
-  }
-
   BRK () { 
     if (this.modeSync) return
     if (this.break) throw new AppExc(E_BRK, 0)

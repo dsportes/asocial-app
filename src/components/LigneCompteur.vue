@@ -62,8 +62,8 @@
   </div>
   <div :class="'row ' + dkli(1)">
     <div class="col-8">{{$t('PCPsoldes')}}</div>
-    <div class="col-2 font-mono text-center">{{p2s(v[VS])}}c</div>
-    <div :class="'col-2 font-mono text-center ' + (sap < 0 ? 'p100' : '')">{{p2s(sap)}}c</div>
+    <div class="col-2 font-mono text-center">{{p5s(v[VS])}}c</div>
+    <div :class="'col-2 font-mono text-center ' + (sap < 0 ? 'p100' : '')">{{p5s(sap)}}c</div>
   </div>
 </div>
 </div>
@@ -88,8 +88,10 @@ const sap = computed(() => props.v[VS] + props.v[VCR] - props.v[VDB] - props.v[V
 const p0 = (x) => x === 0 ? '0' : (x < 1 ? '<1' : Math.round(x))
 const p2 = (x) => x === 0 ? '0' : (x < 0.01 ? '<0,01' : x.toPrecision(2))
 const p4 = (x) => x === 0 ? '0' : (x < 0.0001 ? '<0,0001' : x.toPrecision(4))
+const p5 = (x) => x === 0 ? '0' : (x < 0.0001 ? '<0,0001' : x.toPrecision(5))
 const pv = (x) => x === 0 ? '0B' : (x < 1 ? '<1B' : edvol(x))
 const p2s = (x) => x < 0 ? '-' + p2(-x) : p2(x)
+const p5s = (x) => x < 0 ? '-' + p5(-x) : p5(x)
 
 const pc = (x, y) => y === 0 ? 999 : (x * 100) / y
 const pced = (x, y) => { const q = pc(x, y)

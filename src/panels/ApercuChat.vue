@@ -19,7 +19,7 @@
           <div v-if="chatX.stE !== 2" class="row q-gutter-xs items-center">
             <btn-cond :label="$t('CHadd1')" icon="add" @ok="editer(false)"
               :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
-            <btn-cond v-if="session.estA" :label="$t('CHadd2')" icon="savings"
+            <btn-cond :label="$t('CHadd2')" icon="savings"
               @ok="editer(true)" :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
           </div>
           <btn-cond v-if="chatX.stI" 
@@ -119,7 +119,7 @@
   import stores from '../stores/stores.mjs'
 
   import { styp, sty, dhcool, dkli, afficherDiag } from '../app/util.mjs'
-  import { GetCompta, MajChat, StatutAvatar, PassifChat } from '../app/operations4.mjs'
+  import { GetCompta, MajChat, PassifChat } from '../app/operations4.mjs'
   import { ID } from '../app/api.mjs'
 
   import SdBlanc from '../components/SdBlanc.vue'
@@ -147,7 +147,6 @@
   const nomI = computed(() => chatX.value ? session.getCV(chatX.value.id).nom : '')
   const estDel = computed(() => ID.estComptable(chatX.value.idE) || session.estDelegue)
 
-  // const nbci = ref(chatX.value.items.length) // pour tester l'init d'une variable locale
   const dconf = ref(false)
   const txt = ref('')
   const avecDon = ref(false)
@@ -191,14 +190,7 @@
   }
 
   async function editer (avecD) {
-    if (avecD) {
-      dconf.value = false
-      const [ ,idp] = await new StatutAvatar().run(chatX.value.idE)
-      if (idp !== 0) {
-        await afficherDiag($t('CHauto'))
-        return
-      }
-    }
+    if (avecD) dconf.value = false
     txt.value = chatX.value ? chatX.value.txt : ''
     avecDon.value = avecD
     ui.oD('ACchatedit', idc)

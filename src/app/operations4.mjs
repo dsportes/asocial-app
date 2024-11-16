@@ -23,10 +23,8 @@ export class EchoTexte extends Operation {
 
   async run(texte, to) {
     try {
-      // while (await this.retry()) {
-        const ret = await post(this, 'EchoTexte', { to: to, texte })
-        console.log('Echo : ' + ret.echo)
-      // }
+      const ret = await post(this, 'EchoTexte', { to: to, texte })
+      console.log('Echo : ' + ret.echo)
       return this.finOK(ret.echo)
     } catch (e) {
       await this.finKO(e)

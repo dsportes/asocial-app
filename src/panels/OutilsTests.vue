@@ -19,7 +19,28 @@
 
     <q-page-container>
       <div class="font-mono fs-sm q-my-sm q-ml-sm">{{$t('OTbuild', [config.BUILD])}}</div>
-
+      
+      <div class="font-def fs-sm">Normal sm</div>
+      <div class="font-def fs-md">Normal md</div>
+      <div class="font-def text-italic fs-md">Normal italic md</div>
+      <div class="font-def text-bold fs-md">Normal bold md</div>
+      <div class="font-def text-bold text-italic fs-md">Normal italic bold md</div>
+      <div class="font-def fs-xl">Normal xl</div>
+      <div class="fs-xl">Normal Def xl</div>
+      <div class="fs-sm font-mono q-mt-md">Mono 1 l 0 O wiw sm</div>
+      <div class="fs-md font-mono">Mono 1 l 0 O wiw md</div>
+      <div class="text-italic fs-md font-mono">Mono 1 l 0 O wiw italic md</div>
+      <div class="text-bold fs-md font-mono">Mono 1 l 0 O wiw italic md</div>
+      <div class="text-italic text-bold fs-md font-mono">Mono 1 l 0 O wiw italic bold md</div>
+      <div class="fs-xl font-mono">Mono 1 l 0 O iii xl</div>
+      <div class="fs-xl font-mono">Mono 1 l 0 O www xl</div>
+      <div class="titre-sm q-mt-md">Titre sm</div>
+      <div class="titre-md">Titre md</div>
+      <div class="text-italic titre-md">Titre italic md</div>
+      <div class="text-bold titre-md">Titre italic md</div>
+      <div class="text-italic text-bold titre-md">Titre italic bold md</div>
+      <div class="titre-xl">Titre xl</div>
+      
       <div v-if="tab === 'compteurs'">
         <test-compteurs/>
       </div>
