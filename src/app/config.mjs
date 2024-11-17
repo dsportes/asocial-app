@@ -32,8 +32,8 @@ export const config = {
   /* Valeurs à ne pas changer, sauf rares exception */
   portupload: 33666, // Ne pas changer en général
   dldemonsec: 10, // ficav-store : délai du démon
-  dons: [1, 5, 10, 20, 50], // choix des dons au sponsoring d'un autre compte
-  dons2: [2, 5, 10, 20, 50], // choix des dons pour les dons directs pat chat
+  dons: [1, 5, 10, 20, 50, 100], // choix des dons au sponsoring d'un autre compte
+  dons2: [2, 5, 10, 20, 50, 100], // choix des dons pour les dons directs pat chat
 
   maxlgtextegen: 250,
   maxlgtextesecret: 5000,

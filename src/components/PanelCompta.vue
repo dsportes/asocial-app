@@ -55,7 +55,7 @@
         <div class="col-8 titre-lg">{{$t('PCPsoldac')}}</div>
         <div class="col-2"></div>
         <div class="col-2 text-right">
-          <span :class="'font-mono text-bold fs-lg ' + (sc < 0 ? 'p100' : '')">{{p5s(sc)}}c</span>
+          <span :class="'font-mono text-bold fs-lg ' + (sc < 0 ? 'p100' : '')">{{mon(sc, 2)}}c</span>
         </div>
       </div>
 

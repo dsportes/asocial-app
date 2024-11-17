@@ -36,7 +36,7 @@
       <q-card  v-if="!zombi" class="q-pa-sm">
         <div v-for="it in chatX.items" :key="it.dh + '/' + it.a">
           <q-chat-message :sent="it.a===0" 
-            :bg-color="bgclr(it.a)" 
+            :bg-color="it.a ? 'brown-10' : 'secondary'" 
             text-color="white"
             :stamp="dhcool(it.dh)">
             <sd-blanc v-if="!it.dhx" :texte="it.t"/>
@@ -99,11 +99,14 @@
               left-label v-model="dconf" :label="$t('CHcdon')" />
           </q-toolbar-title>
         </q-toolbar>
+        <div v-if="mdon + 2 > solde" class="msg text-bold">{{$t('CHcred', [solde, mdon])}}</div>
         <editeur-md mh="20rem" v-model="txt" :texte="''" editable modetxt/>
         <q-card-actions align="right" class="q-gutter-sm">
           <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
           <btn-cond icon="add" :cond="ui.urgence ? 'cUrgence' : 'cEdit'"
-            :label="$t('valider')"  @ok="addop"/>
+            :label="$t('valider')"
+            :disable="avecDon && mdon > solde + 2"
+            @ok="addop"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -152,14 +155,13 @@
   const avecDon = ref(false)
   const mdon = ref(cfg.dons2[0])
   const dheff = ref(0)
+  const solde = ref(0)
 
   async function effacer (dh) {
     dheff.value = dh
     nbci.value--
     ui.oD('ACconfirmeff', idc)
   }
-
-  const bgclr = (a) => (a !== 0) ? 'secondary' : ($q.dark.isActive ? '#FDFDFD' : '#1D1D1D' )
 
   async function effop () {
     ui.fD()
@@ -170,15 +172,17 @@
 
   async function addop () {
     ui.fD()
+    /*
     if (avecDon.value && mdon.value) {
       await new GetCompta().run()
       const compta = session.compta
-      if (mdon.value * 100 > compta.solde + 2) {
+      if (mdon.value > compta.solde + 2) {
         await afficherDiag($t('CHcred', [compta.solde, mdon.value * 100]))
         return
       }
     }
-    const don = avecDon.value ? mdon.value * 100 : 0
+    */
+    const don = avecDon.value ? mdon.value : 0
     const t = (avecDon.value && !dconf.value ? ($t('CHdonde', [mdon.value]) + '\n') : '') + txt.value
     const disp = await new MajChat().run(chatX.value, t, 0, don, props.urgence)
     if (disp) { await afficherDiag($t('CHdisp')) }
@@ -192,7 +196,11 @@
   }
 
   async function editer (avecD) {
-    if (avecD) dconf.value = false
+    if (avecD) { 
+      dconf.value = false
+      await session.reloadCompta()
+      solde.value = session.compta.compteurs.soldeCourant
+    }
     txt.value = chatX.value ? chatX.value.txt : ''
     avecDon.value = avecD
     ui.oD('ACchatedit', idc)

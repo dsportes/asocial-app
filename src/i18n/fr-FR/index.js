@@ -71,6 +71,7 @@ export default {
   compteD: 'Compte de l\'organisation, DÉLÉGUÉ par le Comptable pour la partition {0}.', // NouveauSponsoring
   compteA: 'Compte autonome', // ...
   don: 'Don de {0}c', // PageSponsoring NouveauSponsoring
+  pasdon: 'Pas de don', // PageSponsoring NouveauSponsoring
   conf: 'Contact CONFIDENTIEL, sans "chat"', // ...
   total: 'Total', // PageEspace
   ping: 'Ping', // OutilsTests
@@ -583,6 +584,7 @@ export default {
   NPpro20: '20 jours',
   NPpro30: '30 jours',
   NPprof: 'Profil du compte',
+  NPpdon: 'Don au nouveau compte',
   NPphr: 'Phrase de sponsoring',
   NPdlv: 'Date limite de validité:',
   NPst0: 'Proposition en attente de réponse déposée {0}',
@@ -609,9 +611,9 @@ export default {
   NPnav: 'Nom de l\'avatar',
   NPbj: 'Bonjour {0} !',
   NP16: 'Au moins {0} signes',
-  NPcred: 'Votre crédit actuel {0}c est insuffisant pour supporte un don de {1}c.',
+  NPcred: 'Solde insuffisant actuel {0}c pour un don de {1}c.',
   NPdon: 'Don de votre sponsor: {0}c',
-  NPdon2: ' - Don à votre sponsorisé: {0}c',
+  NPdon2: 'Don au sponsorisé: {0}c',
 
   // Showdown
   SHed: 'Editer',
@@ -969,7 +971,7 @@ export default {
   CHmdon: 'Montant du don (en €)',
   CHconfid: 'confidentiel',
   CHdonde: '### Don de {0}€',
-  CHcred: 'Le solde du compte ({0}c) est insuffisant pour couvrir le montant du don ({1}c).',
+  CHcred: 'Solde du compte ({0}c) insuffisant pour supporter ce don ({1}c).',
   CHcdon: 'Ne pas mettre le montant du don dans le texte',
 
   CHGtit: 'Chat du groupe {0}',

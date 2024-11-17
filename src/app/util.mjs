@@ -271,8 +271,9 @@ export function edvol (vol) {
 
 export function mon (v, n) { // n : nombres de chiffres après les centimes
   if (!v) return '0c'
-  if (!n) return Math.round(v) + 'c'
-  return v.toFixed(n).replace('.', ',') + 'c'
+  const p = v < 0 ? -v : v
+  if (!n) return (v < 0 ? '-' : '') + Math.round(p) + 'c'
+  return (v < 0 ? '-' : '') + p.toFixed(n).replace('.', ',') + 'c'
 }
 
 export function nbn (vol, n, u) { // v: nombre de notes ... n: avec décimales

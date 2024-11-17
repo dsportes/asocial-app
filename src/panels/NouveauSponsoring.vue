@@ -25,12 +25,14 @@
           </q-stepper-navigation>
         </q-step>
 
-        <q-step :name="1" :title="$t('NPprof')" icon="settings" :done="step > 1">
+        <q-step :name="1" :title="$t('NPpdon')" icon="settings" :done="step > 1">
           <div class="q-my-sm">
             <q-option-group :options="optionsDon" type="radio" dense v-model="optDon" />
           </div>
+          <div v-if="diagDon" class="msg text-bold">{{diagDon}}</div>
           <q-stepper-navigation>
-            <btn-cond flat @ok="setDon" :label="$t('suivant')"/>
+            <btn-cond flat @ok="step = 0" :label="$t('precedent')"/>
+            <btn-cond flat @ok="setDon" :disable="diagDon !== ''" :label="$t('suivant')"/>
           </q-stepper-navigation>
         </q-step>
 
@@ -41,7 +43,7 @@
               :init-val="pc && pc.phrase ? pc.phrase : ''"/>
           </div>
           <q-stepper-navigation>
-            <btn-cond :label="$t('precedent')" @ok="step = 0" flat/>
+            <btn-cond :label="$t('precedent')" @ok="step = 1" flat/>
           </q-stepper-navigation>
         </q-step>
 
@@ -85,10 +87,8 @@
             <quotas-vols class="q-ml-md" :vols="quotas" noutil/>
           </div>
           <div v-if="dconf" class="titre-md">{{$t('conf')}}</div>
-          <div v-if="estAutonome" class="text-warning titre-md">
-            <span>{{$t('compteA')}}</span>
-            <span v-if="don" class="q-ml-sm">{{$t('NPdon2', [don])}}</span>
-          </div>
+          <div v-if="estAutonome" class="text-warning titre-md">{{$t('compteA')}}</div>
+          <div v-if="don" class="titre-md">{{$t('NPdon2', [don])}}</div>
           <q-stepper-navigation class="row items-center q-gutter-sm q-mt-md">
             <btn-cond flat @ok="step = 5" :label="$t('corriger')"/>
             <btn-cond @ok="confirmer" color="warning" :label="$t('confirmer')" 
@@ -125,8 +125,12 @@ const cfg = stores.config
 const session = stores.session
 const partition = session.partition
 
+const solde = ref(0)
+
 onMounted (async () => {
   await new GetSynthese().run()
+  await session.reloadCompta()
+  solde.value = session.compta.compteurs.soldeCourant
 })
 
 const props = defineProps({ 
@@ -155,7 +159,7 @@ const step3 = ref(null)
 const step = ref(0)
 const optOSA = ref(session.estA ? 2 : 0)
 
-const optionsDon = ref([ ])
+const optionsDon = ref([ { label: $t('pasdon'), value: 0}])
 for (const d of cfg.dons) optionsDon.value.push({ label: $t('don', [d]), value: d})
 const optDon = ref(optionsDon.value[0].value)
 
@@ -204,14 +208,11 @@ async function crypterphrase (p) {
   step.value = 3
 }
 
+const diagDon = computed(() => optDon.value && (solde.value - optDon.value <= 2) ?
+  $t('NPcred', [solde, optDon.value]) : '' )
+
 async function setDon () {
-  await new GetCompta().run(session.compteId)
-  const solde = session.compta.solde || 0
   don.value = optDon.value
-  if (solde - don.value <= 0) {
-    await afficherDiag($t('NPcred', [solde, don.value]))
-    return
-  }
   step.value = 2
 }
 

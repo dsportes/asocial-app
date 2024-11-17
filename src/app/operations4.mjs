@@ -643,7 +643,8 @@ export class AjoutSponsoring extends Operation {
         htK: await crypter(session.clek, spht),
         cvA: await cv.crypter(cleA),
         ardYC: await crypter(arg.pc.pcb, arg.mot),
-        dconf: arg.dconf
+        dconf: arg.dconf,
+        don: arg.don
       }
       args.quotas = arg.quotas
       if (arg.partitionId) { // compte O
@@ -652,8 +653,6 @@ export class AjoutSponsoring extends Operation {
         args.del = arg.del
         args.clePYC = await crypter(arg.pc.pcb, cleP)
         args.cleAP = await crypter(cleP, cleAC, 1)
-      } else {
-        args.don = arg.don
       }
       await post(this, 'AjoutSponsoring', args)
       this.finOK()

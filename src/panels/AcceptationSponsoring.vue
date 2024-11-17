@@ -36,10 +36,8 @@
           </div>
         </div>
 
-        <div v-if="sp.estA" class="text-warning titre-md text-bold">
-          <span>{{$t('compteA')}}</span>
-          <span v-if="sp.don" class="q-ml-sm">{{$t('NPdon', [sp.don])}}</span>
-        </div>
+        <div v-if="sp.estA" class="text-warning titre-md text-bold">{{$t('compteA')}}</div>
+        <div v-if="sp.don" class="titre-md">{{$t('NPdon', [sp.don])}}</div>
 
         <div v-if="sp.dconf">{{$t('conf')}}</div>
 
