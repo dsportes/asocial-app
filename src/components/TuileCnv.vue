@@ -29,7 +29,7 @@
 import { ref, computed } from 'vue'
 
 import { UNITEN, UNITEV } from '../app/api.mjs'
-import { edvol, mon, nbn } from '../app/util.mjs'
+import { edvol, mon } from '../app/util.mjs'
 
 const props = defineProps({ 
   src: Object, // {qc qn qv ac an av c n v}

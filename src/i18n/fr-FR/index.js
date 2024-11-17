@@ -392,6 +392,7 @@ export default {
   EX9328: 'Le quota de calcul de la partition [{0}] est insuffisant pour accepter le nouveau quota [{1}]',
   EX9329: 'Le quota de nombre de documents de la partition [{0}] est insuffisant pour accepter le nouveau quota [{1}]',
   EX9330: 'Le quota de volume de fichiers de la partition [{0}] est insuffisant pour accepter le nouveau quota [{1}]',
+  EX9331: '(BUG) Argument qv mal formé. Source: [{0}] - Propriété:{1} Cause:{2}',
 
   // EX9100: 'Erreur de cryptage AES: {0}',
   // EX9101: 'Erreur de cryptage RSA: {0}',

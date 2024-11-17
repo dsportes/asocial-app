@@ -56,7 +56,7 @@
       <!-- Déconnexion -->
       <btn-cond v-if="session.status > 1" color="warning" icon="logout" 
         @ok="discon" round>
-        <q-tooltip style="height:1.2rem">{{$t('MLAdrc')}}</q-tooltip>
+        <q-tooltip>{{$t('MLAdrc')}}</q-tooltip>
       </btn-cond>
 
       <q-page-sticky v-if="session.signalOp" position="top" :offset="offset"
