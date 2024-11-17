@@ -959,7 +959,7 @@ export default {
   CHadd2: 'Faire un don',
   CHrac: 'Classer "INDÉSIRABLE"',
   CHrac2: 'Tous les échanges vont être supprimés pour vous (pas pour {0}).' +
-  ' Le chat sera callsé "INDÉSIRABLE". Si {0} écrit un échange il apparaîtra.' +
+  ' Le chat sera classé "INDÉSIRABLE". Si {0} écrit un échange il apparaîtra.' +
   ' Le chat cessera d\'être indésirable à la prochaine écriture.',
   CHeffa: '(effacé {0})',
   CHzombi: 'Ce chat n\'existe plus',
@@ -970,6 +970,7 @@ export default {
   CHconfid: 'confidentiel',
   CHdonde: '### Don de {0}€',
   CHcred: 'Le solde du compte ({0}c) est insuffisant pour couvrir le montant du don ({1}c).',
+  CHcdon: 'Ne pas mettre le montant du don dans le texte',
 
   CHGtit: 'Chat du groupe {0}',
   CHGadd: 'Ajouter un item',

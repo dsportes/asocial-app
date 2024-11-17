@@ -280,7 +280,7 @@ function raz () {
   color: $primary
 .hg-theme-default
   color: black !important
-  font-family:'Roboto Mono'
+  font-family:'Ubuntu Mono'
 .ph
   width: 20rem
 .bord

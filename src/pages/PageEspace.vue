@@ -42,7 +42,7 @@
         <span class="titre-md q-mr-md">{{$t('PIqa')}}</span>
         <btn-cond round icon="edit"  @ok="editerqA()"/>
       </div>
-      <quotas-vols class="q-ml-md" noutil :vols="session.synthese.qA"/>
+      <quotas-vols class="q-ml-md" noutil groupe :vols="session.synthese.qA"/>
     </div>
 
     <div class="q-my-sm">

@@ -51,6 +51,6 @@ watch(model, (ap) => {
   bottom: 5px !important
 ::v-deep(.q-field__native)
   font-size: 1rem
-  font-family: "Roboto Mono"
+  font-family: "Ubuntu Mono"
 
 </style>

@@ -21,11 +21,11 @@
               left-label v-model="dconf" :label="$t('CHconfid')" />
           </div>
           <q-stepper-navigation>
-            <btn-cond flat @ok="step = 2" :label="$t('suivant')"/>
+            <btn-cond flat @ok="step = 1" :label="$t('suivant')"/>
           </q-stepper-navigation>
         </q-step>
 
-        <q-step v-if="session.estA" :name="1" :title="$t('NPprof')" icon="settings" :done="step > 1">
+        <q-step :name="1" :title="$t('NPprof')" icon="settings" :done="step > 1">
           <div class="q-my-sm">
             <q-option-group :options="optionsDon" type="radio" dense v-model="optDon" />
           </div>
@@ -41,7 +41,7 @@
               :init-val="pc && pc.phrase ? pc.phrase : ''"/>
           </div>
           <q-stepper-navigation>
-            <btn-cond :label="$t('precedent')" @ok="step = session.estA ? 1 : 0" flat/>
+            <btn-cond :label="$t('precedent')" @ok="step = 0" flat/>
           </q-stepper-navigation>
         </q-step>
 
@@ -123,7 +123,6 @@ const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 
 const cfg = stores.config
 const session = stores.session
-const accepteA = session.espace.opt > 0
 const partition = session.partition
 
 onMounted (async () => {
@@ -138,6 +137,7 @@ const optionsOSA = [
   { label: $t('compteO', [partition ? session.codePart(partition.id) : '']), value: 0 },
   { label: $t('compteD', [partition ? session.codePart(partition.id) : '']), value: 1 }
 ]
+if (session.espace.opt > 0) optionsOSA.push({ label: $t('compteA'), value: 2 })
 
 const isPwd = ref(false)
 const max = ref([])
@@ -153,21 +153,11 @@ const step4 = ref(null)
 const step2 = ref(null)
 const step3 = ref(null)
 const step = ref(0)
-const optOSA = ref(0)
-const optDon = ref(0)
+const optOSA = ref(session.estA ? 2 : 0)
 
 const optionsDon = ref([ ])
 for (const d of cfg.dons) optionsDon.value.push({ label: $t('don', [d]), value: d})
-
-if (session.estA) {
-  step.value = 1
-  optOSA.value = 2
-  optDon.value = optionsDon.value[0].value
-} else {
-  step.value = 0
-  if (accepteA) optionsOSA.push({ label: $t('compteA'), value: 2 })
-  optOSA.value = 0
-}
+const optDon = ref(optionsDon.value[0].value)
 
 const estDelegue = computed(() => optOSA.value === 1)
 const estAutonome = computed(() => optOSA.value === 2)
@@ -249,7 +239,7 @@ async function setQuotas () {
     const qtA = synth.qtA
     maxn = qA.qn - qtA.qn
     maxv = qA.qv - qtA.qv
-    maxc = qA.qc - qtA.qc
+    maxc = 1000
   } else {
     const s = partition.synth
     maxn = s.q.qn - s.qt.qn

@@ -363,5 +363,5 @@ async function getVU (it) {
   font-style: italic
   color: $primary
 .t2
-  font-family: 'Roboto Mono'
+  font-family: 'Ubuntu Mono'
 </style>

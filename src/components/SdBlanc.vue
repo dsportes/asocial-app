@@ -12,11 +12,11 @@ const props = defineProps({
 
 <style lang="css" scoped>
 .markdown-body {
-  font-family:  Calibri-Light !important;
+  font-family:  "Ubuntu Sans" !important;
   background-color: transparent !important;
   color: white !important;
-  line-height: 1.2rem;
-  font-size: 1.1rem;
+  line-height: 1rem;
+  font-size: 0.9rem;
 }
 @import 'github-markdown-css/github-markdown-dark.css'
 </style>

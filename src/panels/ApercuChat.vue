@@ -36,7 +36,7 @@
       <q-card  v-if="!zombi" class="q-pa-sm">
         <div v-for="it in chatX.items" :key="it.dh + '/' + it.a">
           <q-chat-message :sent="it.a===0" 
-            :bg-color="(it.a===0) ? 'primary' : 'secondary'" 
+            :bg-color="bgclr(it.a)" 
             text-color="white"
             :stamp="dhcool(it.dh)">
             <sd-blanc v-if="!it.dhx" :texte="it.t"/>
@@ -118,7 +118,7 @@
 
   import stores from '../stores/stores.mjs'
 
-  import { styp, sty, dhcool, dkli, afficherDiag } from '../app/util.mjs'
+  import { styp, sty, dhcool, dkli, afficherDiag, $q } from '../app/util.mjs'
   import { GetCompta, MajChat, PassifChat } from '../app/operations4.mjs'
   import { ID } from '../app/api.mjs'
 
@@ -158,6 +158,8 @@
     nbci.value--
     ui.oD('ACconfirmeff', idc)
   }
+
+  const bgclr = (a) => (a !== 0) ? 'secondary' : ($q.dark.isActive ? '#FDFDFD' : '#1D1D1D' )
 
   async function effop () {
     ui.fD()
