@@ -9,7 +9,7 @@
         </q-item>
       </q-list>
     </q-menu>
-    <q-tooltip v-if="!label">{{$t('langue')}}</q-tooltip>
+    <q-tooltip class="ttip" v-if="!label">{{$t('langue')}}</q-tooltip>
   </span>
 </template>
 

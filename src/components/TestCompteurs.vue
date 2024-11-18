@@ -20,6 +20,28 @@ const steps = ref([
     d: '04 Nov 2024 10:00:00 UTC',
     qv: { qc: 8, qn: 8, qv: 4, nn: 0, nc: 0, ng: 0, v: 0 },
     conso: null,
+    dbcr: 5,
+    estA: true
+  },
+  { 
+    d: '05 Nov 2024 10:00:00 UTC',
+    qv: { qc: 8, qn: 8, qv: 4, nn: 100, nc: 80, ng: 20, v: 100000000 },
+    conso: { nl: 1000, ne: 500, vd: 100000000, vm: 200000000 },
+    dbcr: 0
+  },
+  { 
+    d: '02 Jan 2025 10:30:00 GMT',
+    qv: { qc: 4, qn: 1, qv: 1, nn: 100, nc: 80, ng: 20, v: 80000000 },
+    conso: null,
+    dbcr: 0
+  }
+])
+
+const steps2 = ref([
+  { 
+    d: '04 Nov 2024 10:00:00 UTC',
+    qv: { qc: 8, qn: 8, qv: 4, nn: 0, nc: 0, ng: 0, v: 0 },
+    conso: null,
     dbcr: 1,
     estA: false,
     dbcr: 1

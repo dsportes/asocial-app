@@ -209,7 +209,7 @@ async function crypterphrase (p) {
 }
 
 const diagDon = computed(() => optDon.value && (solde.value - optDon.value <= 2) ?
-  $t('NPcred', [solde, optDon.value]) : '' )
+  $t('NPcred', [solde.value, optDon.value]) : '' )
 
 async function setDon () {
   don.value = optDon.value

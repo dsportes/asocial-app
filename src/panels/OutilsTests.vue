@@ -19,7 +19,7 @@
 
     <q-page-container>
       <div class="font-mono fs-sm q-my-sm q-ml-sm">{{$t('OTbuild', [config.BUILD])}}</div>
-      
+      <!--
       <div class="font-def fs-sm">Normal sm</div>
       <div class="font-def fs-md">Normal md</div>
       <div class="font-def text-italic fs-md">Normal italic md</div>
@@ -40,7 +40,7 @@
       <div class="text-bold titre-md">Titre italic md</div>
       <div class="text-italic text-bold titre-md">Titre italic bold md</div>
       <div class="titre-xl">Titre xl</div>
-      
+      -->
       <div v-if="tab === 'compteurs'">
         <test-compteurs/>
       </div>

@@ -114,11 +114,8 @@ export const useSessionStore = defineStore('session', {
     estFige (state) { const n = state.ntfE; return n && (n.nr === 2) },
     estClos (state) { const n = state.ntfE; return n && (n.nr === 3) },
     flags (state) { return state.compte && state.compte.flags ? state.compte.flags : 0},
-    RAL (state) { if (!state.compte) return 0
-      if (AL.has(state.flags, AL.RAL2)) return 2
-      if (AL.has(state.flags, AL.RAL1)) return 1
-      return 0
-    },
+    // Taux de ralentissement
+    RAL: (state) => !state.compte ? 0 : AL.txRal(state.compte.qv),
     hasAR (state) {
       if (state.ntfP && state.ntfP.nr === 3) return true
       if (state.ntfC && state.ntfC.nr === 3) return true
@@ -164,7 +161,7 @@ export const useSessionStore = defineStore('session', {
       if (state.estAdmin) return ''
       if (state.avion) return $t('condA')
       if (state.estFige) return $t('condF')
-      if (state.hasLS) return $t('condL')
+      if (!state.estComptable && state.hasLS) return $t('condL')
       return ''
     },
 
@@ -177,7 +174,7 @@ export const useSessionStore = defineStore('session', {
 
     cVisu (state) {
       if (state.estAdmin) return ''
-      if (state.hasAR) return $t('condM')
+      if (!state.estComptable && state.hasAR) return $t('condM')
       return ''
     },
 

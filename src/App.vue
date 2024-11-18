@@ -98,12 +98,12 @@
 
       <!-- Dark ou clair -->
       <btn-cond icon="contrast" round @ok="$q.dark.toggle()" color="none">
-        <q-tooltip>{{$t('clairfonce')}}</q-tooltip>
+        <q-tooltip class="ttip">{{$t('clairfonce')}}</q-tooltip>
       </btn-cond>
 
       <!-- Outils et tests -->
       <btn-cond icon="settings" round @ok="ui.oD('outilsTests', 'a')" color="none">
-        <q-tooltip>{{$t('MLAout')}}</q-tooltip>
+        <q-tooltip class="ttip">{{$t('MLAout')}}</q-tooltip>
       </btn-cond>
 
       <q-toolbar-title class="row justify-end items-center titre-md text-right q-mx-xs">
@@ -587,6 +587,12 @@ un élément qui apparaît quand le drawer est caché*/
 
 <style lang="css">
 @import 'animate.css'
+</style>
+
+<style lang="sass">
+@import './css/app.sass'
+.ttip
+  min-width: 15rem
 </style>
 
 <style lang="sass" scoped>

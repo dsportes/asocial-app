@@ -53,11 +53,14 @@
 
   <ligne-alerte v-if="session.RAL" :niv="1" :code="'PALral' + oa" :hlp="'alerte_ral' + oa">
     <div class="q-ml-md fs-md">
-      <div v-if="!session.estA">{{$t('PALr' + session.RAL)}}</div>
+      <div>{{$t('PALr')}}</div>
       <div class="q-ml-md fs-md">
-        <span class="text-center font-mono">{{qv.qc}}c</span>
-        <span class="q-mr-md text-center font-mono">{{p2(qv.cjm * 30)}}c</span>
-        <span class="q-mrsm text-center font-mono">{{pced(qv.cjm * 30, qv.qc)}}</span>
+        <div>{{$t('PALratt', [secRal])}}</div>
+        <div>
+          <span class="text-center font-mono">{{qv.qc}}c</span>
+          <span class="q-mr-md text-center font-mono">{{p2(qv.cjm * 30)}}c</span>
+          <span class="q-mrsm text-center font-mono">{{pced(qv.cjm * 30, qv.qc)}}</span>
+        </div>
       </div>
     </div>
   </ligne-alerte>
@@ -122,6 +125,8 @@ const pced = (x, y) => { const q = pc(x, y)
   return q >= 999 ? '?' : (q === 0 ? '0%' : (q < 1 ? '<1%' : Math.round(q) + '%'))
 }
 const nrx = (ntf) => !ntf ? 0 : (ntf.nr === 3 ? 2 : (ntf.nr === 0 ? 0 : 1))
+
+const secRal = computed(() => Math.round((1 + (AL.txRal(c.value.qv) / 10))))
 
 </script>
 

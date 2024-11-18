@@ -43,8 +43,7 @@
       </div>
 
       <!-- credits -->
-      <div v-if="session.estComptable || session.compte.estA"
-        class="btn2 row items-center" @click="clickCred">
+      <div class="btn2 row items-center" @click="clickCred">
         <icon-alerte :niv="session.nivAlerteSN"/>
         <span class="q-ml-xs">{{$t('PNCcre')}}</span>
       </div>
