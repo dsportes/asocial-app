@@ -1531,8 +1531,8 @@ export default {
   SAVabo2: 'Volume des fichiers: {0}',
 
   // TuileNotif
-  TUntfp: 'Notif. partition',
-  TUntfc: 'Notif. comptes',
+  TUntfp: 'Alertes partition',
+  TUntfc: 'Alertes comptes',
   TUsim: 'OK',
   TUlec: 'Lec.',
   TUmin: 'Min.',
