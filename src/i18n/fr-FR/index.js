@@ -1037,41 +1037,34 @@ export default {
   // NotePlus
   NPLnote: 'Note {0}',
 
-  ////////////////////////////////////////////////////////
   FAVnone: 'Aucun fichier visible en mode avion',
-  FAVdet: 'Détail du fichier',
-  FAVst1: 'en attente',
-  FAVst2: 'chargé',
-  FAVst3: 'en erreur',
-  FAVl1: 'Note',
-  FAVl2: 'De',
-  FAVl3: 'Taille',
-  FAVl4: 'Date-heure',
-  FAVl5: 'Erreur',
-  FAVl6: 'Statut',
-  FAVl7: 'Nom',
-  FAVl8: 'Version',
-  FAVb1: 'Voir la note',
-  FAVb2: 'Afficher',
-  FAVb3: 'Sauvegarder',
 
-  PNFnbv: 'Pas de version | Une version | {count} versions',
-  PNFl1: 'La version la plus récente est visible en avion',
-  PNFl2: 'FORCER la version la plus récente à être visible en avion',
-  PNFl3: 'Version TOUJOURS visible en avion, même si elle n\'est pas la plus récente',
-  PNFl4: '(Version visible en avion parce que la plus récente)',
-  PNFl5: 'FORCER cette version spécifique à être visible en avion',
-  PNFl6: 'Cette version spécifique est visible en avion',
-  PNFl7: 'Version toujours visible en avion',
+  // PanelAlerte
+  PALdlvat: 'L\'Administrateur Technique a fixé une date au delà de laquelle toute connexion sera bloquée. Normalement la raison de cette limite est exprimée plus avant dans cette page ("Alerte de l\'Administrateur Technique").',
+  PALdlvc: 'Le compte va s\'auto-détruire bientôt, l\'alerte "ACCÈS RESTREINT" n\'ayant pas été résolue.',
+  PALdlv: 'Pour information, sauf connexion ultérieure le compte s\'auto-détruira à la date ci-dessous.',
+  PALar: 'Le compte est en "ACCÈS RESTREINT": les données ne sont plus NI VISUALISABLES, NI MODIFIABLES. Toutefois il reste possible d\'accéder NORMALEMENT aux autres onglets de cette page "Abonnements, Crédits, Chats d\'Urgence".',
+  PALars: 'Solde négatif (défaut de crédit). Voir l\'onglet "Abonnement".',
+  PALarc: 'Alerte spécifiquement sur le compte levée par le Comptable ou un délégué. Voir plus avant dans cette page ("Alerte spécifique du compte").',
+  PALarp: 'Alerte à tous les comptes de la partition levée par le Comptable ou un délégué. Voir plus avant dans cette page ("Alerte aux comptes de la partition").',
+  PALls: 'Le compte est en "LECTURE SEULEMENT": les données sont VISUALISABLES MAIS PAS MODIFIABLES. Toutefois il reste possible d\'accéder NORMALEMENT aux autres onglets de cette page "Abonnements, Crédits, Chats d\'Urgence".',
+  PALnred: 'Le quota du nombre de documents (notes, chats, groupes) est dépassé. Il \'est plus possible d\'en ajouter jusqu\'à rescente en-dessus du quota.',
+  PALvred: 'Le quota du volume des fichiers attachés aux notes est dépassé. Il \'est plus possible d\'augmenter ce volume jusqu\'à rescente en-dessus du quota.',
+  PALralA: 'La moyenne mensuelle de la consommation de calcul sur le mois en cours et le précédent excède le quota que VOUS avez fixé.',
+  PALralO: 'La moyenne mensuelle de la consommation de calcul sur le mois en cours et le précédent excède le quota fixé par le Comptable ou un de ses délégués.',
+  PALr: 'Les opérations sont ralenties jusqu\'à passage en dessous du quota.',
+  PALratt: 'Ralentissement: {0} seconde(s) par opération et par méga-octet de fichier transféré.',
+  PALesp: 'Alerte de l\'Administrateur Technique pour tous les comptes.',
+  PALpart: 'Alerte du Comptable ou d\'un de ses délégués pour tous les comptes de la partition.',
+  PALcpt: 'Alerte du Comptable ou d\'un de ses délégués spécifiquement pour ce compte.',
+
+  // NouveauFichier MenuFichier
   PNFcop: 'Copier dans le "presse-papier',
   PNFaff: 'Afficher dans un nouvel onglet',
   PNFenreg: 'Enregistrer une copie locale',
   PNFsuppr: 'Supprimer définitivement',
   PNFvoirn: 'Voir la note ...',
   PNFdetail: 'Accessibilité en avion ...',
-  PNFversion: 'Version',
-  PNFavion1: 'Dernière version visible en avion',
-
   PNFnv: 'Nouveau fichier attaché',
   PNFnvr: 'Nouvelle révision du fichier #{0}',
   PNFnvf: 'Fichier',
@@ -1098,14 +1091,10 @@ export default {
   PNFnvs0: 'Compression éventuelle et cryptage', 
   PNFnvs1: 'Transfert vers le serveur de fichiers',
   PNFnvs2: 'Validation',
-  PNFfav: 'Ce fichier n\'a pas été déclaré affichable en mode avion',
   PNFgetEr: 'Contenu du fichier non disponible (corrompu ? effacé ?)',
   PNFsf: 'Confirmer ou infirmer la suppression du fichier',
-  PNFav3: 'Pour déclarer un fichier accessible en mode avion, il faut être en mode "synchronisé".',
   PNFcpp: 'Fichier copié dans le presse-papier',
   PNFrevx: 'ne voir que les révisions pour ce nom',
-
-  CMCtit: 'Choix des hashtags',
 
   //EditeurMd
   EMDqss: 'Les modifications n\'ont pas été validées. En quittant cette fenêtre elles seront perdues.',
@@ -1119,37 +1108,7 @@ export default {
   CChself: 'Il n\'est pas possible de créer un chat avec soi-même (entre deux avatars du même compte)',
   CHcrpc: 'Créer un chat depuis la phrase de contact de l\'avatar',
 
-  // PanelContacts
-  PCnom: "Nom ...",
-  PCti: 'Contacts / membres des groupes',
-  PCvi: 'Aucun contact / membre ne répond aux crtières de sélection.',
-  PCmb: 'Membre {1}({0}) du groupe:',
-  PCav: 'Contact {1}({0}) de:',
-
-  P10nvp: 'Sponsoriser un nouveau compte',
-
-  P11tit: 'Avatar du compte | Avatar du compte | Avatars du compte',
-
-  // PanelAlerte
-  PALdlvat: 'L\'Administrateur Technique a fixé une date au delà de laquelle toute connexion sera bloquée. Normalement la raison de cette limite est exprimée plus avant dans cette page ("Alerte de l\'Administrateur Technique").',
-  PALdlvc: 'Le compte va s\'auto-détruire bientôt, l\'alerte "ACCÈS RESTREINT" n\'ayant pas été résolue.',
-  PALdlv: 'Pour information, sauf connexion ultérieure le compte s\'auto-détruira à la date ci-dessous.',
-  PALar: 'Le compte est en "ACCÈS RESTREINT": les données ne sont plus NI VISUALISABLES, NI MODIFIABLES. Toutefois il reste possible d\'accéder NORMALEMENT aux autres onglets de cette page "Abonnements, Crédits, Chats d\'Urgence".',
-  PALars: 'Solde négatif (défaut de crédit). Voir l\'onglet "Abonnement".',
-  PALarc: 'Alerte spécifiquement sur le compte levée par le Comptable ou un délégué. Voir plus avant dans cette page ("Alerte spécifique du compte").',
-  PALarp: 'Alerte à tous les comptes de la partition levée par le Comptable ou un délégué. Voir plus avant dans cette page ("Alerte aux comptes de la partition").',
-  PALls: 'Le compte est en "LECTURE SEULEMENT": les données sont VISUALISABLES MAIS PAS MODIFIABLES. Toutefois il reste possible d\'accéder NORMALEMENT aux autres onglets de cette page "Abonnements, Crédits, Chats d\'Urgence".',
-  PALnred: 'Le quota du nombre de documents (notes, chats, groupes) est dépassé. Il \'est plus possible d\'en ajouter jusqu\'à rescente en-dessus du quota.',
-  PALvred: 'Le quota du volume des fichiers attachés aux notes est dépassé. Il \'est plus possible d\'augmenter ce volume jusqu\'à rescente en-dessus du quota.',
-  PALralA: 'La moyenne mensuelle de la consommation de calcul sur le mois en cours et le précédent excède le quota que VOUS avez fixé.',
-  PALralO: 'La moyenne mensuelle de la consommation de calcul sur le mois en cours et le précédent excède le quota fixé par le Comptable ou un de ses délégués.',
-  PALr: 'Les opérations sont ralenties jusqu\'à passage en dessous du quota.',
-  PALratt: 'Ralentissement: {0} seconde(s) par opération et par méga-octet de fichier transféré.',
-  PALesp: 'Alerte de l\'Administrateur Technique pour tous les comptes.',
-  PALpart: 'Alerte du Comptable ou d\'un de ses délégués pour tous les comptes de la partition.',
-  PALcpt: 'Alerte du Comptable ou d\'un de ses délégués spécifiquement pour ce compte.',
-
-  // PageCompta
+//////////////////////////////////////////
   PCPtabalertes: 'Alertes et restrictions',
   PCPtabcredits: 'Gestion des crédits',
   PCPtabcompta: 'Abonnement et consommation',
