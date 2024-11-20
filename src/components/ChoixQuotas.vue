@@ -1,7 +1,7 @@
 <template>
   <div class="q-pa-xs">
     <div class="row items-center" style="position:relative">
-      <bouton-bulle idtext="quotas" class="bb"/>
+      <bouton-bulle idtext="quotas" class="BULLEbb"/>
       <div class="col-5 row items-center">
         <div class="titre-md mh">{{$t('CQnbdocs', model.qn * UNITEN)}}</div>
         <div v-if="model.n && model.qn > 0" :class="'font-mono q-ml-sm ' + st(pcn)">[{{pcn}}%]</div>

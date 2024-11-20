@@ -65,9 +65,9 @@
     <div v-if="acc === 2">
       <q-separator class="q-my-md" color="orange"/>
       <div class="bord1 column justify-left">
-        <span><q-radio v-model="decl" dense :val="2" :label="$t('ICd2')"/><bouton-bulle idtext="inv2"/></span>
-        <span><q-radio v-model="decl" dense :val="3" :label="$t('ICd3')" /><bouton-bulle idtext="inv3"/></span>
-        <span><q-radio v-model="decl" dense :val="4" :label="$t('ICd4')" /><bouton-bulle idtext="inv4"/></span>
+        <span><q-radio v-model="decl" dense :val="2" :label="$t('ICd2')"/><bouton-bulle idtext="BULLEinv2"/></span>
+        <span><q-radio v-model="decl" dense :val="3" :label="$t('ICd3')" /><bouton-bulle idtext="BULLEinv3"/></span>
+        <span><q-radio v-model="decl" dense :val="4" :label="$t('ICd4')" /><bouton-bulle idtext="BULLEinv4"/></span>
       </div>
 
       <div class="q-mt-md q-mb-xs titre-md text-italic">{{$t('ICrem2')}}</div>

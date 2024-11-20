@@ -290,7 +290,7 @@
             <btn-cond icon="system_update" :label="$t('RLinstal')" @ok="reload"/>
           </div>
         </div>
-        <bouton-bulle idtext="rl1"/>
+        <bouton-bulle idtext="BULLErl1"/>
       </div>
 
       <div class="row no-wrap items-start justify-between q-mb-sm">
@@ -298,7 +298,7 @@
           <div class="titre-md text-bold text-primary q-pr-sm lg1">{{$t('RLopt', ['2'])}}</div>
           <div class="titre-md">{{$t('RLopt2')}}</div>
         </div>
-        <bouton-bulle class="text-right" idtext="rl2"/>
+        <bouton-bulle class="text-right" idtext="BULLErl2"/>
       </div>
 
       <div class="row no-wrap items-start q-mb-sm">

@@ -5,7 +5,7 @@
         <template v-slot:avatar>
           <q-icon :name="icon || 'info'" size="sm" color="primary" />
         </template>
-        <sd-nb :texte="txt"/>
+        <sd-nb :texte="$t(props.idtext)"/>
       </q-banner>
     </q-popup-proxy>
   </btn-cond>
@@ -23,8 +23,6 @@ const props = defineProps({
   icon: String, 
   idtext: String 
 })
-
-const txt = computed(() => props.idtext ? $t('BULLE' + props.idtext) : '???')
 
 const qpp = ref(null)
 

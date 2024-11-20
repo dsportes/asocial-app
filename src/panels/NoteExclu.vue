@@ -39,7 +39,7 @@
 
       <div class="q-mt-md">
         <span class="titre-lg text-italic text-center">{{$t('PNOlex')}}</span>
-        <bouton-bulle idtext="exclu"/>
+        <bouton-bulle idtext="BULLEexclu"/>
       </div>
 
       <div class="spsm q-mt-sm" style="max-height:40vh;overflow-y:auto">

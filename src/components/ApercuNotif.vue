@@ -22,7 +22,7 @@
           <span class="q-pa-xs bg-yellow-3 text-negative text-bold">
             {{$t('ANnr' + type + notif.nr)}}
           </span>
-          <bouton-bulle :idtext="'nr' + type + notif.nr"/>
+          <bouton-bulle :idtext="'BULLEnr' + type + notif.nr"/>
       </div>
       <show-html class="q-mt-xs bord" :texte="notif.texte" :idx="idx" 
         maxh="3rem" zoom scroll/>

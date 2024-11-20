@@ -4,7 +4,7 @@
     <q-card v-if="session.excKO && session.excKO.code === 9999" class="q-mt-lg spsm column justify-center">
       <div class="text-center">
         <span class="titre-lg">{{$t('ECclos', [session.org])}}</span>
-        <bouton-bulle class="q-mr-md fs-md" icon="report_problem" idtext="clos"/>
+        <bouton-bulle class="q-mr-md fs-md" icon="report_problem" idtext="BULLEclos"/>
       </div>
       <div class="q-mt-md q-mb-sm text-center text-italic titre-md">
         {{$t('ECmi', [dhcool(session.excKO.args[1])])}}

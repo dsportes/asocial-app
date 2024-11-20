@@ -10,13 +10,13 @@
       <div>
         <q-checkbox size="sm" v-model="restrloc"/>
         <span>{{$t('ANnr' + type + '2')}}
-          <bouton-bulle class="q-ml-md" :idtext="'nr'+ type + '2'"/>
+          <bouton-bulle class="q-ml-md" :idtext="'BULLEnr'+ type + '2'"/>
         </span>
       </div>
       <div>
         <q-checkbox size="md" v-model="restrbloc"/>
         <span>{{$t('ANnr' + type + '3')}}
-          <bouton-bulle class="q-ml-md" :idtext="'nr'+ type + '3'"/>
+          <bouton-bulle class="q-ml-md" :idtext="'BULLEnr'+ type + '3'"/>
         </span>
       </div>
 

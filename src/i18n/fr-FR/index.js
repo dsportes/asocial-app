@@ -802,7 +802,6 @@ export default {
   TRIpartition8: '% util. quota fichiers ↓',
 
   // MenuAccueil
-  SAVtit: 'Avatar sélectionné',
   SGRtit: 'Groupe sélectionné',
   ACgr: 'Détail du groupe',
   ACgroupes: 'Ses groupes',
@@ -1168,7 +1167,6 @@ export default {
   PTdlvatf: 'FUTURE : {0}',
   PTopt: 'Comptes "autonomes" autorisés',
 
-  //////////////////////////////////////////
   // ChatsAvec
   CAVtit: 'Chats avec :',
   CAVtit2: 'Carte de visite inconnue, chat impossible',
@@ -1441,41 +1439,11 @@ export default {
   APAdec2: 'Décliner définitivement ce sponsoring',
   APAcf2: 'Ne pas ouvrir de "chat" avec {0}', 
 
-  ///////////////////////////////////
   // Aperçu Alerte
-  ANrntfA: 'La consommation excède le plafond attribué.',
-  ANrntfB: 'La consommation dépasse 90% du plafond attribué.',
-  ANrntfC: 'Le crédit est épuisé.',
-  ANrntfD: 'Le crédit sera épuisé dans quelques jours.',
-  ANrntfE: 'Le volume occupé dépasse celui autorisé.',
-  ANrntfD: 'Le volume occupé dépasse 90% de celui autorisé.',
-
-  ANcible1: 'générale',
-  ANcible2: 'collective sur la tranche de quotas',
-  ANcible3: 'sur le compte',
-  ANcible1b: 'générale',
-  ANcible2b: 'affectant les comptes dont les quotas sont pris sur la tranche #{0} ',
-  ANcible3b: 'affectant le compte {0}',
-  ANcourt0: 'Pas d\'alerte {0}',
-  ANcourt1: 'Alerte {0}',
-  ANcourt2: 'Alerte grave {0}',
-  ANcourt3: 'Alerte {0}, écritures bloquées',
-  ANcourt4: 'Alerte {0}, lectures bloquées',
-  ANcourt5: 'Alerte {0}, résiliation en cours',
-
   ANlong0: 'Tout est OK, aucune Alerte.',
   ANlong1: 'A minima une alerte informative / contraintes fortes possibles.',
   ANlong2: 'ACCES RESTREINT, mises à jour et consultations interdites (SAUF pour les actions d\'URGENCE)',
   ANlong3: 'Suppression IMMINENTE du compte ou impossibilité IMMINENTE de s\'y connecter',
-
-  ANlon0: 'Pas d\'alerte en cours',
-  ANlon1: 'Alerte en cours, sans blocage planifié',
-  ANlon2: 'Alerte en cours, blocage planifié',
-  ANlon3: 'Blocage des écritures',
-  ANlon4: 'Blocage des lectures et écritures',
-  ANlon5: 'Résiliation',
-  ANle: 'le {0} (dans {1} jour(s))',
-
   ANcre: 'En créer une',
   ANauc0: 'Pas d\'Alerte générale',
   ANauc1: 'Pas d\'Alerte à tous les comptes de la partition',
@@ -1485,53 +1453,20 @@ export default {
   ANnot2: 'Alerte spécifique du compte',
   ANadmin: 'de l\'adimistrateur technique',
   ANnotc: 'L\'Alerte a été émise par la Comptable: il est seul autorisé à la modifier / supprimer.',
-  ANcomptable: 'du Comptable',
+
   ANdel1: 'de {0}, délégué sur la partition',
-  ANrestr: 'Restriction d\'accès',
   ANnr02: 'Application "figée" par l\'administrateur technique: aucune mise à jour possible',
   ANnr03: 'Application "bloquée" par l\'administrateur technique',
   ANnr12: 'Mises à jour bloquées pour tous les comptes de la partition',
   ANnr13: 'Ni mises à jour, ni visualisations (actions d\'urgence seulement) pour tous les comptes de la partition',
   ANnr22: 'Mises à jour bloquées pour ce compte',
   ANnr23: 'Ni mises à jour, ni visualisations (actions d\'urgence seulement) pour ce compte',
-  ANnr3: 'Application en lecture seulement',
-  ANnr4: 'Accès minimal très restreint à l\'application',
-  ANnospon: 'L\'Alerte provient du Comptable, lui seul peut l\'éditer (pas un sponsor).',
-  ANer1: 'Seul l\'administrateur technique peut créer et éditer une Alerte générale pour l\'organisation.',
-  ANer2: 'Seuls le Comptable ou un sponsor de cette tranche peuvent créer et éditer une Alerte portant sur tous les comptes rattachés à cette tranche.',
-  ANer3: 'Seuls le Comptable ou un sponsor de cette tranche peuvent créer et éditer une Alerte portant sur un compte rattaché à cette tranche.',
-  ANer4: 'Les Alertes de dépassement des limites de l\'abonnement et de surveillance de la consommation, sont automatiques et ne sont pas éditables.',
-  ANer5: 'Un sponsor d\'une tranche ne peut pas créer ou éditer une Alerte concernant un autre sponsor.',
-  ANer10: 'Un sponsor ne peut pas déclarer une Alerte portant sur tous les comptes de sa tranche ce qui le restreindrait lui-même.',
-  ANer11: 'Le Comptable ou un sponsor ne peut pas déclarer une Alerte qui restreindrait son propre compte.',
 
-  ANplus: 'Plus d\'info',
-  ANtxt: 'Texte de l\'alerte',
-  ANpasp: 'Simple alerte, pas de procédure de blocage engagée',
-  ANpec: 'Procédure de blocage engagée',
-  ANpf: 'Une procédure de blocage sera engagée le {0} (dans {1} jour(s))',
-
-  ANdg1: 'Un compte ne peut pas ouvrir une procédure de blocage collective qui le viserait.',
-  ANdg2: 'Un compte ne peut pas ouvrir une procédure de blocage sur son propre compte.',
-
-  AN365: '0..365',
-  ANed0: 'La procédure de blocage actuelle débute le {0}',
-  ANed4: 'Engager une procédure de blocage',
-  ANed3: 'Engager une nouvelle procédure de blocage',
-  ANed2: 'Annuler la procédure de blocage',
-  ANed1: 'Ajuster la procédure actuelle',
-
-  ANdp: 'Débutant dans N jours (le {0}). N : ',
-  ANd4: '"Lectures interdites" N jours après le début. N : ',
-  
-  ANemet: 'Alerte émise par {0}',
-
-  // PanelPeople et apercu compte
+  // PanelPeople BarrePeople
   PPchats: 'Chats avec ...',
   PPgroupes: 'Participations aux groupes',
   PPndel: 'Compte non délégué',
   PPdel: 'Compte délégué',
-  PPpaschat: 'chat pas encore initialisé',
   PPchpart: 'Changer de partition',
   PPchdel: 'Changer le statut de "délégué"',
   PPcompta: 'Abon. et conso.',
@@ -1543,15 +1478,9 @@ export default {
   PPchatreq: 'Un "chat" avec le compte doit avoir été établi avant de le passer en compte "O".',
   PPmutO: 'Passer ce compte en "COMPTE DE L\'ORGANISATION"',
   PPmutA: 'Passer ce compte en "COMPTE AUTONOME"',
-  // PPmutA2: 'Avant de confirmer, consulter l\'aide ci-après: une fois votre compte rendu "autonome" vous ne bénéficierez plus de quotas d\'abonnement et de consommation gratuit (payés par l\'organisation).',
   PPmutmc: 'Ligne de chat à ajouter pour information',
-  PPmut1: 'Le compte de cet avatar est déjà un compte "O" (d\'organisation).',
-  PPmutO: 'Le compte {0} est de type "COMPTE DE L\'ORGANISATION"',
-  PPmutO2: 'Passer ce compte en "COMPTE DE L\'ORGANISATION"',
   PPmsgo: 'Votre compte est désormais de type "COMPTE DE L\'ORGANISATION" attaché à la tranche de quotas #{0}',
   PPmsga: 'Votre compte est désormais de type "AUTONOME"',
-  PPmutv: 'Vérifier soigneusement les quotas à attribuer',
-  PPmutm: 'Message informatif à écrire sur le "chat"',
   PPkodel: 'Retirer au compte le statut de "délégué"',
   PPokdel: 'Conférer au compte le statut de "délégué"',
   PPchgpart: 'Départ de {0} de sa partition {1}',
@@ -1563,27 +1492,20 @@ export default {
   PPc2: 'Calc. ({0})',
   PPc3: 'Nb n..({0})',
   PPc4: 'Vol.f ({0})',
-  PPc5: 'Dispo.',
   PPnt: 'Dont le code contient',
-  PPact: 'Actions sur le compte',
-  PPtit: 'Membre {0} du groupe {1}',
   PPctc: 'Ajouter {1} comme contact du groupe {0}',
-  PPquot: 'Corriger les valeurs non admissibles dans les quotas c-dessus',
-
   PPctc4: 'Le compte n\'a pas d\'avatar ayant accès aux membres du groupe. Impossible de choisir un nouveau contact pour ce groupe.',
   PPctc5: 'Cet avatar est déjà connu du groupe.',
   PPctc6: 'Cet avatar a été mis en liste noire du groupe par un animateur. Il n\'est plus possible de l\'inviter.',
   PPctc7: 'Cet avatar s\'est inscrit lui-même en liste noire du groupe. Il n\'est plus possible de l\'inviter.',
+  PPquot: 'Corriger les valeurs non admissibles dans les quotas c-dessus',
   PPctcok: 'Choisir',
 
+  // SelAvid SupprAvatar
+  SAVtit: 'Avatar sélectionné',
   SAVtit1: 'Suppression de l\'avatar {0}',
   SAVtit2: 'Résiliation du COMPTE {0}',
   SAVer1: 'La suppression du compte ne peut intervenir qu\'après la suppression de ses avatars secondaires',
-  SAVst1: 'disparaîtra',
-  SAVst2: 'ne sera plus hébergé',
-  SAVst3: 'n\'aura plus d\'animateurs',
-  SAVret1: 'D\'autres sessions se sont exécutées en parallèle et ont modifié les données. Vérifier ce nouvel état et confirmer à nouveau la suppression de cet avatar (ou renoncer).',
-  SAVret2: 'D\'autres sessions se sont exécutées en parallèle et ont modifié les données. Vérifier ce nouvel état et confirmer à nouveau la résiliation du compte (ou renoncer).',
   SAVval1: 'Valider cette suppression',
   SAVval2: 'Valider la résiliation du compte',
   SAcptdisp: 'LE COMPTE A DÉJA ÉTÉ RÉSILIÉ. Retour à la page de connexion.',
@@ -1608,11 +1530,7 @@ export default {
   SAVabo1: '{4} document(s): {0} note(s) + {1} chat(s) + {2} participation(s) à des groupes',
   SAVabo2: 'Volume des fichiers: {0}',
 
-  TUtqc: '',
-  TUtqn: 'Abon. nombre notes...',
-  TUtqv: 'Abon. volume fichiers',
-  TUaff: 'Affecté',
-  TUuti: 'Utilisé',
+  // TuileNotif
   TUntfp: 'Notif. partition',
   TUntfc: 'Notif. comptes',
   TUsim: 'OK',
@@ -1620,8 +1538,8 @@ export default {
   TUmin: 'Min.',
   TUpart: 'Partition {0}',
   TUnopart: 'Partition non disponible.',
-  TUtrb: 'Nb partitions',
-  TUco: 'Nb comptes',
+
+  // PageEspace ...
   PEnbc: 'aucun compte | un compte | {count} comptes',
   PEnbd: 'pas de délégué | un délégué | {count} délégués',
   PEedn: 'Editer le nom',
@@ -1633,19 +1551,6 @@ export default {
   PEsd: 'Statistique téléchargée sous le nom [{0}]',
 
   // PanelCredits
-  PCRgen: 'Générer un ticket de crédit',
-  PCRref: 'Référence à joindre au paiemnet: "{0} {1}"',
-  PCRc1: 'Numéro du ticket',
-  PCRc2: 'Montant en euros',
-  PCRc3: 'Commentaire',
-  PCRc4: 'Enregistré le',
-  PCRc5: 'Crédité par le compte',
-  PCRc5n: 'Pas encore crédité',
-  PCRd1: 'Un ticket a 13 chiffres',
-  PCRd2: 'Numéro non généré par l\'application',
-  PCRd3: 'Entre 0,50€ et 100€',
-
-  // Ticket
   TKrefp: 'Référence à joindre au paiemnet: "{0} {1}"',
   TKdel: 'Ticket définitivement perdu ? Détruire ce ticket empêche de bénéficier d\'un crédit le référençant lors d\'un enregistrempent par le Comptable.',
   TKdel2: 'Oui, je détruis ce ticket',
@@ -1661,8 +1566,6 @@ export default {
   TKdeb: 'Ticket commençant par ...',
   TKdebh: '1 à 6 majuscules',
 
-  TK1: 'En attente',
-  TK2: 'Reçu',
   TKdons: 'Dons reçus / donnés',
   TKdb: 'Donné: {0}c',
   TKcr: 'Reçu: {0}c',
@@ -1674,36 +1577,21 @@ export default {
   TKrefa: 'Référence du compte:',
   TKrefc: 'Référence du Comptable:',
   TKatt: 'Tickets en attente',
-  TK1A: 'Tickets en attente de réception',
-  TK1T: 'Tous les tickets en ligne (en attente ou enregistrés)',
-  TK2A: 'Mes tickets en attente de réception',
-  TK2T: 'Tous mes tickets en ligne (en attente ou enregistrés)',
-  TKinc: 'Crédits reçus par le Comptable',
-  TKverif: 'Dernière récupération {0}.',
-  TKnbt: 'Pas de nouveau ticket incorporé | Un nouveau ticket incorporé | {count} nouveaux tickets incorporés',
-  TKbtnv: 'Vérifier s\'il y en a de nouveaux',
 
+  ///////////////////////////////////
+  // HashTags McMemo
   HTtit: 'Sélectionner des hashtags',
   HTfil: 'Filtre',
   HThint: '1 à 12 [a-z 0-9]',
   HTe1: 'Entre {0} et {1} caractères',
   HTe2: 'Minusules a-z et chiffres 0-9',
   MMCnomc: 'Pas de hashtags déclarés',
-  MCaucun: 'Pas de hashtags déclarés',
   MMCnomemo: 'Pas de mémo déclaré',
   MMCap: 'Mémo et hastags personnels attachés à {0}',
   MMCnomaj: 'Mise à jour impossible : {0}',
   MMCcom: 'Mon mémo',
 
-  SINGL10: 'Récupération des fins d\'hébergement',
-  SINGL11: 'Récupération des membres disparus et des groupes devenant orphelins',
-  SINGL12: 'Purge des avatars et groupes',
-  SINGL13: 'Purge des fichiers (et des transferts) des transferts abandonnés',
-  SINGL14: 'Purges des fichiers détruits accumulés dans fpurges',
-  SINGL15: 'Purges des versions ayant une dlv de plus d\'un an',
-  SINGL20: 'Statistiques "mensuelles" comptas',
-  SINGL21: 'Statistiques "mensuelles" tickets (avec purges)',
-  
+/*
   SBf: `### Aucune mise à jour n\'est possible, mais la consultation n'est pas limitée (comme en mode avion):
 - Le compte est considéré comme **inactif** depuis la dernière connexion avant que la cette restriction ne soit enplace.
 - Au bout de 365 jours d'inactivité, le compte sera automatiquement désactivé.
@@ -1729,11 +1617,12 @@ export default {
 - Tout fichier attaché à une note peut être supprimé ou remplacé par un autre de taille inférieure.
 - Il n'est pas possible d'attacher un nouveau fichier à une note.
 `,
+*/
 
   BULLEnr02: 'Application figée par l\'administrateur technique: aucune mise à jour possible',
   BULLEnr03: 'Application **bloquée** par l\'administrateur technique',
   BULLEnr3: 'Application en lecture seulement',
-  BULLEnr4: 'Accès minimal très restreint à l\'application',
+  BULLEnr4: 'Accès restreint à l\'application',
   BULLEnr12: `Tous les comptes de la partition sont restreints en lecture seulement:
 - la visualisation est libre,
 - les mises à jour sont bloquées,
@@ -1744,12 +1633,12 @@ export default {
 - les mises à jour sont bloquées,
 - toutefois les opérations d'urgence ("chats", crédits) sont autorisées.
 `,
-  BULLEnr22: `Compte restreint en lecture seulement:
+  BULLEnr22: `Compte en LECTURE SEULEMENT:
 - la visualisation est libre,
 - les mises à jour sont bloquées,
 - toutefois les opérations d'urgence ("chats", crédits) sont autorisées.
 `,
-  BULLEnr23: `Compte très restreint:
+  BULLEnr23: `Compte en ACCES RESTREINT:
 - la visualisation est bloquée,
 - les mises à jour sont bloquées,
 - toutefois les opérations d'urgence ("chats", crédits) sont autorisées.
@@ -1770,40 +1659,10 @@ export default {
 - je serai inconnu dans le groupe, en particulier vis à vis des notes que j'aurais pu écrire dans le passé et dans lesquelles je n'apparaîtrai plus comme auteur.
 - je serai inscrit en liste noire, personne ne pourra plus m'ajouter comme contact de ce groupe.`,
 
-  BULLEoubla1: `OUBLIER un contact:
-- il ne sera plus inscrit comme "contact" du groupe:
-- il sera inconnu dans le groupe, en particulier vis à vis des notes qu'il aurait pu écrire dans le passé et dans lesquelles il n'apparaîtra plus comme auteur,
-- toutefois, quelqu'un pourrait le réinscrie un jour dans le groupe: cette nouvelle existence dans le groupe ne pourra pas être corrélée avec son passage antérieur dans le groupe, il n'y aura pas le même numéro d'auteur.`,
-
-  BULLEoubla2: `OUBLIER DÉFINITIVEMENT un contact:
-- il ne sera plus inscrit comme "contact" du groupe:
-- il sera inconnu dans le groupe, en particulier vis à vis des notes qu'il aurait pu écrire dans le passé et dans lesquelles il n'apparaîtra plus comme auteur,
-- il sera inscrit en liste noire, personne ne pourra plus l'ajouter comme contact de ce groupe.`,
-
-  BULLEoublc1: `Ne plus être "actif" mais rester connu dans le groupe en tant que "contact":
-- le groupe n'apparaîtra plus dans la liste de mes groupes.
-- je reste inscrit comme "contact" du groupe et pourrai être ré-invité plus tard à des conditions éventuellemnt différentes, 
-- je reste connu dans le groupe, en particulier vis à vis des notes que j'aurais pu écrire dans le passé`,
-
-  BULLEoublc2: `Ne plus être "actif" ET M'OUBLIER:
-- le groupe n'apparaîtra plus dans la liste de mes groupes.
-- je ne serai plus connu dans le groupe, en particulier vis à vis des notes que j'aurais pu écrire dans le passé et dans lesquelles je n'apparaîtrai plus comme auteur.
-- toutefois, quelqu'un pourrait me réinscrie un jour dans le groupe: cette nouvelle existence dans le groupe ne pourra pas être corrélée avec mon passage antérieur dans le groupe, je n'y aurai pas le même numéro d'auteur.`,
-
-  BULLEoublc3: `Décliner l\'invitation MAIS M'OUBLIER DÉFINITIVEMENT:
-- le groupe n'apparaîtra plus dans la liste de mes groupes.
-- je ne serai plus connu dans le groupe, en particulier vis à vis des notes que j'aurais pu écrire dans le passé et dans lesquelles je n'apparaîtrai plus comme auteur.
-- je serai inscrit en liste noire, personne ne pourra plus m'ajouter comme contact de ce groupe.`,
-
   BULLEexclu: `Pour attribuer l\'exclusivité d\'écriture d\'une note, un compte doit:
 - soit avoir lui-même l\'excluvité d\'écriture sur la note,
 - soit avoir un pouvoir d\'animateur dans le groupe,
 - soit, quand aucune exclusivité n\'est attribuée, avoir été le seul compte à écrire dans cette note.`,
-
-  BULLEmcgr: `Pour attribuer des mots-clés "du groupe" à une note de groupe, un compte doit:
-- soit avoir lui-même l\'excluvité d\'écriture sur la note,
-- soit avoir un pouvoir d\'animateur dans le groupe,
-- soit, quand aucune exclusivité n\'est attribuée, avoir un droit d\'écriture des notes du groupe.`,
 
   BULLErl1: `Mais ça ne marche pas avec tous les navigateurs.
 - si l'installation n'a pas eu lieu, utiliser l'option 2 ou l'option 3.
@@ -1812,26 +1671,11 @@ export default {
   BULLErl2: `En général c'est efficace, mais sur smartphone il n'y a ni touche CONTROL, ni touche de fonction F5
 `,
 
-  BULLErl0: `Si l'application s'exécute dans plus d'une fenêtre du navigateur (ce qui est licite bien que peu usuel) le changement de version ne peut pas avoir lieu, même pour une nouvelle fenêtre. 
- 
-Fermer TOUTES les fenêtres / onglets où s'exécute l'application.
-`,
-
   BULLEhashtags: `A droite les hashtags déjà utilisés, à gauche ceux de la sélection. 
   - Ajouter un hashtag non trouvé à droite: le saisir et <ENTREE>
   - Ajouter un hashtag présent à droite: cliquer dessus
   - Enlever un hashtag sélectionné à gauche: cliquer dessus
   `,
-
-  BULLEquotas: ` Le nombre de "documents" correspond au nombre total,
-- de chats, les "indésirables" n'étant pas comptés,
-- de notes personnelles et de celles des groupes dont le compte est hébergeur,
-- de participations "actives" à des groupes.
-
-Le "volume des fichiers" est celui total de ceux attachés aux notes personnelles et à celles des groupes dont le compte est hébergeur.
-
-La "consommation mensuelle" de calcul est en centimes et est la somme des coûts des lectures, écritures et de transfert de volume montant et descendant.
-`,
 
   A_DOCpg: 'L\'application "a-social"',
 

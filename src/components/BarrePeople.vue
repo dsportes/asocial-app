@@ -83,7 +83,7 @@
       <q-card-actions class="q-pa-xs q-mt-sm q-gutter-sm" align="center" vertical>
         <btn-cond icon="undo" flat :label="$t('renoncer')" @ok="ui.fD"/>
         <btn-cond :disable="(diag !== '') || quotas.err || !pc" color="warning" icon="change_history" 
-          cond="cUrgence" :label="$t('PPmutO2')" @ok="cf=true"/>
+          cond="cUrgence" :label="$t('PPmutO')" @ok="cf=true"/>
         <bouton-confirm :actif="cf" :confirmer="mut"/>
       </q-card-actions>
     </q-card>
