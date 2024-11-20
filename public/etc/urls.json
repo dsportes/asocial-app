@@ -1,7 +1,10 @@
 {
   "opurl" : "http://localhost:8443",
   "pubsuburl" : "http://localhost:8443",
-  "docsurls": { "fr-FR": "http://localhost:4000/fr", "en-EN": "http://localhost:4000/en" },
+  "docsurls": { 
+    "fr-FR": "https://dsportes.github.io/asocial-man", 
+    "en-EN": "https://dsportes.github.io/asocial-man" 
+  },
   "vapid_public_key": "BC8J60JGGoZRHWJDrSbRih-0qi4Ug0LPbYsnft668oH56hqApUR0piwzZ_fsr0qGrkbOYSJ0lX1hPRTawQE88Ew",
 
   "opurlZ": "http",
