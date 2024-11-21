@@ -24,10 +24,12 @@ export const config = {
   },
 
   // EN TEST pour éviter de frapper les "phrases secrètes" de test. COMMENTER en production
+  /*
   phrases: [
     'leszsanglotszLONGSzgarezauzGORILLEz',
     'auzvillagezSANSzjaizmauvaisezREPUTATIONz'
-  ],
+  ], 
+  */
 
   /* Valeurs à ne pas changer, sauf rares exception */
   portupload: 33666, // Ne pas changer en général

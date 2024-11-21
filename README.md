@@ -1,3 +1,3 @@
-Application front-end UI de **asocial**.
+Application **asocial**.
 
-@@README de l'application - [README](https://raw.githack.com/dsportes/asocial-doc/master/readme.md)
+[Site de la documentation](https://asocialapps.github.io/frdocs)
