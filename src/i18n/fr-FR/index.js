@@ -1057,6 +1057,7 @@ export default {
   PALralO: 'La moyenne mensuelle de la consommation de calcul sur le mois en cours et le précédent excède le quota fixé par le Comptable ou un de ses délégués.',
   PALr: 'Les opérations sont ralenties jusqu\'à passage en dessous du quota.',
   PALratt: 'Ralentissement: {0} seconde(s) par opération et par méga-octet de fichier transféré.',
+  PALexcjm: 'Quota: {0}c  __ Conso. Moy.: {1}c __ {2}',
   PALesp: 'Alerte de l\'Administrateur Technique pour tous les comptes.',
   PALpart: 'Alerte du Comptable ou d\'un de ses délégués pour tous les comptes de la partition.',
   PALcpt: 'Alerte du Comptable ou d\'un de ses délégués spécifiquement pour ce compte.',
@@ -1123,7 +1124,7 @@ export default {
   PCPref2: 'Crée {0} - Passage en compte "O" {1}.',
   PCPref3: 'Crée {0} - Passage en compte "A" {1}.',
   PCPqmn: 'Quota moyen de nombre de documents',
-  PCPnbdoc: '{0} documents: {1} note(s) + {2} chat(s) + {3} groupe(s)',
+  PCPnbdoc: '{0} note(s) + {1} chat(s) + {2} groupe(s)',
   PCPnbdoc2: '{1} note(s) + {2} chat(s) + {3} groupe(s)',
   PCPqmv: 'Quota moyen de volume de fichiers / utilisé',
   PCPqmc: 'Quota moyen de calcul / consommé',
@@ -1149,6 +1150,12 @@ export default {
   PCPecr: 'Nombre d\'écritures',
   PCPvd: 'Vol. desc. fichiers',
   PCPvm: 'Vol. montant. fichiers',
+  PCPtAN: 'Abonnement pour 30 jours à 100 notes / chats / groupes',
+  PCPtAF: 'Abonnement pour 30 jours à 100Mo d\'espace de fichiers',
+  PCPtlec: 'Coût par 100.000 lectures',
+  PCPtecr: 'Coût par 100.000 d\'écritures',
+  PCPtmon: 'Coût par GB de transfert de fichiers montant du serveur de fichiers',
+  PCPtdes: 'Coût par GB de transfert de fichiers descendant vers le serveur de fichiers',
 
   // PanelPartition PageEspace
   PTnv: 'Nouvelle partition',
@@ -1446,7 +1453,7 @@ export default {
   // Aperçu Alerte
   ANlong0: 'Tout est OK, aucune Alerte.',
   ANlong1: 'A minima une alerte informative / contraintes fortes possibles.',
-  ANlong2: 'ACCES RESTREINT, mises à jour et consultations interdites (SAUF pour les actions d\'URGENCE)',
+  ANlong2: 'ACCÈS RESTREINT, mises à jour et consultations interdites (SAUF pour les actions d\'URGENCE)',
   ANlong3: 'Suppression IMMINENTE du compte ou impossibilité IMMINENTE de s\'y connecter',
   ANcre: 'En créer une',
   ANauc0: 'Pas d\'Alerte générale',
@@ -1569,6 +1576,10 @@ export default {
   TKrefh: 'Facultatif, de 0 à 20c',
   TKdeb: 'Ticket commençant par ...',
   TKdebh: '1 à 6 majuscules',
+  TK1A: 'Tickets en attente de réception',
+  TK1T: 'Tous les tickets en ligne (en attente ou enregistrés)',
+  TK2A: 'Mes tickets en attente de réception',
+  TK2T: 'Tous mes tickets en ligne (en attente ou enregistrés)',
 
   TKdons: 'Dons reçus / donnés',
   TKdb: 'Donné: {0}c',
@@ -1642,7 +1653,7 @@ export default {
 - les mises à jour sont bloquées,
 - toutefois les opérations d'urgence ("chats", crédits) sont autorisées.
 `,
-  BULLEnr23: `Compte en ACCES RESTREINT:
+  BULLEnr23: `Compte en ACCÈS RESTREINT:
 - la visualisation est bloquée,
 - les mises à jour sont bloquées,
 - toutefois les opérations d'urgence ("chats", crédits) sont autorisées.
@@ -1682,7 +1693,9 @@ export default {
   `,
 
   A_DOCpg: 'L\'application "a-social"',
-
+  
+  A_how_to: 'Comment faire pour ...',
+  
   A_pages: 'Disposition générale d\'une page',
   A_page_accueil: 'Page d\'accueil',
   A_top_bar: 'Barre du haut',
@@ -1691,11 +1704,11 @@ export default {
   A_page_admin: 'Page de l\'Administrateur Technique',
   A_page_chats: 'Page des _chats_',
   A_page_clos: 'Clôture immédiate de la connexion',
-  A_compta_notif: 'Alertes sur le compte',
   A_compta_compta: 'Abonnement et consommation',
   A_compta_credits: 'Gestion des crédits',
   A_compta_chats: '"Chats" en cas d\'urgence',
   A_page_compte: 'Page du compte',
+  A_page_compta: 'Page de comptabilité du compte',
   A_page_espace: 'Page de gestion de l\'espace',
   A_page_ficav: 'Page des fichiers accessibles en mode avion',
   A_page_groupe: 'Page de détail d\'un groupe',
@@ -1719,4 +1732,24 @@ export default {
   A_sponsoring_d: 'Déclarer un sponsoring',
   A_sponsoring_a: 'Accepter ou refuser un sponsoring',
 
+  A_compta_alertes: 'Alertes sur le compte',
+  A_alerte_dlvat: 'Alerte: connexion bientôt bloquée',
+  A_alerte_dlvc: 'Alerte: fin de vie du compte proche',
+  A_alerte_ar: 'Alerte: ACCÈS RESTREINT',
+  A_alerte_ls: 'Alerte: LECTURE SEULEMENT',
+  A_alerte_nr: 'Alerte: Excès de nombre de documents',
+  A_alerte_vr: 'Alerte: excès de volume de fichiers',
+  A_alerte_ral: 'Alerte: excès de calcul',
+  A_alerte_esp: 'Alerte: de l\'Administrateur Technique',
+  A_alerte_part: 'Alerte: du Comptable (ou délégués) aux comptes de la partition',
+  A_alerte_cpt: 'Alerte: du Comptable (ou délégués) spécifiquement au compte',
+
+  A_compta_compta: 'Abonnement et consommation, solde',
+  A_compta_credits: 'Gestion et suivi des paiements',
+  A_compta_chats: 'Chats d\'urgence',
+
+  A_compta_compta: 'Solde, abonnement et consommation',
+  A_compta_synth: 'Synthèse de la situation comptable',
+  A_compta_detail: 'Détail des 12 derniers mois',
+  A_compta_tarifs: 'Tarifs appliqués',
 }

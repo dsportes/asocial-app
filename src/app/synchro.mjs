@@ -52,7 +52,7 @@ class Queue {
     const session = stores.session
     const ok = session.ok
     if (this.EnCours || !ok) return
-    console.log('réveil')
+    // console.log('réveil')
 
     const ds = syncQueue.dataSync
     let doCpt = false, doEsp = false

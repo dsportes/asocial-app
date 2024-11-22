@@ -22,7 +22,7 @@ const props = defineProps({
   label: String
 })
 
-const ph = stores.config.pagesHelp
+const ph = stores.config.getHelpPages()
 const ui = stores.ui
 
 const tp = computed (() => !ph.has(props.page) ? $t('HLPaidebd', [props.page]) : $t('A_' + props.page))

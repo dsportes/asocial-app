@@ -115,7 +115,10 @@ export const useSessionStore = defineStore('session', {
     estClos (state) { const n = state.ntfE; return n && (n.nr === 3) },
     flags (state) { return state.compte && state.compte.flags ? state.compte.flags : 0},
     // Taux de ralentissement
-    RAL: (state) => !state.compte ? 0 : AL.txRal(state.compte.qv),
+    RAL: (state) => {
+      const x = !state.compte ? 0 : AL.txRal(state.compte.qv)
+      return x
+    },
     hasAR (state) {
       if (state.ntfP && state.ntfP.nr === 3) return true
       if (state.ntfC && state.ntfC.nr === 3) return true

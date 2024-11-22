@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { useI18n } from 'vue-i18n'
 import { Tarif } from '../app/api.mjs'
-import { b64ToU8 } from '../app/util.mjs'
+import { b64ToU8, HelpTree } from '../app/util.mjs'
 
 export const useConfigStore = defineStore('config', {
   state: () => ({
@@ -42,6 +42,9 @@ export const useConfigStore = defineStore('config', {
     maxlgtextenote: 5000,
     alerteDlv: 31,
 
+    planHelp: null,
+    helpTree: null,
+
     /* Autres */
     emojiIndex: null
   }),
@@ -56,16 +59,20 @@ export const useConfigStore = defineStore('config', {
   },
 
   actions: {
+    getHelpPages () {
+      if (!this.helpTree) this.helpTree = new HelpTree(this.planHelp)
+      return this.helpTree.helpPages
+    },
+
+    getHelpArbre () {
+      if (!this.helpTree) this.helpTree = new HelpTree(this.planHelp)
+      return this.helpTree.arbre
+    },
+
     setConfig(cfg) {
       if (cfg.tarifs) 
         Tarif.tarifs = cfg.tarifs
       for(const x in cfg) this[x] = cfg[x]
-
-      cfg.planHelp.forEach(s => {
-        s.lp.forEach(p => { this.pagesHelp.add(p) })
-        this.pagesHelp.add(s.id) 
-      })
-  
     },
 
     setEmojiIndex (ei) {

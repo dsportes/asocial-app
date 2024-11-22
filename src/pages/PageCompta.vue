@@ -8,7 +8,7 @@
     <bouton-help :page="'compta_' + ui.pagetab"/>
   </div>
 
-  <panel-compta v-if="ui.pagetab==='compta' && session.compta"/>
+  <panel-compta v-if="ui.pagetab==='compta' && session.compta" :c="session.compta.compteurs"/>
 
   <panel-credits v-if="ui.pagetab==='credits'"/>
 

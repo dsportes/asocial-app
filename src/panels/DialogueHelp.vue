@@ -42,11 +42,11 @@
       <q-scroll-area :class="!ui.portrait ? 'col-6' : ''" 
         :style="ui.portrait ? 'height: 50vh;padding-bottom:10px;border-bottom:5px solid grey' : 'height: 80vh;'">
         <show-html v-if="intro" class="q-mx-sm q-my-md" :texte="intro"/>
-        <q-expansion-item v-for="c in chaps" :key="c.t" 
+        <q-expansion-item v-for="c in chaps" :key="c.t" class="q-my-sm"
           group="somegroup" expand-separator>
           <template v-slot:header>
             <div class="full-width column bg-primary text-white">
-              <div class="text-bold titre-lg">{{c.t}}</div>
+              <div class="text-bold titre-md">{{c.t}}</div>
               <div v-if="c.m.length" class="self-end q-mr-sm">
                 <div v-for="m in c.m" :key="m.value" @click.stop="goto(m.value)"
                   class="x1 text-italic titre-md cursor-pointer">{{m.label}}</div>
@@ -74,7 +74,7 @@
               <q-icon name="library_books" color="orange" size="24px" class="col-auto q-mr-sm" />
               <div :class="'col text-bold text-italic' + cl(prop.node.id)">{{ prop.node.label }}</div>
             </div>
-            <div v-if="prop.node.type === 2" class="row items-start no-wrap">
+            <div v-else class="row items-start no-wrap">
               <q-icon name="note" color="primary" size="24px" class="col-auto q-mr-sm" />
               <div :class="'col ' + cl(prop.node.id)">{{ prop.node.label }}</div>
             </div>
@@ -135,22 +135,18 @@ const ui = stores.ui
 
 const config = stores.config
 const docsurl = config.docsurls[locale] || 'http://localhost:8080/fr'
-const plan = config.planHelp
-const arbre = []
-const pages = new Map() // Key: nom page, value: nom de sa section
-
-plan.forEach(s => {
-  const ch = []
-  s.lp.forEach(p => {
-    pages.set(p, s.id)
-    ch.push({ id: p, label: $t('A_' + p), children: [], type: 2 })
-  })
-  arbre.push({ id: s.id, label: $t('A_' + s.id), children: ch, type: 1 })
-})
+const arbre = config.getHelpArbre()
+const pages = config.getHelpPages() // Key: nom page, value: nom de sa page mère (null si racine)
 
 function parents (n) { // nom d'une page ou section
-  const s = pages.get(n)
-  return s ? [s, n] : [n]
+  const r = [n]
+  let x = n
+  while (x) {
+    const p = pages.get(x)
+    if (p) r.push(p)
+    x = p
+  }
+  return r
 }
 
 function ovreadme () { ui.oD('readme', 'a') }
@@ -164,6 +160,10 @@ const intro = ref()
 const chaps = ref()
 const filter = ref('')
 const filterRef = ref(null)
+
+watch(selected, (ap) => {
+  expanded.value = parents(ap)
+})
 
 function resetFilter () {
   filter.value = ''
@@ -190,9 +190,13 @@ function setChaps (id) {
         const y = t1.substring(i + 1).split(' ')
         y.forEach(l => {
           const code = l.trim()
-          if (code && pages.has(code)) {
-            const titre = ($t('A_' + code) || '').trim()
-            if (titre) m.push({ label: titre, value: code })
+          if (code) {
+            if (pages.has(code)) {
+              const titre = ($t('A_' + code) || '').trim()
+              if (titre) m.push({ label: titre, value: code })
+            } else {
+              console.log('Help : page non trouvée [' + code + ']')
+            }
           }
         })
       }
@@ -230,10 +234,6 @@ function remplaceImg (l) {
 }
 
 setChaps(selected.value)
-
-watch(selected, (ap) => {
-  expanded.value = parents(ap)
-})
 
 const stackvide = computed(() => ui.helpstack.length <= 1)
 const courante = computed(() => ui.helpstack[ui.helpstack.length - 1])

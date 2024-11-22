@@ -26,13 +26,25 @@ const steps = ref([
   { 
     d: '05 Nov 2024 10:00:00 UTC',
     qv: { qc: 8, qn: 8, qv: 4, nn: 100, nc: 80, ng: 20, v: 100000000 },
-    conso: { nl: 1000, ne: 500, vd: 100000000, vm: 200000000 },
+    conso: { nl: 200, ne: 100, vd: 0, vm: 0 },
     dbcr: 0
   },
   { 
-    d: '02 Jan 2025 10:30:00 GMT',
+    d: '10 Nov 2024 10:00:00 UTC',
+    qv: { qc: 8, qn: 8, qv: 4, nn: 100, nc: 80, ng: 20, v: 100000000 },
+    conso: { nl: 200, ne: 100, vd: 0, vm: 0 },
+    dbcr: 0
+  },
+  { 
+    d: '2 Dec 2024 10:30:00 UTC',
     qv: { qc: 4, qn: 1, qv: 1, nn: 100, nc: 80, ng: 20, v: 80000000 },
-    conso: null,
+    conso: { nl: 200, ne: 100, vd: 0, vm: 0 },
+    dbcr:100
+  },
+  { 
+    d: '1 Sept 2025 10:30:00 UTC',
+    qv: { qc: 4, qn: 1, qv: 1, nn: 100, nc: 80, ng: 20, v: 80000000 },
+    conso: { nl: 200, ne: 100, vd: 0, vm: 0 },
     dbcr: 0
   }
 ])

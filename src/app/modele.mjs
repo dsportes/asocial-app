@@ -467,7 +467,6 @@ export class Compte extends GenDoc {
 
   async compile (row) {
     const session = stores.session
-    const cfg = stores.config
     const clek = session.clek || await session.setIdClek(this.id, row.cleKXC)
     if (row.cleEK) this.cleE = await decrypter(clek, row.cleEK)
     this.priv = await RegCc.setPriv(this.id, row.privK)

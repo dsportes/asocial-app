@@ -1,11 +1,32 @@
 [
   { "id": "DOCpg", "lp": [] },
-  { "id": "pages", "lp": [ "top_bar", "bottom_bar", "page_accueil", "menu_navigation",
-    "page_espace", "page_partition", "page_session",
+  { "id": "pages", "lp": [ 
+    "top_bar", 
+    "bottom_bar", 
+    "page_accueil", 
+    "menu_navigation",
+    { "id": "page_login", "lp": ["page_login_m", "page_login_fa", "page_login_pp", "nouvelle_version" ]},
+    "page_espace",
+    "page_partition",
+    "page_session",
     "page_compte", 
-    "compta_notif", "compta_compta", "compta_credits", "compta_chats",
-    "page_groupes", "page_people", "page_chats", "page_ficav",
-    "page_groupes", "page_chats", "page_sponsorings", "page_groupe", "boite_automaj", "panel_outils" ]},
-  { "id": "page_login", "lp": ["page_login_m", "page_login_fa", "page_login_pp", "nouvelle_version" ]},
-  { "id": "sponsoring", "lp": ["sponsoring_d", "sponsoring_a"] }
+    { "id": "page_compta", "lp": [
+      { "id": "pages_alertes", "lp": ["alerte_dlvat", "alerte_dlvc", "alerte_ar", "alerte_ls",
+          "alerte_nr", "alerte_vr", "alerte_ral", "alerte_esp", "alerte_part", "alerte_cpt"]},
+      { "id": "compta_compta", "lp": ["compta_synth", "compta_detail", "compta_tarifs"]},
+      "compta_credits",
+      "compta_chats" ]
+    },
+    "page_groupes", 
+    "page_people", 
+    "page_chats", 
+    "page_ficav",
+    "page_groupes", 
+    "page_chats",
+    { "id": "page_sponsoring", "lp": ["sponsoring_d", "sponsoring_a"] },
+    "page_groupe",
+    "boite_automaj",
+    "panel_outils"]
+  },
+  { "id": "how_to" }
 ]

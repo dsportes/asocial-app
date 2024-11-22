@@ -174,7 +174,7 @@
       </q-header>
       <q-page-container>
         <q-card>
-          <panel-compta style="margin:0 auto"/>
+          <panel-compta style="margin:0 auto" :c="session.compta.compteurs"/>
         </q-card>
       </q-page-container>
     </q-layout>

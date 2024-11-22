@@ -40,7 +40,7 @@
   <ligne-alerte v-if="session.hasNRED" :niv="1" code="PALnred" hlp="alerte_nr">
     <div class="q-ml-md fs-md">
       <span class="text-center font-mono">{{qv.qn * UNITEN}} [{{c.qv.qn}}]</span>
-      <span class="text-right font-mono q-ml-md">{{p2(cqn)}}c</span>
+      <span class="text-right font-mono q-ml-md">{{p3(cqn)}}c</span>
     </div>
   </ligne-alerte>
 
@@ -56,10 +56,8 @@
       <div>{{$t('PALr')}}</div>
       <div class="q-ml-md fs-md">
         <div>{{$t('PALratt', [secRal])}}</div>
-        <div>
-          <span class="text-center font-mono">{{qv.qc}}c</span>
-          <span class="q-mr-md text-center font-mono">{{p2(qv.cjm * 30)}}c</span>
-          <span class="q-mrsm text-center font-mono">{{pced(qv.cjm * 30, qv.qc)}}</span>
+        <div class="font-mono">
+          {{$t('PALexcjm', [qv.qc, p3(qv.cjm * 30), pced(qv.cjm * 30, qv.qc)])}}
         </div>
       </div>
     </div>
@@ -119,7 +117,7 @@ const nbjat = computed(() => AMJ.diff(session.dlvatt, session.auj))
 const dlvt = computed(() => AMJ.tDeAmjUtc(session.compte.dlv))
 const oa = computed(() => session.estA ? 'A' : 'O')
 
-const p2 = (x) => x === 0 ? '0' : (x < 0.01 ? '<0,01' : x.toPrecision(2))
+const p3 = (x) => x === 0 ? '0' : (x < 0.01 ? '<0,01' : x.toPrecision(3))
 const pc = (x, y) => y === 0 ? 999 : (x * 100) / y
 const pced = (x, y) => { const q = pc(x, y)
   return q >= 999 ? '?' : (q === 0 ? '0%' : (q < 1 ? '<1%' : Math.round(q) + '%'))

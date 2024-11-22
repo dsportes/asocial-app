@@ -113,16 +113,18 @@ import { $t, mon, dhcool, dkli, edvol } from '../app/util.mjs'
 import MoisM from './MoisM.vue'
 import LigneCompteur from './LigneCompteur.vue'
 
+const props = defineProps({
+  c: Object
+})
+
 const session = stores.session
 
-const c = computed(() => session.compta.compteurs)
+const tref = computed(() => props.c.dhP === props.c.dh0 ? (props.c.estA ? 1 : 0) : (props.c.estA ? 3 : 2 ))
 
-const tref = computed(() => c.value.dhP === c.value.dh0 ? (c.value.estA ? 1 : 0) : (c.value.estA ? 3 : 2 ))
-
-const im = ref(c.value.mm)
+const im = ref(props.c.mm)
 const aaaa = computed(() => {
-  let a = c.value.aaaa
-  const m = c.value.mm
+  let a = props.c.aaaa
+  const m = props.c.mm
   return im.value <= m && im.value > 0 ? a : a - 1
 })
 
@@ -130,14 +132,14 @@ const cu = computed(() => Tarif.cu(aaaa.value, im.value))
 
 const cuf = ['AN', 'AF', 'lec', 'ecr', 'mon', 'des']
 
-const cuj = computed(() => Tarif.cu(c.value.aaaa, c.value.mm))
+const cuj = computed(() => Tarif.cu(props.c.aaaa, props.c.mm))
 
-const qv = computed(() => c.value.qv )
+const qv = computed(() => props.c.qv )
 const cqn = computed(() => qv.value.qn * cuj.value[0])
 const cqv = computed(() => qv.value.qv * cuj.value[1])
 const nbdoc = computed(() => qv.value.nn + qv.value.nc + qv.value.ng)
-const sc = computed(() => c.value.soldeCourant)
-const njec = computed(() => c.value.njec )
+const sc = computed(() => props.c.soldeCourant)
+const njec = computed(() => props.c.njec )
 
 const p0 = (x) => x === 0 ? '0' : (x < 1 ? '<1' : Math.round(x))
 const p2 = (x) => x === 0 ? '0' : (x < 0.01 ? '<0,01' : x.toPrecision(2))

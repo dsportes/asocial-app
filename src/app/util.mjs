@@ -473,3 +473,44 @@ export function getTrigramme () {
   })
 }
 
+export class HelpTree {
+  constructor (plan) {
+    this.arbre = []
+    this.helpPages = new Map()
+
+    plan.forEach(p => {
+      if (typeof p === 'string') {
+        if (this.helpPages.has(p)) console.log('Doublon page help: ' + p)
+        else {
+          this.helpPages.set(p, null)
+          this.arbre.push({ id: p, label: $t('A_' + p), children: [], type: 1 })
+        }
+      } else {
+        this.node(null, null, p, 1)
+      }
+    })
+    console.log(this.arbre.length)
+  }
+
+  node (chp, parentId, page, n) { // page est un objet avec un lp (liste de sous pages)
+    if (this.helpPages.has(page.id)) {
+      console.log('Doublon page help: ' + page.id)
+      return
+    }
+    this.helpPages.set(page.id, parentId)
+    const ch = []
+    if (page.lp) page.lp.forEach(p => {
+      if (typeof p === 'string') {
+        if (this.helpPages.has(p)) console.log('Doublon page help: ' + p)
+        else {
+          this.helpPages.set(p, page.id)
+          ch.push({ id: p, label: $t('A_' + p), children: [], type: n + 1 })
+        }
+      } else {
+        this.node(ch, page.id, p, n + 1)
+      }
+    })
+    const x = chp || this.arbre
+    x.push({ id: page.id, label: $t('A_' + page.id), children: ch, type: n })
+  }
+}

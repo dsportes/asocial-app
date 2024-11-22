@@ -7,10 +7,13 @@
   <div :class="'row q-mt-xs ' + dkli(1)">
     <div class="col-8">{{$t('PCPqmn')}}</div>
     <div class="col-2 font-mono text-center">{{p0(v[VQN] * UNITEN)}}</div>
-    <div class="col-2"/>
+    <div class="col-2 font-mono text-center">
+      <span>{{p0(nbdoc)}}</span>
+      <span :class="'q-ml-xs ' + pccl(nbdoc, v[VQN] * UNITEN)">{{pced(nbdoc, v[VQN] * UNITEN)}}</span>
+    </div>
   </div>
   <div :class="'row ' + dkli(1)">
-    <div class="col-8 text-italic q-ml-md">{{$t('PCPnbdoc', [p0(nbdoc), p0(v[VNN]), p0(v[VNC]), p0(v[VNG])])}}</div>
+    <div class="col-8 text-italic q-ml-md">{{$t('PCPnbdoc', [p0(v[VNN]), p0(v[VNC]), p0(v[VNG])])}}</div>
     <div class="col-2"></div>
     <div class="col-2"></div>
   </div>
