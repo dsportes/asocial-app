@@ -43,11 +43,13 @@ async function msgPush (event) {
 
 export default boot(async ({ app /* Vue */ }) => {
   const urls = require('/public/etc/urls.json')
+  const readme = require('/public/README.md')
 
   const cfg = { pageSessionId: ID.rnd(), nc: 0 }
   for(const x in config) cfg[x] = config[x]
   if (urls.BUILD) cfg.BUILD = urls.BUILD
 
+  cfg.readme = readme || ''
   cfg.docsurls = urls.docsurls || { 'en-FR': 'http://localhost:4000' }
   cfg.vapid_public_key = urls.vapid_public_key || 'BC8J60JGGoZRHWJDrSbRih-0qi4Ug0LPbYsnft668oH56hqApUR0piwzZ_fsr0qGrkbOYSJ0lX1hPRTawQE88Ew'
 

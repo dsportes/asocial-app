@@ -1,7 +1,7 @@
 <template>
 <q-dialog v-model="ui.d.a.dialoguehelp" position="left" persistent>
 <q-layout container view="hHh lpR fFf" :class="styp('xl')">
-  <q-header elevated class="bg-secondary text-white">
+  <q-header elevated>
     <q-toolbar class="bg-secondary text-white">
       <btn-cond icon="chevron_left" color="warning" @ok="ui.fermerHelp">
         <q-tooltip class="bg-white text-primary">{{$t('HLPfermer')}}</q-tooltip>
@@ -11,11 +11,15 @@
       </btn-cond>
       <q-toolbar-title class="titre-lg">{{$t('A_' + selected)}}</q-toolbar-title>
     </q-toolbar>
-    <div class="bg-primary text-right">
-      <a class="q-mr-sm text-italic text-white text-underlined titre-lg text-bold cursor-pointer"
-        :href="docsurl + '/index.html'" target="_blank">
-        {{$t('HLPdg')}}</a>
-    </div>
+    <q-separator color="grey-5" size="2px"/>
+    <q-toolbar class="bg-primary text-white">
+      <q-toolbar-title>
+        <a class="q-mr-sm text-italic text-white text-underlined titre-md text-bold cursor-pointer"
+          :href="docsurl + '/index.html'" target="_blank">
+          {{$t('HLPdg')}}</a>
+      </q-toolbar-title>
+      <btn-cond color="secondary" :label="$t('readme')" @ok="ovreadme"/>
+    </q-toolbar>
   </q-header>
 
   <q-footer elevated class="bg-black text-white">
@@ -80,6 +84,35 @@
       </q-scroll-area>
     </div>
   </q-page-container>
+
+  <q-dialog v-model="ui.d.a.readme" persistent>
+    <q-card :class="styp('md') + 'q-pa-sm'">
+      <q-card-section>
+        <div class="titre-md">{{$t('HLPrm1')}}</div>
+        <sd-nb :texte="config.readme" class="q-my-sm rd"/>
+        <div>
+          <a class="text-italic text-primary text-underlined titre-lg text-bold cursor-pointer"
+            :href="docsurl + '/appli/confiance.html'" target="_blank">
+            {{$t('HLPrm2')}}</a>
+        </div>
+        <div class="titre-md text-italic q-mt-md">{{$t('HLPurls')}}</div>
+        <div class="column fs-sm font-mono q-ml-lg">
+          <div class="row">
+            <span class="col-2 text-right q-pr-md text-italic">OP:</span>
+            <span class="col-10">{{config.OPURL}}</span>
+          </div>
+          <div class="row">
+            <span class="col-2 text-right q-pr-md text-italic">PUBSUB:</span>
+            <span class="col-10">{{config.PUBSUBURL}}</span>
+          </div>
+        </div>
+      </q-card-section>
+      <q-card-actions align="center" class="q-my-sm">
+        <btn-cond flat :label="$t('jailu')" size="lg" @ok="ui.fD"/>
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
+
 </q-layout>
 </q-dialog>
 </template>
@@ -94,6 +127,7 @@ import { styp, sty, $t } from '../app/util.mjs'
 
 import ShowHtml from '../components/ShowHtml.vue'
 import BtnCond from '../components/BtnCond.vue'
+import SdNb from '../components/SdNb.vue'
 
 const $i18n = useI18n()
 const locale = $i18n.locale.value
@@ -118,6 +152,8 @@ function parents (n) { // nom d'une page ou section
   const s = pages.get(n)
   return s ? [s, n] : [n]
 }
+
+function ovreadme () { ui.oD('readme', 'a') }
 
 const tree = ref(null)
 const expandAll = ref(false)
@@ -226,4 +262,10 @@ function back () {
   background-color: $yellow-3
   color: black
   font-weight: bold
+.rd
+  border: 1PX solid $grey-5
+  border-radius: 7px
+  padding: 3px
+  max-height: 10rem
+  overflow-y: scroll
 </style>

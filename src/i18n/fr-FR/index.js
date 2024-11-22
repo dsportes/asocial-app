@@ -56,6 +56,7 @@ export default {
   details: 'Plus de détails', // PageGroupe
   sponsorise: 'sponsorise',
   sponsor: 'sponsor',
+  readme: 'LISEZMOI',
 
   avatar: 'Avatar {0}', // FiltreAvgr
   groupe: 'Groupe {0}', // FiltreAvgr
@@ -574,6 +575,9 @@ export default {
   HLPfiltre: 'Filtre sur les titres',
   HLPdg: 'Site de documentaion de l\'application',
   HLPmenu: 'Voir le détail dans le menu ci-dessus, rubrique _{0}_',
+  HLPrm1: 'Note à propos de la révision de l\'application: quels sources ...',
+  HLPrm2: 'En savoir plus: "Analyse de la confiance ..."', 
+  HLPurls: 'URLs des services externes:',
 
   // Page sponsorings - Nouveau sponsoring
   NPnouv: 'Sponsoriser un nouveau compte',
