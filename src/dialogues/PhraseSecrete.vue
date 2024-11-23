@@ -193,6 +193,16 @@ watch(vkb, (ap, av) => {
 const secligne1 = computed(() => isPwd.value ? ''.padStart(ligne1.value.length, '*') : ligne1.value)
 
 watch(ligne1, (ap) => {
+  if (ap && ap.length > 4 && ap.endsWith('*')) {
+    const c = ap.substring(0, ap.length - 1)
+    let s = ''
+    while (s.length < lgph) s += c
+    forceInput(s)
+  }
+})
+
+/*
+watch(ligne1, (ap) => {
   if (ap && ap.length === 3 && ap.startsWith('*')) {
     const c = ap.substring(1, 3)
     let s = ''
@@ -200,6 +210,7 @@ watch(ligne1, (ap) => {
     forceInput(s)
   }
 })
+*/
 
 watch(razdb, async (ap) => {
   if (ap === true) await afficherDiag($t('LOGrazbl'))
