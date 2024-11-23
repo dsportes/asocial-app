@@ -765,18 +765,7 @@ export class Compteurs {
 
     // fin de réactualisation. Préparation début nouvelle situation
     if (qv) this.qv = qv // valeurs de quotas / volumes à partir de maintenant
-    
-    // consommation moyenne journalière (en c) relevée sur le mois en cours et le précédent
-    {
-      const vc = this.vd[this.mm - 1]
-      let mp = this.mm === 1 ? 11 : this.mm - 2
-      const vp = this.vd[mp]
-      const ct = vc[VCC] + vp[VCC]
-      const nbj = (vc[VMS] + vp[VMS]) / MSPARJOUR
-      this.qv.cjm = ct / (nbj < 10 ? 10 : nbj)
-      assertQv(this.qv, 'Calcul cjm')
-    }
-    
+        
     if (conso) {
       const v = this.vd[this.mm - 1]
       v[VNL] += conso.nl
@@ -788,6 +777,17 @@ export class Compteurs {
     if (chgA !== undefined && chgA !== null && chgA !== this.estA) {
       this.estA = chgA
       this.dhP = this.dh
+    }
+
+    // consommation moyenne journalière (en c) relevée sur le mois en cours et le précédent
+    {
+      const vc = this.vd[this.mm - 1]
+      let mp = this.mm === 1 ? 11 : this.mm - 2
+      const vp = this.vd[mp]
+      const ct = vc[VCC] + vp[VCC]
+      const nbj = (vc[VMS] + vp[VMS]) / MSPARJOUR
+      this.qv.cjm = ct / (nbj < 10 ? 10 : nbj)
+      assertQv(this.qv, 'Calcul cjm')
     }
   }
 
@@ -880,7 +880,7 @@ export class Compteurs {
     v[VNC] = ((v[VNC] * msav) + (q.nc * delta)) / msap
     v[VNG] = ((v[VNG] * msav) + (q.ng * delta)) / msap
     v[VV] = ((v[VV] * msav) + (q.v * delta)) / msap
-    // Augmentation du COUT de l'abonnement et de la consommation
+    // Augmentation du COUT de l'abonnement et de la consommation - FAUX
     const [ma, mc] = Tarif.evalCaCc (a, m, delta, v)
     v[VAC] += ma
     v[VCC] += mc
