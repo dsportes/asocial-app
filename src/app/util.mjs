@@ -492,25 +492,28 @@ export class HelpTree {
     console.log(this.arbre.length)
   }
 
-  node (chp, parentId, page, n) { // page est un objet avec un lp (liste de sous pages)
-    if (this.helpPages.has(page.id)) {
-      console.log('Doublon page help: ' + page.id)
+  node (chp, parentId, page, n) { // page est un Array de la liste de la page et de ses sous pages
+    if (!page.length) return
+    if (this.helpPages.has(page[0])) {
+      console.log('Doublon page help: ' + page[0])
       return
     }
-    this.helpPages.set(page.id, parentId)
+    this.helpPages.set(page[0], parentId)
     const ch = []
-    if (page.lp) page.lp.forEach(p => {
-      if (typeof p === 'string') {
-        if (this.helpPages.has(p)) console.log('Doublon page help: ' + p)
-        else {
-          this.helpPages.set(p, page.id)
-          ch.push({ id: p, label: $t('A_' + p), children: [], type: n + 1 })
+    page.forEach((p, i) => {
+      if (i) {
+        if (typeof p === 'string') {
+          if (this.helpPages.has(p)) console.log('Doublon page help: ' + p)
+          else {
+            this.helpPages.set(p, page[0])
+            ch.push({ id: p, label: $t('A_' + p), children: [], type: n + 1 })
+          }
+        } else {
+          this.node(ch, page[0], p, n + 1)
         }
-      } else {
-        this.node(ch, page.id, p, n + 1)
       }
     })
     const x = chp || this.arbre
-    x.push({ id: page.id, label: $t('A_' + page.id), children: ch, type: n })
+    x.push({ id: page[0], label: $t('A_' + page[0]), children: ch, type: n })
   }
 }
