@@ -65,7 +65,7 @@
 
   <q-separator v-if="session.ntfE" color="orange" class="q-mt-md"/>
   <ligne-alerte v-if="session.ntfE" :niv="session.espace.notifE.nr" code="PALesp" hlp="alerte_esp">
-    <apercu-notif :idx="0" :type="0" 
+    <apercu-notif :idx="0" :type="0" simple
       :cible="session.ns" :notif="session.espace.notifE"/>
   </ligne-alerte>
 
@@ -73,14 +73,14 @@
     <q-separator color="orange" class="q-mt-md"/>
 
     <ligne-alerte :niv="nrx(session.espace.notifP)" code="PALpart" hlp="alerte_part">
-      <apercu-notif :idx="0" :type="1" 
+      <apercu-notif :idx="0" :type="1" simple
         :cible="session.compte.idp" :notif="session.notifP"/>
     </ligne-alerte>
 
     <q-separator color="orange" class="q-mt-md"/>
 
     <ligne-alerte :niv="nrx(session.espace.notifC)" code="PALcpt" hlp="alerte_cpt">
-      <apercu-notif :idx="0" :type="2" 
+      <apercu-notif :idx="0" :type="2" simple
         :cible="session.compteId" :notif="session.compte.notif"/>
     </ligne-alerte>
   </div>

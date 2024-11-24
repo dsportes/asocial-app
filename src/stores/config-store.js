@@ -13,7 +13,8 @@ export const useConfigStore = defineStore('config', {
     subJSON: '???', // subscription obtenu de SW sérialisé
     pageSessionId: '', // rnd, identifiant universel du chargement de la page (session browser)
     nc: 0, // numéro d'ordre de connexion dans la session
-    permState: '???', // granted denied prompt
+    notificationPerm: null,
+    permState: '!!!', // granted denied prompt
 
     locales: [],
     motsclesloc: {},
@@ -69,10 +70,21 @@ export const useConfigStore = defineStore('config', {
       return this.helpTree.arbre
     },
 
-    setConfig(cfg) {
+    async getPerm () {
+      if (!this.notificationPerm)
+        this.notificationPerm = await navigator.permissions.query({ name: 'notifications' })
+      const p = this.notificationPerm.state
+      if (p !== this.permState) {
+        console.log('permState: ', this.permState, ' -> ', p)
+        this.permState = p
+      }
+    },
+
+    async setConfig(cfg) {
       if (cfg.tarifs) 
         Tarif.tarifs = cfg.tarifs
       for(const x in cfg) this[x] = cfg[x]
+      await this.getPerm()
     },
 
     setEmojiIndex (ei) {
@@ -87,11 +99,10 @@ export const useConfigStore = defineStore('config', {
     },
 
     async listenPerm () {
-      const notificationPerm = await navigator.permissions.query({ name: 'notifications' })
-      this.permState = notificationPerm.state
-      notificationPerm.onchange = async () => {
-        console.log("User decided to change his seettings. New permission: " + notificationPerm.state)
-        this.permState = notificationPerm.state
+      await this.getPerm()
+      this.notificationPerm.onchange = async () => {
+        console.log("User decided to change his seettings. New permission: " + this.notificationPerm.state)
+        await this.getPerm()
         if (this.permState === 'granted') await this.setSubscription()
       }
     },

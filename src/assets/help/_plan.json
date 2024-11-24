@@ -15,7 +15,7 @@
     "page_session",
     "page_compte", 
     ["page_compta",
-      ["pages_alertes", 
+      ["compta_alertes", 
         "alerte_dlvat", "alerte_dlvc", "alerte_ar", "alerte_ls",
         "alerte_nr", "alerte_vr", "alerte_ral", "alerte_esp", "alerte_part", "alerte_cpt"
       ],
@@ -29,8 +29,6 @@
     "page_people", 
     "page_chats", 
     "page_ficav",
-    "page_groupes", 
-    "page_chats",
     ["page_sponsoring",
       "sponsoring_d", "sponsoring_a"
     ],

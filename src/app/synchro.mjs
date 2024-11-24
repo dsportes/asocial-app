@@ -322,8 +322,9 @@ export async function connexion(phrase, razdb) {
     const op = new ConnexionSynchroIncognito()
     await op.run()
     setTimeout(async () => {
+      await hb.pingHB()
       await hb.startHB()
-    }, 500)
+    }, 50)
   } catch (e) { 
     throw e
   }
@@ -713,6 +714,7 @@ export class ConnexionSynchroIncognito extends OperationS {
       await sleep(300)
       if (session.nivAlerte) stores.ui.setPage('compta', 'alertes')
       else stores.ui.setPage('accueil')
+      // await stores.config.getPerm()
       this.finOK()
     } catch (e) {
       // stores.ui.setPage('login')

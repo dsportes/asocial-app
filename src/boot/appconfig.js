@@ -107,7 +107,7 @@ export default boot(async ({ app /* Vue */ }) => {
 
   cfg.planHelp = require('../assets/help/_plan.json')
 
-  stores.config.setConfig(cfg)
+  await stores.config.setConfig(cfg)
 
   setRequiredModules({ pako: pako })
 })

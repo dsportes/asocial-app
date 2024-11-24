@@ -1459,6 +1459,7 @@ export default {
   ANauc0: 'Pas d\'Alerte générale',
   ANauc1: 'Pas d\'Alerte à tous les comptes de la partition',
   ANauc2: 'Pas d\'Alerte spécifique du compte',
+  ANaucs: '(aucune)',
   ANnot0: 'Alerte générale pour tous les comptes',
   ANnot1: 'Alerte à tous les comptes de la partition',
   ANnot2: 'Alerte spécifique du compte',
@@ -1729,7 +1730,7 @@ export default {
   A_page_login_pp: 'Le "presse-papier" de notes et fichiers',
   A_nouvelle_version: '"Nouvelle version disponible"',
 
-  A_sponsoring: 'Sponsoriser des comptes',
+  A_page_sponsoring: 'Sponsoriser des comptes',
   A_sponsoring_d: 'Déclarer un sponsoring',
   A_sponsoring_a: 'Accepter ou refuser un sponsoring',
 

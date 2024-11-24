@@ -27,11 +27,11 @@
       <show-html class="q-mt-xs bord" :texte="notif.texte" :idx="idx" 
         maxh="3rem" zoom scroll/>
     </div>
-    <div v-if="!diag && (!notif || !notif.texte)" class="row">
-      <div class="titre-md">{{$t('ANauc' + type)}}</div>
-      <btn-cond v-if="type===0 && session.estAdmin" class="q-ml-sm" :label="$t('ANcre')" icon="add"
+    <div v-if="!diag && (!notif || !notif.texte)" class="row justify-between">
+      <div class="titre-md">{{$t('ANauc' + (simple ? 's' : type))}}</div>
+      <btn-cond v-if="type===0 && session.estAdmin" class="q-ml-sm" icon="edit"
         @ok="creer"/>
-      <btn-cond v-if="type!==0 && session.pow < 4" class="q-ml-sm" :label="$t('ANcre')" icon="add"
+      <btn-cond v-if="type!==0 && session.pow < 4" class="q-ml-sm" icon="edit"
         cond="cUrgence"
         @ok="creer"/>
     </div>
@@ -69,7 +69,8 @@ const props = defineProps({
   - 2 : d'un compte
   */
   cible: String, // type 0: ns, type 1: idPartition, type 2: idCompte
-  idx: Number
+  idx: Number,
+  simple: Boolean
 })
 
 const restr = ref(false)
