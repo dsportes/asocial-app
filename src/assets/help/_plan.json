@@ -1,10 +1,12 @@
 [
   "DOCpg",
-  ["pages",  
-    "top_bar", 
-    "bottom_bar", 
-    "page_accueil", 
-    "menu_navigation",
+  ["pages",
+    [ "pages_struct",
+      "top_bar", 
+      "bottom_bar", 
+      "page_accueil", 
+      "menu_navigation"
+    ],
     ["page_login", 
       "page_login_m", "page_login_fa", "page_login_pp", "nouvelle_version" 
     ],

@@ -1696,7 +1696,8 @@ export default {
   
   A_how_to: 'Comment faire pour ...',
   
-  A_pages: 'Disposition générale d\'une page',
+  A_pages: 'Pages de l\'application',
+  A_pages_struct: 'Disposition générale d\'une page',
   A_page_accueil: 'Page d\'accueil',
   A_top_bar: 'Barre du haut',
   A_bottom_bar: 'Barre du bas',
