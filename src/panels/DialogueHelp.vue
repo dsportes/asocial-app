@@ -45,11 +45,13 @@
         <q-expansion-item v-for="c in chaps" :key="c.t" class="q-my-sm"
           group="somegroup" expand-separator>
           <template v-slot:header>
-            <div class="full-width column bg-primary text-white">
+            <div class="full-width column chap q-pa-xs">
               <div class="text-bold titre-md">{{c.t}}</div>
               <div v-if="c.m.length" class="self-end q-mr-sm">
                 <div v-for="m in c.m" :key="m.value" @click.stop="goto(m.value)"
-                  class="x1 text-italic titre-md cursor-pointer">{{m.label}}</div>
+                  class="x1 text-primary text-italic titre-md cursor-pointer">
+                  {{m.label}}
+                </div>
               </div>
             </div>
           </template>
@@ -260,12 +262,15 @@ function back () {
 @import '../css/app.sass'
 .x1:hover
   background-color: $yellow-3
-  color: black
-  font-weight: bold
+  color: black !important
+  font-weight: bold !important
 .rd
   border: 1PX solid $grey-5
   border-radius: 7px
   padding: 3px
   max-height: 10rem
   overflow-y: scroll
+.chap
+  border: 1px solid $primary
+  border-radius: 8px
 </style>

@@ -25,7 +25,7 @@ Un avis est retourné si aucun compte n'a été trouvé pour cette phrase. Il n'
 
 Dans le cas normal, les données du compte sont chargées et la session est ouverte sur la page d'accueil.
 
-# Créer son compte par _sponsoring_ | page_login_m sponsoring_a
+# Créer son compte par _sponsoring_ | page_login_m sponsoring_a ht_sponsoriser
 Vous avez rencontré une personne ayant un compte dans l'application et ayant la capacité de _sponsoriser_ de nouveaux comptes. Cette personne vous a communiqué:
 - l'URL de connexion à l'application comme _https://s1.monhebergeur.net/?demo_ 
   - s'il a un code après un `?` (`demo` dans cet exemple), c'est le code de votre organisation.
@@ -37,7 +37,7 @@ Plus de détail dans rubrique _Modes synchronisé / incognito / avion_.
 
 Une fois ces données saisies et la phrase de reconnaissance effectivement reconnue vous êtes dirigé vers le dialogue d'acceptation ou de refus du sponsoring où votre compte sera créé (si vous le voulez bien).
 
-Détails à propos des sponsorings dans la rubrique _Sponsoriser des comptes_.
+Détails à propos des sponsorings dans la rubrique _...sponsoriser des comptes_.
 
 # "Nouvelle version disponible" : que faire ? | nouvelle_version
 Appuyer sur ce bouton _rouge_ et suivre les instructions.

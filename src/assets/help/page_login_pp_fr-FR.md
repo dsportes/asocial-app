@@ -1,20 +1,26 @@
 
-# Qu'est-ce que le _presse-papier_ ?
+## Qu'est-ce que le _presse-papier_ ?
 Cette fonctionnalité est disponible dans les trois modes.
 
 Le _presse-papier_ garde localement des _textes_ et des _fichiers_, chacun portant un code identifiant non significatif.
-- on peut ajouter un texte en le saisissant ou en le copiant / collant depuis n'importe quel endroit, en particulier depuis le texte d'une note.
-- on peut aussi l'éditer.
-- on peut ajouter un fichier,
-  - soit en le sélectionnant depuis un des fichiers disponibles sur le poste,
-  - soit en _copiant_ un fichier attaché à une note.
 
-Dans une note on peut _coller_ du texte, en particulier celui d'un texte du _presse-papier_.
+# Copier des textes et fichiers dans le presse-papier
+On peut ajouter un texte,
+- soit en le saisissant,
+- soit en le copiant / collant depuis n'importe quel endroit, en particulier depuis le texte d'une note.
 
-On peut attacher comme fichier d'une note, l'un de ceux présent dans le _presse-papier_.
+On peut _éditer_ un texte du presse-papier.
 
-Le _presse-papier_ est plus ou moins persistant d'une session à la suivante:
-- en mode _incognito_, il n'est pas mémorisé sur le poste, et sa durée de vie est donc celle de la session en cours.
+On peut ajouter un fichier au presse-papier,
+- soit en le sélectionnant depuis un des fichiers disponibles sur le poste,
+- soit en _copiant_ un fichier attaché à une note.
+
+Dans une note:
+- on peut _coller_ du texte, en particulier celui d'un texte du _presse-papier_.
+- on peut attacher comme fichier d'une note l'un de ceux présent dans le _presse-papier_.
+
+Selon le mode de la session, le _presse-papier_ est plus ou moins persistant d'une session à la suivante:
+- en mode _incognito_, il reste en mémoire du navigateur: sa durée de vie est celle de la session en cours.
 - en modes _synchronisé_ et _avion_ , le _presse-papier_ est sauvegardé dans la base locale du compte dans le navigateur: son contenu est disponible à l'ouverture de la session suivante (_synchronisé_ ou _avion_).
 
 ### Exemple d'usage du _presse-papier_

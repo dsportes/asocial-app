@@ -3,8 +3,13 @@
   <q-btn round size="sm" class="btr" icon="print" @click="c.print()"/>
 
   <q-expansion-item switch-toggle-side default-opened dense group="somegroup"
-      header-class="titre-md text-bold bg-primary text-white"
-      :label="$t('PCPsynth', [dhcool(c.dh, true)])">
+      header-class="bg-primary text-white">
+    <template v-slot:header>
+      <div class="full-width row justify-between items-center">
+        <div class="titre-md text-bold">{{$t('PCPsynth', [dhcool(c.dh, true)])}}</div>
+        <bouton-help page="compta_synth"/>
+      </div>
+    </template>
     <div class="spmd q-my-sm justify-center">
       <div class="text-italic">
         {{$t('PCPref' + tref, [dhcool(c.dh0, true), tref > 2 ? dhcool(c.dhP, true) : ''])}}
@@ -55,7 +60,7 @@
         <div class="col-8 titre-lg">{{$t('PCPsoldac')}}</div>
         <div class="col-2"></div>
         <div class="col-2 text-right">
-          <span :class="'font-mono text-bold fs-lg ' + (sc < 0 ? 'p100' : '')">{{mon(sc, 2)}}c</span>
+          <span :class="'font-mono text-bold fs-lg ' + (sc < 0 ? 'p100' : '')">{{mon(sc, 2)}}</span>
         </div>
       </div>
 
@@ -73,8 +78,13 @@
   <q-separator size="3px"/>
 
   <q-expansion-item switch-toggle-side dense group="somegroup"
-      header-class="titre-md text-bold bg-primary text-white"
-      :label="$t('PCPdet')">
+      header-class="bg-primary text-white">
+    <template v-slot:header>
+      <div class="full-width row justify-between items-center">
+        <div class="titre-md text-bold">{{$t('PCPdet')}}</div>
+        <bouton-help page="compta_detail"/>
+      </div>
+    </template>
     <div class="splg column q-my-sm items-center">
       <mois-m v-model.number="im" :imd="c.mm" :aaaa="c.aaaa"/>
       <ligne-compteur class="full-width" :v="c.vd[im - 1]" :mm="im" :aaaa="aaaa"/>
@@ -84,8 +94,13 @@
   <q-separator size="3px"/>
 
   <q-expansion-item switch-toggle-side dense group="somegroup"
-    header-class="titre-md text-bold bg-primary text-white"
-    :label="$t('PCPtarifs')">
+      header-class="bg-primary text-white">
+    <template v-slot:header>
+      <div class="full-width row justify-between items-center">
+        <div class="titre-md text-bold">{{$t('PCPtarifs')}}</div>
+        <bouton-help page="compta_tarifs"/>
+      </div>
+    </template>
     <div class="spmd column q-mb-sm q-pa-xs items-center">
       <div class="text-italic titre-md q-my-sm">{{$t('PCPcent')}}</div>
 
@@ -112,6 +127,7 @@ import { Tarif, UNITEN, UNITEV } from '../app/api.mjs'
 import { $t, mon, dhcool, dkli, edvol } from '../app/util.mjs'
 import MoisM from './MoisM.vue'
 import LigneCompteur from './LigneCompteur.vue'
+import BoutonHelp from './BoutonHelp.vue'
 
 const props = defineProps({
   c: Object

@@ -36,5 +36,7 @@
     "boite_automaj",
     "panel_outils"
   ],
-  "how_to"
+  ["how_to",
+    "ht_sponsoriser"
+  ]
 ]

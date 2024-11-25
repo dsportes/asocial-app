@@ -15,7 +15,7 @@ const props = defineProps({
   font-family:  "Ubuntu Sans" !important;
   background-color: transparent !important;
   color: white !important;
-  line-height: 1rem;
+  line-height: 1.4rem;
   font-size: 0.9rem;
 }
 @import 'github-markdown-css/github-markdown-dark.css'
