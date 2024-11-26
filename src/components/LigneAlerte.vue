@@ -5,7 +5,7 @@
     <div class="titre-md">{{$t(code)}}</div>
     <slot></slot>
   </div>
-  <bouton-help v-if="hlp" class="col-1" page="hlp"/>
+  <bouton-help v-if="hlp" class="col-1 text-right" :page="hlp"/>
 </div>
 </template>
 

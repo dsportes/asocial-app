@@ -5,9 +5,9 @@ Le mois d'application du tarif peut être choisi sur les 12 derniers mois.
 Les montants sont en c (unité monétaire).
 
 ### Abonnements
-Coût de l'abonnement pendant 30 jours à quota de:
-- stockage de 100 documents (notes, chats, participation à un groupe),
-- stockage de 100MB (mega-bytes) de fichiers.
+Coût de l'abonnement pendant 30 jours d'UN quota de:
+- stockage de **100 documents** (notes, chats, participation à un groupe),
+- stockage de **100MB** (méga-bytes) de fichiers.
 
 ### Coût unitaires des consommations
 - 100,000 lectures effectives en base de données.

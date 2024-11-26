@@ -4,9 +4,9 @@
     <div v-if="notif && notif.texte" class="column q-my-sm">
       <div class="row justify-between">
         <div class="titre-md">{{$t('ANnot' + type)}}</div>
-        <btn-cond v-if="type===0 && session.estAdmin" class="q-ml-sm" :label="$t('editer')" icon="edit"
+        <btn-cond v-if="type===0 && session.estAdmin" class="q-ml-sm" round icon="edit"
           @ok="editer"/>
-        <btn-cond v-if="!diag && type!==0 && session.pow < 4" class="q-ml-sm" :label="$t('editer')" icon="edit"
+        <btn-cond v-if="!diag && type!==0 && session.pow < 4" class="q-ml-sm" round icon="edit"
           cond="cUrgence"
           @ok="editer"/>
       </div>
@@ -18,20 +18,17 @@
         {{diag}}
       </div>
 
-      <div v-if="notif.nr > 1" class="q-mt-xs">
-          <span class="q-pa-xs bg-yellow-3 text-negative text-bold">
-            {{$t('ANnr' + type + notif.nr)}}
-          </span>
-          <bouton-bulle :idtext="'BULLEnr' + type + notif.nr"/>
+      <div v-if="notif.nr > 1" class="q-mt-xs q-pa-xs bg-yellow-3 text-negative text-bold">
+        {{$t('ANnr' + type + notif.nr)}}
       </div>
       <show-html class="q-mt-xs bord" :texte="notif.texte" :idx="idx" 
         maxh="3rem" zoom scroll/>
     </div>
     <div v-if="!diag && (!notif || !notif.texte)" class="row justify-between">
       <div class="titre-md">{{$t('ANauc' + (simple ? 's' : type))}}</div>
-      <btn-cond v-if="type===0 && session.estAdmin" class="q-ml-sm" icon="edit"
+      <btn-cond v-if="type===0 && session.estAdmin" class="q-ml-sm" icon="edit" round
         @ok="creer"/>
-      <btn-cond v-if="type!==0 && session.pow < 4" class="q-ml-sm" icon="edit"
+      <btn-cond v-if="type!==0 && session.pow < 4" class="q-ml-sm" icon="edit" round
         cond="cUrgence"
         @ok="creer"/>
     </div>
@@ -47,7 +44,6 @@
 import { ref, watch, computed, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
-import BoutonBulle from './BoutonBulle.vue'
 import BtnCond from './BtnCond.vue'
 import ShowHtml from './ShowHtml.vue'
 import DialogueNotif from './DialogueNotif.vue'
@@ -77,9 +73,6 @@ const restr = ref(false)
 const restrb = ref(false)
 const ntf = ref(null)
 
-watch(restr, (ap) => { if (ap && restrb.value) restrb.value = false })
-watch(restrb, (ap) => { if (ap && restr.value) restr.value = false })
-
 const aut = computed (() => props.notif.idDel ? props.notif.idDel : ID.duComptable())
 
 const nomSource = computed (() => {
@@ -96,7 +89,8 @@ const diag = computed (() => {
 async function editer () {
   ntf.value = props.notif.clone()
   if (ntf.value.nr === 2) { restr.value = true; restrb.value = false }
-  if (ntf.value.nr === 3) { restr.value = false; restrb.value = true }
+  else if (ntf.value.nr === 3) { restr.value = false; restrb.value = true }
+  else { restr.value = false; restrb.value = false }
   ui.oD('DNdialoguenotif', idc)
 }
 

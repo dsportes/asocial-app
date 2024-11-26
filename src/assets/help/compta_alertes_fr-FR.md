@@ -9,7 +9,7 @@ Les alertes suivantes sont susceptibles d'apparaître.
 Pour des raisons techniques ou autres, les connexions seront bloquées à terme, en général rapproché.
 
 # La date de _fin de vie_ du compte est proche | alerte_dlvc
-Les compte est en ACCÈS RESTREINT depuis un moment et rien n'a été fait pour lever cette restriction
+Le compte est en ACCÈS RESTREINT depuis un moment et rien n'a été fait pour lever cette restriction.
 
 # Le solde du compte est débiteur, il est en ACCÈS RESTREINT | alerte_ar
 Les actions possibles sont très réduites, juste celles permettant de palier à cette situation.

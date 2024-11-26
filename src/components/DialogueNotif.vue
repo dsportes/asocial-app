@@ -3,22 +3,18 @@
     <q-toolbar class="bg-secondary text-white">
       <btn-cond icon="close" @ok="ui.fD"/>
       <q-toolbar-title class="titre-lg full-width text-center">{{$t('ANnot' + type)}}</q-toolbar-title>
-      <bouton-help page="page1"/>
+      <bouton-help :page="'dial_majalerte' + type"/>
     </q-toolbar>
     <q-card-section class="q-my-sm q-mx-sm column">
 
-      <div>
-        <q-checkbox size="sm" v-model="restrloc"/>
-        <span>{{$t('ANnr' + type + '2')}}
-          <bouton-bulle class="q-ml-md" :idtext="'BULLEnr'+ type + '2'"/>
-        </span>
-      </div>
-      <div>
-        <q-checkbox size="md" v-model="restrbloc"/>
-        <span>{{$t('ANnr' + type + '3')}}
-          <bouton-bulle class="q-ml-md" :idtext="'BULLEnr'+ type + '3'"/>
-        </span>
-      </div>
+    <div>
+      <q-checkbox size="sm" v-model="restrloc"/>
+      <span>{{$t('ANnr' + type + '2')}}</span>
+    </div>
+    <div>
+      <q-checkbox size="md" v-model="restrbloc"/>
+      <span>{{$t('ANnr' + type + '3')}}</span>
+    </div>
 
     </q-card-section>
     <q-card-section class="q-my-sm q-mx-sm">
@@ -40,7 +36,6 @@ import { ref, watch, computed } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import BoutonHelp from './BoutonHelp.vue'
-import BoutonBulle from './BoutonBulle.vue'
 import BtnCond from './BtnCond.vue'
 import EditeurMd from './EditeurMd.vue'
 import { styp, dhcool } from '../app/util.mjs'
@@ -66,7 +61,7 @@ const ui = stores.ui
 
 const n = ref(props.ntf.clone())
 const restrloc = ref(props.restr || false)
-const restrbloc = ref(props.restrp || false)
+const restrbloc = ref(props.restrb || false)
 
 watch(restrloc, (ap) => { if (ap && restrbloc.value) restrbloc.value = false })
 watch(restrbloc, (ap) => { if (ap && restrloc.value) restrloc.value = false })

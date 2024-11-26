@@ -1,5 +1,14 @@
+Dans la documentation générale, lire:
+- <a href="$$/appli/aboconso.html" target="_blank">Abonnement, consommation, tarifs</a>
+- <a href="$$/appli/alertes.html" target="_blank">Alertes et restrictions d'accès associées</a>
 
-La situation comptable du compte est répartie sur 4 onglets.
+La situation comptable du compte est répartie sur deux onglets:
+- Alertes,
+- Abonnement et consommation.
+
+Pour faire évoluer cette situation, en particulier en cas d'urgence quand cette seule page est accessible, deux onglets sont à disposition:
+- Crédits,
+- Chats d'urgence.
 
 # Onglet "Alertes" | compta_alertes
 

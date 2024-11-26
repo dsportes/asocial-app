@@ -16,7 +16,7 @@
     "page_compte", 
     ["page_compta",
       ["compta_alertes", 
-        "alerte_dlvat", "alerte_dlvc", "alerte_ar", "alerte_ls",
+        "alerte_dlvat", "alerte_dlv", "alerte_dlvc", "alerte_ar", "alerte_ls",
         "alerte_nr", "alerte_vr", "alerte_ral", "alerte_esp", "alerte_part", "alerte_cpt"
       ],
       ["compta_compta", 
@@ -35,6 +35,11 @@
     "page_groupe",
     "boite_automaj",
     "panel_outils"
+  ],
+  ["dial",
+    "dial_majalerte0",
+    "dial_majalerte1",
+    "dial_majalerte2"
   ],
   ["how_to",
     "ht_sponsoriser"

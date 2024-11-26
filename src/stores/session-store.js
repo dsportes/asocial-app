@@ -338,7 +338,9 @@ export const useSessionStore = defineStore('session', {
       if (espace.notifE && espace.notifE.dh > this.dhvu) this.alire = true
     },
 
-    setPartition (partition) { this.partition = partition },
+    setPartition (partition) { 
+      this.partition = partition 
+    },
 
     setSynthese (synthese) { this.synthese = synthese },
 
@@ -391,7 +393,7 @@ export const useSessionStore = defineStore('session', {
       if (this.estAdmin) return
       const mnotifP = new Map()
       if (this.estComptable) {
-        for (let i = 1; i < this.tnotifP.length; i++) {
+        for (const i in this.tnotifP) {
           const ntf = this.tnotifP[i]
           if (ntf) {
             const cl = RegCles.get(i)

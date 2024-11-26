@@ -1433,9 +1433,9 @@ export default {
   ANlong2: 'ACCÈS RESTREINT, mises à jour et consultations interdites (SAUF pour les actions d\'URGENCE)',
   ANlong3: 'Suppression IMMINENTE du compte ou impossibilité IMMINENTE de s\'y connecter',
   ANcre: 'En créer une',
-  ANauc0: 'Pas d\'Alerte générale',
-  ANauc1: 'Pas d\'Alerte à tous les comptes de la partition',
-  ANauc2: 'Pas d\'Alerte spécifique du compte',
+  ANauc0: 'Pas d\'alerte générale',
+  ANauc1: 'Pas d\'alerte à tous les comptes de la partition',
+  ANauc2: 'Pas d\'alerte spécifique au compte',
   ANaucs: '(aucune)',
   ANnot0: 'Alerte générale pour tous les comptes',
   ANnot1: 'Alerte à tous les comptes de la partition',
@@ -1612,30 +1612,6 @@ export default {
 `,
 */
 
-  BULLEnr02: 'Application figée par l\'administrateur technique: aucune mise à jour possible',
-  BULLEnr03: 'Application **bloquée** par l\'administrateur technique',
-  BULLEnr3: 'Application en lecture seulement',
-  BULLEnr4: 'Accès restreint à l\'application',
-  BULLEnr12: `Tous les comptes de la partition sont restreints en lecture seulement:
-- la visualisation est libre,
-- les mises à jour sont bloquées,
-- toutefois les opérations d'urgence ("chats", crédits) sont autorisées.
-`,
-  BULLEnr13: `Tous les comptes de la partition sont TRES restreints:
-- la visualisation est bloquée,
-- les mises à jour sont bloquées,
-- toutefois les opérations d'urgence ("chats", crédits) sont autorisées.
-`,
-  BULLEnr22: `Compte en LECTURE SEULEMENT:
-- la visualisation est libre,
-- les mises à jour sont bloquées,
-- toutefois les opérations d'urgence ("chats", crédits) sont autorisées.
-`,
-  BULLEnr23: `Compte en ACCÈS RESTREINT:
-- la visualisation est bloquée,
-- les mises à jour sont bloquées,
-- toutefois les opérations d'urgence ("chats", crédits) sont autorisées.
-`,
   BULLEclos: 'Application figée par l\'administrateur technique: aucune mise à jour possible',
   
   BULLEinv2: `Décliner l\'invitation et rester en tant que "contact" du groupe:
@@ -1735,6 +1711,7 @@ export default {
   A_compta_alertes: 'Alertes sur le compte',
   A_alerte_dlvat: 'Alerte: connexion bientôt bloquée',
   A_alerte_dlvc: 'Alerte: fin de vie du compte proche',
+  A_alerte_dlv: 'Date de fin de vie du compte',
   A_alerte_ar: 'Alerte: ACCÈS RESTREINT',
   A_alerte_ls: 'Alerte: LECTURE SEULEMENT',
   A_alerte_nr: 'Alerte: Excès de nombre de documents',
@@ -1755,4 +1732,9 @@ export default {
 
   A_how_to: 'Comment faire pour ...',
   A_ht_sponsoriser: '...sponsoriser des comptes',
+
+  A_dial: 'Boîtes de dialogues',
+  A_dial_majalerte0: 'Déclaration d\'une alerte générale',
+  A_dial_majalerte1: 'Déclaration d\'une alerte à tous les comptes d\'une partition',
+  A_dial_majalerte2: 'Déclaration d\'une alerte à un compte spécifique',
 }
