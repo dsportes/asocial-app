@@ -1,6 +1,6 @@
 <template>
 <div class="spmd q-pa-sm">
-  <div class="q-mb-sm">
+  <div v-if="session.estComptable" class="q-mb-sm">
     <div class="titre-md">{{$t('PEsttk')}}</div>
     <div class="row q-gutter-sm q-mb-sm">
       <btn-cond class="self-start b1" label="M" @ok="dlstat(0)"/>

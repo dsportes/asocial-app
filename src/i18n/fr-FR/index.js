@@ -1724,7 +1724,7 @@ export default {
   A_alerte_cpt: 'Alerte: du Comptable (ou délégués) spécifiquement au compte',
 
   A_compta_compta: 'Abonnement et consommation, solde',
-  A_compta_credits: 'Gestion et suivi des paiements',
+  A_compta_credits: 'Gestion des paiements, liste des dons',
   A_compta_chats: 'Chats d\'urgence',
 
   A_compta_compta: 'Solde, abonnement et consommation',

@@ -174,7 +174,8 @@ function resetFilter () {
 }
 
 function setChaps (id) {
-  const x = getMd(id, locale).split('\n')
+  const y = getMd(id, locale)
+  const x = y.replaceAll('\r\n', '\n').split('\n')
   intro.value = ''
   chaps.value = []
   let t = '', tx = [], m = []
@@ -204,14 +205,6 @@ function setChaps (id) {
         })
       }
     } else {
-      /*
-      if (l.startsWith('<a href="$$/')) {
-        const x = l.substring(11)
-        tx.push('<a href="' + docsurl + x)
-      } else {
-        tx.push(remplaceImg(l))
-      }
-      */
       const l2 = l.replaceAll('<a href="$$/', urld)
       tx.push(remplaceImg(l2))
     }
