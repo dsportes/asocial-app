@@ -35,14 +35,13 @@
       </btn-cond>
 
       <q-toolbar-title>
-        <div style="position:relative">
-          <div class="titre-lg text-right full-width">{{titrePage}}</div>
+        <div class="row justify-between items-center">
           <div v-if="config.nouvelleVersion" @click="ui.oD('reload', 'a')" 
-            style="position:absolute;top:-4px;left:0"
-            class="row cursor-pointer items-center bg-negative q-px-xs">
-            <div class="titre-md text-bold text-white q-mr-sm">{{$t('RLnvver')}}</div>
-            <q-icon name="system_update" size="md" color="white"/>
+            class="bg-negative row items-center">
+            <span class="titre-sm text-white text-bold q-mr-sm">{{$t('RLnvver')}}</span>
+            <q-icon name="system_update" size="sm" color="white"/>
           </div>
+          <div class="col titre-lg text-right">{{titrePage}}</div>
         </div>
       </q-toolbar-title>
 
@@ -127,7 +126,7 @@
       <div class="bg-yellow-3 text-black text-bold font-mono q-pa-xs">{{ui.filtreMsg}}</div>
     </q-page-sticky>
 
-    <q-scroll-area :class="'fit ' + dkli(1)">
+    <q-scroll-area :class="'font-def fit ' + dkli(1)">
       <div>
         <div class="row justify-bettween q-mb-md">
           <btn-cond class="q-mr-sm" icon="chevron_right" 
@@ -198,7 +197,7 @@
     </q-scroll-area>
   </q-drawer>
 
-  <q-page-container>
+  <q-page-container class="font-def">
     <transition-group appear
       leave-active-class="animated animate__slideOutLeft"
       enter-active-class="animated animate__slideInRight">

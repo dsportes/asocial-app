@@ -17,6 +17,7 @@ const props = defineProps({
   color: black !important;
   line-height: 1.4rem;
   font-size: 0.9rem;
+  font-weight: 200;
 }
 @import 'github-markdown-css/github-markdown-light.css'
 </style>
@@ -26,6 +27,7 @@ const props = defineProps({
   background-color: #DDDDDD !important
 .markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5
   font-family: Comfortaa
+  font-weight: 200
 h1, h2, h2, h3, h4, h5, h6 
   color: $mdtitre !important
 h1

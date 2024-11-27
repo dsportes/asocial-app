@@ -137,6 +137,7 @@ const ui = stores.ui
 
 const config = stores.config
 const docsurl = config.docsurls[locale] || 'http://localhost:8080/fr'
+const urld = '<a href="' + docsurl + '/'
 const arbre = config.getHelpArbre()
 const pages = config.getHelpPages() // Key: nom page, value: nom de sa page mère (null si racine)
 
@@ -203,12 +204,16 @@ function setChaps (id) {
         })
       }
     } else {
+      /*
       if (l.startsWith('<a href="$$/')) {
         const x = l.substring(11)
         tx.push('<a href="' + docsurl + x)
       } else {
         tx.push(remplaceImg(l))
       }
+      */
+      const l2 = l.replaceAll('<a href="$$/', urld)
+      tx.push(remplaceImg(l2))
     }
   }
   if (!t && tx.length) { intro.value = tx.join('\n') }

@@ -25,10 +25,11 @@
     </div>
 
     <q-dialog v-model="ui.d[idc].MMedition">
-      <q-card :class="styp('sm')">
+      <q-card :class="styp('md')">
         <q-toolbar class="col-auto bg-secondary text-white">
           <btn-cond icon="close" color="warning" @ok="ui.fD"/>
           <q-toolbar-title>{{$t('MMCap', [nom])}}</q-toolbar-title>
+          <bouton-help page="htcomm_maj"/>
         </q-toolbar>
         <q-toolbar inset v-if="diag" class='q-ma-sm bg-yellow-5 text-warning text-bold'>
           {{$t('MMCnomaj', [diag])}}
@@ -62,6 +63,7 @@ import { useQuasar } from 'quasar'
 import stores from '../stores/stores.mjs'
 import EditeurMd from './EditeurMd.vue'
 import BtnCond from './BtnCond.vue'
+import BoutonHelp from './BoutonHelp.vue'
 import HashTags from './HashTags.vue'
 import { styp, dkli, titre } from '../app/util.mjs'
 import { McMemo } from '../app/operations4.mjs'

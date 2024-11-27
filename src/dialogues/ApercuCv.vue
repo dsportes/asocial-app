@@ -2,11 +2,14 @@
   <q-card :class="styp('sm') + 'column'">
     <q-toolbar class="col-auto bg-secondary text-white">
       <btn-cond color="warning" icon="close" @ok="ui.fD"/>
-      <q-toolbar-title class="lh1"> 
-        <span class="titre-lg">{{cv.nom}}</span> 
+      <btn-cond v-if="net" class="q-ml-xs" round icon="refresh" cond="cVisu" @ok="refresh">
+        <q-tooltip>{{$t('CVraf1')}}</q-tooltip>
+      </btn-cond>
+      <q-toolbar-title class="row justify-between lh1"> 
+        <span class="titre-lg">{{$t('cv', [cv.nom])}}</span> 
         <span class="font-mono fs-sm q-ml-md">#{{cv.id}}</span>
       </q-toolbar-title>
-      <btn-cond v-if="net" round icon="refresh" cond="cVisu" @ok="refresh"/>
+      <bouton-help page="cv_aff"/>
     </q-toolbar>
 
     <div class="row q-pa-sm">
@@ -24,6 +27,7 @@ import { styp } from '../app/util.mjs'
 
 import ShowHtml from '../components/ShowHtml.vue'
 import BtnCond from '../components/BtnCond.vue'
+import BoutonHelp from '../components/BoutonHelp.vue'
 
 const props = defineProps({ 
   cv: Object 

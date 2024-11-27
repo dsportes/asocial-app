@@ -57,6 +57,7 @@ export default {
   sponsorise: 'sponsorise',
   sponsor: 'sponsor',
   readme: 'LISEZMOI',
+  cv: 'Carte de visite de {0}',
 
   avatar: 'Avatar {0}', // FiltreAvgr
   groupe: 'Groupe {0}', // FiltreAvgr
@@ -1420,6 +1421,7 @@ export default {
   CVoff: 'Caméra non démarrée',
   CVedit: 'Editer la carte de visite',
   CVraf: 'Rafraîchir les cartes de visite',
+  CVraf1: 'Rafraîchir la carte de visite',
   CVraf2: '{0} carte(s) de visite mises à jour, {1} étaient à jour.',
 
   // AcceptationSponsoring
@@ -1641,7 +1643,7 @@ export default {
 `,
 
   BULLEhashtags: `A droite les hashtags déjà utilisés, à gauche ceux de la sélection. 
-  - Ajouter un hashtag non trouvé à droite: le saisir et <ENTREE>
+  - Ajouter un hashtag non trouvé à droite: le saisir et touche ENTREE
   - Ajouter un hashtag présent à droite: cliquer dessus
   - Enlever un hashtag sélectionné à gauche: cliquer dessus
   `,
@@ -1732,9 +1734,15 @@ export default {
 
   A_how_to: 'Comment faire pour ...',
   A_ht_sponsoriser: '...sponsoriser des comptes',
+  A_ht_cvmaj: '...éditer une carte de visite',
+  A_ht_htcomm: '...éditer mes commentaires / hashtags (d\'un de mes contacts / groupes)',
 
   A_dial: 'Boîtes de dialogues',
+  A_dial_editeur: 'L\'éditeur des textes',
   A_dial_majalerte0: 'Déclaration d\'une alerte générale',
   A_dial_majalerte1: 'Déclaration d\'une alerte à tous les comptes d\'une partition',
   A_dial_majalerte2: 'Déclaration d\'une alerte à un compte spécifique',
+  A_cv_aff: 'Affichage d\'une carte de visite',
+  A_cv_maj: 'Édition d\'une carte de visite',
+  A_htcomm_maj: 'Édition des commentaires / hashtags personnels',
 }

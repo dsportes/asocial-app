@@ -3,24 +3,25 @@
   <q-toolbar class="bg-secondary text-white">
     <btn-cond color="warning" icon="undo" @ok="undo"/>
     <q-toolbar-title class="titre-md full-width text-center">{{titre || $t('HTtit')}}</q-toolbar-title>
-    <bouton-help page="page1"/>
     <bouton-bulle idtext="BULLEhashtags"/>
     <btn-cond v-if="okbtn" icon="check" :disable="!chg" @ok="$emit('ok',sr)"/>
   </q-toolbar>
 
   <div class="q-mb-md">
-    <q-input dense counter v-model="sel" class="q-mt-sm q-ml-sm" style="width:20rem"
-      :label="$t('HTfil')"
-      :rules="[r1,r2]"
-      @keydown.enter.prevent="val"
-      type="text" 
-      :hint="$t('HThint')">
-      <template v-slot:append>
-        <span :class="sel.length === 0 ? 'disabled' : ''">
-          <q-icon name="cancel" class="cursor-pointer"  @click="sel=''"/>
-        </span>
-      </template>
-    </q-input>
+    <div class="row reverse">
+      <q-input dense counter v-model="sel" class="col-6"
+        :label="$t('HTfil')"
+        :rules="[r1,r2]"
+        @keydown.enter.prevent="val"
+        type="text" 
+        :hint="$t('HThint')">
+        <template v-slot:append>
+          <span :class="sel.length === 0 ? 'disabled' : ''">
+            <q-icon name="cancel" class="cursor-pointer"  @click="sel=''"/>
+          </span>
+        </template>
+      </q-input>
+    </div>
     <div class="q-mt-md row font-mono fs-md justify-between">
       <q-scroll-area class="bord1" style="height:25vh; width:45%">
         <div v-for="(t, i) in lr" :key="t" class="text-center cursor-pointer" 

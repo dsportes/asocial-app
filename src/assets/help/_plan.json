@@ -37,11 +37,17 @@
     "panel_outils"
   ],
   ["dial",
+    "dial_editeur",
     "dial_majalerte0",
     "dial_majalerte1",
-    "dial_majalerte2"
+    "dial_majalerte2",
+    "cv_aff",
+    "cv_maj",
+    "htcomm_maj"
   ],
   ["how_to",
-    "ht_sponsoriser"
+    "ht_sponsoriser",
+    "ht_cvmaj",
+    "ht_htcomm"
   ]
 ]

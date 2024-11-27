@@ -15,6 +15,7 @@
             <div :class="'font-mono fs-sm' + (textelocal && textelocal.length >= maxlg ? ' text-bold text-warning bg-yellow-5':'')">
               {{textelocal ? textelocal.length : 0}}/{{maxlg}}c
             </div>
+            <bouton-help page="dial_editeur"/>
           </q-toolbar>
         </q-header>
 
@@ -42,6 +43,7 @@
           <div :class="'font-mono fs-sm' + (textelocal && textelocal.length >= maxlg ? ' text-bold text-warning bg-yellow-5':'')">
             {{textelocal ? textelocal.length : 0}}/{{maxlg}}c
           </div>
+          <bouton-help page="dial_editeur"/>
         </q-toolbar>
       </q-header>
 
@@ -66,6 +68,7 @@ import { sty, dkli } from '../app/util.mjs'
 
 import ShowHtml from './ShowHtml.vue'
 import BtnCond from './BtnCond.vue'
+import BoutonHelp from './BoutonHelp.vue'
 import ChoixEmoji from '../dialogues/ChoixEmoji.vue'
 
 const model = defineModel({ type: String })

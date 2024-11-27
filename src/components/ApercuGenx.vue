@@ -13,9 +13,10 @@
           <span class="fs-sm font-mono q-mr-sm">{{'#' + id}}</span> 
           <span v-if="im" class="fs-sm font-mono q-mr-sm">{{'[' + im + ']'}}</span> 
         </div>
-        <div class="col-auto" v-if="!estComptable">
-          <btn-cond v-if="estAvc || estAnim" icon="edit" round stop @ok="edcv"/>
-          <btn-cond v-else icon="zoom_in" round stop @ok="ovcv"/>
+        <div class="col-auto row q-gutter-xs" v-if="!estComptable">
+          <btn-cond v-if="estAvc || estAnim" icon="badge" round stop @ok="edcv"/>
+          <btn-cond v-else icon="badge" round stop @ok="ovcv"/>
+          <btn-cond v-if="estPeople && !detPeople" round icon="open_in_new" stop @ok="ouvrirdetails"/>
         </div>
       </div>
       <div v-if="cv.texte" class="titre-md">{{titre(cv.texte)}}</div>
@@ -31,10 +32,11 @@
             <span v-for="idg in groupes" :key="idg" class="fs-md bord">{{session.getCV(idg).nomC}}</span>
           </div>
         </div>
-        <!-- v-if="!nodet && !estAvc && !estGroupe && !det" -->
+        <!-- v-if="!nodet && !estAvc && !estGroupe && !det" 
         <btn-cond class="col-auto self-start" 
           v-if="estPeople" size="sm"
           icon="open_in_new" :label="$t('detail')" stop @ok="ouvrirdetails"/>
+          -->
       </div>
     </div>
   </div>
@@ -92,9 +94,11 @@ const estAvc = computed(() => session.compte.mav.has(props.id))
 const cv = computed(() => session.getCV(props.id))
 // true si le panel de détail est déjà ouvert
 const det = computed(() => session.peopleId === props.id && ui.estOuvert('detailspeople'))
-    // Peut être choisi pour devenir contact du groupe courant
+// Peut être choisi pour devenir contact du groupe courant
 const diagC = computed(() => gSt.diagContact(props.id))
 const estPeople = computed(() => pSt.estPeople(props.id))
+
+const detPeople = computed(() => ui.estOuvert('detailspeople'))
 
 function ovcv () {
   ui.oD('ACVouvrir', idc)
