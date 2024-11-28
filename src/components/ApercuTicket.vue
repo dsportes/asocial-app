@@ -36,15 +36,24 @@
         <span class="text-italic fs-md">{{$t('TKrefc')}}</span>
         <span class="q-ml-sm font-mono text-bold">{{tk.refc}}</span>
       </div>
-      <btn-cond v-if="!session.estComptable && !tk.dr" 
+      <btn-cond v-if="!session.estComptable && immuable === 0" 
         class="q-mt-xs" cond="cUrgence"
         color="warning" icon="close" :label="$t('supprimer')" @ok="deltk"/>
-      <btn-cond v-if="session.estComptable && !tk.dr" 
+      <btn-cond v-if="session.estComptable && immuable === 0" 
         class="q-mt-xs" cond="cUrgence"
         color="warning" icon="check" :label="$t('TKenreg1')" @ok="recep1"/>
-      <btn-cond v-if="session.estComptable && !tk.dr" 
+      <btn-cond v-if="session.estComptable && immuable === 0" 
         class="q-ml-xs q-mt-xs" cond="cUrgence"
         color="warning" icon="check" :label="$t('TKenreg2')" @ok="recep2"/>
+      <div v-if="!session.estComptable && immuable === 1" class="text-italic q-my-xs">
+        {{$t('TKimu1')}}
+      </div>
+      <div v-if="!session.estComptable && immuable === 2" class="text-italic q-my-xs">
+        {{$t('TKimu2a')}}
+      </div>
+      <div v-if="session.estComptable && immuable === 2" class="text-italic q-my-xs">
+        {{$t('TKimu2b')}}
+      </div>
       <q-separator class="q-mb-sm" size="3px"/>
     </div>
   </q-expansion-item>
@@ -91,6 +100,15 @@ const aMj = computed(() => {
   const [a, m, j] = AMJ.aaaammjj(props.tk.dg)
   const mx = $t('mois' + m)
   return { a: a, m: mx, j: j }
+})
+// immuable: ticket réceptionné ou émis avant M-2
+const immuable = computed(() => {
+  if (props.tk.dr) return 1
+  const [a, m, j] = AMJ.aaaammjj(props.tk.dg)
+  const [am, mm, jm] = AMJ.aaaammjj(AMJ.amjUtc())
+  let mp = mm - 1, ap = am
+  if (mp === 0) { mp = 12; ap--}
+  return (a === am && m === mm) || (a === ap && m === mp) ? 0 : 2
 })
 const mt = computed(() => mon(!props.tk.dr ? props.tk.ma : props.tk.mc))
 const cmt = computed(() => !props.tk.dr || (props.tk.ma === props.tk.mc) ? '' : 'bg-yellow-3 text-negative')

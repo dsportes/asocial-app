@@ -40,7 +40,7 @@
 
     <q-separator size="3px"/>
 
-    <q-expansion-item v-if="!session.estComptable" switch-toggle-side dense group="tkdon"
+    <q-expansion-item switch-toggle-side dense group="tkdon"
       header-class="titre-md text-bold bg-primary text-white"
       :label="$t('TKdons')">
       <div v-for="(d, idx) in lstDons" :key="idx" class="q-ml-md">

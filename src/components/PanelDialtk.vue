@@ -21,7 +21,7 @@
     <q-card-actions align="right" class="q-gutter-sm">
       <btn-cond icon="undo" flat :label="$t('renoncer')" @ok="ui.fD"/>
       <btn-cond color="warning" icon="check" cond="cUrgence"
-        :label="$t('TKgen')" :disable="diag !== ''" @ok="generer"/>
+        :label="$t('valider')" :disable="diag !== ''" @ok="generer"/>
     </q-card-actions>
   </q-card>
 </template>
