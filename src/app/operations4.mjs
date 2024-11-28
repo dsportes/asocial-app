@@ -1005,7 +1005,7 @@ export class RafraichirCvsAv extends Operation {
       }
       const args = { token: session.authToken, id, lch, lmb }
       const ret = await post(this, 'RafraichirCvsAv', args)
-      return this.finOK(ret.ncnv)
+      return this.finOK(ret)
     } catch (e) {
       if (isAppExc(e) && (e.code === 8001 || e.code === 8002)) return e.code - 8000
       await this.finKO(e)

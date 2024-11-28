@@ -160,7 +160,7 @@ async function rafCvs () {
   let nc = 0, nv = 0
   if (session.avatarId) {
       const r = await new RafraichirCvsAv().run(session.avatarId)
-      if (typeof r ==='number') {
+      if (typeof r === 'number') {
         await afficher8000(r, avid.value, 0)
         return
       }
@@ -169,7 +169,7 @@ async function rafCvs () {
   } else
     for (const id of session.compte.mav) {
       const r = await new RafraichirCvsAv().run(id)
-      if (typeof r ==='number') {
+      if (typeof r === 'number') {
         await afficher8000(r, id, 0)
         return
       }

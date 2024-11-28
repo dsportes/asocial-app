@@ -99,7 +99,7 @@
               left-label v-model="dconf" :label="$t('CHcdon')" />
           </q-toolbar-title>
         </q-toolbar>
-        <div v-if="mdon + 2 > solde" class="msg text-bold">{{$t('CHcred', [solde, mdon])}}</div>
+        <div v-if="avecDon && (mdon + 2 > solde)" class="msg text-bold">{{$t('CHcred', [solde, mdon])}}</div>
         <editeur-md mh="20rem" v-model="txt" :texte="''" editable modetxt/>
         <q-card-actions align="right" class="q-gutter-sm">
           <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
