@@ -6,9 +6,11 @@ import { CV } from '../app/modele.mjs'
 Un people est un avatar (pas du compte):
 - soit membre d'un groupe auquel le compte accède,
 - soit interlocuteur d'un chat avec un avatar du compte.
+- soit délégué de la partition du compte
 Map:
 - clé: id de l'avatar
-- valeur: { sgr, sch }
+- valeur: { sgr, sch, del }
+  - del: true si délégué de la partition du compte
   - sgr: Set des groupes dont le people est membre.
   - sch: Set des avatars du compte avec lequel le people a un chat.
 */
@@ -177,22 +179,6 @@ export const usePeopleStore = defineStore('people', {
       if (!e.sgr.size && !e.sch.size) this.map.delete(idp)
     },
 
-    // retourne { na, cv, sp, chats: Set(), groupes: Map(idg, im)}
-    /*
-    getPeople (id) {
-      const e = this.map.get(id)
-      if (!e) {
-        if (ID.estComptable(id)) {
-          const p = { na: NomGenerique.comptable(), chats: new Map(), groupes: new Map() }
-          this.map.set(id, p)
-          return p
-        }
-        return null
-      }
-      return e
-    },
-    */
-  
     setDisparu (na) {
       const e = this.getElt(na, null, true)
       if (!e) return null
@@ -206,16 +192,12 @@ export const usePeopleStore = defineStore('people', {
       }
     },
   
-    setPeopleTribu (na) { // Sponsor de la tribu
-      const e = this.getElt(na)
-      e.sp = 1
-    },
-
-    unsetPeopleTribu (id) { // sponsor devenu simple compte
-      const e = this.map.get(id)
-      if (!e) return
-      e.sp = 0
-      this.delElt(id, e)
+    setPeopleDelegue (cv) { // délégué de la partition
+      if (cv) {
+        const e = this.getElt(cv.id)
+        this.setCV(cv)
+        e.del = true
+      }
     },
 
     setPeopleChat (chat, cv) { // naE: du people, idI: de l'avatar ayant un chat avec lui

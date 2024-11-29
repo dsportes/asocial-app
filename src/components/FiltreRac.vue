@@ -17,7 +17,8 @@ const x = st.filtre[props.nom]
 const val = ref(x.rac || 0)
 const options = [
   { label: $t('rac0'), value: 0 },
-  { label: $t('rac1'), value: 1 }
+  { label: $t('rac1'), value: 1 },
+  { label: $t('rac2'), value: 2 }
 ]
 
 watch(val, (ap) => { 

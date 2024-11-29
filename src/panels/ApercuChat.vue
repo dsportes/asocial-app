@@ -1,33 +1,31 @@
 <template>
-  <q-layout container view="hHh lpR fFf" :class="styp('md')" style="max-height:90vh">
+  <q-layout container view="hHh lpR fFf" :class="styp('md')">
     <q-header elevated>
       <q-toolbar class="bg-secondary text-white">
         <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
         <q-toolbar-title class="titre-lg text-center q-mx-sm">
-          {{!zombi ? $t('CHoch3', [nomI, nomE]) : $t('CHzombi')}}
+          {{!zombi ? $t('CHoch3', [cvI.nom, cvE.nom]) : $t('CHzombi')}}
         </q-toolbar-title>
         <bouton-help page="page1"/>
       </q-toolbar>
+      <q-toolbar inset v-if="!zombi" class="bg-secondary text-white">
+        <div class="row q-gutter-sm">
+          <div v-if="racE" class="msg">{{$t('CHraccroche2', [cvE.nom])}}</div>
+          <div v-if="racI" class="msg">{{$t('CHraccroche')}}</div>
+          <div v-if="dispE" class="msg2 titre-lg">{{$t('disparu')}}</div>
+        </div>
+      </q-toolbar>
       <div v-if="!zombi">
-        <div v-if="chatX.stE===0" class="text-warning text-bold bg-yellow-5">
-              {{$t('CHraccroche2', [session.getCV(chatX.idE).nom])}}</div>
-        <div v-if="chatX.stI===0" class="text-warning text-bold bg-yellow-5">{{$t('CHraccroche')}}</div>
-        <div v-if="chatX.stE === 2" class="text-center full-width bg-yellow-5 titre-lg text-bold text-negative q-paxs">
-          {{$t('disparu')}}</div>
-        <apercu-genx v-else class="bordb" :id="chatX.idE" :idx="0" />
-        <div :class="sty() + 'q-pa-xs row justify-around items-center'">
+        <apercu-genx v-if="!dispE" class="bordb" :id="chatX.idE" :idx="0" />
+        <div :class="sty() + 'q-pa-xs row justify-between items-center'">
           <div v-if="chatX.stE !== 2" class="row q-gutter-xs items-center">
             <btn-cond :label="$t('CHadd1')" icon="add" @ok="editer(false)"
               :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
             <btn-cond :label="$t('CHadd2')" icon="savings"
               @ok="editer(true)" :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
           </div>
-          <btn-cond v-if="chatX.stI" 
-            :label="$t('CHrac')" icon="phone_disabled" @ok="raccrocher()"
+          <btn-cond v-if="!racI" :label="$t('CHrac')" icon="phone_disabled" @ok="raccrocher()"
             :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
-          <div v-if="!chatX.stI" class="text-warning text-bold titre-md text-italic">
-            {{$t('CHraccroche')}}
-          </div>
         </div>
       </div>
     </q-header>
@@ -43,7 +41,7 @@
             <div v-else class="text-italic bg-yellow-3 text-negative">{{$t('CHeffa', [dhcool(it.dhx)])}}</div>
             <template v-slot:name>
               <div class="full-width row justify-between items-center">
-                <span>{{it.a===0 ? $t('moi') : nomE}}</span>
+                <span>{{it.a===0 ? $t('moi') : cvE.nom}}</span>
                 <btn-cond v-if="it.a===0 && !it.dhx" size="sm" icon="clear" color="secondary"
                   @ok="effacer(it.dh)" 
                   :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
@@ -72,7 +70,7 @@
     <q-dialog v-model="ui.d[idc].ACconfirmrac">
       <q-card :class="styp('sm')">
         <q-card-section class="q-pa-md fs-md text-center">
-          {{$t('CHrac2', [nomE])}}
+          {{$t('CHrac2', [cvE.nom])}}
         </q-card-section>
         <q-card-actions align="right" class="q-gutter-sm">
           <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
@@ -146,9 +144,14 @@
 
   const chatX = computed(() => aSt.getChat(props.id, props.ids))
   const zombi = computed(() => !chatX.value )
-  const nomE = computed(() => chatX.value ? session.getCV(chatX.value.idE).nom : '')
-  const nomI = computed(() => chatX.value ? session.getCV(chatX.value.id).nom : '')
+  // const nomE = computed(() => chatX.value ? session.getCV(chatX.value.idE).nom : '')
+  // const nomI = computed(() => chatX.value ? session.getCV(chatX.value.id).nom : '')
   const estDel = computed(() => ID.estComptable(chatX.value.idE) || session.estDelegue)
+  const cvE = computed(() => session.getCV(chatX.value.idE))
+  const cvI = computed(() => session.getCV(chatX.value.id))
+  const racI = computed(() => chatX.value.stI === 0)
+  const racE = computed(() => chatX.value.stE === 0)
+  const dispE = computed(() => chatX.value.stE === 2)
 
   const dconf = ref(false)
   const txt = ref('')
@@ -172,16 +175,6 @@
 
   async function addop () {
     ui.fD()
-    /*
-    if (avecDon.value && mdon.value) {
-      await new GetCompta().run()
-      const compta = session.compta
-      if (mdon.value > compta.solde + 2) {
-        await afficherDiag($t('CHcred', [compta.solde, mdon.value * 100]))
-        return
-      }
-    }
-    */
     const don = avecDon.value ? mdon.value : 0
     const t = (avecDon.value && !dconf.value ? ($t('CHdonde', [mdon.value]) + '\n') : '') + txt.value
     const disp = await new MajChat().run(chatX.value, t, 0, don, props.urgence)

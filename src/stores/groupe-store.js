@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import stores from './stores.mjs'
-import { UNITEN, UNITEV, MAXTAILLEGROUPE, ID } from '../app/api.mjs'
+import { ID } from '../app/api.mjs'
 
 
 /* Store maître des groupes du compte courant :

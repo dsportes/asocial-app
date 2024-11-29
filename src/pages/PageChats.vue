@@ -105,7 +105,8 @@ const avChats = computed(() => {
   for (const [,elt] of aSt.map) {
     if (!f.tous && session.avatarId !== elt.avatar.id) continue
     for (const [,c] of elt.chats) {
-      if (f.rac === c.stI) continue
+      if (f.rac === 1 && c.stI === 0) continue
+      if (f.rac === 2 && c.stI === 1) continue
       if (flimj && c.dh < flimj) continue
       if (f.nom) {
         const cv = session.getCV(c.idE)
@@ -132,7 +133,6 @@ const grChats = computed(() => {
     const c = elt.chatgr
     const cv = session.getCV(c.idE)
     if (c) {
-      if (f.rac === 2) continue
       if (flimj && c.dh < flimj) continue
       if (f.nom && !cv.nom.startsWith(f.nom)) continue
       if (f.txt && (!c.txt || c.txt.indexOf(f.txt) === -1)) continue

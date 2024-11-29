@@ -5,21 +5,28 @@
       <img class="photomax" :src="cv.photo" />
     </div>
     <div class="col">
-      <div class="row">
-        <div class="col">
-          <span class="text-bold titre-lg q-mr-sm">{{cv.nomC}}</span> 
-          <span v-if="estAvc" class="fs-md q-mr-sm">[{{$t('moi')}}]</span> 
-          <span v-if="del && !estComptable" class="fs-md q-mr-sm">[{{$t('delegue')}}]</span> 
-          <span class="fs-sm font-mono q-mr-sm">{{'#' + id}}</span> 
-          <span v-if="im" class="fs-sm font-mono q-mr-sm">{{'[' + im + ']'}}</span> 
+      <div class="row justify-between items-center">
+        <div class="row q-gutter-sm">
+          <span class="text-bold titre-lg">{{cv.nomC}}</span> 
+          <span v-if="estAvc" class="fs-md">[{{$t('moi')}}]</span> 
+          <span v-if="del && !estComptable" class="fs-md">[{{$t('delegue')}}]</span> 
+          <span v-if="estGroupe || estPeople" class="fs-sm font-mono">{{'#' + id}}</span> 
+          <span v-if="im" class="fs-sm font-mono">{{'[' + im + ']'}}</span> 
         </div>
-        <div class="col-auto row q-gutter-xs" v-if="!estComptable">
-          <btn-cond v-if="estAvc || estAnim" icon="badge" round stop @ok="edcv"/>
+        <div v-if="estGroupe" class="col-auto row q-gutter-xs">
+          <btn-cond v-if="estAnim" icon="badge" round stop @ok="edcv"/>
           <btn-cond v-else icon="badge" round stop @ok="ovcv"/>
-          <btn-cond v-if="estPeople && !detPeople" round icon="open_in_new" stop @ok="ouvrirdetails"/>
+        </div>
+        <div v-else>
+          <div class="col-auto row q-gutter-xs" v-if="!estComptable">
+            <btn-cond v-if="estAvc" icon="badge" round stop @ok="edcv"/>
+            <btn-cond v-if="!estAvc && estPeople" icon="badge" round stop @ok="ovcv"/>
+            <btn-cond v-if="estPeople && !detPeople" round icon="open_in_new" 
+              stop @ok="ouvrirdetails"/>
+          </div>
         </div>
       </div>
-      <div v-if="cv.texte" class="titre-md">{{titre(cv.texte)}}</div>
+      <div v-if="(estGroupe || estPeople) && cv.texte" class="titre-md">{{titre(cv.texte)}}</div>
 
       <mc-memo v-if="!estComptable" :id="id" :idx="idx"/>     
 
@@ -32,15 +39,9 @@
             <span v-for="idg in groupes" :key="idg" class="fs-md bord">{{session.getCV(idg).nomC}}</span>
           </div>
         </div>
-        <!-- v-if="!nodet && !estAvc && !estGroupe && !det" 
-        <btn-cond class="col-auto self-start" 
-          v-if="estPeople" size="sm"
-          icon="open_in_new" :label="$t('detail')" stop @ok="ouvrirdetails"/>
-          -->
       </div>
     </div>
   </div>
-  <!--q-separator color="orange" size="1px"/-->
 
   <q-dialog v-model="ui.d[idc].ACVouvrir" persistent>
     <apercu-cv :cv="cv"/>
@@ -55,7 +56,7 @@
 </template>
 
 <script setup>
-import { computed, onUnmounted } from 'vue'
+import { computed, onMounted, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import { ID } from '../app/api.mjs'
@@ -65,6 +66,7 @@ import ChatsAvec from './ChatsAvec.vue'
 import CarteVisite from '../dialogues/CarteVisite.vue'
 import BtnCond from './BtnCond.vue'
 import McMemo from './McMemo.vue'
+import { GetCv } from '../app/operations4.mjs'
 
 import { useI18n } from 'vue-i18n'
 const $t = useI18n().t
@@ -99,6 +101,11 @@ const diagC = computed(() => gSt.diagContact(props.id))
 const estPeople = computed(() => pSt.estPeople(props.id))
 
 const detPeople = computed(() => ui.estOuvert('detailspeople'))
+
+if (props.del && !estComptable.value && !estPeople.value) onMounted(async () => {
+  const cv = await new GetCv().run(props.id)
+  if (cv) pSt.setPeopleDelegue(cv)
+})
 
 function ovcv () {
   ui.oD('ACVouvrir', idc)

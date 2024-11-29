@@ -141,8 +141,9 @@ export default {
   ambno5: 'aux notes en écriture',
 
   // Filtre Rac
-  rac0: 'actifs',
-  rac1: 'INDESIRABLES',
+  rac0: 'tous',
+  rac1: 'actifs',
+  rac2: 'raccrochés',
 
   FLAGS0: 'a activé l\'accès aux membres', // AM
   FLAGS1: 'a activé l\'accès aux notes',  // AN
@@ -399,6 +400,7 @@ export default {
   EX9332: '(BUG) Ticket enregistré, non supprimable',
   EX9333: '(BUG) Ticket de M-2 ou avant, non supprimable',
   EX9334: '(BUG) Ticket de M-2 ou avant, non enregistrable',
+  EX9335: '(BUG) Demande de la carte de visite d\'un avatar NON contact (et NON délégué)',
 
   // EX9100: 'Erreur de cryptage AES: {0}',
   // EX9101: 'Erreur de cryptage RSA: {0}',
@@ -866,12 +868,12 @@ export default {
   CHopt: 'Photos intégrées au fichier',
   CHdhc: 'Dernière mise à jour: {0}',
   CHerr: 'Incident technique lors de l\'afficage du résultat',
-  CHrac: 'Classer "INDÉSIRABLE"',
+  CHrac: 'Raccrocher',
   CHrac2: 'Tous les échanges vont être supprimés pour vous (pas pour {0}).' +
-  ' Le chat sera classé "INDÉSIRABLE". Si {0} écrit un échange il apparaîtra.' +
-  ' Le chat cessera d\'être indésirable à la prochaine écriture.',
-  CHraccroche: 'INDÉSIRABLE',
-  CHraccroche2: '[INDÉSIRABLE pour {0}]',
+  ' Le chat est "raccroché". Toutefois quand {0} écrira un échange il apparaîtra.' +
+  ' A votre prochaine écriture, le chat redeviendra "actif" (ne sera plus raccroché).',
+  CHraccroche: 'Raccroché de mon côté',
+  CHraccroche2: '[{0} a racchroché]',
   CHnbit: 'aucun échange | un échange | {count} échanges',
   CHeff: 'Effacement définitif du contenu de cet échange ?',
   CHeffa: '(effacé {0})',

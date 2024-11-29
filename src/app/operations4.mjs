@@ -662,6 +662,63 @@ export class AjoutSponsoring extends Operation {
   }
 }
 
+/* OP_NouveauChat: 'Création d\'un nouveau chat' *********************************
+- token: éléments d'authentification du compte.
+- idI
+- idE
+- mode 
+  - 0: par phrase de contact - hZC en est le hash
+  - 1: idE est Comptable
+  - 2: idE est délégué de la partition de idI
+  - idg: idE et idI sont co-membres du groupe idg (idI a accès aux membres)
+- hZC : hash du PBKFD de la phrase de contact compléte pour le mode 0
+- ch: { cck, ccP, cleE1C, cleE2C, t1c }
+  - ccK: clé C du chat cryptée par la clé K du compte de idI
+  - ccP: clé C du chat cryptée par la clé publique de idE
+  - cleE1C: clé A de l'avatar E (idI) cryptée par la clé du chat.
+  - cleE2C: clé A de l'avatar E (idE) cryptée par la clé du chat.
+  - txt: item crypté par la clé C
+
+Retour:
+- `rowChat` : row du chat I.
+*/
+export class NouveauChat extends Operation {
+  constructor () { super('NouveauChat') }
+
+  async run (idI, idE, mode, hZC, txt, urgence) {
+    try {
+      const session = stores.session
+      const aSt =  stores.avatar
+      const pSt = stores.people
+
+      const cc = random(32)
+      const pub = await this.getPub(idE)
+      const cleAI = RegCles.get(idI)
+      const cleAE = RegCles.get(idE)
+      const y = gzipB(txt)
+      const txtc = await crypter(cc, y)
+      const args = { token: session.authToken, idI, idE, mode, hZC, urgence: urgence || false }
+      args.ch = {
+        ccK: await crypter(session.clek, cc), // clé C du chat cryptée par la clé K du compte
+        ccP: await crypterRSA(pub, cc), // clé C du chat cryptée par la clé publique de l'avatar sponsor
+        cleE1C:  await crypter(cc, cleAI), // clé A de l'avatar E (sponsor) cryptée par la clé du chat.
+        cleE2C:  await crypter(cc, cleAE), // clé A de l'avatar E (sponsorisé) cryptée par la clé du chat.
+        txt: txtc, // mot du sponsor crypté par la clé C
+      }
+      const ret = await post(this, 'NouveauChat', args)
+      let ch
+      if (ret.rowChat) {
+        ch = await compile(ret.rowChat)
+        aSt.setChat(ch)
+        pSt.setPCh(ch.idE, ch.id)
+      }
+      this.finOK(ch)
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
 /*   OP_MajChat: 'Mise à jour d\'un "chat".'
 - `token` : éléments d'authentification du compte.
 - id, ids: id du chat
@@ -883,63 +940,6 @@ export class ChangementPC extends Operation {
       const args = { token: session.authToken, id, pcK, hZR, hZC, cleAZC }
       await post(this, 'ChangementPC', args)
       this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
-/* OP_NouveauChat: 'Création d\'un nouveau chat' *********************************
-- token: éléments d'authentification du compte.
-- idI
-- idE
-- mode 
-  - 0: par phrase de contact - hZC en est le hash
-  - 1: idE est Comptable
-  - 2: idE est délégué de la partition de idI
-  - idp: idE et idI sont co-membres du groupe idg (idI a accès aux membres)
-- hZC : hash du PBKFD de la phrase de contact compléte pour le mode 0
-- ch: { cck, ccP, cleE1C, cleE2C, t1c }
-  - ccK: clé C du chat cryptée par la clé K du compte de idI
-  - ccP: clé C du chat cryptée par la clé publique de idE
-  - cleE1C: clé A de l'avatar E (idI) cryptée par la clé du chat.
-  - cleE2C: clé A de l'avatar E (idE) cryptée par la clé du chat.
-  - txt: item crypté par la clé C
-
-Retour:
-- `rowChat` : row du chat I.
-*/
-export class NouveauChat extends Operation {
-  constructor () { super('NouveauChat') }
-
-  async run (idI, idE, mode, hZC, txt, urgence) {
-    try {
-      const session = stores.session
-      const aSt =  stores.avatar
-      const pSt = stores.people
-
-      const cc = random(32)
-      const pub = await this.getPub(idE)
-      const cleAI = RegCles.get(idI)
-      const cleAE = RegCles.get(idE)
-      const y = gzipB(txt)
-      const txtc = await crypter(cc, y)
-      const args = { token: session.authToken, idI, idE, mode, hZC, urgence: urgence || false }
-      args.ch = {
-        ccK: await crypter(session.clek, cc), // clé C du chat cryptée par la clé K du compte
-        ccP: await crypterRSA(pub, cc), // clé C du chat cryptée par la clé publique de l'avatar sponsor
-        cleE1C:  await crypter(cc, cleAI), // clé A de l'avatar E (sponsor) cryptée par la clé du chat.
-        cleE2C:  await crypter(cc, cleAE), // clé A de l'avatar E (sponsorisé) cryptée par la clé du chat.
-        txt: txtc, // mot du sponsor crypté par la clé C
-      }
-      const ret = await post(this, 'NouveauChat', args)
-      let ch
-      if (ret.rowChat) {
-        ch = await compile(ret.rowChat)
-        aSt.setChat(ch)
-        pSt.setPCh(ch.idE, ch.id)
-      }
-      this.finOK(ch)
     } catch (e) {
       await this.finKO(e)
     }

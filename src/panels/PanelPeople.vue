@@ -11,13 +11,11 @@
 
   <q-page-container>
     <q-card class="q-pa-sm">
-      <apercu-genx :id="id" nodet/>
+      <apercu-genx :id="id" nodet :del="del"/>
 
       <barre-people v-if="session.estComptable || session.estDelegue" :id="id"/>
 
       <q-separator color="orange" class="q-my-md q-mx-sm"/>
-
-      <!--div class="titre-md text-italic y-mb-sm">{{$t('PPchats')}}</div-->
 
       <chats-avec :id-e="id" :del="del"/>
 

@@ -56,18 +56,6 @@ if (session.accesNet) onMounted( async () => {
   if (!session.estA) await new GetPartition().run(session.partition.id)
 })
 
-/*
-const nbj = computed(() => session.nbj)
-const nnbj = computed(() => nbj.value > 40 ? 1 : (nbj.value > 10 ? 2 : 3))
-
-const s = computed(() =>session.compta.solde)
-const pc = computed(() => c.value.pourcents)
-const npcn = computed(() => pc.value.pcn < 80 ? 1 : (pc.value.pcn <= 90 ? 2 : 3))
-const npcv = computed(() => pc.value.pcv < 80 ? 1 : (pc.value.pcv <= 90 ? 2 : 3))
-const npcc = computed(() => pc.value.pcc < 80 ? 1 : (pc.value.pcc <= 90 ? 2 : 3))
-const nj = computed(() => c.value.nbj(session.compta.solde))
-const nnj = computed(() => nj.value > 40 ? 1 : (nj.value > 10 ? 2 : 3))
-*/
 const lurg = computed(() => {
   const p = session.partition
   const l = []
@@ -75,7 +63,8 @@ const lurg = computed(() => {
   if (!p) return l
   for (const id in p.mcpt) {
     const e = p.mcpt[id]
-    if (!ID.estComptable(id) && pSt.estPeople(id) && id !== session.compteId && e.del)
+    // if (!ID.estComptable(id) && pSt.estPeople(id) && id !== session.compteId && e.del)
+    if (!ID.estComptable(id) && id !== session.compteId && e.del)
       l.push({ del: e.del, id: id })
   }
   return l
