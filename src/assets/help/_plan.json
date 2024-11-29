@@ -43,7 +43,9 @@
     "dial_majalerte2",
     "cv_aff",
     "cv_maj",
-    "htcomm_maj"
+    "htcomm_maj",
+    "chat_nouveau",
+    "chat_maj"
   ],
   ["how_to",
     "ht_sponsoriser",

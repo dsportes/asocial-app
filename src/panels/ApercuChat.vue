@@ -6,7 +6,7 @@
         <q-toolbar-title class="titre-lg text-center q-mx-sm">
           {{!zombi ? $t('CHoch3', [cvI.nom, cvE.nom]) : $t('CHzombi')}}
         </q-toolbar-title>
-        <bouton-help page="page1"/>
+        <bouton-help page="chat_maj"/>
       </q-toolbar>
       <q-toolbar inset v-if="!zombi" class="bg-secondary text-white">
         <div class="row q-gutter-sm">
@@ -87,7 +87,7 @@
         <q-toolbar class="bg-secondary text-white">
           <btn-cond color="warning" icon="close" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CHadd1')}}</q-toolbar-title>
-          <bouton-help page="page1"/>
+          <bouton-help page="chat_maj"/>
         </q-toolbar>
         <q-toolbar v-if="avecDon" inset class="bg-secondary text-white">
           <q-toolbar-title class="row justify-center items-center q-gutter-md">

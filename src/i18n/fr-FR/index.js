@@ -285,6 +285,7 @@ export default {
   // A_SRV = 9000 // Situation inattendue : assertion trappée sur le serveur
   EX9010: 'Erreur fonctionnelle volontaire pour test.\nDétail: {0}',
 
+  EX9013: '(BUG) Argument {0} de l\'opération {1} mal formé.',
   EX9016: '(BUG) Accès impossible au document "synthese" [{0}]',
   EX9017: '(BUG) Compteurs de comptabilité corrompus: {0} - {1}',
   EX9019: '(BUG) Mode d\'autorisation non reconnu [{0}]',
@@ -885,7 +886,7 @@ export default {
   CHsuppr: 'L\'avatar a DISPARU (résilié, auto-résilié, inactivité prolongée): le "chat" avec lui n\'existe plus.',
   CHmdon: 'Montant du don (en €)',
   CHconfid: 'confidentiel',
-  CHdonde: '### Don de {0}€',
+  CHdonde: '### Don de {0}c',
   CHcred: 'Solde du compte ({0}c) insuffisant pour supporter ce don ({1}c).',
   CHcdon: 'Ne pas mettre le montant du don dans le texte',
   CHGtit: 'Chat du groupe {0}',
@@ -1690,7 +1691,7 @@ export default {
   A_bottom_bar: 'Barre du bas',
   A_menu_navigation: 'Menu de navigation',
   A_page_admin: 'Page de l\'Administrateur Technique',
-  A_page_chats: 'Page des _chats_',
+  A_page_chats: 'Page des "chats"',
   A_page_clos: 'Clôture immédiate de la connexion',
   A_compta_compta: 'Quotas et consommations',
   A_compta_credits: 'Gestion des crédits',
@@ -1755,4 +1756,6 @@ export default {
   A_cv_aff: 'Affichage d\'une carte de visite',
   A_cv_maj: 'Édition d\'une carte de visite',
   A_htcomm_maj: 'Édition des commentaires / hashtags personnels',
+  A_chat_nouveau: 'Création d\'un nouveau "chat"',
+  A_chat_maj: 'Édition d\'un "chat"',
 }
