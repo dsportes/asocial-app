@@ -31,30 +31,14 @@
     </div>
 
     <div v-if="fusion.length">
-      <div class="q-my-md maauto" v-for="(chat, idx) in fusion" :key="chat.id + '/' + chat.ids">
-        <q-card v-if="ID.estGroupe(chat.id)">
-          <div class="row justify-between">
-            <div class="titre-lg text-italic q-mb-xs text-orange">{{$t('CHgr')}}</div>
-          </div>
-          <div :class="'column q-px-sm ' + dkli(idx)">
-            <apercu-genx :id="chat.id" :idx="idx"/>
-            <micro-chatgr :chat="chat"/>
-          </div>
-        </q-card>
-
-        <q-card v-else>
-          <div :class="'column ' + dkli(idx)">
-            <div class="row justify-between">
-              <div class="titre-lg text-italic q-mb-xs text-orange">{{$t('CHde', [session.getCV(chat.id).nom])}}</div>
-            </div>
-            <div class="q-mx-sm">
-              <apercu-genx class="bordb" :id="chat.idE" :idx="idx" />
-              <micro-chat :chat="chat"/>
-            </div>
-          </div>
-        </q-card>
-
-      </div>
+      <q-expansion-item v-for="(chat, idx) in fusion" :key="chat.id + '/' + chat.ids"
+        :header-class="dkli(idx)" switch-toggle-side expand-separator dense group="somegroup">
+        <template v-slot:header>
+          <micro-chatgr v-if="ID.estGroupe(chat.id)" class="full-width" :chat="chat"/>
+          <micro-chat v-else class="full-width" :chat="chat"/>
+        </template>
+        <apercu-genx class="q-ml-xl" :id="ID.estGroupe(chat.id) ? chat.id : chat.idE" :idx="idx"/>
+      </q-expansion-item>
     </div>
 
     <nouveau-chat v-if="ui.d[idc] && ui.d[idc].CCouvrir" :idc="idc" :idI="session.avatarId" :mode="0"/>

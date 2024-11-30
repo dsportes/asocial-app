@@ -1,9 +1,8 @@
 <template>
 <q-page class="q-pa-sm column items-center">
+  <btn-cond class="q-my-sm" :label="$t('PGcrea')" @ok="nvGr" cond="cEdit"/>
+
   <q-card v-if="gSt.pgLgFT" class="spmd column items-center">
-
-    <btn-cond class="q-my-sm" :label="$t('PGcrea')" @ok="nvGr" cond="cEdit"/>
-
     <div v-if="pg" class="q-my-sm full-width">
       <div class="row">
         <div class="col-6">{{$t('PGstatsh')}}</div>

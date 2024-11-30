@@ -128,7 +128,7 @@
 
     <q-item v-if="session.groupeId" clickable class="q-ml-lg" @click="ui.setPage('groupe', 'membres')">
       <q-item-section>
-        <q-item-label lines="1">{{$t('ACmb')}}
+        <q-item-label lines="1">{{$t('ACtmb')}}
           <q-badge color="primary" rounded>{{nbMembres}}</q-badge>
         </q-item-label>
       </q-item-section>

@@ -1,6 +1,20 @@
 <template>
 <div>
   <div class="relative-position">
+    <div v-if="chatx" class="row justify-between items-center">
+      <div class="titre-md text-bold">{{$t('CHentre', [nomI, nomE])}}</div>
+      <btn-cond icon="open_in_new" stop @ok="ouvrirChat()" round
+        :cond="ui.urgence ? 'cUrgence' : 'cVisu'" />
+    </div>
+    <div v-else class="row justify-between items-center">
+      <div v-if="mode===1" class="col text-italic titre-md">{{$t('CHnxco')}}</div>
+      <div v-if="mode===2" class="col text-italic titre-md">{{$t('CHnxdel', [nomE])}}</div>
+      <div v-if="mode===0" class="col text-italic titre-md">{{$t('CHnxpc', [nomE])}}</div>
+      <div v-if="mode>2" class="col text-italic titre-md">{{$t('CHnxmb', [nomE, nomG])}}</div>
+      <btn-cond class="col-auto" icon="add" :label="$t('CHbtncr')" stop @ok="creerChat()"
+        :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
+    </div>
+
     <div v-if="chatx">
       <div class="q-mt-xs row justify-between items-center">
         <div class="text-italic fs-md">
@@ -15,17 +29,7 @@
       </div>
       <div class="row justify-between items-start">
         <div v-if="chatx.items.length" class="fs-md">{{chatx.tit}}</div>
-        <btn-cond icon="open_in_new" :label="$t('CHbtnov')" @ok="ouvrirChat()"
-          :cond="ui.urgence ? 'cUrgence' : 'cVisu'" />
       </div>
-    </div>
-    <div v-else class="row justify-between items-start">
-      <div v-if="mode===1" class="col text-italic titre-md">{{$t('CHnxco')}}</div>
-      <div v-if="mode===2" class="col text-italic titre-md">{{$t('CHnxdel', [nomE])}}</div>
-      <div v-if="mode===0" class="col text-italic titre-md">{{$t('CHnxpc', [nomE])}}</div>
-      <div v-if="mode>2" class="col text-italic titre-md">{{$t('CHnxmb', [nomE, nomG])}}</div>
-      <btn-cond class="col-auto" icon="open_in_new" :label="$t('CHbtncr')" @ok="creerChat()"
-        :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
     </div>
   </div>
 
@@ -77,7 +81,8 @@ const mode = computed(() => {
   return l.length ? l[0] : 0
 })
 
-const nomE = computed(() => session.getCV(props.idE).nom)
+const nomI = computed(() => session.getCV(chatx.value.id).nom)
+const nomE = computed(() => session.getCV(chatx.value.idE).nom)
 const nomG = computed(() => session.getCV(mode.value).nom)
 
 function ouvrirChat () { ui.oD('MCACouvrir', idc) }

@@ -850,6 +850,8 @@ export default {
   APtit: 'Détail du contact {0}',
 
   // Micro chat
+  CHentre: 'Entre {0} et {1}',
+  CHgrp: 'Du groupe {0}',
   CHnxco: 'Il n\'existe pas de chat avec le Comptable, mais il est possible d\'en créer un maintenant.',
   CHnxdel: '[{0}] est délégué de la partition: il n\'existe pas de chat avec lui, mais il peut être crée maintenant.',
   CHnxmb: '[{0}] est membre du groupe [{1}]: il n\'existe pas de chat avec lui, mais il peut être crée maintenant.',
