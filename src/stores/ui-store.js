@@ -175,6 +175,9 @@ export const useUiStore = defineStore('ui', {
       this.page = p
       this.menug = false
       this.setTab(t)
+      if (this.aUnFiltre && !this.pfiltre) 
+        setTimeout(() => this.ouvrFiltre(), 500)
+      else this.fermFiltre()
     },
 
     setTab (tab) {

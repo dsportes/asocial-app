@@ -4,7 +4,7 @@
     <btn-cond color="warning" icon="undo" @ok="undo"/>
     <q-toolbar-title class="titre-md full-width text-center">{{titre || $t('HTtit')}}</q-toolbar-title>
     <bouton-bulle idtext="BULLEhashtags"/>
-    <btn-cond v-if="okbtn" icon="check" :disable="!chg" @ok="$emit('ok',sr)"/>
+    <btn-cond v-if="okbtn" icon="check" @ok="$emit('ok',sr)"/>
   </q-toolbar>
 
   <div class="q-mb-md">

@@ -1,11 +1,15 @@
 <template>
   <div :class="'q-pa-xs full-width ' + dkli(0)">
-    <div><btn-cond :label="$t('FI' + attr)" size="sm" @ok="ouvDial"/></div>
+    <div class="row justify-between">
+      <btn-cond :label="$t('FI' + attr)" size="sm" @ok="ouvDial"/>
+      <btn-cond icon="cancel" size="12px" round color="none"
+        :disable="!src.size" @ok="raz"/>
+    </div>
     <div class="row q-gutter-xs bord1">
       <span v-for="t in src" :key="t">{{t}}</span>
     </div>
     <q-dialog v-model="ui.d[idc].HTags" persistent>
-      <hash-tags :src="src" v-model="ht" okbtn @ok="htok" @ko="ui.fD()"/>
+      <hash-tags :src="src" okbtn @ok="htok" @ko="ui.fD()"/>
     </q-dialog>
   </div>
 </template>
@@ -27,10 +31,14 @@ const st = stores.filtre
 const s0 = new Set()
 const x = st.filtre[props.nom]
 const src = ref(x && x[props.attr] ? x[props.attr] : s0)
-const ht = ref('')
 
 function ouvDial () {
   ui.oD('HTags', idc)
+}
+
+function raz() {
+  src.value = s0
+  st.setFiltre(props.nom, props.attr, new Set())
 }
 
 function htok (ht) {

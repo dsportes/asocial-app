@@ -29,7 +29,8 @@
         @click="clickAlertes"/>
       
       <!-- Presse papier -->
-      <btn-cond v-if="session.ok" icon="content_paste" round 
+      <btn-cond v-if="session.ok && (!session.hasAR || session.estComptable)" 
+        icon="content_paste" round 
         @ok="ui.oD('pressepapier', 'a')">
         <q-tooltip>{{$t('MLApp')}}</q-tooltip>
       </btn-cond>
@@ -52,11 +53,12 @@
 
       <bouton-help :page="'page_' + ui.page"/>
 
-      <!-- Déconnexion -->
+      <!-- Déconnexion
       <btn-cond v-if="session.status > 1" color="warning" icon="logout" 
         @ok="discon" round>
         <q-tooltip>{{$t('MLAdrc')}}</q-tooltip>
       </btn-cond>
+      -->
 
       <q-page-sticky v-if="session.signalOp" position="top" :offset="offset"
         style="z-index:1000!important">
@@ -121,7 +123,7 @@
 
   <q-drawer v-model="ui.pfiltre" side="right" elevated bordered persistent
     :width="250" :breakpoint="ui.seuillarge" :overlay="ui.etroite">
-    <q-page-sticky v-if="ui.filtreMsg" position="top" :offset="[0,0]"
+    <q-page-sticky v-if="ui.filtreMsg" position="top left" :offset="[0,0]"
       style="z-index:1000!important">
       <div class="bg-yellow-3 text-black text-bold font-mono q-pa-xs">{{ui.filtreMsg}}</div>
     </q-page-sticky>
@@ -142,7 +144,7 @@
           <filtre-mc nom="chats" attr="mcn" :idx="1"/>
         </div>
         <div v-if="ui.page === 'espace'" class="column justify-start">
-          <filtre-tri nom="espace" :nb-options="19" :idx="0"/>
+          <filtre-tri nom="espace" :nb-options="20" :idx="0"/>
         </div>
         <div v-if="ui.page === 'partition'" class="column justify-start">
           <filtre-nom nom="partition" prop='nomc' :idx="0"/>

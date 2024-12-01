@@ -1,11 +1,16 @@
 <template>
 <q-list v-if="session.status === 2" class="titre-md" style="min-width: 360px">
-  <div v-if="bloc && !session.estComptable" 
-    class="q-px-sm titre-md msg cursor-pointer"
+  <q-item clickable @click="ui.oD('dialoguedrc', 'a')" class="row items-center">
+    <btn-cond color="warning" size="lg" icon="logout" />
+    <span class="q-ml-sm text-bold fs-lg">{{$t('MLAdrc2')}}</span>
+  </q-item>
+
+  <div v-if="session.hasAR && !session.estComptable" 
+    class="q-my-lg q-mx-md q-pa-md titre-lg msg2 cursor-pointer text-center bord"
     @click="clickNotif2">{{$t('ACbloc')}}
   </div>
 
-  <div v-if="!bloc">
+  <div v-if="!session.hasAR || session.estComptable">
     <q-item class="q-my-md" clickable @click="ui.setPage('notes')">
       <q-item-section>
         <q-item-label 
@@ -13,30 +18,27 @@
           lines="1">{{$t('ACmesnotes')}}</q-item-label>
       </q-item-section>
     </q-item>
-  </div>
 
-  <q-item v-if="session.estComptable" clickable  @click="ui.setPage('espace')">
-    <q-item-section>
-      <q-item-label lines="1">{{$t('ACpartitions')}}</q-item-label>
-    </q-item-section>
-  </q-item>
+    <q-item v-if="session.estComptable" clickable  @click="ui.setPage('espace')">
+      <q-item-section>
+        <q-item-label lines="1">{{$t('ACpartitions')}}</q-item-label>
+      </q-item-section>
+    </q-item>
 
-  <q-item v-if="!session.estComptable && session.estDelegue && !session.estA && session.accesNet" 
-    clickable  @click="maPartition()">
-    <q-item-section>
-      <q-item-label lines="1">{{$t('ACgpart')}}</q-item-label>
-    </q-item-section>
-  </q-item>
+    <q-item v-if="!session.estComptable && session.estDelegue && !session.estA && session.accesNet" 
+      clickable  @click="maPartition()">
+      <q-item-section>
+        <q-item-label lines="1">{{$t('ACgpart')}}</q-item-label>
+      </q-item-section>
+    </q-item>
 
-  <q-item clickable  @click="infoSession()">
-    <q-item-section>
-      <q-item-label lines="1">{{$t('MLAinfm')}}
-        <icon-mode />
-      </q-item-label>
-    </q-item-section>
-  </q-item>
-
-  <div v-if="!bloc" class="q-mt-md">
+    <q-item clickable  @click="infoSession()">
+      <q-item-section>
+        <q-item-label lines="1">{{$t('MLAinfm')}}
+          <icon-mode />
+        </q-item-label>
+      </q-item-section>
+    </q-item>
 
     <q-item clickable @click="ui.setPage('compte')">
       <q-item-section>
@@ -133,7 +135,6 @@
         </q-item-label>
       </q-item-section>
     </q-item>
-
   </div>
 
 </q-list>
@@ -148,6 +149,7 @@ import SelGrid from './SelGrid.vue'
 import { GetPartition } from '../app/operations4.mjs'
 import QueueIcon from './QueueIcon.vue'
 import IconMode from './IconMode.vue'
+import BtnCond from './BtnCond.vue'
 
 const props = defineProps({ 
   menu: Boolean 
@@ -169,11 +171,11 @@ const nbInvits = computed(() => gSt.invitsAtt.length )
 const nbContacts = computed(() => gSt.contactsAtt.length )
 const nbparts = computed(() => nbgrpsT.value + nbInvits.value || nbContacts.value )
 const nbMembres = computed(() => gSt.nbMbC )
-const bloc = computed(() => session.mini )
+
 const nomg = computed(() => { const idg = session.groupeid; return idg ? session.getCV(idg).nom : '' })
 const nbficav = computed(() => faSt.map.size )
 
-function clickNotif2 () {ui.setPage('compta', 'chats')}
+function clickNotif2 () {ui.setPage('compta', 'alertes')}
 
 function ficAvion2 () { ui.setPage('ficavion')}
 
@@ -204,4 +206,8 @@ function tousChats () {
 .h1:hover
   font-style: italic !important
   background-color: white !important
+.bord
+  border-radius: 8px 
+  border: 2px solid $negative
+  max-width: 20rem
 </style>

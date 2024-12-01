@@ -1,8 +1,6 @@
 <template>
   <div :class="'q-pa-xs full-width ' + dkli(0)">
-    <q-input dense counter v-model="val"
-      :label="$t('FI' + prop)"
-      @keydown.enter.prevent="ok" type="text" :hint="$t('entree')">
+    <q-input dense counter v-model="val" :label="$t('FI' + prop)" type="text">
       <template v-slot:append>
         <span :class="val.length === 0 ? 'disabled' : ''">
           <q-icon name="cancel" class="cursor-pointer"  @click="val=''"/>
@@ -24,9 +22,9 @@ const st = stores.filtre
 const x = st.filtre[props.nom]
 const val = ref(x && x[props.prop] ? x[props.prop] : '')
 
-function ok () {
-  st.setFiltre(props.nom, props.prop, val.value)
-}
+watch(val, (ap) => { 
+  st.setFiltre(props.nom, props.prop, ap)
+})
 
 </script>
 

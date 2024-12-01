@@ -205,17 +205,6 @@ onMounted(async () => {
   await refreshSynth()
 })
 
-const fx = [['id', 1], 
-  ['ntr2', 1], ['ntr2', -1],
-  ['nco2', 1], ['nco2', -1],
-  ['q1', 1], ['q1', -1],
-  ['q2', 1], ['q2', -1],
-  ['pca1', 1], ['pca1', -1],
-  ['pca2', 1], ['pca2', -1],
-  ['pcv1', 1], ['pcv1', -1],
-  ['pcv2', 1], ['pcv2', -1],
-  ['nbc', 1], ['nbc', -1]
-]
 const optionsNbmi = [3, 6, 12, 18, 24]
 
 const aSt = stores.avatar
@@ -231,6 +220,45 @@ const ligne = ref(null)
 const nbmi = ref(session.espace ? session.espace.nbmi : 12)
 const optionA = ref(session.espace ? (session.espace.opt ? true : false) : false)
 
+/*
+  // Critères de tri
+  TRIespace0: 'Code partition ↑',
+  TRIespace1: 'Code partition ↓',
+  TRIespace2: 'Nb d\'Alertes de partition ↑',
+  TRIespace3: 'Nb d\'Alertes de partition ↓',
+  TRIespace4: 'Nb d\'Alertes de compte ↑',
+  TRIespace5: 'Nb d\'Alertes de compte ↓',
+  TRIespace6: 'Quota QN (nb notes, chats, grps) ↑',
+  TRIespace7: 'Quota QN (nb notes, chats, grps) ↓',
+  TRIespace8: 'Quota QV (vol. des fichiers) ↑',
+  TRIespace9: 'Quota QV (vol. des fichiers) ↓',
+  TRIespace10: '% attribution de QN ↑',
+  TRIespace11: '% attribution de QN ↓',
+  TRIespace12: '% attribution de QV ↑',
+  TRIespace13: '% attribution de QV ↓',
+  TRIespace14: '% utilisation de QN ↓',
+  TRIespace15: '% utilisation de QN ↑',
+  TRIespace16: '% utilisation de QV ↓',
+  TRIespace17: '% utilisation de QV ↑',
+  TRIespace18: 'Nombre de comptes ↑',
+  TRIespace19: 'Nombre de comptes ↓',
+*/
+const spr = (e, n) => {
+  switch (n) {
+    case 0 : return session.compte.mcode ? session.compte.mcode.get(e.id) : ''
+    case 1 : return e.nftp[0] + e.ntfp[1] + e.ntfp[2]
+    case 2 : return e.nft[0] + e.ntf[1] + e.ntf[2]
+    case 3 : return e.q.qn
+    case 4 : return e.q.qv
+    case 5 : return e.pcan
+    case 6 : return e.pcav
+    case 7 : return e.pcn
+    case 8 : return e.pcv
+    case 9 : return e.nbc
+  }
+  return ''
+}
+
 const maxdl = computed(() => { 
   const m = AMJ.djMoisN(AMJ.amjUtc(), -1)
   return Math.floor(m / 100)
@@ -239,17 +267,19 @@ const mindl = computed(() => Math.floor(session.espace.dcreation / 100))
 const synth = computed(() => {
   if (!session.synthese) return []
   const l = []
+  const f = fSt.tri.espace
+  const n = Math.floor(f / 2)
+  const cd = f % 2 ? -1 : 1
   const tsp = session.synthese.tsp
-  for (const id in tsp) l.push(tsp[id])
-  const fv = fSt.tri.espace
-  const f = fv ? fv.value : 0
-  const ct = { f: fx[f][0], m: fx[f][1] }
+  for (const id in tsp) {
+    const e = tsp[id]
+    e.x = id === '0' ? '0' : spr(e, n)
+    l.push(e)
+  }
   l.sort((x, y) => {
-    if (!x.id) return -1
-    if (!y.id) return 1
-    const a = x[ct.f]
-    const b = y[ct.f]
-    return a > b ? ct.m : (a < b ? -ct.m : 0) 
+    if (x.id === '0') return -1
+    if (y.id === '0') return 1
+    return x.x > y.x ? cd : (x.x < y.x ? -cd : 0) 
   })
   return l
 })

@@ -55,7 +55,8 @@
       </div>
 
       <!-- Presse papier -->
-      <div class="btn2" @click="ui.oD('pressepapier', 'a')">
+      <div v-if="!session.hasAR || session.estComptable"
+        class="btn2" @click="ui.oD('pressepapier', 'a')">
         <btn-cond icon="content_paste"/>
         <span class="q-ml-xs">{{$t('MLApp')}}</span>
       </div>

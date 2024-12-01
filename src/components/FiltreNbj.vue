@@ -14,11 +14,11 @@ const props = defineProps({ nom: String, idx: Number })
 
 const st = stores.filtre
 const x = st.filtre[props.nom]
-const val = ref(x && x.nbj ? x.nbj : 9999)
-const options = ref([1, 7, 30, 90, 9999])
+const val = ref(x && x.nbj ? x.nbj : '---')
+const options = ref(['---', 1, 7, 30, 90, 365])
 
 watch(val, (ap) => { 
-  st.setFiltre(props.nom, 'nbj', ap === 9999 ? 0 : ap)
+  st.setFiltre(props.nom, 'nbj', ap === '---' ? 0 : ap)
 })
 
 </script>

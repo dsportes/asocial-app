@@ -6,10 +6,17 @@
         :label="$t('CVraf')" @ok="rafCvs"/>
     </q-card>
 
-    <div v-if="pSt.map.size && peLpF" class="q-my-md titre-lg text-italic">
-      {{$t('APnb', [pSt.map.size])}}
+    <div class="q-my-md titre-lg text-italic">
+      <div v-if="!pSt.map.size">{{$t('APnb0')}}</div>
+      <div v-else>
+        <span v-if="peLpF && peLpF.length === pSt.map.size">
+          {{peLpF.length === 1 ? $t('APnb9') : $t('APnb8', [peLpF.length])}}
+        </span>
+        <span v-else>{{$t('APnb', peLpF ? peLpF.length : 0, {count: peLpF ? peLpF.length : 0})}} {{$t('APsur', [pSt.map.size])}}</span>
+      </div>
     </div>
-    
+
+
     <div v-if="peLpF.length">
       <q-expansion-item v-for="(p, idx) in peLpF" :key="p.id"
         :header-class="dkli(idx)" switch-toggle-side expand-separator dense 

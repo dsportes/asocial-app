@@ -1,12 +1,40 @@
 <template>
   <q-page class="column q-pl-xs q-mr-sm spmd" style="padding-top:5em">
-    <div v-if="lst">
-      <div v-if="pSt.map.size && !lst.length" class="q-my-md titre-lg text-italic">
-        {{$t('APnb', [pSt.map.size])}}
-      </div>
+    <div v-if="nblst">
       
-      <div v-if="lst.length">
-        <q-card class="q-my-md column justify-center" v-for="(p, idx) in lst" :key="p.id">
+      <div class="q-my-md titre-lg text-italic">
+        {{$t('APnbsel', nblst.nb, { count: nblst.nb})}}
+        <span>{{$t('APsur', [nblst.lst.length])}}</span>
+      </div>
+
+      <div v-if="nblst.lst.length">
+        <q-expansion-item v-for="(p, idx) in nblst.lst" :key="p.id"
+          :header-class="dkli(idx)" switch-toggle-side expand-separator dense 
+          group="somegroup">
+          <template v-slot:header>
+            <div class="column full-width">
+            <div class="row justify-between items-center">
+              <div class="row q-gutter-sm items-center">
+                <img :src="session.getCV(p.id).photo" class="photomax"/>
+                <div class="titre-md text-bold">{{session.getCV(p.id).nom}}</div>
+              </div>
+              <btn-cond v-if="p.d[0] <= 3" style="color:black !important;"
+                cond="cEdit" icon="check" color="green-5" :label="$t('PPctcok')"
+                  @ok="select(p)"/>
+            </div>
+            <div v-if="p.d[0] > 3" class="q-ml-xl">
+              <span class="msg">{{$t('PPctc' + p.d[0])}}
+                <span v-if="p.d[1]" class="q-ml-xs">({{$t('AMm' + p.d[1])}}}</span>
+              </span>
+            </div>
+            </div>
+          </template>
+          <apercu-genx class="q-ml-xl" :id="p.id" :idx="idx" :del="session.eltPart(p.id).del"/>
+        </q-expansion-item>
+      </div>
+    </div>
+<!--
+        <q-card class="q-my-md column justify-center" v-for="(p, idx) in nblst.lst" :key="p.id">
           <apercu-genx class="q-pa-xs" :id="p.id" :idx="idx" nodet/>
           <div :class="dkli(idx) + ' text-center'">
             <span v-if="p.d[0] > 3" class="msg">
@@ -17,10 +45,9 @@
               @ok="select(p)"/>
           </div>
         </q-card>
-      </div>
-    </div>
+-->
 
-      <!-- Confirmation du contact ------------------------------------------------>
+    <!-- Confirmation du contact ------------------------------------------------>
     <q-dialog v-model="ui.d[idc].PInvit" persistent>
       <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
@@ -71,19 +98,22 @@ const propos = ref(true)
 
 const nomg = computed(() => session.getCV(session.groupeId).nom)
     
-const lst = computed(() => { 
+const nblst = computed(() => { 
   const l = []
+  let nb = 0
   session.compte.lstAvatars.forEach(x => {
     const y = { id: x.id }
     y.d = gSt.diagContact(x.id)
+    if (y.d[0] <= 3) nb++
     if (!y.d[0] || propos.value) l.push(y)
   })
   pSt.map.forEach((x, id) => {
     const y = { id: id }
     y.d = gSt.diagContact(id)
+    if (y.d[0] <= 3) nb++
     if (!y.d[0] || propos.value) l.push(y)
   })
-  return l
+  return { nb, lst: l }
 })
 
 async function rafCvs () {
