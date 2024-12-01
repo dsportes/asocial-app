@@ -52,6 +52,19 @@
       <quotas-vols class="q-ml-md" noutil :vols="session.synthese.tsp['0'].q"/>
     </div>
 
+    <div v-if="session.synthese" class="q-my-lg">
+    <div class="row items-end">
+      <div class="col-4 text-right">{{$t('PEnbde')}}</div>
+      <div class="col-1 text-center">{{$t('PEnbdec')}}</div>
+      <div class="col-1 text-center">{{$t('PEnbded')}}</div>
+      <synth-hdrs class="col-6" v-model="igp"/>
+    </div>
+    <synth-ligne :igp="igp" :idx="1" :lg="session.synthese.tsp[0]"/>
+
+    <synth-ligne v-for="(lg, idx) in synth" :key="lg.id" 
+      :igp="igp" :idx="idx" :lg="lg"/>
+    </div>
+
     <div v-if="synth.length">
     <div class="q-mx-xs" 
       v-for="(lg, idx) in synth" :key="lg.id">
@@ -189,6 +202,8 @@ import TuileNotif from '../components/TuileNotif.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import QuotasVols from '../components/QuotasVols.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
+import SynthHdrs from '../components/SynthHdrs.vue'
+import SynthLigne from '../components/SynthLigne.vue'
 import { dkli, styp, $t, afficherDiag } from '../app/util.mjs'
 import { ID, AMJ } from '../app/api.mjs'
 import { GetSynthese, GetPartition, SetEspaceOptionA, NouvellePartition, SetQuotasPart, SetQuotasA,
@@ -211,6 +226,7 @@ const aSt = stores.avatar
 const fSt = stores.filtre
 const session = stores.session
 
+const igp = ref(0)
 const mois = ref(Math.floor(session.auj / 100))
 const nom = ref('')
 const quotasP = ref(null)

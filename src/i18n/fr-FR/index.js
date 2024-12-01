@@ -790,6 +790,43 @@ export default {
   TRIpartition7: '% util. quota fichiers ↑',
   TRIpartition8: '% util. quota fichiers ↓',
 
+  GRC0: 'Alertes sur partition',
+  GRC1: 'Alertes su comptes',
+  GRC2: 'Nombre de documents',
+  GRC3: 'Volume de fichiers',
+  GRC4: 'Conso. de calcul',
+
+  GRC00: 'Total',
+  GRC01: 'Simple',
+  GRC02: 'Lect.',
+  GRC03: 'AC. RESTR',
+
+  GRC10: 'Total',
+  GRC11: 'Simple',
+  GRC12: 'Lect.',
+  GRC13: 'AC. RESTR',
+  
+  GRC20: 'Quota',
+  GRC21: '%attr',
+  GRC22: '%util.',
+  GRC23: 'Nb.doc.',
+
+  GRC30: 'Quota',
+  GRC31: '%attr',
+  GRC32: '%util.',
+  GRC33: 'Vol.occ.',
+
+  GRC40: 'Quota',
+  GRC41: '%attr',
+  GRC42: '%util.',
+  GRC43: 'Moy.30j',
+
+  GRCzo: 'Détails...',
+  GRCed: 'Editer le code',
+  GRCqu: 'Ajuster les quotas',
+  GRCal: 'Déclarer une alerte',
+  GRCsu: 'Supprimer la partition',
+
   // MenuAccueil
   SGRtit: 'Groupe sélectionné',
   ACgr: 'Détail du groupe',
@@ -1545,6 +1582,9 @@ export default {
   TUnopart: 'Partition non disponible.',
 
   // PageEspace ...
+  PEnbde: 'Nombre de ...',
+  PEnbdec: 'cpts',
+  PEnbded: 'déleg',
   PEnbc: 'aucun compte | un compte | {count} comptes',
   PEnbd: 'pas de délégué | un délégué | {count} délégués',
   PEedn: 'Editer le nom',
