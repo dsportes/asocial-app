@@ -705,6 +705,7 @@ export default {
   MLAfav: 'Fichiers visibles en avion',
 
   // Nom des filtres
+  FIcode: 'Code part. contient',
   FInom: 'Début du nom du contact',
   FIngr: 'Début du nom du groupe',
   FInomc: 'Début du nom du compte',
@@ -791,7 +792,7 @@ export default {
   TRIpartition8: '% util. quota fichiers ↓',
 
   GRC0: 'Alertes sur partition',
-  GRC1: 'Alertes su comptes',
+  GRC1: 'Alertes sur comptes',
   GRC2: 'Nombre de documents',
   GRC3: 'Volume de fichiers',
   GRC4: 'Conso. de calcul',
@@ -824,7 +825,8 @@ export default {
   GRCzo: 'Détails...',
   GRCed: 'Editer le code',
   GRCqu: 'Ajuster les quotas',
-  GRCal: 'Déclarer une alerte',
+  GRCaled: 'Modifier l\'alerte',
+  GRCalcr: 'Déclarer une alerte',
   GRCsu: 'Supprimer la partition',
 
   // MenuAccueil
@@ -1188,6 +1190,7 @@ export default {
 
   // PanelPartition PageEspace
   PTnv: 'Nouvelle partition',
+  PTalp: 'Alerte sur la partition',
   PIqa: 'Quotas alloués aux compte "A"',
   PIqo: 'Quotas alloués aux compte "O" - Somme des quotas des partitions',
 
@@ -1582,7 +1585,7 @@ export default {
   TUnopart: 'Partition non disponible.',
 
   // PageEspace ...
-  PEnbde: 'Nombre de ...',
+  PEnbde: 'code de la partition',
   PEnbdec: 'cpts',
   PEnbded: 'déleg',
   PEnbc: 'aucun compte | un compte | {count} comptes',

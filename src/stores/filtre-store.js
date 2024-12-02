@@ -9,11 +9,11 @@ export const useFiltreStore = defineStore('filtre', {
       people: {},
       groupes: { tous: true },
       groupe: {},
-      notes: {}
+      notes: {},
+      espace: {}
     },
     mcgroupe: false,
     tri: {
-      espace: 0,
       partition: 0,
       groupe: 0,
     },

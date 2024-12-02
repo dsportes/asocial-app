@@ -5,7 +5,7 @@
       class="q-ml-xl q-mt-xs q-mb-md" header-class="bg-primary text-white" 
       switch-toggle-side expand-separator dense>
       <template v-slot:header>
-        <div class="full-width fs-md">{{$t('TUpart', [session.codePart(p.id)])}}</div>
+        <div class="full-width titre-lg">{{$t('TUpart', [session.codePart(p.id)])}}</div>
       </template>
       <div class="q-ml-xl q-mb-lg splg">
         <div class="row justify-center q-gutter-sm">

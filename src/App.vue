@@ -143,9 +143,6 @@
           <filtre-mc nom="chats" attr="mcp" :idx="0"/>
           <filtre-mc nom="chats" attr="mcn" :idx="1"/>
         </div>
-        <div v-if="ui.page === 'espace'" class="column justify-start">
-          <filtre-tri nom="espace" :nb-options="20" :idx="0"/>
-        </div>
         <div v-if="ui.page === 'partition'" class="column justify-start">
           <filtre-nom nom="partition" prop='nomc' :idx="0"/>
           <filtre-notif nom="partition" :idx="1"/>
