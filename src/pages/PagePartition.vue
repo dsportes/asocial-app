@@ -1,23 +1,23 @@
 <template>
 <q-page>
-  <div v-if="p" class="column">
+  <div v-if="p">
     <q-expansion-item v-if="session.estDelegue || session.estComptable"
-      class="q-ml-xl q-mt-xs q-mb-md" header-class="bg-primary text-white" 
+      class="q-ml-xl q-mt-xs q-mb-lg" header-class="bg-primary text-white" 
       switch-toggle-side expand-separator dense>
       <template v-slot:header>
-        <div class="full-width titre-lg">{{$t('TUpart', [session.codePart(p.id)])}}</div>
+        <div class="full-width titre-md text-bold">{{$t('TUpart', [session.codePart(p.id)])}}</div>
       </template>
-      <div class="q-ml-xl q-mb-lg splg">
-        <div class="row justify-center q-gutter-sm">
-          <tuile-cnv type="qc" :src="lg"/>
-          <tuile-cnv type="qn" :src="lg"/>
-          <tuile-cnv type="qv" :src="lg"/>
-          <tuile-notif :src="lg"/>
+      <div>
+        <div class="row items-end">
+          <div class="col-4 trc">{{$t('PEnbde')}}</div>
+          <div class="col-1 trc text-center">{{$t('PEnbdec')}}</div>
+          <div class="col-1 trc text-center">{{$t('PEnbded')}}</div>
+          <synth-hdrs class="col-6" v-model="igp"/>
         </div>
-        <div class="q-my-xs">
-          <apercu-notif :editable="session.estComptable || session.estDelegue"
-            :notif="ntfp" :type="1" :cible="p.id"/>
-        </div>
+        <synth-ligne :igp="igp" :idx="0" :lg="lg"/>
+
+        <apercu-notif class="q-my-sm" :editable="session.estComptable || session.estDelegue"
+          :notif="ntfp" :type="1" :cible="p.id"/>
       </div>
     </q-expansion-item>
 
@@ -102,8 +102,8 @@ import stores from '../stores/stores.mjs'
 import { dkli } from '../app/util.mjs'
 import { ID } from '../app/api.mjs'
 import BtnCond from '../components/BtnCond.vue'
-import TuileCnv from '../components/TuileCnv.vue'
-import TuileNotif from '../components/TuileNotif.vue'
+import SynthHdrs from '../components/SynthHdrs.vue'
+import SynthLigne from '../components/SynthLigne.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
@@ -128,9 +128,11 @@ const fSt = stores.filtre
 
 const quotas = ref({})
 
+const igp = ref(0)
+
 const p = computed(() => session.partition)
 const ntfp = computed(() => session.notifPX(p.value.id))
-const lg = computed(() => p.value ? p.value.synth : {})
+const lg = computed(() => session.partition ? session.partition.synth : {})
 
 const ptLc = computed(() => {
   const p = session.partition
@@ -262,4 +264,10 @@ async function validerq () {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
+.trc
+  font-weight: bold
+  font-style: italic
+  text-decoration: underline
+  cursor: pointer
+  color: $primary
 </style>

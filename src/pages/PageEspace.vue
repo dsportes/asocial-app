@@ -1,5 +1,5 @@
 <template>
-  <q-page v-if="session.synthese" class="column q-pa-xs">
+  <q-page v-if="session.synthese" class="q-pa-xs">
     <div class="q-mb-sm">
       <div class="titre-md">{{$t('PEstm')}}</div>
       <div class="row q-gutter-sm q-mb-sm">
@@ -60,11 +60,8 @@
         <div class="col-1 trc text-center" @click="clc('nbd')">{{$t('PEnbded')}}</div>
         <synth-hdrs class="col-6" v-model="igp" :clc="clc"/>
       </div>
-      <synth-ligne :igp="igp" :idx="1" 
-        :lg="session.synthese.tsp[0]" :edval="edval"/>
-
-      <synth-ligne v-for="(lg, idx) in synth" :key="lg.id" 
-        :igp="igp" :idx="idx" :lg="lg" :edval="edval"/>
+      <synth-ligne :igp="igp" :idx="1" :lg="session.synthese.tsp[0]"/>
+      <synth-ligne v-for="(lg, idx) in synth" :key="lg.id" :igp="igp" :idx="idx" :lg="lg"/>
     </div>
 
     <!-- Dialogue de mise à jour des quotas des comptes A -->
@@ -116,8 +113,9 @@ import QuotasVols from '../components/QuotasVols.vue'
 import SynthHdrs from '../components/SynthHdrs.vue'
 import SynthLigne from '../components/SynthLigne.vue'
 import FiltreNom from '../components/FiltreNom.vue'
-import { dkli, styp, $t, afficherDiag, edvol } from '../app/util.mjs'
+import { dkli, styp, $t, afficherDiag } from '../app/util.mjs'
 import { ID, AMJ, UNITEN, UNITEV } from '../app/api.mjs'
+import { Synthese } from '../app/modele.mjs'
 import { GetSynthese, GetPartition, SetEspaceOptionA, NouvellePartition, SetQuotasA,
   DownloadStatC, DownloadStatC2 } from '../app/operations4.mjs'
 
@@ -153,57 +151,6 @@ const clc = (n) => {
   else crTri.value = n
 }
 
-const pval = (lg, n) => {
-  switch (n) {
-    case 'code' : return session.compte.mcode ? session.compte.mcode.get(lg.id) : '?'
-    case 'nbc' : return lg.nbc
-    case 'nbd' : return lg.nbd
-
-    case '00' : return lg.ntfp[0] + lg.ntfp[1] + lg.ntfp[2]
-    case '01' : return lg.ntfp[0]
-    case '02' : return lg.ntfp[1]
-    case '03' : return lg.ntfp[2]
-
-    case '10' : return lg.ntf[0] + lg.ntf[1] + lg.ntf[2]
-    case '11' : return lg.ntf[0]
-    case '12' : return lg.ntf[1]
-    case '13' : return lg.ntf[2]
-
-    case '20' : return lg.q.qn * UNITEN
-    case '21' : return lg.pcan
-    case '22' : return lg.pcn
-    case '23' : return lg.qt.nn + lg.qt.nc + lg.qt.ng
-
-    case '30' : return lg.q.qv * UNITEV
-    case '31' : return lg.pcav
-    case '32' : return lg.pcv
-    case '33' : return lg.qt.v
-
-    case '40' : return lg.q.qc
-    case '41' : return lg.pcac
-    case '42' : return lg.pcc
-    case '43' : return Math.round(lg.qt.cjm * 30)
-  }
-  return ''
-}
-
-const edval = (lg, n) => {
-  switch (n) {
-    case '21' :
-    case '22' :
-    case '31' :
-    case '32' :
-    case '41' :
-    case '42' : return pval(lg, n) + '%'
-    case '30' : 
-    case '33' : return edvol(pval(lg, n))
-
-    case '40' :
-    case '43' : return pval(lg, n) + 'c'
-  }
-  return pval(lg, n)
-}
-
 const maxdl = computed(() => { 
   const m = AMJ.djMoisN(AMJ.amjUtc(), -1)
   return Math.floor(m / 100)
@@ -222,10 +169,10 @@ const synth = computed(() => {
     if (id !== '0') {
       const lg = tsp[id]
       if (f.code) {
-        const c = pval(lg, 'code')
+        const c = Synthese.pval(lg, 'code', session.compte)
         if (c.indexOf(f.code) === -1) continue
       }
-      lg.x = pval(lg, n)
+      lg.x = Synthese.pval(lg, n, session.compte)
       l.push(lg)
     }
   }

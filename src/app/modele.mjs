@@ -2,7 +2,7 @@ import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 import mime2ext from 'mime2ext'
 import { $t, u8ToB64, gzipB, ungzipB, gzipT, ungzipT, titre, 
-  dhstring, normNomFichier } from './util.mjs'
+  dhstring, normNomFichier, edvol } from './util.mjs'
 import { pbkfd, sha256, crypter, decrypter, decrypterStr, decrypterRSA } from './webcrypto.mjs'
 import { ID, Cles, E_BRO, Compteurs, AMJ,
   synthesesPartition, synthesePartPC, FLAGS, UNITEN, UNITEV } from './api.mjs'
@@ -343,6 +343,56 @@ export class Synthese extends GenDoc {
     }
   }
 
+  static pval (lg, n, compte) {
+    switch (n) {
+      case 'code' : return compte.mcode ? compte.mcode.get(lg.id) : '?'
+      case 'nbc' : return lg.nbc
+      case 'nbd' : return lg.nbd
+  
+      case '00' : return lg.ntfp[0] + lg.ntfp[1] + lg.ntfp[2]
+      case '01' : return lg.ntfp[0]
+      case '02' : return lg.ntfp[1]
+      case '03' : return lg.ntfp[2]
+  
+      case '10' : return lg.ntf[0] + lg.ntf[1] + lg.ntf[2]
+      case '11' : return lg.ntf[0]
+      case '12' : return lg.ntf[1]
+      case '13' : return lg.ntf[2]
+  
+      case '20' : return lg.q.qn * UNITEN
+      case '21' : return lg.pcan
+      case '22' : return lg.pcn
+      case '23' : return lg.qt.nn + lg.qt.nc + lg.qt.ng
+  
+      case '30' : return lg.q.qv * UNITEV
+      case '31' : return lg.pcav
+      case '32' : return lg.pcv
+      case '33' : return lg.qt.v
+  
+      case '40' : return lg.q.qc
+      case '41' : return lg.pcac
+      case '42' : return lg.pcc
+      case '43' : return Math.round(lg.qt.cjm * 30)
+    }
+    return ''
+  }
+  
+  static edval (lg, n, compte) {
+    switch (n) {
+      case '21' :
+      case '22' :
+      case '31' :
+      case '32' :
+      case '41' :
+      case '42' : return Synthese.pval(lg, n, compte) + '%'
+      case '30' : 
+      case '33' : return edvol(Synthese.pval(lg, n))
+  
+      case '40' :
+      case '43' : return Synthese.pval(lg, n, compte) + 'c'
+    }
+    return Synthese.pval(lg, n, compte)
+  }
 }
 
 /** Partition *********************************

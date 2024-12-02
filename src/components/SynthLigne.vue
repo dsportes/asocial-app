@@ -1,47 +1,54 @@
 <template>
 <div>
-  <div :class="dkli(idx) + ' row full-width items-center'">
+  <div :class="dkli(idx) + ' row full-width items-start q-py-sm'">
 
-    <div class="col-4 row items-center q-gutter-sm">
-      <btn-cond v-if="lg.id !== '0'" round icon="more_vert" color="primary">
-        <q-menu anchor="bottom left" self="top left" max-height="20rem" 
-          max-width="32rem">
-          <q-list class="q-py-xs bord1 bg-black text-white fs-md ">
-            <q-item clickable v-close-popup  @click="pagePartition" class="row items-center">
-              <q-icon color="primary" size="md" name="open_in_new" />
-              <span>{{$t('GRCzo')}}</span>
-            </q-item>
-            <q-item v-if="!session.cUrgence" clickable v-close-popup  
-              @click="editer" class="row items-center">
-              <q-icon color="primary" size="md" name="edit" />
-              <span>{{$t('GRCed')}}</span>
-            </q-item>
-            <q-item v-if="!session.cUrgence" clickable v-close-popup  
-              @click="editerqP" class="row items-center">
-              <q-icon color="primary" size="md" name="settings" />
-              <span>{{$t('GRCqu')}}</span>
-            </q-item>
-            <q-item v-if="ntfP" clickable v-close-popup  
-              @click="editerNtf" class="row items-center">
-              <q-icon color="primary" size="md" name="warning" />
-              <span>{{$t('GRCaled')}}</span>
-            </q-item>
-            <q-item v-if="!ntfP" clickable v-close-popup  
-              @click="creerNtf" class="row items-center">
-              <q-icon color="primary" size="md" name="warning" />
-              <span>{{$t('GRCalcr')}}</span>
-            </q-item>
-            <q-item v-if="lg.nbc === 0 && !session.cUrgence" 
-              clickable v-close-popup  @click="supprimer" class="row items-center">
-              <q-icon color="warning" size="md" name="delete" />
-              <span>{{$t('GRCsu')}}</span>
-            </q-item>
-          </q-list>
-        </q-menu>
-      </btn-cond>
-      <div v-if="lg.id !== '0'" class="titre-md text-bold">{{data.code}}</div>
-      <div v-if="lg.id !== '0'" class="font-mono fs-sm">#{{data.id}}</div>
-      <div v-if="lg.id === '0'" class="q-pl-lg text-italic titre-md text-bold">{{$t('total')}}</div>
+    <div class="col-4 row items-start justify-between">
+      <div class="col row q-gutter-xs items-start">
+        <btn-cond v-if="lg.id !== '0' && session.estComptable" size="sm" round icon="more_vert" color="primary">
+          <q-menu anchor="bottom left" self="top left" max-height="20rem" 
+            max-width="32rem">
+            <q-list class="q-py-xs bord1 bg-black text-white fs-md ">
+              <q-item clickable v-close-popup  @click="pagePartition" class="row items-center">
+                <q-icon color="primary" size="md" name="open_in_new" />
+                <span>{{$t('GRCzo')}}</span>
+              </q-item>
+              <q-item v-if="!session.cUrgence" clickable v-close-popup  
+                @click="editer" class="row items-center">
+                <q-icon color="primary" size="md" name="edit" />
+                <span>{{$t('GRCed')}}</span>
+              </q-item>
+              <q-item v-if="!session.cUrgence" clickable v-close-popup  
+                @click="editerqP" class="row items-center">
+                <q-icon color="primary" size="md" name="settings" />
+                <span>{{$t('GRCqu')}}</span>
+              </q-item>
+              <q-item v-if="ntfP" clickable v-close-popup  
+                @click="editerNtf" class="row items-center">
+                <q-icon color="primary" size="md" name="warning" />
+                <span>{{$t('GRCaled')}}</span>
+              </q-item>
+              <q-item v-if="!ntfP" clickable v-close-popup  
+                @click="creerNtf" class="row items-center">
+                <q-icon color="primary" size="md" name="warning" />
+                <span>{{$t('GRCalcr')}}</span>
+              </q-item>
+              <q-item v-if="lg.nbc === 0 && !session.cUrgence" 
+                clickable v-close-popup  @click="supprimer" class="row items-center">
+                <q-icon color="warning" size="md" name="delete" />
+                <span>{{$t('GRCsu')}}</span>
+              </q-item>
+            </q-list>
+          </q-menu>
+        </btn-cond>
+        <div v-else style="width:18px"/>
+        <div v-if="lg.id !== '0'" class="titre-md text-bold">{{data.code}}</div>
+        <div v-if="lg.id !== '0'" class="q-ml-md font-mono fs-sm">#{{data.id}}</div>
+        <div v-if="lg.id === '0'" class="text-italic titre-md text-bold">{{$t('total')}}</div>
+      </div>
+      <div class="col-auto row items-start">
+        <q-icon :name="ic[data.ip]" :color="clr[data.ip]" size="12px"/>
+        <q-icon :name="ic[data.ic]" :color="clr[data.ic]" size="12px"/>
+      </div>
     </div>
 
     <div class="col-1 font-mono fs-md text-center">{{data.nbc}}</div>
@@ -104,9 +111,12 @@ import { $t, dkli, styp } from '../app/util.mjs'
 import stores from '../stores/stores.mjs'
 import ChoixQuotas from './ChoixQuotas.vue'
 import DialogueNotif from './DialogueNotif.vue'
-import { Notification } from '../app/modele.mjs'
-import { GetPartition, SetQuotasPart, SetCodePart, SupprPartition } from '../app/operations4.mjs'
+import { Notification, Synthese } from '../app/modele.mjs'
+import { GetPartition, SetQuotasPart, SetCodePart, SupprPartition, GetSynthese } from '../app/operations4.mjs'
 import BtnCond from './BtnCond.vue'
+
+const ic = ['star', 'circle', 'change_history', 'square']
+const clr = ['green-5', 'primary', 'warning', 'negative']
 
 const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
@@ -115,8 +125,7 @@ const session = stores.session
 const props = defineProps({
   igp: Number, // Groupe de compteurs affiché (0..4)
   lg: Object, // ligne de synthèses
-  idx: Number,
-  edval: Function
+  idx: Number
 })
 
 const nvcode = ref('')
@@ -127,29 +136,36 @@ const restrb = ref(false)
 
 const quotasP = ref(null)
 
-const code = computed(() => session.compte.mcode.get(props.lg.id))
-const ntfP = computed(() => {
-  const t = session.espace.tnotifP
-  const n = t ? t[props.lg.id] : null
-  return n ? new Notification(n) : null
-})
+const code = computed(() => session.compte.mcode ? session.compte.mcode.get(props.lg.id) : '')
+const ntfP = computed(() => session.notifPX(props.lg.id))
+
+async function refreshSynth () {
+  await new GetSynthese().run()
+}
 
 async function lgCourante () {
   if (!session.partition || session.partition.id !== props.lg.id)
     await new GetPartition().run(props.lg.id)
 }
 
-const data = ref({})
-data.value.code = code.value
-data.value.id = props.lg.id
-data.value.nbc = props.lg.nbc
-data.value.nbd = props.lg.nbd
-for (let i = 0; i < 5; i++) {
-  for (let j = 0; j < 4; j++) {
-    const ij = '' + i + '' + j
-    data.value[ij] = props.edval(props.lg, ij)
+const data = computed(() => {
+  const d = {}
+  d.code = code.value
+  d.id = props.lg.id
+  d.nbc = props.lg.nbc
+  d.nbd = props.lg.nbd
+  for (let i = 0; i < 5; i++) {
+    for (let j = 0; j < 4; j++) {
+      const ij = '' + i + '' + j
+      d[ij] = Synthese.edval(props.lg, ij, session.compte)
+    }
   }
-}
+  let n = props.lg.ntfp
+  d.ip = n[2] ? 3 : (n[1] ? 2 : (n[0] ? 1 : 0))
+  n = props.lg.ntf
+  d.ic = n[2] ? 3 : (n[1] ? 2 : (n[0] ? 1 : 0))
+  return d
+})
 
 async function editerNtf () {
   ntf.value = ntfP.value.clone()
@@ -189,6 +205,7 @@ async function editer () {
 async function valider () {
   await new SetCodePart().run(props.lg.id, nvcode.value)
   ui.fD()
+  await refreshSynth()
 }
 
 /*
@@ -204,11 +221,11 @@ async function editerqP () {
   const qpt = synth.tsp['0'].q
   const qe = session.espace.quotas
   const rqn = qe.qn - qpt.qn + q.qn
-  const maxn = rqn < 0 ? q.qn : rqn
+  const maxn = rqn < q.qn ? q.qn : rqn
   const rqv = qe.qv - qpt.qv + q.qv
-  const maxv = rqv < 0 ? q.qv : rqv
+  const maxv = rqv < q.qv ? q.qv : rqv
   const rqc = qe.qc - qpt.qc + q.qc
-  const maxc = rqc < 0 ? q.qc : rqc
+  const maxc = rqc < q.qc ? q.qc : rqc
   quotasP.value = { 
     qc: q.qc, qn: q.qn, qv: q.qv,
     minc: 0, minn: 0, minv: 0,
@@ -219,7 +236,7 @@ async function editerqP () {
 }
 
 async function validerqP () {
-  await new SetQuotasPart().run(ligne.value.id, quotasP.value)
+  await new SetQuotasPart().run(props.lg.id, quotasP.value)
   await refreshSynth()
   ui.fD()
 }

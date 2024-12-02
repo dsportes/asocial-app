@@ -84,6 +84,7 @@ async function valider (suppr) {
       const clep = RegCles.get(props.cible)
       const ntf = suppr ? null : await n.value.crypt(clep)
       await new SetNotifP().run(suppr ? null : ntf, props.cible)
+      await new GetPartition().run(props.cible)
     } else {
       const idp = session.partition.id
       const clep = RegCles.get(idp)
