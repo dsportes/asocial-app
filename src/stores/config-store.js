@@ -75,7 +75,7 @@ export const useConfigStore = defineStore('config', {
         this.notificationPerm = await navigator.permissions.query({ name: 'notifications' })
       const p = this.notificationPerm.state
       if (p !== this.permState) {
-        console.log('permState: ', this.permState, ' -> ', p)
+        // console.log('permState: ', this.permState, ' -> ', p)
         this.permState = p
       }
     },

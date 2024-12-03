@@ -41,12 +41,6 @@ export const usePeopleStore = defineStore('people', {
       }
     },
 
-    // entrée du people courant
-    peC: (state) => { 
-      const id = stores.session.peopleId
-      return state.map.get(id)
-    },
-
     // Array des ids des people
     peopleIds: (state) => { return Array.from(state.map.keys()) },
 

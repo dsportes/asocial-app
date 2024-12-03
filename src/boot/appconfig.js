@@ -64,13 +64,13 @@ export default boot(async ({ app /* Vue */ }) => {
   cfg.PUBSUBURL = u + '/pubsub/'
   console.log('PUBSUBURL: ' + cfg.PUBSUBURL)
 
-  console.log(' build:' + cfg.BUILD)
+  console.log('build:' + cfg.BUILD)
   
   new BroadcastChannel('channel-pubsub').onmessage = msgPush
   
   cfg.search = window.location.search.replace('?', '')
 
-  console.log('Mode silencieux: ' + (cfg['silence'] ? 'oui' : 'non'))
+  // console.log('Mode silencieux: ' + (cfg['silence'] ? 'oui' : 'non'))
 
   cfg.locales = []
   cfg.localeOptions.forEach(t => {cfg.locales.push(t.value)})

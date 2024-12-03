@@ -631,6 +631,9 @@ La structure est la suivante:
 - `vd` : [0..11] - vecteur détaillé pour les 12 mois de l'année (glissante)
 
 Propriétés calculées:
+- pcn : % dude qn utilisé
+- pcv : % de qv utilisé
+- pcc : % du cjm*30 à qc
 - `cjm` : consommation moyenne de M M-1 ramenée à un jour.
 - `njec` : nombre de jours estimés avant épuisement du crédit.
 - `flags` : flags courants 
@@ -779,6 +782,26 @@ export class Compteurs {
   }
 
   get soldeCourant () { return this.soldeDeM(this.mm) }
+
+  get pcn () { 
+    const x = this.qv
+    const n = x.nn + x.nc + x.ng
+    if (x.qn === 0) return n > 0 ? 999 : 0
+    return Math.round(n * 100 / (x.qn * UNITEN))
+  }
+
+  get pcv () { 
+    const x = this.qv
+    if (x.qv === 0) return x.v > 0 ? 999 : 0
+    return Math.round(x.v * 100 / (x.qv * UNITEV))
+  }
+
+  get pcc () { 
+    const x = this.qv
+    const n = x.cjm * 30
+    if (x.qc === 0) return n > 0 ? 999 : 0
+    return Math.round(n * 100 / x.qc)
+  }
 
   soldeDeM (m) {
     const vf = this.vd[m - 1]

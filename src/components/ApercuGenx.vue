@@ -21,7 +21,7 @@
           <div class="col-auto row q-gutter-xs" v-if="!estComptable">
             <btn-cond v-if="estAvc" icon="badge" round stop @ok="edcv"/>
             <btn-cond v-if="!estAvc && estPeople" icon="badge" round stop @ok="ovcv"/>
-            <btn-cond v-if="estPeople && !detPeople" round icon="open_in_new" 
+            <btn-cond v-if="estPeople && !nodetP && !detPeople" round icon="open_in_new" 
               stop @ok="ouvrirdetails"/>
           </div>
         </div>
@@ -75,7 +75,8 @@ const props = defineProps({
   id: String, // id du groupe, avatar du compte ou contact
   del: Boolean, // true si délégué, pour l'afficher
   im: Number, // pour un membre pour l'afficher
-  nodet: Boolean, // true si le panel de détail ne DOIT PAS être visible
+  nodet: Boolean, // true si ne pas afficher CV et groupe
+  nodetP: Boolean, // true si le panel de détail ne DOIT PAS être visible
   idx: Number,
   urgence: Boolean // true si invoqué depuis tab URGENCE
 })

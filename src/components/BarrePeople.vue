@@ -1,17 +1,19 @@
 <template>
 <div>
   <div class="row justify-center q-gutter-sm q-my-sm items-center">
-    <btn-cond v-if="session.estComptable && id !== session.compteId"
+    <btn-cond v-if="session.estComptable && !ID.estComptable(id)"
       cond="cUrgence" :label="$t('PPchpart')" @ok="chgPartition"/>
-    <btn-cond v-if="session.estComptable && id !== session.compteId" 
-      cond="cUrgence" :label="$t('PPchdel')" @ok="chgDelegue"/>
-    <btn-cond v-if="comptaVis" cond="cUrgence" :label="$t('PPcompta')" @ok="voirCompta"/>
-    <btn-cond v-if="!idp" color="warning" icon="change_history"
-      cond="cEdit" class="justify-start" @ok="muterO"
-      :label="$t('PPmuterO')">
-      <q-tooltip>{{$t('PPmutO')}}</q-tooltip>
-    </btn-cond>
-    <btn-cond v-if="idp && !session.estComptable" color="warning" icon="change_history"
+    <btn-cond v-if="estDel && session.estComptable && !ID.estComptable(id)" 
+      icon="check" color="warning" cond="cUrgence"
+      :label="$t('PPkodel')" @ok="changerDel(false)"/>
+    <btn-cond v-if="!estDel && session.estComptable && !ID.estComptable(id)"
+      icon="check" color="warning" cond="cUrgence"
+      :label="$t('PPokdel')" @ok="changerDel(true)"/>
+    <btn-cond v-if="id !== session.compteId && !ID.estComptable(id)"
+      cond="cUrgence" :label="$t('PPcompta')" @ok="voirCompta"/>
+
+    <btn-cond v-if="!ID.estComptable(id)" 
+      color="warning" icon="change_history"
       cond="cEdit" class="justify-start" @ok="muterA"
       :label="$t('PPmuterA')">
       <q-tooltip>{{$t('PPmutA')}}</q-tooltip>
@@ -55,77 +57,31 @@
     </q-card>
   </q-dialog>
 
-  <!-- Mutation de type de compte en "O" -->
-  <q-dialog v-model="ui.d[idc].BPmutO" persistent>
-    <q-card :class="styp('md')">
-      <q-toolbar class="bg-secondary text-white">
-        <btn-cond color="warning" icon="close" @ok="ui.fD"/>
-        <q-toolbar-title class="titre-lg text-center q-mx-sm">
-          {{$t('PPmutO')}}
-        </q-toolbar-title>
-        <bouton-help page="page1"/>
-      </q-toolbar>
-
-      <micro-chat class="q-pa-xs q-my-md" :chat="chat"/>
-      
-      <q-card-section>
-        <phrase-contact @ok="okpc" :orgext="session.org" declaration/>
-        <div v-if="diag" class="q-ma-sm q-pa-xs bg-yellow-3 text-negative text-bold">{{diag}}</div>
-      </q-card-section>
-      
-      <choix-quotas v-model="quotasO"/>
-      <div v-if="quotasO.err" class="bg-yellow-5 text-bold text-black q-pa-xs">
-        {{$t('PPquot')}}
-      </div>
-
-      <q-card-section>
-        <div class="titre-md">{{$t('PPmutmc')}}</div>
-        <editeur-md
-          v-model="texte" :lgmax="250" modetxt editable mh="6rem"
-          :texte="txtdefO"/>
-      </q-card-section>
-
-      <q-card-actions class="q-pa-xs q-mt-sm q-gutter-sm" align="center" vertical>
-        <btn-cond icon="undo" flat :label="$t('renoncer')" @ok="ui.fD"/>
-        <btn-cond :disable="(diag !== '') || quotasO.err || !pc" color="warning" icon="change_history" 
-          cond="cUrgence" :label="$t('PPmutO')" @ok="cf=true"/>
-        <bouton-confirm :actif="cf" :confirmer="mut"/>
-      </q-card-actions>
-    </q-card>
-  </q-dialog>
-
   <!-- Changement de partition -->
   <q-dialog v-model="ui.d[idc].BPchgTr" persistent>
-    <q-card :class="styp('sm')">
+    <q-card :class="styp('sm') + ' q-pa-sm'">
       <div class="titre-lg bg-secondary text-white text-center">
-        {{$t('PPchgpart', [cv.nom, session.codePart(idpCpt)])}}</div>
-      <div class="q-mx-sm titre-md">{{$t('PPqvc', [cpt.qv.qc, cpt.pc.pcc])}}</div>
-      <div class="q-mx-sm titre-md">{{$t('PPqvn', [cpt.qv.qn, edn(cpt.qv.qn), cpt.pc.pcn])}}</div>
-      <div class="q-mx-sm titre-md">{{$t('PPqvv', [cpt.qv.qv, edv(cpt.qv.qv), cpt.pc.pcv])}}</div>
+        {{$t('PPchgpart', [cv.nom, session.codePart(idp)])}}</div>
+      <div class="q-mx-sm titre-md">{{$t('PPqvn', [cpt.qv.qn, edn(cpt.qv.qn), cpt.pcn])}}</div>
+      <div class="q-mx-sm titre-md">{{$t('PPqvv', [cpt.qv.qv, edv(cpt.qv.qv), cpt.pcv])}}</div>
+      <div class="q-mx-sm titre-md">{{$t('PPqvc', [cpt.qv.qc, cpt.pcc])}}</div>
 
       <q-input filled v-model="filtre" :label="$t('PPnt')" />
       <q-separator class="q-mt-sm"/>
 
       <q-card-section>
-        <div class="titre-md text-italic">{{$t('PPc0')}}</div>
         <div class="titre-md text-italic row items-center">
           <div class="col-3">{{$t('PPc1')}}</div>
-          <div class="col-3 text-center">{{$t('PPc2', [cpt.qv.qc])}}</div>
-          <div class="col-3 text-center" >{{$t('PPc3', [cpt.qv.qn])}}</div>
-          <div class="col-3 text-center">{{$t('PPc4', [cpt.qv.qv])}}</div>
+          <div class="col-3 text-center">{{$t('PPcn', [cpt.qv.qn])}}</div>
+          <div class="col-3 text-center">{{$t('PPcv', [cpt.qv.qv])}}</div>
+          <div class="col-3 text-center">{{$t('PPcc', [cpt.qv.qc])}}</div>
         </div>
+        <div class="titre-md q-mt-sm text-bold text-italic">{{$t('PPc0')}}</div>
       </q-card-section>
 
       <q-card-section style="height: 30vh" class="scroll bord1">
         <div v-for="x in lst" :key="x.id" :class="cllst(x)"  @click="selx = x">
           <div class="col-3">{{x.code}}</div>
-          <div class="col-3 q-px-xs">
-            <div :class="'text-center' + (x.okc ? '' : ' bg-yellow-5 text-bold text-negative')">
-              <span >{{x.dc}}</span>
-              <span class="q-mx-sm">/</span>
-              <span>{{x.qc}}</span>
-            </div>
-          </div>
           <div class="col-3 q-px-xs">
             <div :class="'text-center' + (x.okn ? '' : ' bg-yellow-5 text-bold text-negative')">
               <span >{{x.dn}}</span>
@@ -133,11 +89,18 @@
               <span>{{x.qn}}</span>
             </div>
           </div>
-         <div class="col-3 q-px-xs">
+          <div class="col-3 q-px-xs">
             <div :class="'text-center' + (x.okv ? '' : ' bg-yellow-5 text-bold text-negative')">
               <span >{{x.dv}}</span>
               <span class="q-mx-sm">/</span>
               <span>{{x.qv}}</span>
+            </div>
+          </div>
+          <div class="col-3 q-px-xs">
+            <div :class="'text-center' + (x.okc ? '' : ' bg-yellow-5 text-bold text-negative')">
+              <span >{{x.dc}}</span>
+              <span class="q-mx-sm">/</span>
+              <span>{{x.qc}}</span>
             </div>
           </div>
         </div>
@@ -152,23 +115,8 @@
     </q-card>
   </q-dialog>
 
-  <!-- Changement de statut délégué -->
-  <q-dialog v-model="ui.d[idc].BPchgSp" persistent>
-    <q-card :class="styp('md') + 'q-pa-sm'">
-      <div v-if="estDel" class="text-center q-my-md titre-md">{{$t('PPdel')}}</div>
-      <div v-else class="text-center q-my-md titre-md">{{$t('PPndel')}}</div>
-      <q-card-actions align="right" class="q-gutter-sm">
-        <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
-        <btn-cond v-if="estDel" icon="check" color="warning"
-          :label="$t('PPkodel')" @ok="changerDel(false)"/>
-        <btn-cond v-else icon="check" color="warning"
-          :label="$t('PPokdel')" @ok="changerDel(true)"/>
-      </q-card-actions>
-    </q-card>
-  </q-dialog>
-
   <!-- Affichage des compteurs de compta du compte "courant"-->
-  <q-dialog v-model="ui.d[idc].BPcptdial" full-height position="left" persistent>
+  <q-dialog v-model="ui.d[idc].BPcptdial" position="left" persistent>
     <q-layout container view="hHh lpR fFf" :class="styp('md')">
       <q-header elevated class="bg-secondary text-white">
         <q-toolbar>
@@ -203,7 +151,7 @@ import EditeurMd from '../components/EditeurMd.vue'
 import PhraseContact from '../components/PhraseContact.vue'
 import { $t, styp, edvol, afficherDiag } from '../app/util.mjs'
 import { StatutAvatar, ChangerPartition, DeleguePartition, GetCompta, GetComptaQv,  
-  GetAvatarPC, MuterCompteO, MuterCompteA, GetSynthese, GetPartition } from '../app/operations4.mjs'
+  GetAvatarPC, MuterCompteA, GetSynthese, GetPartition } from '../app/operations4.mjs'
 
 const session = stores.session
 const cfg = stores.config
@@ -212,21 +160,11 @@ const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 
 const props = defineProps({ 
-  id: String,
-  part: Boolean
+  id: String
 })
 
-if (!props.part) {
-  onMounted(async () => {
-    const [c, p] = await new StatutAvatar().run(props.id)
-    idp.value = p
-    idcpt.value = c
-  })
-}
+const idp = ref(session.partition.id) // id de la partition du compte
 
-const idp = ref(props.part ? session.partition.id : '')
-const idcpt = ref(props.id)
-const idpCpt = ref(null)
 const pc = ref(null)
 const texte = ref('')
 const selx = ref(null)
@@ -236,21 +174,16 @@ const atr = ref([])
 const pcc = ref(0)
 const pcn = ref(0)
 const pcv = ref(0)
-const stp = ref(true) // avatar principal) 
-const sta = ref(true) // compte A
 const cf = ref(false)
-const quotasO = ref({}) // { q1) q2) qc) min1) min2) max1) max2) minc) maxc) err}
 const quotasA = ref({}) // { q1) q2) qc) min1) min2) max1) max2) minc) maxc) err}
 const diag = ref('')
 
 const cv = computed(() => session.getCV(props.id) )
 const estDel = computed(() => session.partition.estDel(props.id))
-const comptaVis = computed(() => (session.estComptable || 
-  (session.estDelegue && !session.eltPart(props.id).fake)) && props.id !== session.compteId )
+
 const opt = computed(() => session.espace.opt)
 const chat = computed(() => aSt.getChatIdIE(session.compteId, props.id))
-const cpt = computed(() => session.compta)
-const txtdefO = computed(() => $t('PPmsgo', [session.partition.id]))
+const cpt = computed(() => session.compta.compteurs)
 const txtdefA = computed(() => $t('PPmsga'))
 
 watch(filtre, (ap, av) => { filtrer() })
@@ -259,47 +192,13 @@ const edn = (v) => v * UNITEN
 const edv = (v) => edvol(v * UNITEV)
 
 const cllst = (x) => { const cl = 'row items-center cursor-pointer' + (selx.value && selx.value.idp === x.idp ? ' bord2' : ' bord1')
-  return cl + (idpCpt.value === x.idp ? ' disabled' : '')
+  return cl + (session.partition.id === x.idp ? ' disabled' : '')
 }
 
 async function okpc (p) {
   pc.value = p
   const id = await new GetAvatarPC().run(p)
-  diag.value = idcpt.value !== id ? $t('PPmutpc') : ''
-}
-
-async function O () {
-  if (!chat.value) {
-    await afficherDiag($t('PPchatreq'))
-    return
-  }
-  const c = await new GetComptaQv().run(idcpt.value)
-  await new GetPartition().run(session.partition.id)
-  const qp = session.partition.q
-  const qa = session.partition.synth.qa
-  const qm = cfg.quotasMaxC
-  let maxn = qp.qn - qa.qn
-  if (maxn < 0) maxn = 0
-  if (maxn > qm[0]) maxn = qm[0]
-  let maxv = qp.qv - qa.qv
-  if (maxv < 0) maxv = 0
-  if (maxv > qm[1]) maxv = qm[1]
-  let maxc = qp.qc - qa.qc
-  if (maxc < 0) maxc = 0
-  if (maxc > qm[2]) maxn = qm[2]
-  quotasO.value = {
-    qn: c.qv.qn > maxn ? maxn : c.qv.qn, 
-    qv: c.qv.qv > maxv ? maxv : c.qv.qv, 
-    qc: c.qv.qc > maxc ? maxc : c.qv.qc, 
-    minn: 0, minv: 0, minc: 0,
-    maxn, maxv, maxc,
-    n: c.qv.nn + c.qv.nc + c.qv.ng, 
-    v: c.qv.v,
-    err: ''
-  }
-  cf.value = false
-  diag.value = $t('PPmutpc2')
-  ui.oD('BPmutO', idc)
+  diag.value = props.id !== id ? $t('PPmutpc') : ''
 }
 
 async function muterA () {
@@ -307,7 +206,7 @@ async function muterA () {
     await afficherDiag($t('PPchatreq'))
     return
   }
-  const c = await new GetComptaQv().run(idcpt.value)
+  const c = await new GetComptaQv().run(props.id)
   const qm = cfg.quotasMaxC
   await new GetSynthese().run()
   const synth = session.synthese
@@ -323,14 +222,14 @@ async function muterA () {
   // if (maxc <= 0) maxc = c.qv.qc
   // if (maxc > qm[2]) maxn = qm[2]
   const maxc = qm[2]
-  quotasA.value = { 
-    qn: c.qv.qn > maxn ? maxn : c.qv.qn, 
-    qv: c.qv.qv > maxv ? maxv : c.qv.qv, 
-    qc: c.qv.qc, 
+  quotasA.value = {
+    qn: c.qn > maxn ? maxn : c.qn, 
+    qv: c.qv > maxv ? maxv : c.qv, 
+    qc: c.qc > maxc ? maxc : c.qc, 
     minn: 0, minv: 0, minc: 0,
     maxn, maxv, maxc,
-    n: c.qv.nn + c.qv.nc + c.qv.ng, 
-    v: c.qv.v,
+    n: c.nn + c.nc + c.ng, 
+    v: c.v,
     err: ''
   }
   cf.value = false
@@ -338,18 +237,8 @@ async function muterA () {
   ui.oD('BPmutA', idc)
 }
 
-async function mut () {
-  await new MuterCompteO().run(idcpt.value, quotas.value, chat.value, 
-    texte.value || txtdefO.value, pc.value)
-  idp.value = session.partition.id
-  pc.value = null
-  await new GetPartition().run(session.partition.id)
-  await new GetSynthese().run()
-  ui.fD()
-}
-
 async function mutA () {
-  await new MuterCompteA().run(idcpt.value, chat.value, 
+  await new MuterCompteA().run(props.id, quotasA.value, chat.value, 
     texte.value || txtdefA.value, pc.value)
   idp.value = null
   pc.value = null
@@ -400,11 +289,6 @@ function filtrer () {
 }
 
 async function chgDelegue () { // comptable
-  const c = await new GetCompta().run(props.id)
-  if (c.estA) {
-    await afficherDiag($t('PPnopart'))
-    return
-  }
   ui.oD('BPchgSp', idc)
 }
 
@@ -416,13 +300,8 @@ async function changerDel(del) {
 }
 
 async function chgPartition () { // comptable
+  await new GetCompta().run(props.id)
   await new GetSynthese().run()
-  const c = await new GetCompta().run(props.id)
-  if (c.estA) {
-    await afficherDiag($t('PPnopart'))
-    return
-  }
-  idpCpt.value = c.idp
   selx.value = null
   filtre.value = ''
   filtrer()

@@ -134,7 +134,7 @@ import { $t, styp, afficherDiag } from '../app/util.mjs'
 import { isAppExc, ID } from '../app/api.mjs'
 
 const session = stores.session
-const cf = stores.config
+const cfg = stores.config
 const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 const aSt = stores.avatar

@@ -1,5 +1,4 @@
 <template>
-<q-page>
   <div v-if="p">
     <q-expansion-item v-if="session.estDelegue || session.estComptable"
       class="q-ml-xl q-mt-xs q-mb-lg" header-class="bg-primary text-white" 
@@ -30,37 +29,38 @@
     </q-toolbar>
 
     <div v-for="(c, idx) in ptLcFT" :key="c.id" class="spmd q-my-xs">
-      <q-expansion-item v-if="vis2(c)" dense switch-toggle-side group="g1" :class="dkli(idx)" @click="selCpt(c)">
+      <q-expansion-item dense switch-toggle-side group="g1" :class="dkli(idx)" 
+        @click="selCpt(c)">
         <template v-slot:header>
           <div class="row full-width items-center justify-between">
             <div class="row items-center">
               <img class="photomax" :src="c.cv.photo" />
               <div class="titre-md q-ml-sm">{{c.cv.nomC}}
-                <span v-if="type(c)===1" class="q-ml-sm">[{{$t('moi')}}]</span>
+                <span v-if="session.compteId === c.id" class="q-ml-sm">[{{$t('moi')}}]</span>
                 <span v-if="c.del" class="q-ml-sm">[{{$t('delegue')}}]</span>
               </div>
               <q-icon size="md" v-if="c.notif" :name="ico(c)"
                 :class="'q-ml-md ' + tclr(c) + ' ' + bgclr(c)"/>
             </div>
             
-            <btn-cond v-if="type(c)===2" class="q-ml-md" icon="open_in_new"
+            <btn-cond v-if="session.compteId !== c.id" class="q-ml-md" icon="open_in_new"
               stop @ok="voirpage(c)"/>
           </div>
         </template>
 
-        <div class="q-ml-lg"> <!-- type(c)!==3 &&  -->
-          <apercu-genx v-if="(session.compteId !== c.id)" :id="c.id" :idx="idx" :del="c.del"/>
+        <div class="q-ml-lg">
+          <apercu-genx v-if="(session.compteId !== c.id)" nodetP :id="c.id" :idx="idx" :del="c.del"/>
 
-          <barre-people v-if="session.estComptable || session.estDelegue" :id="c.id" part />
+          <barre-people :id="c.id" />
 
-          <apercu-notif v-if="session.estDelegue || session.estComptable" class="q-my-xs" editable
+          <apercu-notif class="q-my-xs" 
+            :editable="session.estComptable || !ID.estComptable(c)"
             :notif="c.notif" :type="2" :idx="idx" :cible="c.id"/>
 
-          <div v-if="vis(c)" class="q-my-sm row">
+          <div v-if="session.estComptable || !ID.estComptable(c)" class="q-my-sm row">
             <quotas-vols class="col" :vols="c.q" />
-            <btn-cond v-if="session.pow < 4" class="col-auto q-ml-sm self-start"
-              cond="cUrgence"
-              icon="settings" round @ok="editerq(c)"/>
+            <btn-cond class="col-auto q-ml-sm self-start"
+              cond="cUrgence" icon="settings" round @ok="editerq(c)"/>
           </div>
           
         </div>
@@ -92,7 +92,6 @@
     <btn-cond icon="refresh" @ok="reload()"/>
   </q-page-sticky>
 
-</q-page>
 </template>
 
 <script setup>
@@ -219,18 +218,9 @@ async function reload () {
 const ico = (c) => ic[c.notif.nr || 0]
 const tclr = (c) => 'text-' + txt[c.notif.nr || 0]
 const bgclr = (c) => 'bg-' + bg[c.notif.nr || 0]
-const vis = (c) => session.pow < 4 || (c.id === session.compteId)
-const vis2 = (c) => session.pow < 4 || (c.del && (c.id !== session.compteId))
-
-function type (c) {
-  if (aSt.estAvatar(c.id)) return 1
-  if (pSt.estPeople(c.id)) return 2
-  return 3
-}
 
 async function selCpt (c) {
   session.setPeopleId(c.id)
-  if (session.pow < 4) await new GetNotifC().run(session.peopleId)
 }
 
 function voirpage (c) { 

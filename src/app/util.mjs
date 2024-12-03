@@ -489,7 +489,6 @@ export class HelpTree {
         this.node(null, null, p, 1)
       }
     })
-    console.log(this.arbre.length)
   }
 
   node (chp, parentId, page, n) { // page est un Array de la liste de la page et de ses sous pages

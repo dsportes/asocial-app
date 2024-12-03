@@ -946,14 +946,9 @@ export class ChangementPC extends Operation {
   }
 }
 
-/* OP_StatutAvatar: 'Vérification que le bénéficiaire envisagé d\'un don est bien un compte autonome'
-indique si l'avatar donné en argument est 
-un avatar principal ou non, d'un compte autonome ou non
-- token : jeton d'authentification du compte de **l'administrateur**
-- id : id de l'avatar
-Retour: [idc, idp]
-- `idc`: id du compte
-- `idp`: id de partition si compte "0", null si compte "A"
+/* OP_StatutAvatar: Si l'avatar est avatar principal, retourne sa partition
+Retour: SSI id est un avatar principal
+- idp: id de la partition si compte "0", '' si compte "A"
 */
 export class StatutAvatar extends Operation {
   constructor () { super('StatutAvatar') }
@@ -963,7 +958,7 @@ export class StatutAvatar extends Operation {
       const session = stores.session
       const args = { token: session.authToken, id }
       const ret = await post(this, 'StatutAvatar', args)
-      return this.finOK(ret.idcidp)
+      return this.finOK(ret.idp)
     } catch (e) {
       await this.finKO(e)
     }
@@ -1153,13 +1148,14 @@ export class MuterCompteA1 extends Operation {
 - hZR: hash de sa phrase de contact réduite
 - hZC: hash de sa phrase de contact complète
 - ids : ids du chat du compte demandeur (Comptable / Délégué)
+- quotas: { qc, qn, qv }
 - t : texte (crypté) de l'item à ajouter au chat
 Retour:
 */
 export class MuterCompteA extends Operation {
   constructor () { super('MuterCompteA') }
 
-  async run (id, chat, txt, pc) { // id du compte à muter, pc: phrase de contact
+  async run (id, q, chat, txt, pc) { // id du compte à muter, pc: phrase de contact
     try {
       const session = stores.session
       const args = { 
@@ -1168,6 +1164,7 @@ export class MuterCompteA extends Operation {
         hZR: pc.hps1, 
         hZC: pc.hpsc,
         t: txt ? await crypter(chat.clec, gzipB(txt)) : null,
+        quotas: { qc: q.qc, qn: q.qn, qv: q.qv},
         ids: chat.ids
       }
       await post(this, 'MuterCompteA', args)

@@ -123,7 +123,7 @@
 
   <q-drawer v-model="ui.pfiltre" side="right" elevated bordered persistent
     :width="250" :breakpoint="ui.seuillarge" :overlay="ui.etroite">
-    <q-page-sticky v-if="ui.filtreMsg" position="top left" :offset="[0,0]"
+    <q-page-sticky v-if="ui.filtreMsg" position="top-left" :offset="[0,0]"
       style="z-index:1000!important">
       <div class="bg-yellow-3 text-black text-bold font-mono q-pa-xs">{{ui.filtreMsg}}</div>
     </q-page-sticky>
