@@ -1260,7 +1260,7 @@ export class ChangerPartition extends Operation {
 Retour:
 */
 export class DeleguePartition extends Operation {
-  constructor () { super('ChangerPartition') }
+  constructor () { super('DeleguePartition') }
 
   async run (id, del) { // id du compte, statut délégué
     try {

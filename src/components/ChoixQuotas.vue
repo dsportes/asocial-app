@@ -19,7 +19,7 @@
     <div class="row items-center">
       <div class="col-5 row items-center">
         <div class="titre-md mh">{{ed2(model.qv) + ' ' + $t('CQvolfics')}}</div>
-        <div v-if="model.n && model.qv > 0" :class="'font-mono q-ml-sm ' + st(pcv)">[{{pcv}}%]</div>
+        <div v-if="model.v && model.qv > 0" :class="'font-mono q-ml-sm ' + st(pcv)">[{{pcv}}%]</div>
       </div>
 
       <q-input class="col-3 text-center" dense v-model.number="model.qv" type="number" :disable="lecture"/>

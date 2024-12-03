@@ -37,6 +37,12 @@ export const config = {
 
   maxlgtextegen: 250,
   maxlgtextesecret: 5000,
-  alerteDlv: 31
+  alerteDlv: 31,
+
+  // quotasMax : [QN, QV, QC]
+  quotasMaxP: [100000, 100000, 100000], // quotas max attribuables à une PARTITION
+  quotasMaxC: [10000, 10000, 10000], // quotas max attribuables à un COMPTE
+  quotasMaxA: [100000, 100000, 100000], // quotas max attribuables à l'ensemble des COMPTES A d'un espace
+  quotasMaxE: [100000, 100000, 100000] // quotas max attribuables à un espace
 
 }

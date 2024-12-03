@@ -242,10 +242,16 @@ async function editerq (c) {
   // c.q : {qc qn qv c2m nn nc ng v} extraits du document `comptas` du compte.
   await new GetPartition().run(session.compte.idp)
   const s = session.partition.synth
+  const qm = cfg.quotasMaxC
   let maxn = s.q.qn - s.qt.qn + c.q.qn; 
   if (maxn <= 0) maxn = c.q.qn
-  let maxc =s.q.qc - s.qt.qc + c.q.qc; if (maxc <= 0) maxc = c.q.qc
-  let maxv = s.q.qv - s.qt.qv + c.q.qv; if (maxv <= 0) maxv = c.q.qv
+  if (maxn > qm[0]) maxn = qm[0]
+  let maxv = s.q.qv - s.qt.qv + c.q.qv
+  if (maxv <= 0) maxv = c.q.qv
+  if (maxv > qm[1]) maxv = qm[1]
+  let maxc =s.q.qc - s.qt.qc + c.q.qc
+  if (maxc <= 0) maxc = c.q.qc
+  if (maxc > qm[2]) maxc = qm[2]
   quotas.value = { 
     qn: c.q.qn, qv: c.q.qv, qc: c.q.qc, minn: 0, minv: 0, minc: 0,
     maxn, maxv, maxc,

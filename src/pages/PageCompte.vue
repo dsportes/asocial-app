@@ -134,6 +134,7 @@ import { $t, styp, afficherDiag } from '../app/util.mjs'
 import { isAppExc, ID } from '../app/api.mjs'
 
 const session = stores.session
+const cf = stores.config
 const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 const aSt = stores.avatar
@@ -223,30 +224,52 @@ async function oknom (nom) {
 async function editerq () {
   await new GetCompta().run()
   const c = session.compta.compteurs
+  const qm = cfg.quotasMaxC
   if (estA.value) {
     await new GetSynthese().run()
     const synth = session.synthese
     const qA = synth.qA
     const qtA = synth.qtA
-    let maxn = qA.qn - qtA.qn + c.qv.qn; if (maxn <= 0) maxn = c.qv.qn
-    // let maxc = qA.qc - qtA.qc + c.qv.qc; if (maxc <= 0) maxc = c.qv.qc
-    const maxc = 1000
-    let maxv = qA.qv - qtA.qv + c.qv.qv; if (maxv <= 0) maxv = c.qv.qv
-    quotas.value = { qn: c.qv.qn, qv: c.qv.qv, qc: c.qv.qc, minn: 0, minv: 0, minc: 0,
+    let maxn = qA.qn - qtA.qn + c.qv.qn
+    if (maxn <= 0) maxn = c.qv.qn
+    if (maxn > qm[0]) maxn = qm[0]
+    let maxv = qA.qv - qtA.qv + c.qv.qv
+    if (maxv <= 0) maxv = c.qv.qv
+    if (maxv > qm[1]) maxv = qm[1]
+    // let maxc = qA.qc - qtA.qc + c.qv.qc
+    // if (maxc <= 0) maxc = c.qv.qc
+    // if (maxc > qm[2]) maxn = qm[2]
+    const maxc = qm[2]
+    quotas.value = { 
+      qn: c.qv.qn, 
+      qv: c.qv.qv, 
+      qc: c.qv.qc, 
+      minn: 0, minv: 0, minc: 0,
       maxn, maxv, maxc,
-      n: c.qv.nn + c.qv.nc + c.qv.ng, v: c.qv.v,
+      n: c.qv.nn + c.qv.nc + c.qv.ng, 
+      v: c.qv.v,
       err: ''
     }
   } else {
     await new GetPartition().run(session.compte.idp)
     const s = session.partition.synth
-    let maxn = s.q.qn - s.qt.qn + c.qv.qn; if (maxn <= 0) maxn = c.qv.qn
-    let maxc =s.q.qc - s.qt.qc + c.qv.qc; if (maxc <= 0) maxc = c.qv.qc
-    let maxv = s.q.qv - s.qt.qv + c.qv.qv; if (maxv <= 0) maxv = c.qv.qv
+    let maxn = s.q.qn - s.qt.qn + c.qv.qn
+    if (maxn <= 0) maxn = c.qv.qn
+    if (maxn > qm[0]) maxn = qm[0]
+    let maxv = s.q.qv - s.qt.qv + c.qv.qv
+    if (maxv <= 0) maxv = c.qv.qv
+    if (maxv > qm[1]) maxv = qm[1]
+    let maxc = s.q.qc - s.qt.qc + c.qv.qc
+    if (maxc <= 0) maxc = c.qv.qc
+    if (maxc > qm[2]) maxn = qm[2]
     quotas.value = { 
-      qn: c.qv.qn, qv: c.qv.qv, qc: c.qv.qc, minn: 0, minv: 0, minc: 0,
+      qn: c.qv.qn, 
+      qv: c.qv.qv, 
+      qc: c.qv.qc, 
+      minn: 0, minv: 0, minc: 0,
       maxn, maxv, maxc,
-      n: c.qv.nn + c.qv.nc + c.qv.ng, v: c.qv.v,
+      n: c.qv.nn + c.qv.nc + c.qv.ng, 
+      v: c.qv.v,
       err: ''
     }
   }

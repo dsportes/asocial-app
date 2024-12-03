@@ -135,6 +135,7 @@ const optionsNbmi = [3, 6, 12, 18, 24]
 const aSt = stores.avatar
 const fSt = stores.filtre
 const session = stores.session
+const cfg = stores.config
 
 const igp = ref(0)
 const mois = ref(Math.floor(session.auj / 100))
@@ -225,10 +226,11 @@ async function dlstat2 () {
 
 async function ovnvPart () { 
   nom.value = ''
+  const qm = cfg.quotasMaxP
   quotasP.value = { 
     qc: 1, qn: 1, qv: 1, 
     minc: 0, minn: 0, minv: 0,
-    maxc: 9999, maxn: 9999, maxv: 9999, 
+    maxn: qm[0], maxv: qm[1], maxc: qm[2], 
     n: 0, v: 0,
     err: false
   }
@@ -242,18 +244,21 @@ async function creer () {
 }
 
 async function editerqA () {
-  const synth = session.synthese 
+  const synth = session.synthese
+  const qm = cfg.quotasMaxA
   const q = synth.qA // quotas actuels réservés aux comptes "A"
   const qpt = synth.tsp['0'].q
   const qe = session.espace.quotas
   const rqn = qe.qn - qpt.qn + q.qn
-  const maxn = rqn < 0 ? q.qn : rqn
+  let maxn = rqn < 0 ? q.qn : rqn
+  if (maxn > qm[0]) maxn = qm[0]
   const rqv = qe.qv - qpt.qv + q.qv
-  const maxv = rqv < 0 ? q.qv : rqv
+  let maxv = rqv < 0 ? q.qv : rqv
+  if (maxv > qm[1]) maxv = qm[1]
   quotasA.value = { 
     qc: 0, qn: q.qn, qv: q.qv,
     minc: 0, minn: 0, minv: 0,
-    maxc: 0, maxn, maxv,
+    maxc: qm[2], maxn, maxv,
     err: ''
   }
   ui.oD('PEedqA', idc)

@@ -352,9 +352,13 @@ async function valider () {
 
 function ovchgquotas (e) {
   esp.value = e
+  const qm = cfg.quotasMaxE
   // minn, minv, maxn, maxv, minc, maxc, err
-  quotas.value = { ...e.quotas, err: null, minn: 10, minv: 10, minc: 10, 
-    maxn: 1000000, maxv: 1000000, maxc: 1000000 }
+  quotas.value = { ...e.quotas, err: null, minn: 1, minv: 1, minc: 1, 
+    maxn: qm[0], 
+    maxv: qm[1], 
+    maxc: qm[2]
+  }
   ui.oD('PAedprf', idc)
 }
 

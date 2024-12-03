@@ -7,7 +7,7 @@
       cond="cUrgence" :label="$t('PPchdel')" @ok="chgDelegue"/>
     <btn-cond v-if="comptaVis" cond="cUrgence" :label="$t('PPcompta')" @ok="voirCompta"/>
     <btn-cond v-if="!idp" color="warning" icon="change_history"
-      cond="cEdit" class="justify-start" @ok="muter"
+      cond="cEdit" class="justify-start" @ok="muterO"
       :label="$t('PPmuterO')">
       <q-tooltip>{{$t('PPmutO')}}</q-tooltip>
     </btn-cond>
@@ -34,6 +34,11 @@
         <div v-if="diag" class="q-ma-sm q-pa-xs bg-yellow-3 text-negative text-bold">{{diag}}</div>
       </q-card-section>
 
+      <choix-quotas v-model="quotasA"/>
+      <div v-if="quotasA.err" class="bg-yellow-5 text-bold text-black q-pa-xs">
+        {{$t('PPquot')}}
+      </div>
+
       <q-card-section>
         <div class="titre-md">{{$t('PPmutmc')}}</div>
         <editeur-md
@@ -43,7 +48,7 @@
 
       <q-card-actions class="q-pa-xs q-mt-sm q-gutter-sm" align="center" vertical>
         <btn-cond icon="undo" flat :label="$t('renoncer')" @ok="ui.fD"/>
-        <btn-cond :disable="!pc" color="warning" icon="change_history" 
+        <btn-cond :disable="(diag !== '') || quotasA.err  || !pc" color="warning" icon="change_history" 
           cond="cUrgence" :label="$t('PPmutA')" @ok="cf=true"/>
         <bouton-confirm :actif="cf" :confirmer="mutA"/>
       </q-card-actions>
@@ -51,7 +56,7 @@
   </q-dialog>
 
   <!-- Mutation de type de compte en "O" -->
-  <q-dialog v-model="ui.d[idc].BPmut" persistent>
+  <q-dialog v-model="ui.d[idc].BPmutO" persistent>
     <q-card :class="styp('md')">
       <q-toolbar class="bg-secondary text-white">
         <btn-cond color="warning" icon="close" @ok="ui.fD"/>
@@ -68,8 +73,8 @@
         <div v-if="diag" class="q-ma-sm q-pa-xs bg-yellow-3 text-negative text-bold">{{diag}}</div>
       </q-card-section>
       
-      <choix-quotas v-model="quotas"/>
-      <div v-if="quotas.err" class="bg-yellow-5 text-bold text-black q-pa-xs">
+      <choix-quotas v-model="quotasO"/>
+      <div v-if="quotasO.err" class="bg-yellow-5 text-bold text-black q-pa-xs">
         {{$t('PPquot')}}
       </div>
 
@@ -82,7 +87,7 @@
 
       <q-card-actions class="q-pa-xs q-mt-sm q-gutter-sm" align="center" vertical>
         <btn-cond icon="undo" flat :label="$t('renoncer')" @ok="ui.fD"/>
-        <btn-cond :disable="(diag !== '') || quotas.err || !pc" color="warning" icon="change_history" 
+        <btn-cond :disable="(diag !== '') || quotasO.err || !pc" color="warning" icon="change_history" 
           cond="cUrgence" :label="$t('PPmutO')" @ok="cf=true"/>
         <bouton-confirm :actif="cf" :confirmer="mut"/>
       </q-card-actions>
@@ -201,6 +206,7 @@ import { StatutAvatar, ChangerPartition, DeleguePartition, GetCompta, GetComptaQ
   GetAvatarPC, MuterCompteO, MuterCompteA, GetSynthese, GetPartition } from '../app/operations4.mjs'
 
 const session = stores.session
+const cfg = stores.config
 const aSt = stores.avatar
 const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
@@ -233,7 +239,8 @@ const pcv = ref(0)
 const stp = ref(true) // avatar principal) 
 const sta = ref(true) // compte A
 const cf = ref(false)
-const quotas = ref({}) // { q1) q2) qc) min1) min2) max1) max2) minc) maxc) err}
+const quotasO = ref({}) // { q1) q2) qc) min1) min2) max1) max2) minc) maxc) err}
+const quotasA = ref({}) // { q1) q2) qc) min1) min2) max1) max2) minc) maxc) err}
 const diag = ref('')
 
 const cv = computed(() => session.getCV(props.id) )
@@ -261,28 +268,38 @@ async function okpc (p) {
   diag.value = idcpt.value !== id ? $t('PPmutpc') : ''
 }
 
-async function muter () {
+async function O () {
   if (!chat.value) {
     await afficherDiag($t('PPchatreq'))
     return
   }
   const c = await new GetComptaQv().run(idcpt.value)
   await new GetPartition().run(session.partition.id)
-  const s = session.partition.synth
-  quotas.value = {
-    qn: c.qn,
-    qv: c.qv,
-    qc: 1,
-    minn: Math.ceil((c.nc + c.ng + c.nn) / UNITEN),
-    minv: Math.ceil(c.v / UNITEV),
-    minc: 1,
-    maxn: s.q.qn - s.qt.qn,
-    maxv: s.q.qv - s.qt.qv,
-    maxc: s.q.qc - s.qt.qc
+  const qp = session.partition.q
+  const qa = session.partition.synth.qa
+  const qm = cfg.quotasMaxC
+  let maxn = qp.qn - qa.qn
+  if (maxn < 0) maxn = 0
+  if (maxn > qm[0]) maxn = qm[0]
+  let maxv = qp.qv - qa.qv
+  if (maxv < 0) maxv = 0
+  if (maxv > qm[1]) maxv = qm[1]
+  let maxc = qp.qc - qa.qc
+  if (maxc < 0) maxc = 0
+  if (maxc > qm[2]) maxn = qm[2]
+  quotasO.value = {
+    qn: c.qv.qn > maxn ? maxn : c.qv.qn, 
+    qv: c.qv.qv > maxv ? maxv : c.qv.qv, 
+    qc: c.qv.qc > maxc ? maxc : c.qv.qc, 
+    minn: 0, minv: 0, minc: 0,
+    maxn, maxv, maxc,
+    n: c.qv.nn + c.qv.nc + c.qv.ng, 
+    v: c.qv.v,
+    err: ''
   }
   cf.value = false
   diag.value = $t('PPmutpc2')
-  ui.oD('BPmut', idc)
+  ui.oD('BPmutO', idc)
 }
 
 async function muterA () {
@@ -290,6 +307,34 @@ async function muterA () {
     await afficherDiag($t('PPchatreq'))
     return
   }
+  const c = await new GetComptaQv().run(idcpt.value)
+  const qm = cfg.quotasMaxC
+  await new GetSynthese().run()
+  const synth = session.synthese
+  const qA = synth.qA
+  const qtA = synth.qtA
+  let maxn = qA.qn - qtA.qn
+  if (maxn < 0) maxn = 0
+  if (maxn > qm[0]) maxn = qm[0]
+  let maxv = qA.qv - qtA.qv
+  if (maxv < 0) maxv = 0
+  if (maxv > qm[1]) maxv = qm[1]
+  // let maxc = qA.qc - qtA.qc + c.qv.qc
+  // if (maxc <= 0) maxc = c.qv.qc
+  // if (maxc > qm[2]) maxn = qm[2]
+  const maxc = qm[2]
+  quotasA.value = { 
+    qn: c.qv.qn > maxn ? maxn : c.qv.qn, 
+    qv: c.qv.qv > maxv ? maxv : c.qv.qv, 
+    qc: c.qv.qc, 
+    minn: 0, minv: 0, minc: 0,
+    maxn, maxv, maxc,
+    n: c.qv.nn + c.qv.nc + c.qv.ng, 
+    v: c.qv.v,
+    err: ''
+  }
+  cf.value = false
+  diag.value = $t('PPmutpc2')
   ui.oD('BPmutA', idc)
 }
 
@@ -321,8 +366,8 @@ async function voirCompta () { // comptable OU délégué
 function filtrer () {
   const l = []
   /*
-  - `tsp` : table des _synthèses_ des partitions.
-    - _index_: numéro de la partition.
+  - `tsp` : map des _synthèses_ des partitions.
+    - _clé_: ID de la partition.
     - _valeur_ : `synth`, objet des compteurs de synthèse calculés de la partition.
       - `id nbc nbd`
       - `ntfp[1,2,3]`

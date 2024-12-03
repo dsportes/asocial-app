@@ -233,20 +233,24 @@ function okmot () {
 }
 
 async function setQuotas () {
-  let maxn = 0, maxv = 0, maxc = 0
+  const qm = cfg.quotasMaxC
+  let maxn, maxv, maxc
   if (estAutonome.value) {
     const synth = session.synthese
     const qA = synth.qA
     const qtA = synth.qtA
     maxn = qA.qn - qtA.qn
     maxv = qA.qv - qtA.qv
-    maxc = 1000
+    maxc = qm[2]
   } else {
     const s = partition.synth
     maxn = s.q.qn - s.qt.qn
     maxv = s.q.qv - s.qt.qv
     maxc = s.q.qc - s.qt.qc
   }
+  if (maxn > qm[0]) maxn = qm[0]
+  if (maxv > qm[1]) maxv = qm[1]
+  if (maxc > qm[2]) maxc = qm[2]
   quotas.value = { qn: 0, qv: 0, qc: 0, minn: 0, minv: 0, minc: 0, maxn, maxv, maxc, err: null }
 }
 
