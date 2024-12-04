@@ -247,19 +247,24 @@ export class ExistePhrase extends Operation {
   }
 }
 
-/** GetCompta ****************************************************
-args.token: éléments d'authentification du compte.
-args.id : id du compte
+/* OP_GetCompta : retourne la compta d'un compte
+Le demandeur doit être:
+- le comptable,
+- OU un délégué de sa partition si c'est un cpompte O
+- OU avec un chat ayant un "mut" avec le demandé si c'est un compte A 
+
+  id: { t: 'ida' }, // id du compte dont la compta est demandée
+  ids: { t: 'ida', n: true }
 Retour:
 - rowCompta s'il existe
 */
 export class GetCompta extends Operation {
   constructor () { super('GetCompta') }
 
-  async run (id) {
+  async run (id, ids) {
     try {
       const session = stores.session
-      const args = { token: session.authToken, id: id || session.compteId }
+      const args = { token: session.authToken, id: id || session.compteId, ids: ids || null }
       const ret = await post(this, 'GetCompta', args)
       let c
       if (ret.rowCompta) {
@@ -719,7 +724,32 @@ export class NouveauChat extends Operation {
   }
 }
 
-/*   OP_MajChat: 'Mise à jour d\'un "chat".'
+/* OP_MutChat: Ajout ou suppression d\'une demande de mutation sur un chat 
+  id: { t: 'ida' }, // id de l'avatar du chat (principal)
+  ids: { t: 'ids' },  // ids du chat
+  mut: { t: 'int', min: 0, max: 2 } // type de demande - 1 muter en O, 2 muter en A
+*/
+export class MutChat extends Operation {
+  constructor () { super('MajChat') }
+
+  async run (chat, mut) {
+    try {
+      const session = stores.session
+      const args = { 
+        token: session.authToken, 
+        id: chat.id, 
+        ids: chat.ids,
+        mut: mut
+      }
+      await post(this, 'MutChat', args)
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/*  OP_MajChat: 'Mise à jour d\'un "chat".'
 - `token` : éléments d'authentification du compte.
 - id, ids: id du chat
 - t: texte gzippé crypté par la clé C du chat (null si suppression)
@@ -946,19 +976,22 @@ export class ChangementPC extends Operation {
   }
 }
 
-/* OP_StatutAvatar: Si l'avatar est avatar principal, retourne sa partition
-Retour: SSI id est un avatar principal
-- idp: id de la partition si compte "0", '' si compte "A"
+/* StatutChatE: Statut du contact d'un chat
+  ids: { t: 'ida' } // ids = chat
+Retour: { cpt, idp, del }
+- cpt: true si avatar principal
+- idp: id de la partition si compte "0", 
+- del: true si delégué
 */
-export class StatutAvatar extends Operation {
-  constructor () { super('StatutAvatar') }
+export class StatutChatE extends Operation {
+  constructor () { super('StatutChatE') }
 
-  async run (id) { 
+  async run (ids) { 
     try {
       const session = stores.session
-      const args = { token: session.authToken, id }
-      const ret = await post(this, 'StatutAvatar', args)
-      return this.finOK(ret.idp)
+      const args = { token: session.authToken, ids }
+      const ret = await post(this, 'StatutChatE', args)
+      return this.finOK(ret.statut)
     } catch (e) {
       await this.finKO(e)
     }
@@ -1135,6 +1168,32 @@ export class MuterCompteA1 extends Operation {
       const session = stores.session
       const args = { token: session.authToken }
       await post(this, 'MuterCompteA1', args)
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/*  OP_MuterCompteAauto: Auto mutation du compte O en compte A
+Mutation d'un compte `c` O de la partition `p` en compte A
+- augmente `syntheses.qtA`.
+- diminue `partition[p].mcpt[c].q` ce qui se répercute sur `syntheses.tsp[p].qt`.
+- bloqué si l'augmentation de `syntheses.qtA` fait dépasser `syntheses.qA`.
+  
+  quotas: { t: 'q' } // quotas: { qc, qn, qv }   
+*/
+export class MuterCompteAauto extends Operation {
+  constructor () { super('MuterCompteA') }
+
+  async run (q) { // id du compte à muter, pc: phrase de contact
+    try {
+      const session = stores.session
+      const args = { 
+        token: session.authToken, 
+        quotas: { qc: q.qc, qn: q.qn, qv: q.qv}
+      }
+      await post(this, 'MuterCompteAauto', args)
       this.finOK()
     } catch (e) {
       await this.finKO(e)

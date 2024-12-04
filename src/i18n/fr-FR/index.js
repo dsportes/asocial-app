@@ -259,7 +259,6 @@ export default {
   EX8215: 'Le don est  [{0}c] trop important vis à vis du solde du compte du donateur [{1}c].',
   EX8217: 'Phrase de sponsoring non reconnue.',
   EX8218: 'Seuls le Comptable ou un Délégué peut consulter la comptabilité d\'un autre compte que le leur.',
-  EX8219: 'Un délégué ne peut consulter la comptabilité que des comptes de la partition dont il est délégué.',
   EX8220: 'Un compte "A" ne peut pas accéder aux partitions',
 
   EX8319: 'Le quota de calcul de la partition [{0}] est insuffisant pour accepter ce compte [{1}]',
@@ -402,6 +401,14 @@ export default {
   EX9333: '(BUG) Ticket de M-2 ou avant, non supprimable',
   EX9334: '(BUG) Ticket de M-2 ou avant, non enregistrable',
   EX9335: '(BUG) Demande de la carte de visite d\'un avatar NON contact (et NON délégué)',
+  EX9336: '(BUG) Action de mutation sur chat avec un avatar NON compte',
+  EX9337: '(BUG) Action de mutation sur chat I inexistant',
+  EX9338: '(BUG) Action de mutation sur chat E inexistant',
+  EX9339: '(BUG) Action de mutation sur chat avec un compte NON délégué',
+  EX9340: '(BUG) Action de mutation en compte A sur chat avec un compte NON délégué de sa partition actuelle',
+  EX9341: '(BUG) Action de mutation {0} sur chat incompatible avec le type de compte actuel {1}',
+  EX9342: '(BUG) Accès à la comptabilité d\'un compte sans droit pour le faire.',
+  EX9343: '(BUG) Pour s\'auto-muter en compte A il faut être délégué (et pas Comptable).',
 
   // EX9100: 'Erreur de cryptage AES: {0}',
   // EX9101: 'Erreur de cryptage RSA: {0}',
@@ -461,7 +468,7 @@ export default {
   OP_SetEspaceDlvat: 'Changement de la date limite de vie des comptes "O" par l\'administrateur',
   OP_PlusTicket: 'Génération d\'un ticket de crédit',
   OP_MoinsTicket: 'Suppression d\'un ticket de crédit',
-  OP_StatutAvatar: 'Vérification que le bénéficiaire envisagé d\'un don est bien un compte autonome',
+  OP_StatutChatE: 'Statut du contact d\'un chat',
   OP_ReceptionTicket: 'Réception d\'un ticket par le Comptable',
   OP_AcceptationSponsoring: 'Acceptation d\'un sponsoring et création d\'un nouveau compte',
   OP_RefusSponsoring: 'Rejet d\'une proposition de sponsoring',
@@ -476,6 +483,7 @@ export default {
   OP_RafraichirCvsGr: 'Rafraichissement des CVs des membres d\'un grouper',
   OP_MuterCompteO: 'Mutation d\'un compte A en compte O',
   OP_MuterCompteA: 'Mutation du compte O en compte A',
+  OP_MuterCompteAauto: 'Auto mutation du compte O en compte A',
   OP_GetPub: 'Obtention d\'une clé publique',
   OP_GetPubOrg: 'Obtention d\'une clé publique',
   OP_GetAvatarPC: 'Récupération d\'un avatar par sa phrase de contact',
@@ -894,7 +902,7 @@ export default {
   APtit: 'Détail du contact {0}',
   APnbsel: 'Aucun contact possible | Un contact possible | {count} contacts possibles',
 
-  // Micro chat
+  // MicroChat ApercuChat
   CHentre: 'Entre {0} et {1}',
   CHgrp: 'Du groupe {0}',
   CHnxco: 'Il n\'existe pas de chat avec le Comptable, mais il est possible d\'en créer un maintenant.',
@@ -931,7 +939,8 @@ export default {
   CHzombi: 'Ce chat n\'existe plus',
   CHdisp: 'L\'avatar a DISPARU (résilié, auto-résilié, inactivité prolongée): le "chat" avec lui ne peut plus être mis à jour.',
   CHsuppr: 'L\'avatar a DISPARU (résilié, auto-résilié, inactivité prolongée): le "chat" avec lui n\'existe plus.',
-  CHmdon: 'Montant du don (en €)',
+  CHmdon: 'Montant du don (en c)',
+  CHdoncpt: 'Un don ne peut être fait qu\'à l\'avatar principal d\'un compte.',
   CHconfid: 'confidentiel',
   CHdonde: '### Don de {0}c',
   CHcred: 'Solde du compte ({0}c) insuffisant pour supporter ce don ({1}c).',
@@ -939,6 +948,18 @@ export default {
   CHGtit: 'Chat du groupe {0}',
   CHGadd: 'Ajouter un item',
   CHGnot: 'Aucun avatar du groupe a accès aux membres (donc au chat).',
+  CHmutE: '{0} m\'a demandé de LE muter en compte {1}',
+  CHmutI: 'J\'ai demandé à {0} de ME muter en compte {1}',
+  CHmuts: 'NE PLUS demander à {0} de ME muter en compte {1}',
+  CHmutd: 'Demander à {0} de ME muter en compte {1}',
+  CHmutb: 'Mutations',
+  CHmute: 'La mutation en compte "O" ou "A" ne peut être gérée qu\'entre des COMPTES (pas leurs avatars secondaires).',
+  CHmutn1: '{0} N\'EST PAS DÉLÉGUÉ d\'une partition, je ne peux pas lui demander ma mutation en compte "O".',
+  CHmutn2: '{0} N\'EST PAS DÉLÉGUÉ de ma partition, je ne peux pas lui demander ma mutation en compe "A".',
+  CHmutr1: 'Demande impossible à satisfaire, je ne suis PAS DÉLÉGUÉ d\'une partition.',
+  CHmutr2: 'Demande impossible à satisfaire, je ne suis PAS DÉLÉGUÉ de la partition de {0}.',
+  CHmutO: 'Muter {0} en compte "O"',
+  CHmutA: 'Muter {0} en compte "A"',
 
   // PageSession
   ISst: 'Statut de la session: {0}. Mode: {1}',
@@ -1422,7 +1443,8 @@ export default {
   // Page (Compte) et NouvelAvatar
   CPTchps: 'Changer la phrase secrète',
   CPTedq: 'Quotas du compte',
-  CPTdel: 'Délégué de la partition [{0}]',
+  CPTdel: 'Délégué de ma partition [{0}]',
+  CPTautoA: 'M\'auto-muter en compte A',
   CPTnvav: 'Nouvel avatar',
   CPTnvav2: 'Création d\'un nouvel avatar',
   CPTchps2: 'Nouvelle phrase secrète de connexion',
@@ -1706,6 +1728,16 @@ export default {
   - Ajouter un hashtag présent à droite: cliquer dessus
   - Enlever un hashtag sélectionné à gauche: cliquer dessus
   `,
+
+  BULLEquotas: ` Le nombre de "documents" correspond au nombre total,
+- de chats, ceux raccrochés n'étant pas comptés,
+- de notes personnelles et de celles des groupes dont le compte est hébergeur,
+- de participations "actives" à des groupes.
+
+Le "volume des fichiers" est celui total de ceux attachés aux notes personnelles et à celles des groupes dont le compte est hébergeur.
+
+La "consommation mensuelle" de calcul est en centimes et est la somme des coûts des lectures, écritures et de transfert de volume montant et descendant (calculée sur M et M-1).
+`,
 
   // App.vue : nom des pages
   Pnull: '',

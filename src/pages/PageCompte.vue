@@ -1,6 +1,9 @@
 <template>
   <q-page class="column q-pa-xs splg">
     <div class="row q-my-sm items-center justify-center q-gutter-sm">
+      <div v-if="estA" class="text-warning bg-yellow-3 text-bold">
+        {{$t('compteA')}}
+      </div>
       <div> <!-- Changement de phrase secrète -->
         <btn-cond class="q-ml-sm" icon="manage_accounts" no-caps cond="cUrgence"
           :label="$t('CPTchps')" color="warning" @ok="ouvrirchgps"/>
@@ -16,13 +19,12 @@
         icon="settings" :label="$t('CPTedq')" @ok="editerq" cond="cUrgence"/>
     </div>
 
-    <div class="row justify-center">
-    <span v-if="estA" class="q-pa-xs text-warning bg-yellow-3 text-bold">
-      {{$t('compteA')}}
-    </span>
-    <span v-if="estDelegue" class="q-pa-xs text-warning bg-yellow-3 text-bold">
-      {{$t('CPTdel', [session.compte.idp])}}
-    </span>
+    <div v-if="estDelegue" class="row justify-between items-center">
+      <div class="q-pa-xs text-warning bg-yellow-3 text-bold">
+        {{$t('CPTdel', [session.compte.idp])}}
+      </div>
+      <btn-cond :label="$t('CPTautoA')" flat color="warning"
+        @ok="muterA"/>
     </div>
 
     <!-- Avatars du compte -->
@@ -51,20 +53,27 @@
       </div>
     </q-card>
 
-    <!-- Dialogue de confirmation de mutation en compte A -->
+    <!-- Dialogue de mutation en compte A -->
     <q-dialog v-model="ui.d[idc].PCmuta" persistent>
       <q-card :class="styp('md')">
         <q-toolbar class="bg-secondary text-white">
           <btn-cond icon="close" color="warning" @ok="ui.fD"/>
-          <q-toolbar-title class="titre-lg full-width text-center">{{$t('PPmutA')}}</q-toolbar-title>
-        </q-toolbar>
-        <div class="q-ma-sm text-center">
-          <span class="titre-lg">{{$t('PPmutA2')}}</span>
+          <q-toolbar-title class="titre-lg full-width text-center">{{$t('CPTautoA')}}</q-toolbar-title>
           <bouton-help page="page2"/>
-        </div>
-        <q-card-actions align="right" class="q-gutter-sm">
-          <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
-          <bouton-confirm actif :confirmer="muterA"/>
+        </q-toolbar>
+
+        <q-card-section>
+          <choix-quotas v-model="quotas"/>
+          <div v-if="quotas.err" class="bg-yellow-5 text-bold text-black q-pa-xs">
+            {{$t('PPquot')}}
+          </div>
+        </q-card-section>
+
+        <q-card-actions class="q-pa-xs q-mt-sm q-gutter-sm" align="center">
+          <btn-cond icon="undo" flat :label="$t('renoncer')" @ok="ui.fD"/>
+          <btn-cond :disable="quotas.err !== ''" color="warning" icon="change_history" 
+            cond="cUrgence" :label="$t('valider')" @ok="cf=true"/>
+          <bouton-confirm :actif="cf" :confirmer="mutA"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -120,7 +129,7 @@
 import { ref, computed, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
-import { GetSynthese, GetPartition, GetCompta, NouvelAvatar, ChangementPS, MuterCompteA } from '../app/operations4.mjs'
+import { GetSynthese, GetPartition, GetCompta, NouvelAvatar, ChangementPS, MuterCompteAauto } from '../app/operations4.mjs'
 import { SetQuotas } from '../app/operations4.mjs'
 import { ExistePhrase } from '../app/operations4.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -145,14 +154,10 @@ const nomav = ref('')
 const avid = ref('')
 const quotas = ref(null)
 const synth = ref(null)
+const cf = ref(false)
 
 const estA = computed(() => session.estA)
 const estDelegue = computed(() => session.estDelegue)
-
-async function muterA () {
-  await new MuterCompteA().run()
-  ui.fD()
-}
 
 function ouvrirNvav () { 
   ui.oD('PCnvav', idc)
@@ -222,62 +227,82 @@ async function oknom (nom) {
 }
 
 async function editerq () {
-  await new GetCompta().run()
-  const c = session.compta.compteurs
-  const qm = cfg.quotasMaxC
-  if (estA.value) {
-    await new GetSynthese().run()
-    const synth = session.synthese
-    const qA = synth.qA
-    const qtA = synth.qtA
-    let maxn = qA.qn - qtA.qn + c.qv.qn
-    if (maxn <= 0) maxn = c.qv.qn
-    if (maxn > qm[0]) maxn = qm[0]
-    let maxv = qA.qv - qtA.qv + c.qv.qv
-    if (maxv <= 0) maxv = c.qv.qv
-    if (maxv > qm[1]) maxv = qm[1]
-    // let maxc = qA.qc - qtA.qc + c.qv.qc
-    // if (maxc <= 0) maxc = c.qv.qc
-    // if (maxc > qm[2]) maxn = qm[2]
-    const maxc = qm[2]
-    quotas.value = { 
-      qn: c.qv.qn, 
-      qv: c.qv.qv, 
-      qc: c.qv.qc, 
-      minn: 0, minv: 0, minc: 0,
-      maxn, maxv, maxc,
-      n: c.qv.nn + c.qv.nc + c.qv.ng, 
-      v: c.qv.v,
-      err: ''
-    }
-  } else {
-    await new GetPartition().run(session.compte.idp)
-    const s = session.partition.synth
-    let maxn = s.q.qn - s.qt.qn + c.qv.qn
-    if (maxn <= 0) maxn = c.qv.qn
-    if (maxn > qm[0]) maxn = qm[0]
-    let maxv = s.q.qv - s.qt.qv + c.qv.qv
-    if (maxv <= 0) maxv = c.qv.qv
-    if (maxv > qm[1]) maxv = qm[1]
-    let maxc = s.q.qc - s.qt.qc + c.qv.qc
-    if (maxc <= 0) maxc = c.qv.qc
-    if (maxc > qm[2]) maxn = qm[2]
-    quotas.value = { 
-      qn: c.qv.qn, 
-      qv: c.qv.qv, 
-      qc: c.qv.qc, 
-      minn: 0, minv: 0, minc: 0,
-      maxn, maxv, maxc,
-      n: c.qv.nn + c.qv.nc + c.qv.ng, 
-      v: c.qv.v,
-      err: ''
-    }
-  }
+  if (estA.value) await setQuotasA()
+  else await setQuotasP()
   ui.oD('PTedq', idc)
 }
 
 async function validerq () {
   await new SetQuotas().run(session.compteId, quotas.value)
+  ui.fD()
+}
+
+async function setQuotasP () {
+  await new GetCompta().run()
+  const c = session.compta.compteurs.qv
+  const qm = cfg.quotasMaxC
+  await new GetPartition().run(session.compte.idp)
+  const s = session.partition.synth
+  let maxn = s.q.qn - s.qt.qn + c.qn
+  if (maxn <= 0) maxn = c.qv.qn
+  if (maxn > qm[0]) maxn = qm[0]
+  let maxv = s.q.qv - s.qt.qv + c.qv
+  if (maxv <= 0) maxv = c.qv
+  if (maxv > qm[1]) maxv = qm[1]
+  let maxc = s.q.qc - s.qt.qc + c.qc
+  if (maxc <= 0) maxc = c.qc
+  if (maxc > qm[2]) maxn = qm[2]
+  quotas.value = { 
+    qn: c.qn, 
+    qv: c.qv, 
+    qc: c.qc, 
+    minn: 0, minv: 0, minc: 0,
+    maxn, maxv, maxc,
+    n: c.nn + c.nc + c.ng, 
+    v: c.v,
+    err: ''
+  }
+}
+
+async function setQuotasA () {
+  await new GetCompta().run()
+  const c = session.compta.compteurs.qv
+  const qm = cfg.quotasMaxC
+  await new GetSynthese().run()
+  const synth = session.synthese
+  const qA = synth.qA
+  const qtA = synth.qtA
+  let maxn = qA.qn - qtA.qn
+  if (maxn < 0) maxn = 0
+  if (maxn > qm[0]) maxn = qm[0]
+  let maxv = qA.qv - qtA.qv
+  if (maxv < 0) maxv = 0
+  if (maxv > qm[1]) maxv = qm[1]
+  // let maxc = qA.qc - qtA.qc + c.qv.qc
+  // if (maxc <= 0) maxc = c.qv.qc
+  // if (maxc > qm[2]) maxn = qm[2]
+  const maxc = qm[2]
+  quotas.value = {
+    qn: c.qn > maxn ? maxn : c.qn, 
+    qv: c.qv > maxv ? maxv : c.qv, 
+    qc: c.qc > maxc ? maxc : c.qc, 
+    minn: 0, minv: 0, minc: 0,
+    maxn, maxv, maxc,
+    n: c.nn + c.nc + c.ng, 
+    v: c.v,
+    err: ''
+  }
+}
+
+async function muterA () {
+  await setQuotasA()
+  cf.value = false
+  ui.oD('PCmuta', idc)
+}
+
+async function mutA () {
+  await new MuterCompteAauto().run(quotas.value)
+  await new GetSynthese().run()
   ui.fD()
 }
 

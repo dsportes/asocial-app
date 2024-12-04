@@ -9,23 +9,25 @@
         <bouton-help page="chat_maj"/>
       </q-toolbar>
       <q-toolbar inset v-if="!zombi" class="bg-secondary text-white">
-        <div class="row q-gutter-sm">
+        <div v-if="racE || racI || dispE" class="row q-gutter-sm">
           <div v-if="racE" class="msg">{{$t('CHraccroche2', [cvE.nom])}}</div>
           <div v-if="racI" class="msg">{{$t('CHraccroche')}}</div>
           <div v-if="dispE" class="msg2 titre-lg">{{$t('disparu')}}</div>
         </div>
+        <div v-if="chatX.mutI" class="msg">{{$t('CHmutI', [cvE.nom, chatX.mutI === 2 ? 'A' : 'O'])}}</div>
+        <div v-if="chatX.mutE" class="msg">{{$t('CHmutE', [cvE.nom, chatX.mutE === 2 ? 'A' : 'O'])}}</div>
       </q-toolbar>
       <div v-if="!zombi">
         <apercu-genx v-if="!dispE" class="bordb" :id="chatX.idE" :idx="0" />
-        <div :class="sty() + 'q-pa-xs row justify-between items-center'">
-          <div v-if="chatX.stE !== 2" class="row q-gutter-xs items-center">
-            <btn-cond :label="$t('CHadd1')" icon="add" @ok="editer(false)"
-              :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
-            <btn-cond :label="$t('CHadd2')" icon="savings"
-              @ok="editer(true)" :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
-          </div>
-          <btn-cond v-if="!racI" :label="$t('CHrac')" icon="phone_disabled" @ok="raccrocher()"
-            :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
+        <div :class="sty() + 'q-pa-xs row q-gutter-xs items-center'">
+          <btn-cond v-if="chatX.stE !== 2" :label="$t('CHadd1')" icon="add"
+            @ok="editer(false)" :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
+          <btn-cond v-if="chatX.stE !== 2"  :label="$t('CHadd2')" icon="savings"
+            @ok="editer(true)" :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
+          <btn-cond v-if="!racI" :label="$t('CHrac')" icon="phone_disabled" 
+            @ok="raccrocher()" :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
+          <btn-cond v-if="chatX.stE !== 2"  :label="$t('CHmutb')" color="warning" icon="settings"
+            @ok="ovMut()" :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
         </div>
       </div>
     </q-header>
@@ -51,6 +53,57 @@
         </div>
       </q-card>
     </q-page-container>
+
+    <!-- Gestion des mutations -->
+    <q-dialog v-model="ui.d[idc].mutation">
+      <q-card :class="styp('sm')">
+        <q-card-section v-if="chatX.mutI" class="q-pa-md fs-md">
+          <div class="titre-lg">{{$t('CHmutI', [cvE.nom, chatX.mutI === 2 ? 'A' : 'O'])}}</div>
+          <div class="row items-center q-gutter-sm justify-end">
+            <btn-cond :label="$t('CHmuts', [cvE.nom, chatX.mutI === 2 ? 'A' : 'O'])" color="warning" icon="close"
+              @ok="cfI = true"/>
+            <bouton-confirm :actif="cfI" :confirmer="delMutI"/>
+          </div>
+        </q-card-section>
+
+        <q-card-section v-if="!chatX.mutI && session.estA" class="q-pa-md fs-md">
+          <div v-if="!stE.del">{{$t('CHmutn1', [cvE.nom])}}</div>
+          <div class="row items-center q-gutter-sm justify-end">
+            <btn-cond :label="$t('CHmutd', [cvE.nom, 'A'])" color="warning" icon="check"
+              @ok="cfA = true"/>
+            <bouton-confirm :actif="cfA" :confirmer="demMutA"/>
+          </div>
+        </q-card-section>
+
+        <q-card-section v-if="!chatX.mutI && !session.estA" class="q-pa-md fs-md">
+          <div v-if="!stE.del || stE.idp !== sesion.compte.idp">{{$t('CHmutn2', [cvE.nom])}}</div>
+          <div class="row items-center q-gutter-sm justify-end">
+            <btn-cond :label="$t('CHmutd', [cvE.nom, 'O'])" color="warning" icon="check"
+              @ok="cfO = true"/>
+            <bouton-confirm :actif="cfO" :confirmer="demMutO"/>
+          </div>
+        </q-card-section>
+
+        <q-card-section v-if="chatX.mutE === 2" class="q-pa-md fs-md"><!-- il est O -->
+          <div class="titre-lg">{{$t('CHmutE', [cvE.nom, 'A'])}}</div>
+          <div v-if="!session.compte.del">{{$t('CHmutr1')}}</div>
+          <div v-if="session.compte.del && session.compte.idp !== stE.idp">{{$t('CHmutr2', [cvE.nom])}}</div>
+          <btn-cond :label="$t('CHmutd', [cvE.nom, 'A'])" color="warning" icon="check"
+            @ok="mutA"/>
+        </q-card-section>
+
+        <q-card-section v-if="chatX.mutE === 1" class="q-pa-md fs-md"><!-- il est A -->
+          <div class="titre-lg">{{$t('CHmutE', [cvE.nom, 'O'])}}</div>
+          <div v-if="!session.compte.del">{{$t('CHmutr1')}}</div>
+          <btn-cond :label="$t('CHmutd', [cvE.nom, 'O'])" color="warning" icon="check"
+            @ok="mutO"/>
+        </q-card-section>
+
+        <q-card-actions align="center">
+          <btn-cond flat :label="$t('jailu')" @ok="ui.fD"/>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
 
     <!-- Confirmation d'effacement d'un échange -->
     <q-dialog v-model="ui.d[idc].ACconfirmeff">
@@ -91,19 +144,22 @@
         </q-toolbar>
         <q-toolbar v-if="avecDon" inset class="bg-secondary text-white">
           <q-toolbar-title class="row justify-center items-center q-gutter-md">
-            <div class="titre-md text-bold">{{$t('CHmdon')}}</div>
-            <q-select :options="cfg.dons2" size="md" v-model="mdon" dense color="white"/>
-            <q-checkbox class="titre-md text-bold" size="md" dense 
-              left-label v-model="dconf" :label="$t('CHcdon')" />
+            <div v-if="stE.cpt">
+              <div class="titre-md text-bold">{{$t('CHmdon')}}</div>
+              <q-select :options="cfg.dons2" size="md" v-model="mdon" dense color="white"/>
+              <q-checkbox class="titre-md text-bold" size="md" dense 
+                left-label v-model="dconf" :label="$t('CHcdon')" />
+            </div>
+            <div v-else class="msg">{{$t('CHdoncpt')}}</div>
           </q-toolbar-title>
         </q-toolbar>
-        <div v-if="avecDon && (mdon + 2 > solde)" class="msg text-bold">{{$t('CHcred', [solde, mdon])}}</div>
+        <div v-if="avecDon && stE.cpt && (mdon + 2 > solde)" class="msg text-bold">{{$t('CHcred', [solde, mdon])}}</div>
         <editeur-md mh="20rem" v-model="txt" :texte="''" editable modetxt/>
         <q-card-actions align="right" class="q-gutter-sm">
           <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
           <btn-cond icon="add" :cond="ui.urgence ? 'cUrgence' : 'cEdit'"
             :label="$t('valider')"
-            :disable="avecDon && mdon > solde + 2"
+            :disable="avecDon && stE.cpt && (mdon > solde + 2)"
             @ok="addop"/>
         </q-card-actions>
       </q-card>
@@ -120,7 +176,7 @@
   import stores from '../stores/stores.mjs'
 
   import { styp, sty, dhcool, dkli, afficherDiag, $q } from '../app/util.mjs'
-  import { GetCompta, MajChat, PassifChat } from '../app/operations4.mjs'
+  import { GetCompta, MajChat, PassifChat, StatutChatE } from '../app/operations4.mjs'
   import { ID } from '../app/api.mjs'
 
   import SdBlanc from '../components/SdBlanc.vue'
@@ -128,6 +184,7 @@
   import ApercuGenx from '../components/ApercuGenx.vue'
   import BoutonHelp from '../components/BoutonHelp.vue'
   import BtnCond from '../components/BtnCond.vue'
+  import BoutonConfirm from '../components/BoutonConfirm.vue'
 
   const props = defineProps({ 
     id: String, 
@@ -141,6 +198,10 @@
   const session = stores.session
   const cfg = stores.config
   const pSt = stores.people
+
+  const cfI = ref(false)
+  const cfA = ref(false)
+  const cfO = ref(false)
 
   const chatX = computed(() => aSt.getChat(props.id, props.ids))
   const zombi = computed(() => !chatX.value )
@@ -159,6 +220,11 @@
   const mdon = ref(cfg.dons2[0])
   const dheff = ref(0)
   const solde = ref(0)
+  const stE = ref(null)
+
+  async function getStE () {
+    stE.value = new StatutChatE().run(chatX.value.ids)
+  }
 
   async function effacer (dh) {
     dheff.value = dh
@@ -175,8 +241,8 @@
 
   async function addop () {
     ui.fD()
-    const don = avecDon.value ? mdon.value : 0
-    const t = (avecDon.value && !dconf.value ? ($t('CHdonde', [mdon.value]) + '\n') : '') + txt.value
+    const don = avecDon.value && stE.value.cpt ? mdon.value : 0
+    const t = (don ? ($t('CHdonde', [don]) + '\n') : '') + txt.value
     const disp = await new MajChat().run(chatX.value, t, 0, don, props.urgence)
     if (disp) { await afficherDiag($t('CHdisp')) }
     txt.value = ''
@@ -190,18 +256,65 @@
 
   async function editer (avecD) {
     if (avecD) { 
+      await getStE ()
       dconf.value = false
       await session.reloadCompta()
       solde.value = session.compta.compteurs.soldeCourant
+      avecDon.value = true
+    } else {
+      avecDon.value = false
     }
     txt.value = chatX.value ? chatX.value.txt : ''
-    avecDon.value = avecD
     ui.oD('ACchatedit', idc)
   }
 
   async function raccrocher () {
     txt.value = ''
     ui.oD('ACconfirmrac', idc)
+  }
+
+  async function ovMut () {
+    if (props.id !== session.compteId) {
+      await afficherDiag($t('CHmute'))
+      return
+    }
+    await getStE()
+    if (!stE.value || !stE.value.cpt) {
+      await afficherDiag($t('CHmute'))
+      return
+    }
+    cfI.value = false
+    cfA.value = false
+    cfO.value = false
+    this.ui.oD('mutation', idc)
+  }
+
+  async function delMutI () {
+    ui.fD()
+    console.log('delMutI')
+    await new MutChat().run(chatX.value, 0)
+  }
+
+  async function demMutA () {
+    ui.fD()
+    console.log('demMutA')
+    await new MutChat().run(chatX.value, 2)
+  }
+
+  async function demMutO () {
+    ui.fD()
+    console.log('demMutO')
+    await new MutChat().run(chatX.value, 1)
+  }
+
+  async function mutA () {
+    ui.fD()
+    console.log('mutA')
+  }
+
+  async function mutO () {
+    ui.fD()
+    console.log('mutO')    
   }
 
 </script>
