@@ -3,33 +3,33 @@
   <q-header elevated>
     <q-toolbar class="full-width">
 
-      <btn-cond v-if="session.ok && !session.mini && (session.ral !== 3)"
+      <btn-cond v-if="!session.estAdmin && session.ok"
         icon="menu" round color="none">
         <q-menu v-model="ui.menug" max-height="90vh" class="sombre1 text-white">
           <menu-accueil menu/>
         </q-menu>
       </btn-cond>
 
-      <btn-cond :disable="!aHome" flat icon="home"
+      <btn-cond v-if="!session.estAdmin && session.ok" :disable="!aHome" flat icon="home"
         :color="aHome ? 'green-5' : 'grey'" @ok="gotoAccueilLogin()"/>
 
-      <btn-cond :disable="!ui.pageback || (ui.page === 'accueil')" icon="arrow_back" round @ok="ui.gotoBack()"/>
+      <btn-cond v-if="!session.estAdmin && session.ok" :disable="!ui.pageback || (ui.page === 'accueil')" icon="arrow_back" round @ok="ui.gotoBack()"/>
 
       <btn-cond v-if="session.ok && !session.avion && !session.estAdmin" 
         :color="session.statusPushIC.c" :icon="session.statusPushIC.ic" @ok="ouvSync">
         <q-badge v-if="hb.nbRetry" color="negative" class="text-white text-bold font-mono">{{hb.nbRetry}}</q-badge>
       </btn-cond>
 
-      <btn-cond v-if="!session.ok" :color="session.statusPermIC.c" :icon="session.statusPermIC.ic"/>
+      <btn-cond v-if="!session.ok && !session.estAdmin" :color="session.statusPermIC.c" :icon="session.statusPermIC.ic"/>
 
       <!-- Notifications -->
-      <icon-alerte v-if="session.status === 2" class="q-ml-xs" 
+      <icon-alerte v-if="session.status === 2 && !session.estAdmin" class="q-ml-xs" 
         :alire="session.alire && (session.nivAlerte !== 0)" 
         :niv="session.nivAlerte" 
         @click="clickAlertes"/>
       
       <!-- Presse papier -->
-      <btn-cond v-if="session.ok && (!session.hasAR || session.estComptable)" 
+      <btn-cond v-if="session.ok && !session.estAdmin && (!session.hasAR || session.estComptable)" 
         icon="content_paste" round 
         @ok="ui.oD('pressepapier', 'a')">
         <q-tooltip>{{$t('MLApp')}}</q-tooltip>
@@ -46,19 +46,17 @@
         </div>
       </q-toolbar-title>
 
-      <btn-cond v-if="session.ok && ui.aUnFiltre" 
+      <btn-cond v-if="session.ok && !session.estAdmin && ui.aUnFiltre" 
         color="warning" round icon="search" @ok="ui.ouvrFiltre">
         <q-tooltip>{{$t('MLAfiltre')}}</q-tooltip>
       </btn-cond>
 
       <bouton-help :page="'page_' + ui.page"/>
 
-      <!-- Déconnexion
-      <btn-cond v-if="session.status > 1" color="warning" icon="logout" 
+      <btn-cond v-if="session.estAdmin" color="warning" icon="logout" 
         @ok="discon" round>
         <q-tooltip>{{$t('MLAdrc')}}</q-tooltip>
       </btn-cond>
-      -->
 
       <q-page-sticky v-if="session.signalOp" position="top" :offset="offset"
         style="z-index:1000!important">

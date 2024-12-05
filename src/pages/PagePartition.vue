@@ -1,26 +1,29 @@
 <template>
   <div v-if="p">
-    <q-expansion-item v-if="session.estDelegue || session.estComptable"
-      class="q-ml-xl q-mt-xs q-mb-lg" header-class="bg-primary text-white" 
-      switch-toggle-side expand-separator dense>
-      <template v-slot:header>
-        <div class="full-width titre-md text-bold">{{$t('TUpart', [session.codePart(p.id)])}}</div>
-      </template>
-      <div>
-        <div class="row items-end">
-          <div class="col-4 trc">{{$t('PEnbde')}}</div>
-          <div class="col-1 trc text-center">{{$t('PEnbdec')}}</div>
-          <div class="col-1 trc text-center">{{$t('PEnbded')}}</div>
-          <synth-hdrs class="col-6" v-model="igp"/>
+    <div class="row q-mt-xs q-mb-lg">
+      <btn-cond class="col-auto q-mr-sm self-start" icon="refresh" @ok="reload()"/>
+      <q-expansion-item v-if="session.estDelegue || session.estComptable"
+        class="col" header-class="bg-primary text-white" 
+        switch-toggle-side expand-separator dense>
+        <template v-slot:header>
+          <div class="full-width titre-md text-bold">{{$t('TUpart', [session.codePart(p.id)])}}</div>
+        </template>
+        <div>
+          <div class="row items-end">
+            <div class="col-4 trc">{{$t('PEnbde')}}</div>
+            <div class="col-1 trc text-center">{{$t('PEnbdec')}}</div>
+            <div class="col-1 trc text-center">{{$t('PEnbded')}}</div>
+            <synth-hdrs class="col-6" v-model="igp"/>
+          </div>
+          <synth-ligne :igp="igp" :idx="0" :lg="lg"/>
+
+          <apercu-notif class="q-my-sm" :editable="session.estComptable || session.estDelegue"
+            :notif="ntfp" :type="1" :cible="p.id"/>
         </div>
-        <synth-ligne :igp="igp" :idx="0" :lg="lg"/>
+      </q-expansion-item>
+      <div v-else class="col p-px-xs fs-md bg-primary text-white q-my-xs">{{$t('TUpart', [session.codePart(p.id)])}}</div>
+    </div>
 
-        <apercu-notif class="q-my-sm" :editable="session.estComptable || session.estDelegue"
-          :notif="ntfp" :type="1" :cible="p.id"/>
-      </div>
-    </q-expansion-item>
-
-    <div v-else class="q-ml-xl p-px-xs fs-md bg-primary text-white q-my-xs">{{$t('TUpart', [session.codePart(p.id)])}}</div>
 
     <q-toolbar class="bg-secondary text-white">
       <q-toolbar-title class="titre-md q-ma-xs">{{$t('PTtit' + (session.pow === 4 ? '1' : '2'))}}</q-toolbar-title>          
@@ -87,10 +90,6 @@
     </q-dialog>
   </div>
   <div v-else class="titre-lg text-italic full-width text-center">{{$t('TUnopart')}}</div>
-
-  <q-page-sticky position="top-left" :offset="[3, 3]">
-    <btn-cond icon="refresh" @ok="reload()"/>
-  </q-page-sticky>
 
 </template>
 

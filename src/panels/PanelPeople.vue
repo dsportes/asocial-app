@@ -15,16 +15,8 @@
 
       <div class="row q-gutter-sm items-center">
         <btn-cond v-if="comptaVis" cond="cUrgence" :label="$t('PPcompta')" @ok="voirCompta"/>
-        <btn-cond v-if="estA && session.estDelegue" 
-          color="warning" icon="change_history"
-          cond="cEdit" class="justify-start" @ok="muterO"
-          :label="$t('PPmuterO')">
-          <q-tooltip>{{$t('PPmutO')}}</q-tooltip>
-        </btn-cond>
       </div>
-
-      <!--barre-people v-if="session.estComptable || session.estDelegue" :id="id"/-->
-
+      
       <q-separator color="orange" class="q-my-md q-mx-sm"/>
 
       <chats-avec :id-e="id" :del="del"/>
@@ -44,45 +36,6 @@
     </div>
   
   </q-page-container>
-
-  <!-- Mutation de type de compte en "O" -->
-  <q-dialog v-model="ui.d[idc].BPmutO" persistent>
-    <q-card :class="styp('md')">
-      <q-toolbar class="bg-secondary text-white">
-        <btn-cond color="warning" icon="close" @ok="ui.fD"/>
-        <q-toolbar-title class="titre-lg text-center q-mx-sm">
-          {{$t('PPmutO')}}
-        </q-toolbar-title>
-        <bouton-help page="page1"/>
-      </q-toolbar>
-
-      <micro-chat class="q-pa-xs q-my-md" :chat="chat"/>
-      
-      <q-card-section>
-        <phrase-contact @ok="okpc" :orgext="session.org" declaration/>
-        <div v-if="diag" class="q-ma-sm q-pa-xs bg-yellow-3 text-negative text-bold">{{diag}}</div>
-      </q-card-section>
-      
-      <choix-quotas v-model="quotasO"/>
-      <div v-if="quotasO.err" class="bg-yellow-5 text-bold text-black q-pa-xs">
-        {{$t('PPquot')}}
-      </div>
-
-      <q-card-section>
-        <div class="titre-md">{{$t('PPmutmc')}}</div>
-        <editeur-md
-          v-model="texte" :lgmax="250" modetxt editable mh="6rem"
-          :texte="txtdefO"/>
-      </q-card-section>
-
-      <q-card-actions class="q-pa-xs q-mt-sm q-gutter-sm" align="center" vertical>
-        <btn-cond icon="undo" flat :label="$t('renoncer')" @ok="ui.fD"/>
-        <btn-cond :disable="(diag !== '') || quotasO.err || !pc" color="warning" icon="change_history" 
-          cond="cUrgence" :label="$t('PPmutO')" @ok="cf=true"/>
-        <bouton-confirm :actif="cf" :confirmer="mutO"/>
-      </q-card-actions>
-    </q-card>
-  </q-dialog>
 
   <!-- Affichage des compteurs de compta du compte "courant"-->
   <q-dialog v-model="ui.d[idc].BPcptdial" position="left" persistent>
@@ -141,13 +94,8 @@ const comptaVis = computed(() => id.value !== session.sessionId &&
 const sgr = computed(() => pSt.getSgr(id.value))
 const compta = ref(null)
 const cf = ref(false)
-const quotasO = ref({}) // { q1) q2) qc) min1) min2) max1) max2) minc) maxc) err}
-const diag = ref('')
-const pc = ref(null)
-const texte = ref('')
-const txtdefO = computed(() => $t('PPmsgo', [session.partition.id]))
-const estA = computed(() => compta.value && compta.value.estA)
-const chat = computed(() => aSt.getChatIdIE(session.compteId, id.value))
+
+// const chat = computed(() => aSt.getChatIdIE(session.compteId, id.value))
 
 const del = computed(() => { 
   const p = session.partition
@@ -171,57 +119,6 @@ function voirgr (idg) {
   session.setGroupeId(idg)
   session.setMembreId(im.value(idg))
   ui.setPage('groupe', 'membres')
-}
-
-async function okpc (p) {
-  pc.value = p
-  const idx = await new GetAvatarPC().run(p)
-  diag.value = id.value !== idx ? $t('PPmutpc') : ''
-}
-
-/* Un compte A est muté en O DANS LA PARTITION DU DELEGUE
-donc Primitive si c'est le Comptable */
-async function muterO () {
-  if (!chat.value) {
-    await afficherDiag($t('PPchatreq'))
-    return
-  }
-  const c = await new GetComptaQv().run(id.value)
-  await new GetPartition().run(session.partition.id)
-  const qp = session.partition.q
-  const qa = session.partition.synth.qt
-  const qm = cfg.quotasMaxC
-  let maxn = qp.qn - qa.qn
-  if (maxn < 0) maxn = 0
-  if (maxn > qm[0]) maxn = qm[0]
-  let maxv = qp.qv - qa.qv
-  if (maxv < 0) maxv = 0
-  if (maxv > qm[1]) maxv = qm[1]
-  let maxc = qp.qc - qa.qc
-  if (maxc < 0) maxc = 0
-  if (maxc > qm[2]) maxn = qm[2]
-  quotasO.value = {
-    qn: c.qn > maxn ? maxn : c.qn, 
-    qv: c.qv > maxv ? maxv : c.qv, 
-    qc: c.qc > maxc ? maxc : c.qc, 
-    minn: 0, minv: 0, minc: 0,
-    maxn, maxv, maxc,
-    n: c.nn + c.nc + c.ng, 
-    v: c.v,
-    err: ''
-  }
-  cf.value = false
-  diag.value = $t('PPmutpc2')
-  ui.oD('BPmutO', idc)
-}
-
-async function mutO () {
-  await new MuterCompteO().run(id.value, quotasO.value, chat.value, 
-    texte.value || txtdefO.value, pc.value)
-  pc.value = null
-  await new GetPartition().run(session.partition.id)
-  await new GetSynthese().run()
-  ui.fD()
 }
 
 </script>

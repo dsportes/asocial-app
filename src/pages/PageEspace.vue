@@ -42,7 +42,7 @@
         <span class="titre-md q-mr-md">{{$t('PIqa')}}</span>
         <btn-cond round icon="edit"  @ok="editerqA()"/>
       </div>
-      <quotas-vols class="q-ml-md" noutil groupe :vols="session.synthese.qA"/>
+      <quotas-vols class="q-ml-md" noutil :vols="session.synthese.qA"/>
     </div>
 
     <div class="q-my-sm">
@@ -71,7 +71,7 @@
           <btn-cond color="warning" icon="close" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTquta')}}</q-toolbar-title>
         </q-toolbar>
-        <choix-quotas class="q-mt-sm" v-model="quotasA" groupe/>
+        <choix-quotas class="q-mt-sm" v-model="quotasA"/>
         <q-card-actions align="right" class="q-gutter-sm">
           <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
           <btn-cond :disable="quotasA.err || !quotasA.chg" icon="check" cond="cUrgence"
@@ -92,7 +92,7 @@
         <choix-quotas v-model="quotasP" />
         <q-card-actions align="right" class="q-gutter-sm">
           <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
-          <btn-cond color="warning" icon="add" :disable="!nom || quotasP.err" 
+          <btn-cond color="warning" icon="add" :disable="!nom || quotasP.err !== ''" 
             :label="$t('valider')" @ok="creer"/>
         </q-card-actions>
       </q-card>
@@ -227,12 +227,25 @@ async function dlstat2 () {
 async function ovnvPart () { 
   nom.value = ''
   const qm = cfg.quotasMaxP
+  const synth = session.synthese
+  const q = synth.qA // quotas actuels réservés aux comptes "A"
+  const qpt = synth.tsp['0'].q
+  const qe = session.espace.quotas
+  const rqn = qe.qn - qpt.qn
+  let maxn = rqn < 0 ? 0 : rqn
+  if (maxn > qm[0]) maxn = qm[0]
+  const rqv = qe.qv - qpt.qv
+  let maxv = rqv < 0 ? 0 : rqv
+  if (maxv > qm[1]) maxv = qm[1]
+  const rqc = qe.qc - qpt.qc
+  let maxc = rqc < 0 ? 0 : rqc
+  if (maxc > qm[2]) maxC = qm[2]
   quotasP.value = { 
-    qc: 1, qn: 1, qv: 1, 
+    qc: 0, qn: 0, qv: 0,
     minc: 0, minn: 0, minv: 0,
-    maxn: qm[0], maxv: qm[1], maxc: qm[2], 
+    maxc, maxn, maxv,
     n: 0, v: 0,
-    err: false
+    err: ''
   }
   ui.oD('PEnt', idc)
 }

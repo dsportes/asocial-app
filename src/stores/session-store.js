@@ -11,7 +11,7 @@ import { crypter, decrypter } from '../app/webcrypto.mjs'
 import { u8ToB64, $t } from '../app/util.mjs'
 import { AMJ, ID, AppExc, A_SRV, AL } from '../app/api.mjs'
 import { RegCles, Notification as MaNotification } from '../app/modele.mjs'
-import { GetPartition, GetCompta } from '../app/operations4.mjs'
+import { GetPartition, GetCompta, GetSynthese } from '../app/operations4.mjs'
 
 export const useSessionStore = defineStore('session', {
   state: () => ({
@@ -420,6 +420,64 @@ export const useSessionStore = defineStore('session', {
     async reloadCompta () {
       await new GetCompta().run()
       if (!this.estA) await new GetPartition().run(this.compte.idp)
+    },
+
+    async getQuotasP () {
+      await new GetCompta().run()
+      const c = this.compta.compteurs.qv
+      const qm = this.config.quotasMaxC
+      await new GetPartition().run(this.compte.idp)
+      const s = this.partition.synth
+      let maxn = s.q.qn - s.qt.qn + c.qn
+      if (maxn <= 0) maxn = c.qv.qn
+      if (maxn > qm[0]) maxn = qm[0]
+      let maxv = s.q.qv - s.qt.qv + c.qv
+      if (maxv <= 0) maxv = c.qv
+      if (maxv > qm[1]) maxv = qm[1]
+      let maxc = s.q.qc - s.qt.qc + c.qc
+      if (maxc <= 0) maxc = c.qc
+      if (maxc > qm[2]) maxn = qm[2]
+      return { 
+        qn: c.qn, 
+        qv: c.qv, 
+        qc: c.qc, 
+        minn: 0, minv: 0, minc: 0,
+        maxn, maxv, maxc,
+        n: c.nn + c.nc + c.ng, 
+        v: c.v,
+        err: ''
+      }
+    },
+
+    async getQuotasA () {
+      await new GetCompta().run()
+      const c = this.compta.compteurs.qv
+      const qm = this.config.quotasMaxC
+      await new GetSynthese().run()
+      const synth = this.synthese
+      const qA = synth.qA
+      const qtA = synth.qtA
+      let maxn = qA.qn - qtA.qn
+      if (maxn < 0) maxn = 0
+      if (maxn > qm[0]) maxn = qm[0]
+      let maxv = qA.qv - qtA.qv
+      if (maxv < 0) maxv = 0
+      if (maxv > qm[1]) maxv = qm[1]
+      // let maxc = qA.qc - qtA.qc + c.qv.qc
+      // if (maxc <= 0) maxc = c.qv.qc
+      // if (maxc > qm[2]) maxn = qm[2]
+      const maxc = qm[2]
+      return {
+        qn: c.qn > maxn ? maxn : c.qn, 
+        qv: c.qv > maxv ? maxv : c.qv, 
+        qc: c.qc > maxc ? maxc : c.qc, 
+        minn: 0, minv: 0, minc: 0,
+        maxn, maxv, maxc,
+        n: c.nn + c.nc + c.ng, 
+        v: c.v,
+        err: ''
+      }
     }
+        
   }
 })

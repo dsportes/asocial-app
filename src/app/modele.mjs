@@ -471,10 +471,8 @@ _data_ :
 - `id` : ID du compte = ID de son avatar principal.
 - `v` : 1..N.
 - `hk` : `hXR`, hash du PBKFD d'un extrait de la phrase secrète (en base précédé de `ns`).
-- `dlv`: date limite de validité, dernier jour d'un mois,
-  le compte peut être détruit dès le lendemain.
+- `dlv` : dernier jour de validité du compte.
 
-- `flags`: flags issus du dernier calcul des compteurs de compta.
 - `dharF dhopf dharC dhopC dharS dhopS`: dh des ACCES RESTREINT (F, C, S).
 
 - `vpe` : version du périmètre
@@ -487,7 +485,22 @@ _data_ :
 - `privK` : clé privée RSA de son avatar principal cryptée par la clé K du compte.
 
 - `dhvuK` : date-heure de dernière vue des notifications par le titulaire du compte, cryptée par la clé K.
-- `qv` : qv de compta.compteurs.qv (à quelques % près)
+- `qv` : `{ qc, qn, qv, nn, nc, ng, v, cjm }`. Recopiés de `compta.compteurs.qv` en fin d'opération quand l'un d'eux passe un seuil de 5% (sans seuil pour `qc, qn, qv`), à la montée ou à la descente.
+  - `qc`: limite de consommation
+  - `qn`: quota du nombre total de notes / chats / groupes.
+  - `qv`: quota du volume des fichiers.
+  - `nn`: nombre de notes existantes.
+  - `nc`: nombre de chats existants.
+  - `ng` : nombre de participations aux groupes existantes.
+  - `v`: volume effectif total des fichiers
+  - `cjm`: coût journalier moyen de calcul sur M et M-1.
+- `flags` : flags courants. Recopiés de `compta.compteurs.flags` en fin d'opération en cas de changement.
+  - `RAL` : ralentissement (excès de calcul / quota)
+  - `NRED` : documents en réduction (excès de nombre de documents / quota)
+  - `VRED` : volume de fichiers en réduction (excès de volume / quota)
+  - `ARSN` : accès restreint pour solde négatif
+
+- `lmut` : liste des `ids` des chats pour lesquels le compte (son avatar principal) a une demande de mutation (`mutI` != 0)
 
 _Comptes "O" seulement:_
 - `clePK` : clé P de la partition cryptée par la clé K du compte. Si cette clé a une longueur de 256, la clé P a été cryptée par la clé publique de l'avatar principal du compte suite à une affectation à une partition APRÈS sa création (changement de partition, passage de compte A à O)
@@ -501,7 +514,7 @@ _Comptes "O" seulement:_
 
 - `mpg` : map des participations aux groupes:
   - _clé_ : ID du groupe
-  - _valeur_: `{ cleGK, lav }` - compilé en Set des IDs des avatars.
+  - _valeur_: `{ cleGK, lav }`
     - `cleGK` : clé G du groupe cryptée par la clé K du compte.
     - `lav`: liste de ses avatars participant au groupe.
 
@@ -864,13 +877,19 @@ export class Ticket extends GenDoc {
 /** Chat ************************************************************
 _data_ (de l'exemplaire I):
 - `id`: id de I,
-- `ids`: à la création calculé par hash du cryptage par la clé du site de `idI / idE`.
+- `ids`: aléatoire.
 - `v`: 1..N.
 - `vcv` : version de la carte de visite de E.
 
 - `st` : deux chiffres `I E`
   - I : 0:indésirable, 1:actif
   - E : 0:indésirable, 1:actif, 2:disparu
+- `mutI` :
+  - 1 - I a demandé à E de le muter en compte "O"
+  - 2 - I a demandé à E de le muter en compte "A"
+- `mutE` :
+  - 1 - E a demandé à I de le muter en compte "O"
+  - 2 - E a demandé à I de le muter en compte "A"
 - `idE idsE` : identifiant de _l'autre_ chat.
 - `cvE` : `{id, v, ph, tx}` carte de visite de E au moment de la création / dernière mise à jour du chat (textes cryptés par sa clé A).
 - `cleCKP` : clé C du chat cryptée,
@@ -893,6 +912,8 @@ export class Chat extends GenDoc {
     this.st = row.st
     this.idE = row.idE
     this.idsE = row.idsE
+    this.mutI = row.mutI
+    this.mutE = row.mutE
 
     this.cleCKP = row.cleCKP
     this.clec = await RegCc.get(this)

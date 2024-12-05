@@ -129,7 +129,7 @@
 import { ref, computed, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
-import { GetSynthese, GetPartition, GetCompta, NouvelAvatar, ChangementPS, MuterCompteAauto } from '../app/operations4.mjs'
+import { GetSynthese, NouvelAvatar, ChangementPS, MuterCompteAauto } from '../app/operations4.mjs'
 import { SetQuotas } from '../app/operations4.mjs'
 import { ExistePhrase } from '../app/operations4.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -143,7 +143,6 @@ import { $t, styp, afficherDiag } from '../app/util.mjs'
 import { isAppExc, ID } from '../app/api.mjs'
 
 const session = stores.session
-const cfg = stores.config
 const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 const aSt = stores.avatar
@@ -227,8 +226,7 @@ async function oknom (nom) {
 }
 
 async function editerq () {
-  if (estA.value) await setQuotasA()
-  else await setQuotasP()
+  quotas.value = estA.value ? await session.getQuotasA() : await session.getQuotasP()
   ui.oD('PTedq', idc)
 }
 
@@ -237,65 +235,8 @@ async function validerq () {
   ui.fD()
 }
 
-async function setQuotasP () {
-  await new GetCompta().run()
-  const c = session.compta.compteurs.qv
-  const qm = cfg.quotasMaxC
-  await new GetPartition().run(session.compte.idp)
-  const s = session.partition.synth
-  let maxn = s.q.qn - s.qt.qn + c.qn
-  if (maxn <= 0) maxn = c.qv.qn
-  if (maxn > qm[0]) maxn = qm[0]
-  let maxv = s.q.qv - s.qt.qv + c.qv
-  if (maxv <= 0) maxv = c.qv
-  if (maxv > qm[1]) maxv = qm[1]
-  let maxc = s.q.qc - s.qt.qc + c.qc
-  if (maxc <= 0) maxc = c.qc
-  if (maxc > qm[2]) maxn = qm[2]
-  quotas.value = { 
-    qn: c.qn, 
-    qv: c.qv, 
-    qc: c.qc, 
-    minn: 0, minv: 0, minc: 0,
-    maxn, maxv, maxc,
-    n: c.nn + c.nc + c.ng, 
-    v: c.v,
-    err: ''
-  }
-}
-
-async function setQuotasA () {
-  await new GetCompta().run()
-  const c = session.compta.compteurs.qv
-  const qm = cfg.quotasMaxC
-  await new GetSynthese().run()
-  const synth = session.synthese
-  const qA = synth.qA
-  const qtA = synth.qtA
-  let maxn = qA.qn - qtA.qn
-  if (maxn < 0) maxn = 0
-  if (maxn > qm[0]) maxn = qm[0]
-  let maxv = qA.qv - qtA.qv
-  if (maxv < 0) maxv = 0
-  if (maxv > qm[1]) maxv = qm[1]
-  // let maxc = qA.qc - qtA.qc + c.qv.qc
-  // if (maxc <= 0) maxc = c.qv.qc
-  // if (maxc > qm[2]) maxn = qm[2]
-  const maxc = qm[2]
-  quotas.value = {
-    qn: c.qn > maxn ? maxn : c.qn, 
-    qv: c.qv > maxv ? maxv : c.qv, 
-    qc: c.qc > maxc ? maxc : c.qc, 
-    minn: 0, minv: 0, minc: 0,
-    maxn, maxv, maxc,
-    n: c.nn + c.nc + c.ng, 
-    v: c.v,
-    err: ''
-  }
-}
-
 async function muterA () {
-  await setQuotasA()
+  quotas.value = await session.getQuotasA()
   cf.value = false
   ui.oD('PCmuta', idc)
 }

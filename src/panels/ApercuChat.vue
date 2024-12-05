@@ -26,7 +26,7 @@
             @ok="editer(true)" :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
           <btn-cond v-if="!racI" :label="$t('CHrac')" icon="phone_disabled" 
             @ok="raccrocher()" :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
-          <btn-cond v-if="chatX.stE !== 2"  :label="$t('CHmutb')" color="warning" icon="settings"
+          <btn-cond v-if="id === session.compteId && chatX.stE !== 2"  :label="$t('CHmutb')" color="warning" icon="settings"
             @ok="ovMut()" :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
         </div>
       </div>
@@ -57,50 +57,89 @@
     <!-- Gestion des mutations -->
     <q-dialog v-model="ui.d[idc].mutation">
       <q-card :class="styp('sm')">
-        <q-card-section v-if="chatX.mutI" class="q-pa-md fs-md">
-          <div class="titre-lg">{{$t('CHmutI', [cvE.nom, chatX.mutI === 2 ? 'A' : 'O'])}}</div>
-          <div class="row items-center q-gutter-sm justify-end">
-            <btn-cond :label="$t('CHmuts', [cvE.nom, chatX.mutI === 2 ? 'A' : 'O'])" color="warning" icon="close"
-              @ok="cfI = true"/>
-            <bouton-confirm :actif="cfI" :confirmer="delMutI"/>
-          </div>
+        <q-card-section v-if="chatX.mutI" class="column items-center q-gutter-sm q-pa-md fs-md">
+          <div class="titre-lg text-center">{{$t('CHmutI', [cvE.nom, chatX.mutI === 2 ? 'A' : 'O'])}}</div>
+          <btn-cond :label="$t('CHmuts', [cvE.nom, chatX.mutI === 2 ? 'A' : 'O'])" 
+            color="warning" icon="close" @ok="cfI = true"/>
+          <bouton-confirm :actif="cfI" :confirmer="delMutI"/>
+          <q-separator class="full-width" color="orange"/>
         </q-card-section>
 
-        <q-card-section v-if="!chatX.mutI && session.estA" class="q-pa-md fs-md">
-          <div v-if="!stE.del">{{$t('CHmutn1', [cvE.nom])}}</div>
-          <div class="row items-center q-gutter-sm justify-end">
-            <btn-cond :label="$t('CHmutd', [cvE.nom, 'A'])" color="warning" icon="check"
-              @ok="cfA = true"/>
-            <bouton-confirm :actif="cfA" :confirmer="demMutA"/>
-          </div>
-        </q-card-section>
-
-        <q-card-section v-if="!chatX.mutI && !session.estA" class="q-pa-md fs-md">
-          <div v-if="!stE.del || stE.idp !== sesion.compte.idp">{{$t('CHmutn2', [cvE.nom])}}</div>
-          <div class="row items-center q-gutter-sm justify-end">
+        <q-card-section v-if="!chatX.mutI && session.estA" class="column items-center q-gutter-sm q-pa-md fs-md">
+          <div class="titre-lg text-italic">{{$t('CHmutdm')}}</div>
+          <div v-if="!stE.del" class="text-italic">{{$t('CHmutn1', [cvE.nom])}}</div>
+          <div v-else class="column items-center q-gutter-sm">
             <btn-cond :label="$t('CHmutd', [cvE.nom, 'O'])" color="warning" icon="check"
-              @ok="cfO = true"/>
-            <bouton-confirm :actif="cfO" :confirmer="demMutO"/>
+              @ok="cfA = true"/>
+            <bouton-confirm :actif="cfA" :confirmer="demMutO"/>
           </div>
+          <q-separator class="full-width" color="orange"/>
         </q-card-section>
 
-        <q-card-section v-if="chatX.mutE === 2" class="q-pa-md fs-md"><!-- il est O -->
+        <q-card-section v-if="!chatX.mutI && !session.estA" class="column items-center q-gutter-sm q-pa-md fs-md">
+          <div class="titre-lg text-italic">{{$t('CHmutdm')}}</div>
+          <div v-if="!stE.del || stE.idp !== session.compte.idp" class="text-italic">{{$t('CHmutn2', [cvE.nom])}}</div>
+          <div v-else class="column items-center q-gutter-sm">
+            <btn-cond :label="$t('CHmutd', [cvE.nom, 'A'])" color="warning" icon="check"
+              @ok="cfO = true"/>
+            <bouton-confirm :actif="cfO" :confirmer="demMutA"/>
+          </div>
+          <q-separator class="full-width" color="orange"/>
+        </q-card-section>
+
+        <q-card-section v-if="chatX.mutE === 2" class="column items-center q-gutter-sm q-pa-md fs-md"><!-- il est O -->
           <div class="titre-lg">{{$t('CHmutE', [cvE.nom, 'A'])}}</div>
-          <div v-if="!session.compte.del">{{$t('CHmutr1')}}</div>
+          <div v-if="!session.compte.del" class="text-italic">>{{$t('CHmutr1')}}</div>
           <div v-if="session.compte.del && session.compte.idp !== stE.idp">{{$t('CHmutr2', [cvE.nom])}}</div>
-          <btn-cond :label="$t('CHmutd', [cvE.nom, 'A'])" color="warning" icon="check"
-            @ok="mutA"/>
+          <btn-cond v-if="session.compte.del && session.compte.idp === stE.idp"
+            :label="$t('CHaffcpta', [cvE.nom])" icon="savings" @ok="voirCompta"/>
+          <btn-cond v-if="session.compte.del && session.compte.idp === stE.idp"
+            :label="$t('CHmutx', [cvE.nom, 'A'])" color="warning" icon="check"
+            @ok="ovdialmut('A')"/>
         </q-card-section>
 
-        <q-card-section v-if="chatX.mutE === 1" class="q-pa-md fs-md"><!-- il est A -->
+        <q-card-section v-if="chatX.mutE === 1" class="column items-center q-gutter-sm q-pa-md fs-md"><!-- il est A -->
           <div class="titre-lg">{{$t('CHmutE', [cvE.nom, 'O'])}}</div>
-          <div v-if="!session.compte.del">{{$t('CHmutr1')}}</div>
-          <btn-cond :label="$t('CHmutd', [cvE.nom, 'O'])" color="warning" icon="check"
-            @ok="mutO"/>
+          <div v-if="!session.compte.del" class="text-italic">>{{$t('CHmutr1')}}</div>
+          <btn-cond v-if="session.compte.del"
+            :label="$t('CHaffcpta', [cvE.nom])" icon="savings" @ok="voirCompta"/>
+          <btn-cond v-if="session.compte.del"
+            :label="$t('CHmutx', [cvE.nom, 'O'])" color="warning" icon="check"
+            @ok="ovdialmut('O')"/>
+          <q-separator class="q-my-sm" color="orange"/>
         </q-card-section>
 
-        <q-card-actions align="center">
+        <q-card-actions class="q-mt-sm" align="center">
           <btn-cond flat :label="$t('jailu')" @ok="ui.fD"/>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <!-- Mutation de type de compte en "type" -->
+    <q-dialog v-model="ui.d[idc].BPmut" persistent>
+      <q-card :class="styp('md')">
+        <q-toolbar class="bg-secondary text-white">
+          <btn-cond icon="close" color="warning" @ok="ui.fD"/>
+          <q-toolbar-title class="titre-lg full-width text-center">{{$t('PPmuter' + type)}}</q-toolbar-title>
+        </q-toolbar>
+
+        <choix-quotas v-model="quotas"/>
+        <div v-if="quotas.err" class="bg-yellow-5 text-bold text-black q-pa-xs">
+          {{$t('PPquot')}}
+        </div>
+
+        <q-card-section>
+          <div class="titre-md">{{$t('PPmutmc')}}</div>
+          <editeur-md
+            v-model="texte" :lgmax="250" modetxt editable mh="6rem"
+            :texte="$t('PPmsg' + type, [session.compte.idp])"/>
+        </q-card-section>
+
+        <q-card-actions class="q-pa-xs q-mt-sm q-gutter-sm" align="center" vertical>
+          <btn-cond icon="undo" flat :label="$t('renoncer')" @ok="ui.fD"/>
+          <btn-cond :disable="quotas.err !== ''" color="warning" icon="change_history" 
+            cond="cUrgence" :label="$t('valider')" @ok="cf=true"/>
+          <bouton-confirm :actif="cf" :confirmer="mutOA"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -134,6 +173,24 @@
       </q-card>
     </q-dialog>
 
+    <!-- Affichage des compteurs de compta du compte "courant"-->
+    <q-dialog v-model="ui.d[idc].BPcptdial" position="left" persistent>
+      <q-layout container view="hHh lpR fFf" :class="styp('md')">
+        <q-header elevated class="bg-secondary text-white">
+          <q-toolbar>
+            <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
+            <q-toolbar-title class="titre-lg text-center q-mx-sm">
+              {{$t('PTcompta', [cvE.nomC])}}</q-toolbar-title>
+          </q-toolbar>
+        </q-header>
+        <q-page-container>
+          <q-card>
+            <panel-compta style="margin:0 auto" :c="session.compta.compteurs"/>
+          </q-card>
+        </q-page-container>
+      </q-layout>
+    </q-dialog>
+    
     <!-- Dialogue d'ajout d'un item au chat -->
     <q-dialog v-model="ui.d[idc].ACchatedit">
       <q-card :class="styp('sm')">
@@ -176,7 +233,8 @@
   import stores from '../stores/stores.mjs'
 
   import { styp, sty, dhcool, dkli, afficherDiag, $q } from '../app/util.mjs'
-  import { GetCompta, MajChat, PassifChat, StatutChatE } from '../app/operations4.mjs'
+  import { GetPartition, GetSynthese, GetCompta, MajChat, PassifChat, 
+    MutChat, StatutChatE, MuterCompteO, MuterCompteA } from '../app/operations4.mjs'
   import { ID } from '../app/api.mjs'
 
   import SdBlanc from '../components/SdBlanc.vue'
@@ -185,6 +243,8 @@
   import BoutonHelp from '../components/BoutonHelp.vue'
   import BtnCond from '../components/BtnCond.vue'
   import BoutonConfirm from '../components/BoutonConfirm.vue'
+  import PanelCompta from '../components/PanelCompta.vue'
+  import ChoixQuotas from '../components/ChoixQuotas.vue'
 
   const props = defineProps({ 
     id: String, 
@@ -202,6 +262,7 @@
   const cfI = ref(false)
   const cfA = ref(false)
   const cfO = ref(false)
+  const cf = ref(false)
 
   const chatX = computed(() => aSt.getChat(props.id, props.ids))
   const zombi = computed(() => !chatX.value )
@@ -221,9 +282,12 @@
   const dheff = ref(0)
   const solde = ref(0)
   const stE = ref(null)
+  const type = ref()
+  const texte = ref('')
+  const quotas = ref()
 
   async function getStE () {
-    stE.value = new StatutChatE().run(chatX.value.ids)
+    stE.value = await new StatutChatE().run(chatX.value.ids)
   }
 
   async function effacer (dh) {
@@ -274,10 +338,6 @@
   }
 
   async function ovMut () {
-    if (props.id !== session.compteId) {
-      await afficherDiag($t('CHmute'))
-      return
-    }
     await getStE()
     if (!stE.value || !stE.value.cpt) {
       await afficherDiag($t('CHmute'))
@@ -307,14 +367,28 @@
     await new MutChat().run(chatX.value, 1)
   }
 
-  async function mutA () {
+  async function ovdialmut (t) {
     ui.fD()
-    console.log('mutA')
+    type.value = t
+    cf.value = false
+    texte.value = $t('PPmsg' + type.value, [session.compte.idp])
+    quotas.value = t === 'A' ? await session.getQuotasA() : await session.getQuotasP()
+    ui.oD('BPmut', idc)
   }
 
-  async function mutO () {
+  async function mutOA () {
+    if (type.value === 'A')
+      await new MuterCompteA().run(chatX.value, quotas.value, texte.value)
+    else
+      await new MuterCompteO().run(chatX.value, quotas.value, texte.value)
+    await new GetPartition().run(session.compte.idp)
+    await new GetSynthese().run()
     ui.fD()
-    console.log('mutO')    
+  }
+
+  async function voirCompta () { // comptable OU délégué
+    await new GetCompta().run(chatX.value.idE, chatX.value.ids)
+    ui.oD('BPcptdial', idc)
   }
 
 </script>

@@ -3,7 +3,7 @@
   <div class="relative-position">
     <div class="row justify-between items-center">
       <div class="titre-md text-bold">{{$t('CHgrp', [nomg])}}</div>
-      <btn-cond icon="open_in_new" stop @ok="ouvrirChat()" round
+      <btn-cond icon="chat" stop @ok="ouvrirChat()" round
         :cond="ui.urgence ? 'cUrgence' : 'cVisu'" />
     </div>
     <div class="q-mt-xs row justify-between items-center">

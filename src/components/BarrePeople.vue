@@ -18,44 +18,7 @@
       :label="$t('PPmuterA')">
       <q-tooltip>{{$t('PPmutA')}}</q-tooltip>
     </btn-cond>
-
   </div>
-
-  <!-- Mutation de type de compte en "A" -->
-  <q-dialog v-model="ui.d[idc].BPmutA" persistent>
-    <q-card :class="styp('md')">
-      <q-toolbar class="bg-secondary text-white">
-        <btn-cond icon="close" color="warning" @ok="ui.fD"/>
-        <q-toolbar-title class="titre-lg full-width text-center">{{$t('PPmutA')}}</q-toolbar-title>
-      </q-toolbar>
-
-      <micro-chat class="q-pa-xs q-my-md" :chat="chat"/>
-      
-      <q-card-section>
-        <phrase-contact @ok="okpc" :orgext="session.org" declaration/>
-        <div v-if="diag" class="q-ma-sm q-pa-xs bg-yellow-3 text-negative text-bold">{{diag}}</div>
-      </q-card-section>
-
-      <choix-quotas v-model="quotasA"/>
-      <div v-if="quotasA.err" class="bg-yellow-5 text-bold text-black q-pa-xs">
-        {{$t('PPquot')}}
-      </div>
-
-      <q-card-section>
-        <div class="titre-md">{{$t('PPmutmc')}}</div>
-        <editeur-md
-          v-model="texte" :lgmax="250" modetxt editable mh="6rem"
-          :texte="txtdefA"/>
-      </q-card-section>
-
-      <q-card-actions class="q-pa-xs q-mt-sm q-gutter-sm" align="center" vertical>
-        <btn-cond icon="undo" flat :label="$t('renoncer')" @ok="ui.fD"/>
-        <btn-cond :disable="(diag !== '') || quotasA.err  || !pc" color="warning" icon="change_history" 
-          cond="cUrgence" :label="$t('PPmutA')" @ok="cf=true"/>
-        <bouton-confirm :actif="cf" :confirmer="mutA"/>
-      </q-card-actions>
-    </q-card>
-  </q-dialog>
 
   <!-- Changement de partition -->
   <q-dialog v-model="ui.d[idc].BPchgTr" persistent>
@@ -150,8 +113,8 @@ import ChoixQuotas from '../components/ChoixQuotas.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 import PhraseContact from '../components/PhraseContact.vue'
 import { $t, styp, edvol, afficherDiag } from '../app/util.mjs'
-import { StatutAvatar, ChangerPartition, DeleguePartition, GetCompta, GetComptaQv,  
-  GetAvatarPC, MuterCompteA, GetSynthese, GetPartition } from '../app/operations4.mjs'
+import { StatutChatE, ChangerPartition, DeleguePartition, GetCompta, GetComptaQv,  
+  GetAvatarPC, GetSynthese, GetPartition } from '../app/operations4.mjs'
 
 const session = stores.session
 const cfg = stores.config
@@ -175,7 +138,6 @@ const pcc = ref(0)
 const pcn = ref(0)
 const pcv = ref(0)
 const cf = ref(false)
-const quotasA = ref({}) // { q1) q2) qc) min1) min2) max1) max2) minc) maxc) err}
 const diag = ref('')
 
 const cv = computed(() => session.getCV(props.id) )
@@ -193,58 +155,6 @@ const edv = (v) => edvol(v * UNITEV)
 
 const cllst = (x) => { const cl = 'row items-center cursor-pointer' + (selx.value && selx.value.idp === x.idp ? ' bord2' : ' bord1')
   return cl + (session.partition.id === x.idp ? ' disabled' : '')
-}
-
-async function okpc (p) {
-  pc.value = p
-  const id = await new GetAvatarPC().run(p)
-  diag.value = props.id !== id ? $t('PPmutpc') : ''
-}
-
-async function muterA () {
-  if (!chat.value) {
-    await afficherDiag($t('PPchatreq'))
-    return
-  }
-  const c = await new GetComptaQv().run(props.id)
-  const qm = cfg.quotasMaxC
-  await new GetSynthese().run()
-  const synth = session.synthese
-  const qA = synth.qA
-  const qtA = synth.qtA
-  let maxn = qA.qn - qtA.qn
-  if (maxn < 0) maxn = 0
-  if (maxn > qm[0]) maxn = qm[0]
-  let maxv = qA.qv - qtA.qv
-  if (maxv < 0) maxv = 0
-  if (maxv > qm[1]) maxv = qm[1]
-  // let maxc = qA.qc - qtA.qc + c.qv.qc
-  // if (maxc <= 0) maxc = c.qv.qc
-  // if (maxc > qm[2]) maxn = qm[2]
-  const maxc = qm[2]
-  quotasA.value = {
-    qn: c.qn > maxn ? maxn : c.qn, 
-    qv: c.qv > maxv ? maxv : c.qv, 
-    qc: c.qc > maxc ? maxc : c.qc, 
-    minn: 0, minv: 0, minc: 0,
-    maxn, maxv, maxc,
-    n: c.nn + c.nc + c.ng, 
-    v: c.v,
-    err: ''
-  }
-  cf.value = false
-  diag.value = $t('PPmutpc2')
-  ui.oD('BPmutA', idc)
-}
-
-async function mutA () {
-  await new MuterCompteA().run(props.id, quotasA.value, chat.value, 
-    texte.value || txtdefA.value, pc.value)
-  idp.value = null
-  pc.value = null
-  await new GetPartition().run(session.partition.id)
-  await new GetSynthese().run()
-  ui.fD()
 }
 
 async function voirCompta () { // comptable OU délégué

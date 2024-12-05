@@ -3,7 +3,7 @@
   <div class="relative-position">
     <div v-if="chatx" class="row justify-between items-center">
       <div class="titre-md text-bold">{{$t('CHentre', [nomI, nomE])}}</div>
-      <btn-cond icon="open_in_new" stop @ok="ouvrirChat()" round
+      <btn-cond icon="chat" stop @ok="ouvrirChat()" round
         :cond="ui.urgence ? 'cUrgence' : 'cVisu'" />
     </div>
     <div v-else class="row justify-between items-center">
@@ -18,11 +18,13 @@
     <div v-if="chatx">
       <div class="q-mt-xs row justify-between items-center">
         <div class="text-italic fs-md">
+          <span v-if="chatx.mutI" class="q-mr-sm msg">{{$t('CHmutIx')}}</span>
+          <span v-if="chatx.mutE" class="q-mr-sm msg">{{$t('CHmutEx')}}</span>
           <span v-if="chatx.stI===1" class="q-mr-sm">{{$t('actif')}}</span>
-          <span v-else class="q-mr-sm text-warning text-bold bg-yellow-5">{{$t('CHraccroche')}}</span>
-          <span v-if="chatx.stE===0" class="q-mr-sm text-warning text-bold bg-yellow-5">
+          <span v-else class="q-mr-sm msg">{{$t('CHraccroche')}}</span>
+          <span v-if="chatx.stE===0" class="q-mr-sm msg">
             {{$t('CHraccroche2', [session.getCV(chatx.idE).nom])}}</span>
-          <span v-if="chatx.stE===2" class="q-mr-sm text-warning text-bold bg-yellow-5">{{$t('CHavdisp')}}</span>
+          <span v-if="chatx.stE===2" class="q-mr-sm msg">{{$t('CHavdisp')}}</span>
           <span class="q-mr-sm">{{$t('CHnbit', chatx.items.length, {count:chatx.items.length} )}}</span>
         </div>
         <div v-if="chatx.items.length" class="text-italic font-mono q-mr-sm">{{dhcool(chatx.dh)}}</div>
