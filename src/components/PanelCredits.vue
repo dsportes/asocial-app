@@ -12,8 +12,8 @@
     </div>
   </div>
 
-  <btn-cond v-if="!session.estComptable" class="q-my-xs" cond="cUrgence"
-    icon="add" :label="$t('TKnv')" @ok="nvtk"/>
+  <btn-cond class="q-my-xs" cond="cUrgence" icon="add" :label="$t('TKnv')" 
+    @ok="nvtk"/>
 
   <div v-if="session.compta">
     <q-expansion-item switch-toggle-side dense group="tkdon"

@@ -730,8 +730,9 @@ export default {
   FIjours: 'Modifiés dans les N jours',
   FIinvits: 'Groupes ayant des invitations en cours',
   FIavecsp: 'Seulement les délégués',
-  FIchel: 'Chats en ligne seulement', // ???
+  FIavecmut: 'Chats avec MUTATIONS seulement',
   FIavecgr: 'Membre d\'un groupe',
+
   FInotif: 'Ayant une Alerte ... {0}',
   FIstmb: 'Ayant un statut ... {0}',
   FIambno: 'Accès aux notes / membres...',
@@ -952,9 +953,10 @@ export default {
   CHmutI: 'J\'ai demandé à {0} de ME muter en compte "{1}"',
   CHmutIx: 'Mutation demandée',
   CHmutEx: 'Mutation à faire',
-  CHmuts: 'NE PLUS demander à {0} de ME muter en compte "{1}"',
-  CHmutd: 'Demander à {0} de ME muter en compte "{1}"',
+  CHmuts: 'Ne plus ME muter en compte "{1}"',
+  CHmutd: 'ME muter en compte "{1}"',
   CHmutdm: 'Demande de mutation de mon compte',
+  CHmutex: 'Je n\'ai aucune demande de mutation en attente.',
   CHmutb: 'Mutations',
   CHmute: 'La mutation en compte "O" ou "A" ne peut être gérée qu\'entre des COMPTES (pas leurs avatars secondaires).',
   CHmutn1: 'Le compte {0} N\'EST PAS DÉLÉGUÉ d\'une partition, je ne peux pas lui demander ma mutation en compte "O".',
@@ -963,6 +965,8 @@ export default {
   CHmutr2: 'Demande impossible à satisfaire, je ne suis PAS DÉLÉGUÉ de la partition de {0}.',
   CHmutx: 'Muter {0} en compte "{1}"',
   CHaffcpta: 'Abon. / conso. de {0}',
+  CHmutit1: 'Demander et exécuter des mutations',
+  CHmutit2: 'Demander des mutations',
 
   // PageSession
   ISst: 'Statut de la session: {0}. Mode: {1}',

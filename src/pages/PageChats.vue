@@ -89,6 +89,7 @@ const avChats = computed(() => {
   for (const [,elt] of aSt.map) {
     if (!f.tous && session.avatarId !== elt.avatar.id) continue
     for (const [,c] of elt.chats) {
+      if (f.avecmut && !c.mutI && !c.mutE) continue
       if (f.rac === 1 && c.stI === 0) continue
       if (f.rac === 2 && c.stI === 1) continue
       if (flimj && c.dh < flimj) continue

@@ -3,6 +3,11 @@
   <q-header elevated>
     <q-toolbar class="full-width">
 
+      <btn-cond v-if="session.estAdmin && session.status" color="warning" icon="logout" 
+        @ok="discon" round>
+        <q-tooltip>{{$t('MLAdrc')}}</q-tooltip>
+      </btn-cond>
+
       <btn-cond v-if="!session.estAdmin && session.ok"
         icon="menu" round color="none">
         <q-menu v-model="ui.menug" max-height="90vh" class="sombre1 text-white">
@@ -52,11 +57,6 @@
       </btn-cond>
 
       <bouton-help :page="'page_' + ui.page"/>
-
-      <btn-cond v-if="session.estAdmin" color="warning" icon="logout" 
-        @ok="discon" round>
-        <q-tooltip>{{$t('MLAdrc')}}</q-tooltip>
-      </btn-cond>
 
       <q-page-sticky v-if="session.signalOp" position="top" :offset="offset"
         style="z-index:1000!important">
@@ -140,6 +140,7 @@
           <filtre-nom nom="chats" prop='txt' :idx="1"/>
           <filtre-mc nom="chats" attr="mcp" :idx="0"/>
           <filtre-mc nom="chats" attr="mcn" :idx="1"/>
+          <filtre-avecmut nom="chats" attr="avecmut" :idx="0"/>
         </div>
         <div v-if="ui.page === 'partition'" class="column justify-start">
           <filtre-nom nom="partition" prop='nomc' :idx="0"/>
@@ -432,6 +433,7 @@ import FiltreAmbno from './components/FiltreAmbno.vue'
 import FiltreAvgr from './components/FiltreAvgr.vue'
 import FiltreVols from './components/FiltreVols.vue'
 import FiltreRac from './components/FiltreRac.vue'
+import FiltreAvecmut from './components/FiltreAvecmut.vue'
 import DialogueErreur from './dialogues/DialogueErreur.vue'
 import MenuAccueil from './components/MenuAccueil.vue'
 import PhraseSecrete from './dialogues/PhraseSecrete.vue'

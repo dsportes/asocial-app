@@ -86,7 +86,7 @@ export const useSessionStore = defineStore('session', {
     dlvat: (state) => state.espace && state.espace.dlvat ? state.espace.dlvat : AMJ.max,
 
     estComptable (state) { return ID.estComptable(state.compteId) },
-    estAdmin (state) { return !state.compteId },
+    estAdmin (state) { return !state.compteId }, // OU page login !!!
     estDelegue (state) { return state.compte && state.compte.del },
     oad (state) { 
       if (!state.compte || state.estComptable) return ''

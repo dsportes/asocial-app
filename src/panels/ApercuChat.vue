@@ -55,8 +55,16 @@
     </q-page-container>
 
     <!-- Gestion des mutations -->
-    <q-dialog v-model="ui.d[idc].mutation">
+    <q-dialog v-model="ui.d[idc].mutation" persistent>
       <q-card :class="styp('sm')">
+        <q-toolbar class="bg-secondary text-white">
+          <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
+          <q-toolbar-title class="titre-lg text-center q-mx-sm">
+            {{$t('CHmutit' + (session.compte.del ? 1 : 2))}}
+          </q-toolbar-title>
+          <bouton-help page="chat_mut"/>
+        </q-toolbar>
+
         <q-card-section v-if="chatX.mutI" class="column items-center q-gutter-sm q-pa-md fs-md">
           <div class="titre-lg text-center">{{$t('CHmutI', [cvE.nom, chatX.mutI === 2 ? 'A' : 'O'])}}</div>
           <btn-cond :label="$t('CHmuts', [cvE.nom, chatX.mutI === 2 ? 'A' : 'O'])" 
@@ -87,6 +95,11 @@
           <q-separator class="full-width" color="orange"/>
         </q-card-section>
 
+        <q-card-section v-if="session.compte.del && !chatX.mutE" class="column items-center q-gutter-sm q-pa-md fs-md"><!-- il est O -->
+          <div class="titre-lg text-italic">{{$t('CHmutex')}}</div>
+          <q-separator class="full-width" color="orange"/>
+        </q-card-section>
+
         <q-card-section v-if="chatX.mutE === 2" class="column items-center q-gutter-sm q-pa-md fs-md"><!-- il est O -->
           <div class="titre-lg">{{$t('CHmutE', [cvE.nom, 'A'])}}</div>
           <div v-if="!session.compte.del" class="text-italic">>{{$t('CHmutr1')}}</div>
@@ -96,6 +109,7 @@
           <btn-cond v-if="session.compte.del && session.compte.idp === stE.idp"
             :label="$t('CHmutx', [cvE.nom, 'A'])" color="warning" icon="check"
             @ok="ovdialmut('A')"/>
+          <q-separator class="full-width" color="orange"/>
         </q-card-section>
 
         <q-card-section v-if="chatX.mutE === 1" class="column items-center q-gutter-sm q-pa-md fs-md"><!-- il est A -->
@@ -106,7 +120,7 @@
           <btn-cond v-if="session.compte.del"
             :label="$t('CHmutx', [cvE.nom, 'O'])" color="warning" icon="check"
             @ok="ovdialmut('O')"/>
-          <q-separator class="q-my-sm" color="orange"/>
+          <q-separator class="full-width" color="orange"/>
         </q-card-section>
 
         <q-card-actions class="q-mt-sm" align="center">
@@ -346,24 +360,22 @@
     cfI.value = false
     cfA.value = false
     cfO.value = false
+    // console.log('ovMut', session.compte.del, chatX.value.mutE)
     this.ui.oD('mutation', idc)
   }
 
   async function delMutI () {
     ui.fD()
-    console.log('delMutI')
     await new MutChat().run(chatX.value, 0)
   }
 
   async function demMutA () {
     ui.fD()
-    console.log('demMutA')
     await new MutChat().run(chatX.value, 2)
   }
 
   async function demMutO () {
     ui.fD()
-    console.log('demMutO')
     await new MutChat().run(chatX.value, 1)
   }
 
