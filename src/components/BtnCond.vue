@@ -60,7 +60,7 @@ async function ok () {
     emit('ok', props.ctx || null)
     return 
   }
-  await afficherDiag(this.diag)
+  await afficherDiag(diag.value)
 }
 
 </script>

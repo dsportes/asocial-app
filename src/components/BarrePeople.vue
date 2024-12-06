@@ -11,13 +11,6 @@
       :label="$t('PPokdel')" @ok="changerDel(true)"/>
     <btn-cond v-if="id !== session.compteId && !ID.estComptable(id)"
       cond="cUrgence" :label="$t('PPcompta')" @ok="voirCompta"/>
-
-    <btn-cond v-if="!ID.estComptable(id)" 
-      color="warning" icon="change_history"
-      cond="cEdit" class="justify-start" @ok="muterA"
-      :label="$t('PPmuterA')">
-      <q-tooltip>{{$t('PPmutA')}}</q-tooltip>
-    </btn-cond>
   </div>
 
   <!-- Changement de partition -->
