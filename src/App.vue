@@ -96,7 +96,7 @@
       <bouton-langue style="position:relative;top:2px;"/>
 
       <!-- Dark ou clair -->
-      <btn-cond icon="contrast" round @ok="$q.dark.toggle()" color="none">
+      <btn-cond icon="contrast" round @ok="clairFonce" color="none">
         <q-tooltip class="ttip">{{$t('clairfonce')}}</q-tooltip>
       </btn-cond>
 
@@ -153,7 +153,6 @@
           <filtre-avecgr nom="people" :idx="1"/>
           <filtre-mc nom="people" attr="mcp" :idx="0"/>
           <filtre-mc nom="people" attr="mcn" :idx="1"/>
-          <filtre-del v-if="session.compte.idp" nom="people" :idx="0"/>
         </div>
         <div v-if="ui.page === 'groupes'" class="column justify-start">
           <filtre-nom nom="groupes" prop='ngr' :idx="0"/>
@@ -400,7 +399,7 @@
 
 <script setup>
 import { watchEffect, computed } from 'vue'
-import { useQuasar } from 'quasar'
+import { useQuasar, setCssVar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 
 import stores from './stores/stores.mjs'
@@ -421,7 +420,6 @@ import FiltreNom from './components/FiltreNom.vue'
 import FiltreMc from './components/FiltreMc.vue'
 import FiltreNbj from './components/FiltreNbj.vue'
 import FiltreAvecgr from './components/FiltreAvecgr.vue'
-import FiltreDel from './components/FiltreDel.vue'
 import FiltreAvecsp from './components/FiltreAvecsp.vue'
 import FiltreTri from './components/FiltreTri.vue'
 import FiltreNotif from './components/FiltreNotif.vue'
@@ -477,8 +475,18 @@ import PageInvitation from './pages/PageInvitation.vue'
 
 const $t = useI18n().t
 const $q = useQuasar()
+
+function setCss() {
+  setCssVar('primary', $q.dark.isActive ? '#29B6F6' : '#0277BD')
+  setCssVar('secondary', $q.dark.isActive ? '#7CB342' : '#33691E')
+}
+
 $q.dark.set(true)
+setCss()
+
 set$t($t, $q)
+
+function clairFonce () { $q.dark.toggle(); setCss() }
 
 const session = stores.session
 const aSt = stores.avatar 

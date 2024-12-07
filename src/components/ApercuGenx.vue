@@ -21,7 +21,7 @@
           <div class="col-auto row q-gutter-xs" v-if="!estComptable">
             <btn-cond v-if="estAvc" icon="badge" round stop @ok="edcv"/>
             <btn-cond v-if="!estAvc && estPeople" icon="badge" round stop @ok="ovcv"/>
-            <btn-cond v-if="estPeople && !nodetP && !detPeople" round icon="open_in_new" 
+            <btn-cond v-if="estPeople && !nodetP && !detPeople" round icon="zoom_in" 
               stop @ok="ouvrirdetails"/>
           </div>
         </div>

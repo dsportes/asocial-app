@@ -45,7 +45,9 @@
       <!-- credits -->
       <div class="btn2 row items-center" @click="clickCred">
         <icon-alerte :niv="session.nivAlerteSN"/>
-        <span class="q-ml-xs">{{$t('PNCcre')}}</span>
+        <span class="q-ml-xs">{{$t('PNCcre')}}
+          <q-badge v-if="session.estComptable && aSt.nbTkAtt" color="primary" rounded>{{aSt.nbTkAtt}}</q-badge>
+        </span>
       </div>
 
       <!-- Chats d'urgence -->

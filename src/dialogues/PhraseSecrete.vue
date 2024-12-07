@@ -10,8 +10,8 @@
     </q-toolbar>
 
     <q-card-section class="fs-md">
-      <q-checkbox v-model="vkb" color="primary" style="position:relative;left:-8px"/>
-      <span class="cprim fs-lg">{{$t('PSkb')}}</span>
+      <q-checkbox v-model="vkb" color="warning" style="position:relative;left:-8px"/>
+      <span class="text-primary fs-lg ">{{$t('PSkb')}}</span>
 
       <div v-if="!orgext" class="q-my-md">
         <div class="titre-lg">{{$t('PSorg1')}}</div>
@@ -47,7 +47,7 @@
         </div>
         <div v-else></div>
         <div>
-          <btn-cond class="q-mr-sm" flat :label="$t('renoncer')" @ok="ko"/>
+          <btn-cond class="q-mr-sm" flat icon="undo" :label="$t('renoncer')" @ok="ko"/>
           <btn-cond color="warning" :label="labelVal()" :icon-right="iconValider"
             :disable="!ligne1 || ligne1.length < lgph || !orgL"
             @ok="ok" />
@@ -287,8 +287,6 @@ function raz () {
   color: $primary
 .q-card__section
   padding: 0.3rem
-.cprim
-  color: $primary
 .hg-theme-default
   color: black !important
   font-family:'Ubuntu Mono'

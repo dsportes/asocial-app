@@ -694,7 +694,13 @@ export class Compti extends GenDoc {
     for(const t of s) if (x.ht.has(t)) return true
     return false
   }
-  
+
+  stW (id, t) {
+    const x = this.mc.get(id)
+    if (!x || !t || !t.length) return false
+    return x.tx.indexOf(t) !== -1
+  }
+
 }
 
 /**Invits *********************************************************

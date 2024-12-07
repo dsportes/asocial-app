@@ -1,6 +1,6 @@
 Dans la documentation générale, lire <a href="$$/appli/contactschats.html" target="_blank">"Chats" entre deux avatars</a>
 
-## Panneau d'affichage d'un _chat_
+## Visualisation et édition d'un _chat_
 Le panneau se ferme par la flèche orangée en haut à gauche dans la barre de titre citant entre qui et qui le chat est ouvert.
 
 Si le contact du chat a disparu, ceci apparaît en haut.
@@ -37,4 +37,7 @@ Au lieu d'ouvrir un nouvel échange par le bouton **NOUVEL ÉCHANGE** il faut l'
 
 > Remarque: un don n'est possible que si après don le compte reste _créditeur_ d'au moins 2c.
 
+# Mutations de type de compte "O" en "A" et "A" en "O" ! mutation_oa
+Dans la documentation générale, lire <a href="$$/appli/mutations_oa.html" target="_blank">Mutations de compte "O" en "A" et de "A" en "O"</a>
 
+Voir comment procéder pour demander et exécuter une _mutation_ dans la rubrique citée ci-dessus

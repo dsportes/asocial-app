@@ -1829,6 +1829,7 @@ La "consommation mensuelle" de calcul est en centimes et est la somme des coûts
   A_ht_sponsoriser: '...sponsoriser des comptes',
   A_ht_cvmaj: '...éditer une carte de visite',
   A_ht_htcomm: '...éditer mes commentaires / hashtags (d\'un de mes contacts / groupes)',
+  A_ht_mutation_oa: '...muter de compte "O" en "A" et vice-versa',
 
   A_dial: 'Boîtes de dialogues',
   A_dial_editeur: 'L\'éditeur des textes',
@@ -1839,5 +1840,7 @@ La "consommation mensuelle" de calcul est en centimes et est la somme des coûts
   A_cv_maj: 'Édition d\'une carte de visite',
   A_htcomm_maj: 'Édition des commentaires / hashtags personnels',
   A_chat_nouveau: 'Création d\'un nouveau "chat"',
-  A_chat_maj: 'Édition d\'un "chat"',
+  A_chat_maj: 'Visualisation et édition d\'un "chat"',
+  A_contact_detail: 'Fiche détaillé d\'un contact',
+
 }

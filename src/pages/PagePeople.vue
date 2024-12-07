@@ -22,19 +22,22 @@
         :header-class="dkli(idx)" switch-toggle-side expand-separator dense 
         group="somegroup">
         <template v-slot:header>
-          <div class="row q-gutter-sm items-center">
-            <img :src="session.getCV(p.id).photo" class="photomax"/>
-            <div class="titre-md text-bold">{{session.getCV(p.id).nom}}</div>
+          <div class="row justify-between items-start full-width">
+            <div class="row q-gutter-sm items-center">
+              <img :src="session.getCV(p.id).photo" class="photomax"/>
+              <div class="titre-md text-bold">{{session.getCV(p.id).nom}}</div>
+            </div>
+            <btn-cond icon="zoom_in" round stop @ok="ouvrirdetails(p.id)"/>
           </div>
         </template>
-        <apercu-genx class="q-ml-xl" :id="p.id" :idx="idx" 
+        <apercu-genx class="q-ml-xl" :id="p.id" :idx="idx" nodetP
           :del="session.eltPart(p.id).del"/>
       </q-expansion-item>
     </div>
 
-    <q-page-sticky v-if="session.accesNet && !session.estA" position="top-left" :offset="[3, 3]">
+    <!--q-page-sticky v-if="session.accesNet && !session.estA" position="top-left" :offset="[3, 3]">
       <btn-cond icon="refresh" @ok="reload()" :cond="session.estAdmin ? 'cUrgence' : 'cVisu'"/>
-    </q-page-sticky>
+    </q-page-sticky-->
   </q-page>
 </template>
 
@@ -54,18 +57,13 @@ const pSt = stores.people
 
 const peLpF = computed(() => {
   const ci = session.compti
-  const part = session.partition
   const f = stores.filtre.filtre.people
   const fsetp = f.mcp && f.mcp.size ? f.mcp : null
   const fsetn = f.mcn && f.mcn.size ? f.mcn : null
   const r = []
   for (const [id, p] of pSt.map) {
     const cv = session.getCV(id)
-    if (f.nom && !cv.nom.startsWith(f.nom)) continue
-    if (f.rolepart && part) {
-      if (!part.estCpt(id)) continue
-      if (f.rolepart === 2 && !part.estDel(id)) continue
-    } 
+    if (f.nom && !cv.nom.startsWith(f.nom) && (!ci.stW(id, f.nom))) continue
     if (f.avecgr && (!p.sgr.size)) continue
     if (fsetp && !ci.aHT(id, fsetp)) continue
     if (fsetn && ci.aHT(id, fsetn)) continue
@@ -77,11 +75,18 @@ const peLpF = computed(() => {
 
 watch(peLpF, (ap) => {ui.fmsg(ap.length)})
 
+function ouvrirdetails (id) {
+  session.setPeopleId(id)
+  ui.oD('detailspeople', 'a')
+}
+
+/*
 async function reload () {
   if (session.accesNet && !session.estA) await new GetPartition().run(session.compte.idp)
 }
 
 if (session.accesNet) onMounted(async () => { await reload() })
+*/
 
 async function rafCvs () {
   let nc = 0, nv = 0

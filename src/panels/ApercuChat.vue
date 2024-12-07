@@ -62,7 +62,7 @@
           <q-toolbar-title class="titre-lg text-center q-mx-sm">
             {{$t('CHmutit' + (session.compte.del ? 1 : 2))}}
           </q-toolbar-title>
-          <bouton-help page="chat_mut"/>
+          <bouton-help page="ht_mutation_oa"/>
         </q-toolbar>
 
         <q-card-section v-if="chatX.mutI" class="column items-center q-gutter-sm q-pa-md fs-md">

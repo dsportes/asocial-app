@@ -23,6 +23,8 @@ const props = defineProps({
 </style>
 
 <style lang="sass">
+p
+  font-weight: 400 !important
 .mdclair pre
   background-color: #DDDDDD !important
 .markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5
@@ -36,4 +38,6 @@ h2
   font-size: 1.3em !important
 h3
   font-size: 1.15em !important
+a
+ color: $positive !important
 </style>

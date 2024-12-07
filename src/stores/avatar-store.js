@@ -150,6 +150,14 @@ export const useAvatarStore = defineStore('avatar', {
         return e ? Array.from(e.tickets.values()) : []
     },
 
+    nbTkAtt: (state) => {
+      let n = 0
+      const e = state.map.get(state.session.compteId)
+      if (!e) return 0
+      Array.from(e.tickets.values()).forEach(t => { if (!t.dr) n++})
+      return n
+    },
+
     nbchats: (state) => {
       let n = 0
       for (const [,elt] of state.map) if (elt.chats) n += elt.chats.size

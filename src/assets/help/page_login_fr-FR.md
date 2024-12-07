@@ -25,6 +25,13 @@ Un avis est retourné si aucun compte n'a été trouvé pour cette phrase. Il n'
 
 Dans le cas normal, les données du compte sont chargées et la session est ouverte sur la page d'accueil.
 
+## Pour les paranos
+Si vous n'avez pas confiance dans le matériel que vous utilisez et que vous craignez que votre **clavier soit écouté** (ce qui techniquement est réalisable depuis longtemps), il faut éviter de sa saisir sa phrase secrète au clavier _physique_ de votre appareil.
+
+Cocher la case **Clavier virtuel** de la boîte de dialogue de saisie de votre phrase secrète. Le clavier physique / système est évité et votre phrase ne peut pas être écoutée et déroutée.
+
+> De manière générale, si vous n'avez pas confiance dans le browser que vous utilisez et que vous soupçonnez qu'une _backdoor_ donne, sans votre consentement, accès à sa mémoire depuis un process externe (ce qui se passe quand vous demandez au browser d'ouvrir un port de _debug_), aucune confiance ne peut être accordée à aucune application.
+
 # Créer son compte par _sponsoring_ | page_login_m sponsoring_a ht_sponsoriser
 Vous avez rencontré une personne ayant un compte dans l'application et ayant la capacité de _sponsoriser_ de nouveaux comptes. Cette personne vous a communiqué:
 - l'URL de connexion à l'application comme _https://s1.monhebergeur.net/?demo_ 
