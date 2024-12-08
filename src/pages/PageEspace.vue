@@ -1,16 +1,45 @@
 <template>
   <q-page v-if="session.synthese" class="q-pa-xs">
-    <div class="q-mb-sm">
-      <div class="titre-md">{{$t('PEstm')}}</div>
-      <div class="row q-gutter-sm q-mb-sm">
-        <btn-cond class="self-start b1" label="M" @ok="dlstat(0)"/>
-        <btn-cond class="self-start b1" label="M-1" @ok="dlstat(1)"/>
-        <btn-cond class="self-start b1" label="M-2" @ok="dlstat(2)"/>
-        <btn-cond class="self-start b1" label="M-3" @ok="dlstat(3)"/>
-        <saisie-mois v-model="mois" :dmax="maxdl" :dmin="mindl" :dinit="maxdl"
-          @ok="dlstat2" icon="download" :label="$t('ESdlc')"/>
-      </div>
+    <div class="q-my-md spmd">
+      <q-expansion-item switch-toggle-side dense group="somegroup"
+        header-class="bg-primary text-white titre-lg" :label="$t('PEstm1')">
+        <div class="q-ml-lg q-my-sm">
+          <div class="row q-gutter-xs q-mb-md items-center">
+            <div class="titre-md">{{$t('PEstm')}}</div>
+            <btn-cond class="self-start b1" label="M" @ok="dlstat(0)"/>
+            <btn-cond class="self-start b1" label="M-1" @ok="dlstat(1)"/>
+            <btn-cond class="self-start b1" label="M-2" @ok="dlstat(2)"/>
+            <btn-cond class="self-start b1" label="M-3" @ok="dlstat(3)"/>
+          </div>
+          <saisie-mois v-model="mois" :dmax="maxdl" :dmin="mindl" :dinit="maxdl"
+            @ok="dlstat2" icon="download" :label="$t('ESdlc')"/>
+        </div>
+      </q-expansion-item>
+      
+      <q-expansion-item switch-toggle-side dense group="somegroup"
+        header-class="bg-primary text-white titre-lg" :label="$t('PEcptA')">
+        <div class="q-ml-lg q-my-sm">
+          <q-toggle class="q-my-sm" v-model="optionA" :label="$t('PTopt')" />
+          <div class="q-my-sm">
+            <div class="row justify-between items-center">
+              <span class="titre-md text-bold q-my-sm">{{$t('PIqa')}}</span>
+              <btn-cond round icon="edit" class="self-start"  @ok="editerqA()"/>
+            </div>
+            <quotas-vols class="q-ml-md" noutil :vols="session.synthese.qA"/>
+          </div>
+        </div>
+      </q-expansion-item>
+
     </div>
+
+<!--
+    <template v-slot:header>
+      <div class="full-width row justify-between items-center">
+        <div class="titre-md text-bold">{{$t('PCPsynth', [dhcool(c.dh, true)])}}</div>
+        <bouton-help page="compta_synth"/>
+      </div>
+    </template>
+-->
     
     <div class="q-mb-sm row justify-start" style="height:1.8rem;overflow:hidden">
       <div class="titre-md q-mx-sm">{{$t('ESnbmi')}}</div>
@@ -21,7 +50,14 @@
     </div>
 
     <div class="q-mb-sm">
-      <q-toggle v-model="optionA" :label="$t('PTopt')" />
+      <q-toggle v-model="optionA" :label="$t('PTopt')"/>
+      <div class="q-my-sm">
+        <div class="row">
+          <span class="titre-md q-mr-md">{{$t('PIqa')}}</span>
+          <btn-cond round icon="edit"  @ok="editerqA()"/>
+        </div>
+        <quotas-vols class="q-ml-md" noutil :vols="session.synthese.qA"/>
+      </div>
     </div>
 
     <div class="text-center q-mb-sm">
@@ -35,14 +71,6 @@
         <span class="titre-md q-mr-md">{{$t('ESquotas')}}</span>
       </div>
       <quotas-vols class="q-ml-md" noutil :vols="session.espace.quotas"/>
-    </div>
-
-    <div class="q-my-sm">
-      <div class="row">
-        <span class="titre-md q-mr-md">{{$t('PIqa')}}</span>
-        <btn-cond round icon="edit"  @ok="editerqA()"/>
-      </div>
-      <quotas-vols class="q-ml-md" noutil :vols="session.synthese.qA"/>
     </div>
 
     <div class="q-my-sm">
@@ -128,6 +156,7 @@ async function refreshSynth () {
 
 onMounted(async () => {
   await refreshSynth()
+  quotasTA.value = session.synthese.qtA
 })
 
 const optionsNbmi = [3, 6, 12, 18, 24]
@@ -142,6 +171,7 @@ const mois = ref(Math.floor(session.auj / 100))
 const nom = ref('')
 const quotasP = ref(null)
 const quotasA = ref(null)
+const quotasTA = ref(null)
 const nbmi = ref(session.espace ? session.espace.nbmi : 12)
 const optionA = ref(session.espace ? (session.espace.opt ? true : false) : false)
 const crTri = ref('code')
@@ -290,7 +320,7 @@ async function validerqA () {
 .w10
   width: 10rem
 .b1
-  width: 4rem
+  width: 2rem
 .trc
   font-weight: bold
   font-style: italic
