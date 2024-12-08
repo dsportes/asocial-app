@@ -1,6 +1,6 @@
 <template>
-  <q-page class="spmd">
-    <div v-if="session.ok" class="q-mb-md">
+  <q-page class="column spmd">
+    <div v-if="session.ok" class="q-my-md">
       <div class="text-italic titre-lg">{{$t('ISst', [st, mo])}}</div>
 
       <div class="titre-md text-italic q-mt-md">{{$t('ISconso', [mon(couts[4], 4)])}}</div>
@@ -51,19 +51,9 @@ const aSt = stores.avatar
 const fSt = stores.fetat
 
 const nc = computed(() => session.getCV(session.compteId).nom )
-const couts = computed(() => Tarif.evalConso(session.consocumul))
+const couts = computed(() => Tarif.evalConso2(session.consocumul))
 const st = computed(() => $t('ISst' + (session.status < 2 ? session.status : 2)))
 const mo = computed(() => session.synchro ? $t('sync') : (session.avion ? $t('avion') : 'incognito'))
-
-async function retry (idf) {
-  const e = fSt.getFetat(idf)
-  await e.retry()
-}
-
-async function abandon (idf) {
-  const e = fSt.getFetat(idf)
-  await e.abandon()
-}
 
 </script>
 <style lang="sass" scoped>

@@ -58,7 +58,7 @@
     <q-dialog v-model="ui.d[idc].mutation" persistent>
       <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
-          <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
+          <btn-cond color="warning" icon="close" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">
             {{$t('CHmutit' + (session.compte.del ? 1 : 2))}}
           </q-toolbar-title>
