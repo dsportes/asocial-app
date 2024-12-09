@@ -333,6 +333,7 @@ export class Synthese extends GenDoc {
   async compile (row) {
     this.qA = row.qA
     this.qtA = row.qtA
+    if (isNaN(this.qtA.qc)) this.qtA.qc = 99
     this.tsp = {}
 
     if (row.tsp) for (const id in row.tsp) {

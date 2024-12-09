@@ -7,8 +7,8 @@ import { pubsub } from '../app/net.mjs'
 import { SyncFull } from '../app/synchro.mjs'
 // import { sleep } from '../app/util.mjs'
 
-const court = 5000
-const long = 120000
+const court = 3000
+const long = 10000
 const trace = false
 
 export const useHbStore = defineStore('hb', () => {
@@ -28,7 +28,7 @@ export const useHbStore = defineStore('hb', () => {
   // session NON prête
   // ou avec accès au serveur bloqué / avion
   // ou absence de droit à web push
-  const KO = computed(() => !session.ok || !session.accesNetNf || !config.permission)
+  const KO = computed(() => !session.ok || session.estAdmin  || !session.accesNetNf || !config.permission)
 
   /* Principe général
   - le HB tourne tout le temps, se relance en permanence depuis le boot

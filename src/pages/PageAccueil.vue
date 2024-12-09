@@ -1,6 +1,6 @@
 <template>
     <div class="spsm fs-md q-pa-sm">
-      <div class="row justify-center">
+      <div class="row">
         <div class="btn2">
           <bouton-langue :label="$t('langue')"/>
         </div>
@@ -30,7 +30,7 @@
         </div>
       </div>
 
-      <div class="row justify-center bordb">
+      <div class="row bordb">
         <!-- Alertes -->
         <div class="btn2 row items-center" @click="clickAlertes">
           <icon-alerte

@@ -17,69 +17,67 @@
       </q-expansion-item>
       
       <q-expansion-item switch-toggle-side dense group="somegroup"
-        header-class="bg-primary text-white titre-lg" :label="$t('PEcptA')">
+        header-class="bg-primary text-white titre-lg" :label="$t('PEoptg')">
         <div class="q-ml-lg q-my-sm">
           <q-toggle class="q-my-sm" v-model="optionA" :label="$t('PTopt')" />
-          <div class="q-my-sm">
-            <div class="row justify-between items-center">
-              <span class="titre-md text-bold q-my-sm">{{$t('PIqa')}}</span>
-              <btn-cond round icon="edit" class="self-start"  @ok="editerqA()"/>
-            </div>
-            <quotas-vols class="q-ml-md" noutil :vols="session.synthese.qA"/>
+          <div class="q-mb-sm row justify-start" style="height:1.8rem;overflow:hidden">
+            <div class="titre-md q-mx-sm">{{$t('ESnbmi')}}</div>
+            <q-select class="col-auto items-start items-start text-bold bg-primary text-white titre-lg q-pl-sm" 
+              standout style="position:relative;top:-8px;"
+              :disable="session.pow !== 2"
+              v-model.number="nbmi" :options="optionsNbmi" dense />
           </div>
         </div>
       </q-expansion-item>
 
-    </div>
-
-<!--
-    <template v-slot:header>
-      <div class="full-width row justify-between items-center">
-        <div class="titre-md text-bold">{{$t('PCPsynth', [dhcool(c.dh, true)])}}</div>
-        <bouton-help page="compta_synth"/>
-      </div>
-    </template>
--->
-    
-    <div class="q-mb-sm row justify-start" style="height:1.8rem;overflow:hidden">
-      <div class="titre-md q-mx-sm">{{$t('ESnbmi')}}</div>
-      <q-select class="col-auto items-start items-start text-bold bg-primary text-white titre-lg q-pl-sm" 
-        standout style="position:relative;top:-8px;"
-        :disable="session.pow !== 2"
-        v-model.number="nbmi" :options="optionsNbmi" dense />
-    </div>
-
-    <div class="q-mb-sm">
-      <q-toggle v-model="optionA" :label="$t('PTopt')"/>
-      <div class="q-my-sm">
-        <div class="row">
-          <span class="titre-md q-mr-md">{{$t('PIqa')}}</span>
-          <btn-cond round icon="edit"  @ok="editerqA()"/>
+      <q-expansion-item switch-toggle-side dense group="somegroup"
+        header-class="bg-primary text-white titre-lg" :label="$t('PEquotas')">
+        <div class="q-ml-lg q-my-sm">
+          <div class="q-my-sm row text-italic text-bold titre-md items-center">
+            <div class="col-3"></div>
+            <div class="col-3 text-center">{{$t('PEqn')}}</div>
+            <div class="col-3 text-center">{{$t('PEqv')}}</div>
+            <div class="col-3 text-center">{{$t('PEqc')}}</div>
+          </div>
+          <div class="q-my-xs row items-center">
+            <div class="col-3 text-italic titre-md">{{$t('PExesp')}}</div>
+            <div class="col-3 text-center font-mono">{{qnE}}</div>
+            <div class="col-3 text-center font-mono">{{qvE}}</div>
+            <div class="col-3 text-center font-mono">{{qcE}}</div>
+          </div>
+          <div class="q-my-xs row items-center">
+            <div class="col-3 text-italic titre-md">{{$t('PExcpta')}}</div>
+            <div class="col-3 text-center font-mono">{{qnA}}</div>
+            <div class="col-3 text-center font-mono">{{qvA}}</div>
+            <div class="col-3 text-center font-mono">{{qcA}}</div>
+          </div>
+          <div class="q-my-xs row items-center">
+            <div class="col-3 text-italic titre-md">{{$t('PExpart')}}</div>
+            <div class="col-3 text-center font-mono">{{qnP}}</div>
+            <div class="col-3 text-center font-mono">{{qvP}}</div>
+            <div class="col-3 text-center font-mono">{{qcP}}</div>
+          </div>
+          <div class="q-my-xs row items-center">
+            <div class="col-3 text-italic titre-md">{{$t('PExcpto')}}</div>
+            <div class="col-3 text-center font-mono">{{qnO}}</div>
+            <div class="col-3 text-center font-mono">{{qvO}}</div>
+            <div class="col-3 text-center font-mono">{{qcO}}</div>
+          </div>
+          <div class="q-my-md">
+            <div class="row justify-between items-center">
+              <span class="titre-md text-bold q-my-sm">{{$t('PIqa')}}</span>
+              <btn-cond round icon="edit" class="self-start"  @ok="editerqA()"/>
+            </div>
+          </div>
         </div>
-        <quotas-vols class="q-ml-md" noutil :vols="session.synthese.qA"/>
-      </div>
+      </q-expansion-item>
     </div>
 
-    <div class="text-center q-mb-sm">
-      <btn-cond cond="cUrgence" icon="add" :label="$t('PTnv')" @ok="ovnvPart"/>
+    <div class="row justify-between items-center titre-lg q-pa-xs q-mt-md q-mb-sm bg-secondary text-white">
+      <div class="titre-lg text-italic ">{{$t('PEdetpart')}}</div>
+      <btn-cond cond="cUrgence" icon="add" class="self-start" :label="$t('PTnv')" @ok="ovnvPart"/>
     </div>
 
-    <q-separator color="orange" class="q-my-sm"/>
-
-    <div class="q-my-sm">
-      <div class="row">
-        <span class="titre-md q-mr-md">{{$t('ESquotas')}}</span>
-      </div>
-      <quotas-vols class="q-ml-md" noutil :vols="session.espace.quotas"/>
-    </div>
-
-    <div class="q-my-sm">
-      <div class="row">
-        <span class="titre-md">{{$t('PIqo')}}</span>
-      </div>
-      <quotas-vols class="q-ml-md" noutil :vols="session.synthese.tsp['0'].q"/>
-    </div>
-    <q-separator color="orange" class="q-mt-sm"/>
     <div v-if="session.synthese" style="position:relative;top:-20px">
       <filtre-nom class="w10" style="position:relative;top:30px" nom="espace" prop='code' :idx="0"/>
       <div class="row items-end">
@@ -142,7 +140,7 @@ import SynthHdrs from '../components/SynthHdrs.vue'
 import SynthLigne from '../components/SynthLigne.vue'
 import FiltreNom from '../components/FiltreNom.vue'
 import { dkli, styp, $t, afficherDiag } from '../app/util.mjs'
-import { ID, AMJ, UNITEN, UNITEV } from '../app/api.mjs'
+import { ID, AMJ, UNITEN, UNITEV, edvol } from '../app/api.mjs'
 import { Synthese } from '../app/modele.mjs'
 import { GetSynthese, GetPartition, SetEspaceOptionA, NouvellePartition, SetQuotasA,
   DownloadStatC, DownloadStatC2 } from '../app/operations4.mjs'
@@ -176,6 +174,89 @@ const nbmi = ref(session.espace ? session.espace.nbmi : 12)
 const optionA = ref(session.espace ? (session.espace.opt ? true : false) : false)
 const crTri = ref('code')
 const asc = ref(true)
+
+const qnE = computed(() => {
+  const q = session.espace.quotas.qn
+  return q * UNITEN + ' [' + q + '] '
+})
+
+const qvE = computed(() => {
+  const q = session.espace.quotas.qv
+  return edvol(q * UNITEV) + ' [' + q + '] '
+})
+
+const qcE = computed(() => {
+  const q = session.espace.quotas.qc
+  return '[' + q + 'c] '
+})
+
+const qnA = computed(() => {
+  const q = session.synthese.qA.qn
+  const a = session.synthese.qtA.qn
+  return q * UNITEN + ' [' + q + '] ' + pcn(q, a)
+})
+
+const qvA = computed(() => {
+  const q = session.synthese.qA.qv
+  const a = session.synthese.qtA.qv
+  return edvol(q * UNITEV) + ' [' + q + '] ' + pcv(q, a)
+})
+
+const qcA = computed(() => {
+  const q = session.synthese.qA.qc
+  const a = session.synthese.qtA.qc
+  return '[' + q + 'c] ' + pcc(q, a)
+})
+
+const qp = computed(() => session.synthese.tsp[0])
+
+const qnP = computed(() => {
+  const q = session.espace.quotas.qn - session.synthese.qA.qn
+  return q * UNITEN + ' [' + q + '] ' + qp.value.pcan + '%'
+})
+
+const qvP = computed(() => {
+  const q = session.espace.quotas.qv - session.synthese.qA.qv
+  return edvol(q * UNITEV) + ' [' + q + '] ' + qp.value.pcav + '%'
+})
+
+const qcP = computed(() => {
+  const q = session.espace.quotas.qc - session.synthese.qA.qc
+  return '[' + q + 'c] ' + qp.value.pcac + '%'
+})
+
+const qnO = computed(() => {
+  const q = qp.value.qt.qn
+  return q * UNITEN + ' [' + q + '] '
+})
+
+const qvO = computed(() => {
+  const q = qp.value.qt.qv
+  return edvol(q * UNITEV) + ' [' + q + '] '
+})
+
+const qcO = computed(() => {
+  const q = qp.value.qt.qc
+  return '[' + q + 'c] '
+})
+
+const pcn = (q, a) => {
+  let pc = q ? (Math.round(a * 100 / (q * UNITEN))) : 999
+  if (pc > 999) pc = 999
+  return pc + '%'
+}
+
+const pcv = (q, a) => {
+  let pc = q ? (Math.round(a * 100 / (q * UNITEV))) : 999
+  if (pc > 999) pc = 999
+  return pc + '%'
+}
+
+const pcc = (q, a) => {
+  let pc = q ? (Math.round(a * 100 / q)) : 999
+  if (pc > 999) pc = 999
+  return pc + '%'
+}
 
 const clc = (n) => {
   if (n === crTri.value) asc.value = !asc.value
