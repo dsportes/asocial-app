@@ -321,10 +321,12 @@ export async function connexion(phrase, razdb) {
   try { 
     const op = new ConnexionSynchroIncognito()
     await op.run()
+    /*
     setTimeout(async () => {
       await hb.pingHB()
-      await hb.startHB()
+      await hb.connex()
     }, 50)
+    */
   } catch (e) { 
     throw e
   }
@@ -456,8 +458,10 @@ export class OperationS extends Operation {
         token: session.authToken, 
         dataSync: ds ? ds.serial() : null, 
       }
-      if ((!ds1 || full) && nbIter === 0) {
+      if ((!ds1 || full) && nbIter === 0) { // Cas de login / relogin
+        const hb = stores.hb
         args.subJSON = config.subJSON
+        args.nhb = hb.nhb
       }
       if (!nbIter) {
         if (full) args.full = true

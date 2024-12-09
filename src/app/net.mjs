@@ -130,7 +130,7 @@ export async function post (op, fonction, args) {
       if (resp.conso) session.setConso(resp.conso)
       if (resp.trlog) 
         syncQueue.synchro(resp.trlog)
-      if (resp.nhb !== undefined) hb.setNhb(resp.nhb)
+      if (resp.nhb !== undefined) hb.retOP(resp.nhb) // { sessionId, nhb, nomop }
     }
     return resp
   } catch (e) { // Résultat mal formé

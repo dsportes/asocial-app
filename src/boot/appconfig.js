@@ -110,4 +110,6 @@ export default boot(async ({ app /* Vue */ }) => {
   await stores.config.setConfig(cfg)
 
   setRequiredModules({ pako: pako })
+
+  stores.hb.nextHB(true)
 })

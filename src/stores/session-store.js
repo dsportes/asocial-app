@@ -254,9 +254,9 @@ export const useSessionStore = defineStore('session', {
     */
     async initSession(phrase) {
       this.phrase = phrase
-      this.config.nc++
-      stores.hb.reset()  
+      this.config.nc++ 
       this.setAuthToken(phrase)
+      stores.hb.connex()
       this.nombase = localStorage.getItem(this.lsk) || ''
       this.auj = AMJ.amjUtc()
       this.dhConnx = Date.now()
