@@ -46,7 +46,7 @@
         </div>
 
         <div class="titre-md">{{$t('NPquo')}}</div>
-        <quotas-vols class="q-ml-md" :vols="sp.quotas" noutil/>
+        <quotas-vols class="q-ml-md" :vols="sp.quotas"/>
 
         <div class="titre-md q-mt-xs">{{$t('NPmot')}}</div>
         <show-html class="q-mb-xs border1" zoom maxh="4rem" :texte="sp.ard"/>

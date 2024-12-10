@@ -2,8 +2,8 @@ import { defineStore } from 'pinia'
 import { $t, hms } from '../app/util.mjs'
 
 const seuillarge = 900
-const pagesF = new Set(['chats', 'partition', 'people', 'groupes', 'groupesac', 'groupe', 'invitation', 'notes'])
-const tabF = new Set(['membres'])
+const pagesF = new Set(['admin', 'chats', 'partition', 'people', 'groupes', 'groupesac', 'groupe', 'invitation', 'notes'])
+const tabF = new Set(['espaces', 'membres'])
 const pagesB = new Set(['espace', 'compte', 'groupes', 'groupesac'])
 
 // Le compteur de dialogues ouverts DOIT ne pas être remis à 0

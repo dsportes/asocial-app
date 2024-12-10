@@ -52,8 +52,8 @@ const mindlvat = computed(() => Math.floor(AMJ.amjUtc() / 100))
 const initdlvat = computed(() => props.espace.dlvat ? Math.floor(props.espace.dlvat / 100) : mindlvat.value)
 const maxdlvat = computed(() => Math.floor(AMJ.max / 100))
 
-function cfDlvat (dl) {
-  dlv.value = AMJ.djMois((dl * 100) + 1)
+function cfDlvat () {
+  dlv.value = AMJ.djMois((dlvat.value * 100) + 1)
   ui.oD('PEdlvat', idc)
 }
 

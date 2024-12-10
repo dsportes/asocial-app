@@ -62,6 +62,7 @@
               </div>
               <icon-alerte class="col-auto" espace :niv="esp.notifE ? esp.notifE.nr - 1 : -1"/>
             </div>
+            <div v-if="limc(idx) !==''" class="msg q-mx-sm">{{$t('PEdlvat', limc(idx))}}</div>
             <div class="titre-md text-italic q-my-sm">{{$t('PEabom', abot(idx))}}</div>
           </div>
         </template>
@@ -70,38 +71,51 @@
           <btn-cond v-if="esp.hTC" class="q-ma-xs" :label="$t('ENnpspc')" 
             @ok="ovnspc(esp)" />
           
-          <div class="q-my-sm">
-            <div class="row">
-              <span class="titre-md q-mr-md">{{$t('ESquotas')}}</span>
-              <btn-cond round icon="edit"  @ok="ovchgquotas(esp)"/>
+          <q-expansion-item class="q-my-xs" 
+            switch-toggle-side expand-separator dense header-class="bg-primary text-white titre-md"
+            :label="$t('ESquotas')" group="espaces2">
+            <div class="q-my-sm">
+              <div class="row justify-between">
+                <quotas-vols class="col" :vols="esp.quotas"/>
+                <btn-cond round icon="edit" class="col-auto self-start" @ok="ovchgquotas(esp)"/>
+              </div>
             </div>
-            <quotas-vols class="q-ml-md" noutil :vols="esp.quotas"/>
-          </div>
+          </q-expansion-item>
 
-          <div v-if="!esp.hTC">
-            <div class="titre-md q-my-sm">{{$t('ESnbmi2', [esp.nbmi])}}</div>
-
-            <div v-if="esp.opt" class="titre-md q-my-sm">{{$t('PTopt')}}</div>
-
+          <q-expansion-item class="q-my-xs" 
+            switch-toggle-side expand-separator dense header-class="bg-primary text-white titre-md"
+            :label="$t('ESal')" group="espaces2">
             <div class="q-my-sm">
               <bouton-dlvat :espace="esp" @close="finDlv"/>
+              <apercu-notif class="q-my-sm" :notif="esp.notifE" :idx="idx" 
+                :type="0" :cible="esp.ns"/>
             </div>
+          </q-expansion-item>
 
-            <apercu-notif class="q-my-sm" :notif="esp.notifE" :idx="idx" 
-              :type="0" :cible="esp.ns"/>
+          <q-expansion-item v-if="!esp.hTC" class="q-my-xs" 
+            switch-toggle-side expand-separator dense header-class="bg-primary text-white titre-md"
+            :label="$t('ESoptc')" group="espaces2">
+            <div class="q-my-sm">
+              <div class="titre-md q-my-sm">{{$t('ESnbmi2', [esp.nbmi])}}</div>
+              <div class="titre-md q-my-sm">{{$t('PTopt' + (esp.opt ? 'o' : 'n'))}}</div>
+            </div>
+          </q-expansion-item>
 
-            <div class="q-mb-sm">
-              <div class="titre-md">{{$t('PEstm')}}</div>
-              <div class="row q-gutter-sm q-mb-sm">
+          <q-expansion-item v-if="!esp.hTC" class="q-my-xs" 
+            switch-toggle-side expand-separator dense header-class="bg-primary text-white titre-md"
+            :label="$t('PEstm1')" group="espaces2">
+            <div class="q-ml-lg q-my-sm">
+              <div class="row q-gutter-xs q-mb-md items-center">
+                <div class="titre-md">{{$t('PEstm')}}</div>
                 <btn-cond class="self-start b1" label="M" @ok="dlstat(esp, 0)"/>
                 <btn-cond class="self-start b1" label="M-1" @ok="dlstat(esp, 1)"/>
                 <btn-cond class="self-start b1" label="M-2" @ok="dlstat(esp, 2)"/>
                 <btn-cond class="self-start b1" label="M-3" @ok="dlstat(esp, 3)"/>
-                <saisie-mois v-model="mois" :dmax="maxdl" :dmin="mindl(esp)" :dinit="maxdl"
-                  @ok="dlstat2(esp)" icon="download" :label="$t('ESdlc')"/>
               </div>
+              <saisie-mois v-model="mois" :dmax="maxdl" :dmin="mindl(esp)" :dinit="maxdl"
+                @ok="dlstat2(esp)" icon="download" :label="$t('ESdlc')"/>
             </div>
-          </div>
+          </q-expansion-item>
         </div>
       </q-expansion-item>
     </div>
@@ -216,16 +230,37 @@ const OPNOMS = {
 }
 
 const session = stores.session
+const fSt = stores.filtre
 const cfg = stores.config
-const lstEsp = ref([])
+const lstEspB = ref([])
+
+const lstEsp = computed(() => {
+  const lst = []
+  const f = fSt.filtre.admin
+  const t = fSt.tri.admin
+  for (const r of lstEspB.value) {
+    if (f.org && r.org.indexOf(f.org) === -1) continue
+    if (f.ns && r.ns !== f.ns) continue
+    lst.push(r)
+  }
+  if (t === 1)
+    lst.sort((a, b) => { return a.org < b.org ? -1 : (a.org === b.org ? 0 : 1)})
+  else if (t === 2)
+    lst.sort((a, b) => { return a.abot[0] > b.abot[0] ? -1 : (a.abot[0] === b.abot[0] ? 0 : 1)})
+  else
+    lst.sort((a, b) => { return a.ns > b.ns ? -1 : (a.ns === b.ns ? 0 : 1)})
+  return lst
+})
 
 async function loadEsp () {
   const lst = []
   const rows = await new GetEspaces().run()
-  if (rows) for (const row of rows) 
-    lst.push(await compile(row))
-  lst.sort((a, b) => { return a.ns < b.ns ? -1 : (a.ns === b.ns ? 0 : 1)})
-  lstEsp.value = lst
+  if (rows) for (const row of rows) {
+    const r = await compile(row)
+    r.abot = Tarif.abo(r.quotas)
+    lst.push(r)
+  }
+  lstEspB.value = lst
 }
 
 onMounted(async () => {
@@ -238,10 +273,14 @@ const maxdl = computed(() => {
   return Math.floor(m / 100)
 })
 
-const abot = (idx) => Tarif.abo(lstEsp.value[idx].quotas)
+const abot = (idx) => lstEsp.value[idx].abot
+const limc = (idx) => {
+  const dlvat = lstEsp.value[idx].dlvat
+  return !dlvat || dlvat === AMJ.max ? '' : Math.floor(dlvat / 100)
+}
 
 const gccode = ref('???')
-const tab = ref('taches')
+const tab = ref('espaces')
 const gcop = ref('')
 const ns = ref('')
 const nsc = ref('') // ns "courant" de PageEspace à ouvrir
@@ -334,7 +373,7 @@ function ovnspc (e) {
 }
 
 async function nvspc () {
-  await new MajSponsEspace().run(esp.value.org, ps.value, esp.value.id)
+  await new MajSponsEspace().run(esp.value.org, ps.value, esp.value.ns)
   ns.value = 0
   ps.value = null
   ui.fD()
@@ -387,7 +426,7 @@ function mindl (esp) {
 async function dlstat2 (esp) {
   const cleES = esp.cleES
   const { err, blob } = await new DownloadStatC2()
-    .run(esp.org, parseInt(mois.value), 'C', cleES)
+    .run(esp.org, mois.value, 'C', cleES)
   const nf = esp.org + '-C_' + mois.value
   if (!err) {
     saveAs(blob, nf)
@@ -425,5 +464,5 @@ async function tacheGo (t) {
 .bord7
   border: 2px solid $primary
 .b1
-  width: 4rem
+  width: 2rem
 </style>

@@ -84,7 +84,7 @@
           <div class="titre-md">{{$t('NPmotc')}} : <span class="font-mono q-pl-md">{{mot}}</span></div>
           <div>
             <div class="titre-md">{{$t(estDelegue ? 'compteD' : 'compteO', [partition.id])}}</div>
-            <quotas-vols class="q-ml-md" :vols="quotas" noutil/>
+            <quotas-vols class="q-ml-md" :vols="quotas"/>
           </div>
           <div v-if="dconf" class="titre-md">{{$t('conf')}}</div>
           <div v-if="estAutonome" class="text-warning titre-md">{{$t('compteA')}}</div>

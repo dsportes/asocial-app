@@ -51,7 +51,7 @@
         </div>
       </q-toolbar-title>
 
-      <btn-cond v-if="session.ok && !session.estAdmin && ui.aUnFiltre" 
+      <btn-cond v-if="session.ok && ui.aUnFiltre" 
         color="warning" round icon="search" @ok="ui.ouvrFiltre">
         <q-tooltip>{{$t('MLAfiltre')}}</q-tooltip>
       </btn-cond>
@@ -141,6 +141,11 @@
           <filtre-mc nom="chats" attr="mcp" :idx="0"/>
           <filtre-mc nom="chats" attr="mcn" :idx="1"/>
           <filtre-avecmut nom="chats" attr="avecmut" :idx="0"/>
+        </div>
+        <div v-if="ui.page === 'admin'" class="column justify-start">
+          <filtre-nom nom="admin" prop='org' :idx="0"/>
+          <filtre-ns nom="admin" prop="ns" :idx="1"/>
+          <filtre-tri nom="admin" :nb-options="3" :idx="0"/>
         </div>
         <div v-if="ui.page === 'partition'" class="column justify-start">
           <filtre-nom nom="partition" prop='nomc' :idx="0"/>
@@ -416,6 +421,7 @@ import BoutonLangue from './components/BoutonLangue.vue'
 import BoutonBulle from './components/BoutonBulle.vue'
 import IconAlerte from './components/IconAlerte.vue'
 import QueueIcon from './components/QueueIcon.vue'
+import FiltreNs from './components/FiltreNs.vue'
 import FiltreNom from './components/FiltreNom.vue'
 import FiltreMc from './components/FiltreMc.vue'
 import FiltreNbj from './components/FiltreNbj.vue'

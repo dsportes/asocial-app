@@ -31,7 +31,7 @@
         <div v-if="sp.dconf">{{$t('conf')}}</div>
 
         <div class="titre-md">{{$t('NPquo')}}</div>
-        <quotas-vols class="q-ml-md" :vols="sp.quotas" noutil/>
+        <quotas-vols class="q-ml-md" :vols="sp.quotas"/>
         <div class="titre-md q-mt-xs">{{$t('NPmot')}}</div>
         <show-html class="q-mb-xs bord" zoom maxh="4rem" :texte="sp.ard" :idx="idx"/>
 

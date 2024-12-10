@@ -328,7 +328,7 @@ async function dlstat (mr) {
 async function dlstat2 () {
   const cleES = session.compte.cleE
   const { err, blob } = await new DownloadStatC2()
-    .run(session.espace.org, parseInt(mois.value), 'C', cleES)
+    .run(session.espace.org, mois.value, 'C', cleES)
   const nf = session.espace.org + '-C_' + mois.value
   if (!err) {
     saveAs(blob, nf)

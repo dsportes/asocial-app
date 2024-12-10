@@ -1,20 +1,20 @@
 <template>
-<span class="row justify-start">
-  <span class="column items-end q-mr-sm">
-    <span class="titre-md">{{label}}</span>
-    <span :class="(err ? 'text-right text-bold text-negative bg-yellow-5' : '') + ' font-mono fs-xs q-py-none q-px-xs q-mx-sm'">
-      {{min}}...{{max}}
-    </span>
+  <span class="row justify-between items-center">
+    <div class="col titre-md">{{label}}</div>
+    <div class="col-auto q-mx-sm column items-center bord">
+      <div class="row" style="overflow:hidden;height:2rem">
+        <q-input class="font-mono text-bold fs-md q-mr-xs" v-model="aa" dense
+          style="width:3rem;position:relative;top:-9px;" prefix="20"/>
+        <q-select class="font-mono text-bold fs-md" v-model="mm" dense :options="mois"
+          style="width:2.5rem;position:relative;top:-9px;"/>
+      </div>
+      <div :class="(err ? 'text-right msg' : '') + ' font-mono fs-xs q-py-none q-px-xs q-mx-sm'">
+        {{min}}...{{max}}
+      </div>
+    </div>
+    <btn-cond class="col-auto self-center"
+      :icon="icon" round @ok="ok" :disable="err"/>
   </span>
-  <span class="row" style="overflow:hidden;height:2rem">
-    <q-input class="font-mono text-bold fs-md q-mr-xs" v-model="aa" dense
-      style="width:3rem;position:relative;top:-9px;" prefix="20"/>
-    <q-select class="font-mono text-bold fs-md" v-model="mm" dense :options="mois"
-      style="width:2.5rem;position:relative;top:-9px;"/>
-  </span>
-  <btn-cond class="self-start q-ml-sm" color="warning"
-    :icon="icon" round @ok="ok" :disable="err"/>
-</span>
 </template>
 
 <script setup>
@@ -55,16 +55,21 @@ const max = props.dmax || 209912
 
 const dloc = defineModel({type: Number})
 
+const ret = ref(dloc.value)
+
 function ok () { 
-  emit('ok', dloc.value)
+  dloc.value = ret.value
+  emit('ok')
 }
 
 function check () { 
-  err.value = dloc.value < min || dloc.value > max 
+  err.value = ret.value < min || ret.value > max 
 }
 
 function dx () { 
-  dloc.value = ((parseInt(aa.value) + 2000) * 100) + parseInt(mm.value)
+  const a = !aa.value || isNaN(aa.value) ? 0 : parseInt(aa.value)
+  const x = ((a + 2000) * 100) + parseInt(mm.value)
+  ret.value = x
 }
 
 watch(aa, (ap, av) => {

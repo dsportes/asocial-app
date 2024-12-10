@@ -715,6 +715,8 @@ export default {
   MLAfav: 'Fichiers visibles en avion',
 
   // Nom des filtres
+  FIns: 'ID de l\'espace',
+  FIorg: 'Code org. contient',
   FIcode: 'Code part. contient',
   FInom: 'Début du nom du contact',
   FIngr: 'Début du nom du groupe',
@@ -771,6 +773,9 @@ export default {
   PPnv2: 'Création d\'une nouvelle note',
 
   // Critères de tri
+  TRIadmin0: 'ID de l\'espace ↑',
+  TRIadmin1: 'Code organisation ↑',
+  TRIadmin2: 'Coût abonnement ↓',
   TRIespace0: 'Code partition ↑',
   TRIespace1: 'Code partition ↓',
   TRIespace2: 'Nb d\'Alertes de partition ↑',
@@ -886,7 +891,9 @@ export default {
   ESnbmi: 'Comptes supprimés après N mois sans connexion',
   ESnbmi2: 'Comptes supprimés après {0} mois sans connexion',
   ESorg: 'Organisation',
-  ESquotas: 'Quotas totaux de l\'espace fixés par l\'administrateur technique:',
+  ESquotas: 'Quotas de l\'espace',
+  ESoptc: 'Options fixées par le Comptable',
+  ESal: 'Alerte et limitation de connexion',
   ESreq: 'Valeur requise',
   ESnum: 'Numéro d\'espace non disponible',
   ESorg1: 'Au moins 4 caractères/chiffres',
@@ -1238,7 +1245,8 @@ export default {
   PTdlvatx: 'Dates limites de connexion des comptes',
   PTdlvata: 'ACTUELLLE : {0}',
   PTdlvatf: 'FUTURE : {0}',
-  PTopt: 'Comptes "autonomes" autorisés',
+  PTopto: 'Comptes "autonomes" autorisés',
+  PToptn: 'Comptes "autonomes" NON autorisés',
 
   // ChatsAvec
   CAVtit: 'Chats avec :',
@@ -1467,6 +1475,12 @@ export default {
   CQconsocalc: 'par mois',
   CQnbdocs: 'Pas de document | Un document | {count} documents',
   CQvolfics: 'de fichiers',
+  CQabo1: 'Abonnement mensuel:',
+  CQabo2: 'Documents:',
+  CQabo3: 'Fichiers:',
+  CQqn: 'Quota nb. docs.',
+  CQqv: 'Quota vol. fics.',
+  CQqc: 'Quota calcul 30j',
 
 // ChoixEmoji
   EMOsearch1: 'Recherche',
@@ -1636,6 +1650,7 @@ export default {
   PExcpto: 'Attr. comptes "O"',
   PEdetpart: 'Décomposition de l\'espace en partitions',
   PEabom: 'Abonnement mensuel: {0}c (QN: {1}c + QV: {2}c)',
+  PEdlvat: 'Connexions jusqu\'à {0}',
 
   // PanelCredits
   TKrefp: 'Référence à joindre au paiemnet: "{0} {1}"',
