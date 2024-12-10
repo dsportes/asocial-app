@@ -1519,6 +1519,11 @@ export default {
   ANlong1: 'A minima une alerte informative / contraintes fortes possibles.',
   ANlong2: 'ACCÈS RESTREINT, mises à jour et consultations interdites (SAUF pour les actions d\'URGENCE)',
   ANlong3: 'Suppression IMMINENTE du compte ou impossibilité IMMINENTE de s\'y connecter',
+  // Aperçu Alerte
+  ANlongb0: 'Pas d\'alerte.',
+  ANlongb1: 'Alerte informative.',
+  ANlongb2: 'Espace FIGE: AUCUNE mise à jour possible',
+  ANlongb3: 'Espace CLOS',
   ANcre: 'En créer une',
   ANauc0: 'Pas d\'alerte générale',
   ANauc1: 'Pas d\'alerte à tous les comptes de la partition',
@@ -1630,6 +1635,7 @@ export default {
   PExpart: 'Libres pour part.',
   PExcpto: 'Attr. comptes "O"',
   PEdetpart: 'Décomposition de l\'espace en partitions',
+  PEabom: 'Abonnement mensuel: {0}c (QN: {1}c + QV: {2}c)',
 
   // PanelCredits
   TKrefp: 'Référence à joindre au paiemnet: "{0} {1}"',

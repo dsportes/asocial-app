@@ -52,14 +52,17 @@
       <q-expansion-item  v-for="(esp, idx) in lstEsp" :key="esp.ns" class="q-my-xs"
         switch-toggle-side expand-separator dense group="espaces">
         <template v-slot:header>
-          <div :class="dkli(idx) + ' row full-width justify-between text-bold font-mono fs-lg'">
-            <div class="col">
-              <span class="q-mr-md">#{{esp.ns}}</span>
-              <span>{{esp.org}}</span>
-              <span v-if="esp.hTC" class="msg q-mx-sm">{{$t('ESencrea')}}</span>
-              <span v-if="!esp.hTC && esp.moisStat" class="q-ml-md fs-sm">{{$t('ESdms', [esp.moisStat])}}</span>
+          <div :class="dkli(idx) + ' full-width'">
+            <div class="row full-width justify-between text-bold font-mono fs-lg">
+              <div class="col">
+                <span class="q-mr-md">#{{esp.ns}}</span>
+                <span>{{esp.org}}</span>
+                <span v-if="esp.hTC" class="msg q-mx-sm">{{$t('ESencrea')}}</span>
+                <span v-if="!esp.hTC && esp.moisStat" class="q-ml-md fs-sm">{{$t('ESdms', [esp.moisStat])}}</span>
+              </div>
+              <icon-alerte class="col-auto" espace :niv="esp.notifE ? esp.notifE.nr - 1 : -1"/>
             </div>
-            <icon-alerte v-if="esp.notifE" class="col-auto" :niv="nvntf(esp.notifE)"/>
+            <div class="titre-md text-italic q-my-sm">{{$t('PEabom', abot(idx))}}</div>
           </div>
         </template>
 
@@ -191,7 +194,7 @@ import { GetEspaces, CreationEspace, MajSponsEspace, SetEspaceQuotas, InitTaches
   DownloadStatC, DownloadStatC2, GetTaches, DelTache, GoTache } from '../app/operations4.mjs'
 import { get } from '../app/net.mjs'
 import { compile } from '../app/modele.mjs'
-import { Cles, ID, AMJ, UNITEN, UNITEV } from '../app/api.mjs'
+import { Cles, ID, AMJ, Tarif, UNITEN, UNITEV } from '../app/api.mjs'
 import { styp, edvol, mon, nbn, dkli, afficherDiag, dhstring } from '../app/util.mjs'
 
 const ui = stores.ui
@@ -234,6 +237,8 @@ const maxdl = computed(() => {
   const m = AMJ.djMoisN(AMJ.amjUtc(), -1)
   return Math.floor(m / 100)
 })
+
+const abot = (idx) => Tarif.abo(lstEsp.value[idx].quotas)
 
 const gccode = ref('???')
 const tab = ref('taches')

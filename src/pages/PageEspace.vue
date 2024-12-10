@@ -32,6 +32,7 @@
 
       <q-expansion-item switch-toggle-side dense group="somegroup"
         header-class="bg-primary text-white titre-lg" :label="$t('PEquotas')">
+        <div class="q-ml-lg titre-md text-bold q-my-sm">{{$t('PEabom', abot)}}</div>
         <div class="q-ml-lg q-my-sm">
           <div class="q-my-sm row text-italic text-bold titre-md items-center">
             <div class="col-3"></div>
@@ -140,7 +141,7 @@ import SynthHdrs from '../components/SynthHdrs.vue'
 import SynthLigne from '../components/SynthLigne.vue'
 import FiltreNom from '../components/FiltreNom.vue'
 import { dkli, styp, $t, afficherDiag } from '../app/util.mjs'
-import { ID, AMJ, UNITEN, UNITEV, edvol } from '../app/api.mjs'
+import { ID, AMJ, Tarif, UNITEN, UNITEV, edvol } from '../app/api.mjs'
 import { Synthese } from '../app/modele.mjs'
 import { GetSynthese, GetPartition, SetEspaceOptionA, NouvellePartition, SetQuotasA,
   DownloadStatC, DownloadStatC2 } from '../app/operations4.mjs'
@@ -174,6 +175,8 @@ const nbmi = ref(session.espace ? session.espace.nbmi : 12)
 const optionA = ref(session.espace ? (session.espace.opt ? true : false) : false)
 const crTri = ref('code')
 const asc = ref(true)
+
+const abot = computed(() => Tarif.abo(session.espace.quotas))
 
 const qnE = computed(() => {
   const q = session.espace.quotas.qn

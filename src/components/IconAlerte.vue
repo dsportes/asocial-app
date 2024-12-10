@@ -3,8 +3,11 @@
   <q-avatar v-if="niv >= 3" size="sm" square :class="alire ? ' bord2' : ' bord1'">
     <img src="~assets/zombi.png">
   </q-avatar>
-  <q-icon v-else size="24px" :color="clr[niv]" :class="alire ? ' bord2' : ' bord1'" :name="ico[niv]"/>
-  <q-tooltip class="bg-indigo text-white font-sm">{{$t('ANlong' + (niv || 0))}}</q-tooltip>
+  <q-icon v-if="niv >= 0 && niv < 3" size="24px" :color="clr[niv]" :class="alire ? ' bord2' : ' bord1'" :name="ico[niv]"/>
+  <q-icon v-if="niv === -1" size="24px" name="circle" color="grey-5"/>
+  <q-tooltip class="bg-indigo text-white font-sm">
+    {{espace ? $t('ANlongb' + (niv === -1 ? 0 : niv + 1)) : $t('ANlong' + (niv || 0))}}
+  </q-tooltip>
 </span>
 </template>
 
@@ -19,13 +22,8 @@ const clr = ['green-5', 'warning', 'negative']
 const ico = ['circle', 'warning', 'dangerous']
 
 const props = defineProps({ 
-  /* gravité maximale des alertes
-    3 : zombi, compte en suppression ou inaccessibilité imminente
-    2 : Accès restreint
-    1 : Accès avec contraintes, alertes de compte ou partition
-    0 : Pas d'alerte
-  */
   niv: Number,
+  espace: Boolean,
   alire: Boolean // présence de l'indicateur à lire
 })
 
