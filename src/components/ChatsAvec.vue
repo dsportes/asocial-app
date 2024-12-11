@@ -6,8 +6,10 @@
       <div v-for="e in chDuC" :key="e.id">
         <span class="q-mr-md bord">
           <span class="fs-md q-mr-sm">{{e.nom}}</span>
-          <btn-cond v-if="e.ch" round icon="open_in_new" cond="cVisu" @ok="ouvrirChat(e.ch)"/>
-          <btn-cond v-else round icon="add" color="warning" cond="cEdit" @ok="creerChat()"/>
+          <btn-cond v-if="e.ch" round icon="open_in_new" 
+            :cond="urgence ? 'cUrgence' : 'cVisu'" @ok="ouvrirChat(e.ch)"/>
+          <btn-cond v-else round icon="add" color="warning" 
+            :cond="urgence ? 'cUrgence' : 'cEdit'" @ok="creerChat()"/>
         </span>
       </div>
     </div>

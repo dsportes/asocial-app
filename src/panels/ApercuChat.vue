@@ -280,8 +280,7 @@
 
   const chatX = computed(() => aSt.getChat(props.id, props.ids))
   const zombi = computed(() => !chatX.value )
-  // const nomE = computed(() => chatX.value ? session.getCV(chatX.value.idE).nom : '')
-  // const nomI = computed(() => chatX.value ? session.getCV(chatX.value.id).nom : '')
+
   const estDel = computed(() => ID.estComptable(chatX.value.idE) || session.estDelegue)
   const cvE = computed(() => session.getCV(chatX.value.idE))
   const cvI = computed(() => session.getCV(chatX.value.id))
@@ -384,7 +383,10 @@
     type.value = t
     cf.value = false
     texte.value = $t('PPmsg' + type.value, [session.compte.idp])
-    quotas.value = t === 'A' ? await session.getQuotasA() : await session.getQuotasP()
+    await new GetCompta().run(chatX.value.idE, chatX.value.ids)
+    // pour le compte idE (pas pour l'exécutant) - Compta chargée
+    quotas.value = t === 'A' ? await session.getQuotasA(session.compta.compteurs.qv) 
+      : await session.getQuotasP(session.compta.compteurs.qv, true)
     ui.oD('BPmut', idc)
   }
 

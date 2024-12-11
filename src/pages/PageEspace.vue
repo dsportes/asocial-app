@@ -19,7 +19,7 @@
       <q-expansion-item switch-toggle-side dense group="somegroup"
         header-class="bg-primary text-white titre-lg" :label="$t('PEoptg')">
         <div class="q-ml-lg q-my-sm">
-          <q-toggle class="q-my-sm" v-model="optionA" :label="$t('PTopt')" />
+          <q-toggle class="q-my-sm" v-model="optionA" :label="$t('PTopto')" />
           <div class="q-mb-sm row justify-start" style="height:1.8rem;overflow:hidden">
             <div class="titre-md q-mx-sm">{{$t('ESnbmi')}}</div>
             <q-select class="col-auto items-start items-start text-bold bg-primary text-white titre-lg q-pl-sm" 
@@ -32,7 +32,7 @@
 
       <q-expansion-item switch-toggle-side dense group="somegroup"
         header-class="bg-primary text-white titre-lg" :label="$t('PEquotas')">
-        <div class="q-ml-lg titre-md text-bold q-my-sm">{{$t('PEabom', abot)}}</div>
+
         <div class="q-ml-lg q-my-sm">
           <div class="q-my-sm row text-italic text-bold titre-md items-center">
             <div class="col-3"></div>
@@ -47,23 +47,45 @@
             <div class="col-3 text-center font-mono">{{qcE}}</div>
           </div>
           <div class="q-my-xs row items-center">
+            <div class="col-3 text-right titre-md">{{$t('PEcabo', [mon(aboE[0], 3)])}}</div>
+            <div class="col-3 text-center font-mono">{{mon(aboE[1], 3)}}</div>
+            <div class="col-3 text-center font-mono">{{mon(aboE[2], 3)}}</div>
+            <div class="col-3 text-center font-mono"></div>
+          </div>
+
+          <div class="q-mt-sm row items-center">
             <div class="col-3 text-italic titre-md">{{$t('PExcpta')}}</div>
             <div class="col-3 text-center font-mono">{{qnA}}</div>
             <div class="col-3 text-center font-mono">{{qvA}}</div>
             <div class="col-3 text-center font-mono">{{qcA}}</div>
           </div>
           <div class="q-my-xs row items-center">
+            <div class="col-3 text-right titre-md">{{$t('PEcabo', [mon(aboA[0], 3)])}}</div>
+            <div class="col-3 text-center font-mono">{{mon(aboA[1], 3)}}</div>
+            <div class="col-3 text-center font-mono">{{mon(aboA[2], 3)}}</div>
+            <div class="col-3 text-center font-mono"></div>
+          </div>
+
+          <div class="q-mt-sm row items-center">
             <div class="col-3 text-italic titre-md">{{$t('PExpart')}}</div>
             <div class="col-3 text-center font-mono">{{qnP}}</div>
             <div class="col-3 text-center font-mono">{{qvP}}</div>
             <div class="col-3 text-center font-mono">{{qcP}}</div>
           </div>
-          <div class="q-my-xs row items-center">
+
+          <div class="q-mt-sm row items-center">
             <div class="col-3 text-italic titre-md">{{$t('PExcpto')}}</div>
             <div class="col-3 text-center font-mono">{{qnO}}</div>
             <div class="col-3 text-center font-mono">{{qvO}}</div>
             <div class="col-3 text-center font-mono">{{qcO}}</div>
           </div>
+          <div class="q-my-xs row items-center">
+            <div class="col-3 text-right titre-md">{{$t('PEcabo', [mon(aboO[0], 3)])}}</div>
+            <div class="col-3 text-center font-mono">{{mon(aboO[1], 3)}}</div>
+            <div class="col-3 text-center font-mono">{{mon(aboO[2], 3)}}</div>
+            <div class="col-3 text-center font-mono"></div>
+          </div>
+
           <div class="q-my-md">
             <div class="row justify-between items-center">
               <span class="titre-md text-bold q-my-sm">{{$t('PIqa')}}</span>
@@ -72,6 +94,7 @@
           </div>
         </div>
       </q-expansion-item>
+      
     </div>
 
     <div class="row justify-between items-center titre-lg q-pa-xs q-mt-md q-mb-sm bg-secondary text-white">
@@ -136,11 +159,10 @@ import stores from '../stores/stores.mjs'
 import BtnCond from '../components/BtnCond.vue'
 import SaisieMois from '../components/SaisieMois.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
-import QuotasVols from '../components/QuotasVols.vue'
 import SynthHdrs from '../components/SynthHdrs.vue'
 import SynthLigne from '../components/SynthLigne.vue'
 import FiltreNom from '../components/FiltreNom.vue'
-import { dkli, styp, $t, afficherDiag } from '../app/util.mjs'
+import { dkli, styp, $t, mon, afficherDiag } from '../app/util.mjs'
 import { ID, AMJ, Tarif, UNITEN, UNITEV, edvol } from '../app/api.mjs'
 import { Synthese } from '../app/modele.mjs'
 import { GetSynthese, GetPartition, SetEspaceOptionA, NouvellePartition, SetQuotasA,
@@ -176,12 +198,15 @@ const optionA = ref(session.espace ? (session.espace.opt ? true : false) : false
 const crTri = ref('code')
 const asc = ref(true)
 
-const abot = computed(() => Tarif.abo(session.espace.quotas))
+const aboE = computed(() => Tarif.abo(session.espace.quotas))
+const aboA = computed(() => Tarif.abo(session.synthese.qA))
+const aboO = computed(() => Tarif.abo(qp.value.qt))
 
 const qnE = computed(() => {
   const q = session.espace.quotas.qn
   return q * UNITEN + ' [' + q + '] '
 })
+
 
 const qvE = computed(() => {
   const q = session.espace.quotas.qv
@@ -213,35 +238,23 @@ const qcA = computed(() => {
 
 const qp = computed(() => session.synthese.tsp[0])
 
-const qnP = computed(() => {
-  const q = session.espace.quotas.qn - session.synthese.qA.qn
-  return q * UNITEN + ' [' + q + '] ' + qp.value.pcan + '%'
+const qP = computed(() => { return {
+  qn: session.espace.quotas.qn - session.synthese.qA.qn,
+  qv: session.espace.quotas.qv - session.synthese.qA.qv,
+  qc: session.espace.quotas.qc - session.synthese.qA.qc }
 })
 
-const qvP = computed(() => {
-  const q = session.espace.quotas.qv - session.synthese.qA.qv
-  return edvol(q * UNITEV) + ' [' + q + '] ' + qp.value.pcav + '%'
-})
+const qnP = computed(() => qP.value.qn * UNITEN + ' [' + qP.value.qn + '] ' + qp.value.pcan + '%')
 
-const qcP = computed(() => {
-  const q = session.espace.quotas.qc - session.synthese.qA.qc
-  return '[' + q + 'c] ' + qp.value.pcac + '%'
-})
+const qvP = computed(() => edvol(qP.value.qv * UNITEV) + ' [' + qP.value.qv + '] ' + qp.value.pcav + '%')
 
-const qnO = computed(() => {
-  const q = qp.value.qt.qn
-  return q * UNITEN + ' [' + q + '] '
-})
+const qcP = computed(() => '[' + qP.value.qc + 'c] ' + qp.value.pcac + '%')
 
-const qvO = computed(() => {
-  const q = qp.value.qt.qv
-  return edvol(q * UNITEV) + ' [' + q + '] '
-})
+const qnO = computed(() => qp.value.qt.qn * UNITEN + ' [' + qp.value.qt.qn + '] ')
 
-const qcO = computed(() => {
-  const q = qp.value.qt.qc
-  return '[' + q + 'c] '
-})
+const qvO = computed(() => edvol(qp.value.qt.qv * UNITEV) + ' [' + qp.value.qt.qv + '] ')
+
+const qcO = computed(() => '[' + qp.value.qt.qc + 'c] ')
 
 const pcn = (q, a) => {
   let pc = q ? (Math.round(a * 100 / (q * UNITEN))) : 999

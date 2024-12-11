@@ -1,6 +1,7 @@
 <template>
 <div>
-  <div class="row titre-md text-italic full-width">
+  <div v-if="label" class="titre-md full-width">{{label}}</div>
+  <div class="row titre-md q-my-xs text-italic full-width">
     <div :class="col4 + ' '">{{$t('CQqn')}}</div>
     <div :class="col4 + ' '">{{$t('CQqv')}}</div>
     <div v-if="vols.qc !== undefined" :class="col4 + ' '">{{$t('CQqc')}}</div>
@@ -10,17 +11,17 @@
       <div>[{{vols.qn}}]</div>
       <div>{{qnn}}</div>
       <div v-if="anv">{{pcn}}%</div>
-      <div class="text-bold">{{abo[1]}}c</div>
+      <div class="text-bold">{{mon(abo[1], 3)}}</div>
     </div>
     <div :class="col4 + ' b row justify-around'">
       <div>[{{vols.qv}}]</div>
       <div>{{edvol(qvv)}}</div>
       <div v-if="anv">{{pcv}}%</div>
-      <div class="text-bold">{{abo[2]}}c</div>
+      <div class="text-bold">{{mon(abo[2], 3)}}</div>
     </div>
     <div v-if="vols.qc !== undefined" :class="col4 + ' b row justify-around'">
-      <div>{{vols.qc}}c</div>
-      <div v-if="acj" class="text-bold">{{mon(vols.cjm, 4)}}</div>
+      <div>{{mon(vols.qc, 3)}}</div>
+      <div v-if="acj" class="text-bold">{{mon(vols.cjm, 3)}}</div>
       <div v-if="acj">{{pcc}}%</div>
     </div>
   </div>
@@ -34,7 +35,8 @@ import { Tarif, UNITEN, UNITEV } from '../app/api.mjs'
 import { edvol, mon} from '../app/util.mjs'
 
 const props = defineProps({
-  vols: Object // {qn qv qc v nn nc ng cjm}
+  vols: Object, // {qn qv qc v nn nc ng cjm}
+  label: String
 })
 
 const abo = computed(() => Tarif.abo(props.vols))

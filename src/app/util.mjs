@@ -269,12 +269,47 @@ export function edvol (vol) {
   return (v / 1000000000000000).toPrecision(3) + 'PB'
 }
 
+/*
 export function mon (v, n) { // n : nombres de chiffres après les centimes
   if (!v) return '0c'
   const p = v < 0 ? -v : v
-  if (!n) return (v < 0 ? '-' : '') + Math.round(p) + 'c'
-  return (v < 0 ? '-' : '') + p.toFixed(n).replace('.', ',') + 'c'
+  const s = v < 0 ? '-' : ''
+  if (!n) return s + Math.round(p) + 'c'
+  return s + p.toFixed(n).replace('.', ',') + 'c'
 }
+*/
+
+const chouia = '0.000000000000000'
+
+export function mon (v, n) { // n : si décimal, nombre de chiffres significatifs
+  if (!v) return '0c'
+  const p = v < 0 ? -v : v
+  const s = v < 0 ? '-' : ''
+  const e = Math.floor(p)
+  if (e === p) return s + p + 'c' // Entier
+  const es = ('' + e).length
+  if (es >= n) return s + Math.round(p) + 'c' // Décimal mais assez de chiffres sur entier
+  if (p < 1) {
+    const x = (p.toFixed(n)) // 0.00..999
+    const y = chouia.substring(0, n + 2)
+    if (x === y) return s + '<' + (chouia.substring(0, n + 1) + '1').replace('.', ',') + 'c'
+    return s + x.replace('.', ',') + 'c'
+  }
+  return s + p.toPrecision(n).replace('.', ',') + 'c'
+}
+
+/*
+console.log(mon(1234, 0), '1234')
+console.log(mon(1234, 3), '1234')
+console.log(mon(1234, 6), '1234')
+console.log(mon(123.4567, 3), '123')
+console.log(mon(123.4567, 6), '123.457')
+console.log(mon(0.1234567, 2), '0.12')
+console.log(mon(0.1234567, 5), '0.12346')
+console.log(mon(0.0001234567, 3), '<0.001')
+console.log(mon(12.01234567, 4), '12.01')
+console.log(mon(1.0001234567, 6), '1.00012')
+*/
 
 export function nbn (vol, n, u) { // v: nombre de notes ... n: avec décimales
   const v = vol || 0

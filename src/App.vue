@@ -4,7 +4,7 @@
     <q-toolbar class="full-width">
 
       <btn-cond v-if="session.estAdmin && session.status" color="warning" icon="logout" 
-        @ok="discon" round>
+        @ok="discon">
         <q-tooltip>{{$t('MLAdrc')}}</q-tooltip>
       </btn-cond>
 
@@ -15,8 +15,8 @@
         </q-menu>
       </btn-cond>
 
-      <btn-cond v-if="!session.estAdmin && session.ok" :disable="!aHome" flat icon="home"
-        :color="aHome ? 'green-5' : 'grey'" @ok="gotoAccueilLogin()"/>
+      <btn-cond v-if="!session.estAdmin && session.ok" flat icon="home" color="none"
+        @ok="gotoAccueilLogin()"/>
 
       <btn-cond v-if="!session.estAdmin && session.ok" :disable="!ui.pageback || (ui.page === 'accueil')" icon="arrow_back" round @ok="ui.gotoBack()"/>
 
@@ -52,7 +52,7 @@
       </q-toolbar-title>
 
       <btn-cond v-if="session.ok && ui.aUnFiltre" 
-        color="warning" round icon="search" @ok="ui.ouvrFiltre">
+        color="warning" icon="search" @ok="ui.ouvrFiltre">
         <q-tooltip>{{$t('MLAfiltre')}}</q-tooltip>
       </btn-cond>
 

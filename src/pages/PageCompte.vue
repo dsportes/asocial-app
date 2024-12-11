@@ -1,30 +1,37 @@
 <template>
   <q-page class="column q-pa-xs splg">
-    <div class="row q-my-sm items-center justify-center q-gutter-sm">
-      <div v-if="estA" class="text-warning bg-yellow-3 text-bold">
+    <div class="column q-my-sm items-center q-gutter-sm">
+      <div v-if="estA" class="text-warning text-italic text-bold">
         {{$t('compteA')}}
       </div>
-      <div> <!-- Changement de phrase secrète -->
-        <btn-cond class="q-ml-sm" icon="manage_accounts" no-caps cond="cUrgence"
-          :label="$t('CPTchps')" color="warning" @ok="ouvrirchgps"/>
-        <bouton-help class="q-ml-sm" page="page1"/>
-      </div>
-      <div> <!-- Nouvel avatar -->
-        <btn-cond class="q-ml-sm" icon="add" no-caps cond="cEdit"
-          :label="$t('CPTnvav')" color="warning" @ok="ouvrirNvav"/>
-        <bouton-help class="q-ml-sm" page="page1"/>
-      </div>
-      <!-- maj quotas du compte -->
-      <btn-cond v-if="estDelegue || estA"
-        icon="settings" :label="$t('CPTedq')" @ok="editerq" cond="cUrgence"/>
-    </div>
 
-    <div v-if="estDelegue" class="row justify-between items-center">
-      <div class="q-pa-xs text-warning bg-yellow-3 text-bold">
-        {{$t('CPTdel', [session.compte.idp])}}
+      <div v-if="estDelegue">
+        <span class="q-pa-xs text-warning text-italic text-bold">
+          {{$t('CPTdel', [session.compte.idp])}}</span>
+        <btn-cond class="q-ml-sm" @ok="maPartition" icon="open_in_new"/>
       </div>
-      <btn-cond :label="$t('CPTautoA')" flat color="warning"
-        @ok="muterA"/>
+
+      <div v-if="estDelegue">
+        <btn-cond v-if="estDelegue" :label="$t('CPTautoA')" flat icon="check" color="warning"
+          @ok="muterA"/>
+      </div>
+
+      <div> <!-- Changement de phrase secrète -->
+        <btn-cond class="q-ml-sm" icon="manage_accounts" cond="cUrgence"
+          :label="$t('CPTchps')" flat @ok="saisiePS"/>
+        <bouton-help class="q-ml-sm" page="page1"/>
+      </div>
+
+      <div> <!-- Nouvel avatar -->
+        <btn-cond class="q-ml-sm" icon="add" cond="cEdit"
+          :label="$t('CPTnvav')" flat @ok="ouvrirNvav"/>
+        <bouton-help class="q-ml-sm" page="page1"/>
+      </div>
+      
+      <div> <!-- maj quotas du compte -->
+        <btn-cond v-if="estDelegue || estA"
+          icon="settings" flat :label="$t('CPTedq')" @ok="editerq" cond="cUrgence"/>
+      </div>
     </div>
 
     <!-- Avatars du compte -->
@@ -90,18 +97,6 @@
       </q-card>
     </q-dialog>
 
-    <!-- Dialogue de changement de la phrase secrète -->
-    <q-dialog v-model="ui.d[idc].PCchgps" persistent>
-      <q-card :class="styp('sm') + 'column items-center'">
-        <div class="row q-my-md q-gutter-md justify-center items-center">
-          <btn-cond :label="$t('renoncer')" icon="close" @ok="ui.fD"/>
-          <bouton-help page="page1"/>
-        </div>
-        <btn-cond :label="$t('CPTchps2')" cond="cUrgence" class="titre-lg" @ok="saisiePS" />
-        <bouton-confirm class="q-my-md" :actif="ps !== null" :confirmer="changerps"/>
-      </q-card>
-    </q-dialog>
-
     <!-- Dialogue de suppression d'un avatar -->
     <q-dialog v-model="ui.d[idc].SAsuppravatar" full-height position="left" persistent>
       <suppr-avatar :avid="avid"/>
@@ -129,7 +124,7 @@
 import { ref, computed, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
-import { GetSynthese, NouvelAvatar, ChangementPS, MuterCompteAauto } from '../app/operations4.mjs'
+import { GetSynthese, NouvelAvatar, ChangementPS, MuterCompteAauto, GetCompta, GetPartition } from '../app/operations4.mjs'
 import { SetQuotas } from '../app/operations4.mjs'
 import { ExistePhrase } from '../app/operations4.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -158,14 +153,14 @@ const cf = ref(false)
 const estA = computed(() => session.estA)
 const estDelegue = computed(() => session.estDelegue)
 
+async function maPartition () { 
+  await new GetPartition().run(session.compte.idp)
+  ui.setPage('partition')
+}
+
 function ouvrirNvav () { 
   ui.oD('PCnvav', idc)
   nomav.value = ''
-}
-
-function ouvrirchgps () {
-  ui.oD('PCchgps', idc)
-  ps.value = null
 }
 
 function saisiePS () {
@@ -178,23 +173,17 @@ function saisiePS () {
   ui.oD('phrasesecrete', 'a')
 }
 
-function reset () { ps.value = null; ui.fD() }
-
-function okps (p) { 
-  if (ps.value) ps.value.phrase = null
+async function okps (p) { 
+  if (!p) return
   ps.value = p
-}
-
-async function changerps () {
-  ui.fD()
   const ret = await new ExistePhrase().run(ps.value.hps1, 1)
-  if (isAppExc(ret)) return reset()
+  if (isAppExc(ret)) { ps.value = null; return }
   if (ret) {
     await afficherDiag($t('existe'))
     return
   }
   await new ChangementPS().run(ps.value)
-  reset()
+  ps.value = null
 }
 
 const eltav = (id) => aSt.getElt(id)
@@ -225,8 +214,10 @@ async function oknom (nom) {
   ui.fD()
 }
 
-async function editerq () {
-  quotas.value = estA.value ? await session.getQuotasA() : await session.getQuotasP()
+async function editerq () { // Délégués et comptes "A" - Pour le compte lui-même
+  await new GetCompta().run()
+  quotas.value = estA.value ? await session.getQuotasA(session.compta.compteurs.qv) 
+    : await session.getQuotasP(session.compta.compteurs.qv)
   ui.oD('PTedq', idc)
 }
 
@@ -235,8 +226,9 @@ async function validerq () {
   ui.fD()
 }
 
-async function muterA () {
-  quotas.value = await session.getQuotasA()
+async function muterA () { // Délégués seulement - Pour le compte lui-même
+  await new GetCompta().run()
+  quotas.value = await session.getQuotasA(session.compta.compteurs.qv)
   cf.value = false
   ui.oD('PCmuta', idc)
 }

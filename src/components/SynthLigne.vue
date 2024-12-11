@@ -141,6 +141,7 @@ const ntfP = computed(() => session.notifPX(props.lg.id))
 
 async function refreshSynth () {
   await new GetSynthese().run()
+  await new GetPartition().run(props.lg.id)
 }
 
 async function lgCourante () {

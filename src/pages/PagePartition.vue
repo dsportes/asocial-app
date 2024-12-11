@@ -9,6 +9,7 @@
           <div class="full-width titre-md text-bold">{{$t('TUpart', [session.codePart(p.id)])}}</div>
         </template>
         <div>
+          <quotas-vols class="q-my-sm" :vols="session.partition.q"/>
           <div class="row items-end">
             <div class="col-4 trc">{{$t('PEnbde')}}</div>
             <div class="col-1 trc text-center">{{$t('PEnbdec')}}</div>
@@ -108,7 +109,7 @@ import ApercuGenx from '../components/ApercuGenx.vue'
 import QuotasVols from '../components/QuotasVols.vue'
 import NouveauSponsoring from '../panels/NouveauSponsoring.vue'
 import BarrePeople from '../components/BarrePeople.vue'
-import { GetNotifC, GetPartition, SetQuotas } from '../app/operations4.mjs'
+import { GetNotifC, GetPartition, SetQuotas, GetCompta } from '../app/operations4.mjs'
 import { styp } from '../app/util.mjs'
 
 const ui = stores.ui
@@ -123,6 +124,15 @@ const aSt = stores.avatar
 const pSt = stores.people
 const cfg = stores.config
 const fSt = stores.filtre
+
+async function reload () {
+  if (session.accesNet && !session.estA) 
+    await new GetPartition().run(session.partition.id)
+}
+
+onMounted(async () => {
+  await reload()
+})
 
 const quotas = ref({})
 
@@ -209,11 +219,6 @@ const ptLcFT = computed(() => {
 
 watch(ptLcFT, (ap) => {ui.fmsg(ap.length)})
 
-async function reload () {
-  if (session.accesNet && !session.estA) 
-    await new GetPartition().run(session.partition.id)
-}
-
 const ico = (c) => ic[c.notif.nr || 0]
 const tclr = (c) => 'text-' + txt[c.notif.nr || 0]
 const bgclr = (c) => 'bg-' + bg[c.notif.nr || 0]
@@ -228,25 +233,7 @@ function voirpage (c) {
 }
 
 async function editerq (c) {
-  // c.q : {qc qn qv c2m nn nc ng v} extraits du document `comptas` du compte.
-  await new GetPartition().run(session.compte.idp)
-  const s = session.partition.synth
-  const qm = cfg.quotasMaxC
-  let maxn = s.q.qn - s.qt.qn + c.q.qn; 
-  if (maxn <= 0) maxn = c.q.qn
-  if (maxn > qm[0]) maxn = qm[0]
-  let maxv = s.q.qv - s.qt.qv + c.q.qv
-  if (maxv <= 0) maxv = c.q.qv
-  if (maxv > qm[1]) maxv = qm[1]
-  let maxc =s.q.qc - s.qt.qc + c.q.qc
-  if (maxc <= 0) maxc = c.q.qc
-  if (maxc > qm[2]) maxc = qm[2]
-  quotas.value = { 
-    qn: c.q.qn, qv: c.q.qv, qc: c.q.qc, minn: 0, minv: 0, minc: 0,
-    maxn, maxv, maxc,
-    n: c.q.nn + c.q.nc + c.q.ng, v: c.q.v,
-    err: ''
-  }
+  quotas.value = await session.getQuotasP(c.q)
   ui.oD('PTedq', idc)
 }
 

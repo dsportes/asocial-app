@@ -422,20 +422,21 @@ export const useSessionStore = defineStore('session', {
       if (!this.estA) await new GetPartition().run(this.compte.idp)
     },
 
-    async getQuotasP () {
-      await new GetCompta().run()
-      const c = this.compta.compteurs.qv
+    /* Calcul des quotas
+    Si NON mutation: les max tiennent compte de la valeur actuelle pour le compte
+    */
+    async getQuotasP (c, mut) { // { qn, qv ...}
       const qm = this.config.quotasMaxC
       await new GetPartition().run(this.compte.idp)
       const s = this.partition.synth
-      let maxn = s.q.qn - s.qt.qn + c.qn
-      if (maxn <= 0) maxn = c.qv.qn
+      let maxn = s.q.qn - s.qt.qn + (mut ? 0 : c.qn)
+      if (maxn <= 0) maxn = mut ? 0 : c.qv.qn
       if (maxn > qm[0]) maxn = qm[0]
-      let maxv = s.q.qv - s.qt.qv + c.qv
-      if (maxv <= 0) maxv = c.qv
+      let maxv = s.q.qv - s.qt.qv + (mut ? 0 : c.qv)
+      if (maxv <= 0) maxv = mut ? 0 : c.qv
       if (maxv > qm[1]) maxv = qm[1]
-      let maxc = s.q.qc - s.qt.qc + c.qc
-      if (maxc <= 0) maxc = c.qc
+      let maxc = s.q.qc - s.qt.qc + (mut ? 0 : c.qc)
+      if (maxc <= 0) maxc = mut ? 0 : c.qc
       if (maxc > qm[2]) maxn = qm[2]
       return { 
         qn: c.qn, 
@@ -449,9 +450,7 @@ export const useSessionStore = defineStore('session', {
       }
     },
 
-    async getQuotasA () {
-      await new GetCompta().run()
-      const c = this.compta.compteurs.qv
+    async getQuotasA (c) { // { qn, qv ...}
       const qm = this.config.quotasMaxC
       await new GetSynthese().run()
       const synth = this.synthese
