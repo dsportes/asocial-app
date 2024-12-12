@@ -84,7 +84,8 @@
           <q-separator class="full-width" color="orange"/>
         </q-card-section>
 
-        <q-card-section v-if="!chatX.mutI && !session.estA" class="column items-center q-gutter-sm q-pa-md fs-md">
+        <q-card-section v-if="!chatX.mutI && !session.estA && !session.estComptable" 
+          class="column items-center q-gutter-sm q-pa-md fs-md">
           <div class="titre-lg text-italic">{{$t('CHmutdm')}}</div>
           <div v-if="!stE.del || stE.idp !== session.compte.idp" class="text-italic">{{$t('CHmutn2', [cvE.nom])}}</div>
           <div v-else class="column items-center q-gutter-sm">

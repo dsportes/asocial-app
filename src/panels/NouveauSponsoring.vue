@@ -31,7 +31,7 @@
           </div>
           <div v-if="diagDon" class="msg text-bold">{{diagDon}}</div>
           <q-stepper-navigation>
-            <btn-cond flat @ok="step = 0" :label="$t('precedent')"/>
+            <btn-cond flat @ok="step = 0" class="q-mr-sm" :label="$t('precedent')"/>
             <btn-cond flat @ok="setDon" :disable="diagDon !== ''" :label="$t('suivant')"/>
           </q-stepper-navigation>
         </q-step>

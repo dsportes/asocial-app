@@ -22,7 +22,7 @@ export async function ping () {
     ui.afficherMessage(r.data)
     return r.data
   } catch (e) {
-    return '$KO : ' + e.message()
+    return '$KO : ' + e.message
   }
 }
 

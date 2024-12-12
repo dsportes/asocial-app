@@ -1,28 +1,34 @@
 <template>
-  <q-page class="q-pa-xs">
+  <q-page class="q-px-xs q-pb-sm">
 
-    <q-tabs  class="col titre-md" v-model="tab" inline-label outside-arrows mobile-arrows no-caps>
+    <q-tabs  class="col titre-md bg-primary text-white" v-model="tab" 
+      inline-label outside-arrows mobile-arrows no-caps dense>
       <q-tab name="espaces" :label="$t('EStabe')"/>
       <q-tab name="taches" :label="$t('EStabt')"/>
     </q-tabs>
 
     <div v-if="tab==='taches'" class="q-pa-xs">
-      <div class="full-width row items-center q-gutter-sm bg-secondary text-white">
+      <div class="full-width row items-center q-gutter-sm">
         <btn-cond icon="refresh" @ok="getTaches"/>
         <div class="row items-center">
           <span class="q-mr-sm">{{$t('ESfta')}}</span>
           <q-input class="w6" v-model="ns"
-              :label="$t('ESns')" :hint="$t('ESnsh2')" dense/>
+              :label="$t('ESns')" :hint="$t('ESnsh2')" dense>
+            <template v-slot:append>
+              <btn-cond icon="check" round @ok="getTaches"/>
+            </template>
+          </q-input>
         </div>
       </div>
-      <div class="full-width q-mb-sm q-px-sm row items-center justify-between bg-secondary text-white">
+      <q-separator class="q-my-xs" color="orange"/>
+      <div class="full-width q-mb-sm q-px-sm row items-center justify-between ">
         <btn-cond color="warning" :label="$t('ESgcin')" @ok="initGC"/>
         <div class="row items-center">
           <q-input class="w6 q-mr-sm" v-model="gccode" :label="$t('ESgccode')" dense/>
           <btn-cond color="warning" :label="$t('ESstartd')" @ok="startDemon"/>
         </div>
       </div>
-
+      <q-separator class="q-my-xs" color="orange"/>
       <div v-for="(t, idx) in taches" :key="idx">
         <div :class="dkli(idx) + ' q-my-sm full-with'">
           <div class="row font-mono">

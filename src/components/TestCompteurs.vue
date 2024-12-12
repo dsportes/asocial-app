@@ -21,7 +21,7 @@ const steps = ref([
     qv: { qc: 8, qn: 8, qv: 4, nn: 0, nc: 0, ng: 0, v: 0 },
     conso: { nl: 200, ne: 100, vd: 0, vm: 0 },
     dbcr: 5,
-    estA: true
+    idp: 'abcd'
   },
   { 
     d: '05 Nov 2024 10:00:00 UTC',
@@ -55,7 +55,7 @@ const steps2 = ref([
     qv: { qc: 8, qn: 8, qv: 4, nn: 0, nc: 0, ng: 0, v: 0 },
     conso: null,
     dbcr: 1,
-    estA: false,
+    idp: '',
     dbcr: 1
   },
   { 
@@ -86,7 +86,7 @@ const steps2 = ref([
     d: '02 Jun 2025 10:30:00 UTC',
     qv: null,
     conso: { nl: 1000, ne: 500, vd: 100000000, vm: 200000000 },
-    estA: true,
+    idp: 'abcd',
     dbcr: -5
   },
   { 
@@ -106,7 +106,7 @@ for(let i = 0; i < steps.value.length; i++) {
   // constructor (serial, qv, conso, chgA, dbcr, dh)
   const s = steps.value[i]
   s.cpt = new Compteurs(i === 0 ? null : 
-    steps.value[i-1].serial, s.qv, s.conso, s.estA, s.dbcr, Date.parse(s.d))
+    steps.value[i-1].serial, s.qv, s.conso, s.idp, s.dbcr, Date.parse(s.d))
   s.serial = s.cpt.serial
   s.cpt.print()
 }

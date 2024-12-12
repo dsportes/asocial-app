@@ -162,8 +162,8 @@ import ChoixQuotas from '../components/ChoixQuotas.vue'
 import SynthHdrs from '../components/SynthHdrs.vue'
 import SynthLigne from '../components/SynthLigne.vue'
 import FiltreNom from '../components/FiltreNom.vue'
-import { dkli, styp, $t, mon, afficherDiag } from '../app/util.mjs'
-import { ID, AMJ, Tarif, UNITEN, UNITEV, edvol } from '../app/api.mjs'
+import { dkli, styp, $t, mon, afficherDiag, edvol } from '../app/util.mjs'
+import { ID, AMJ, Tarif, UNITEN, UNITEV } from '../app/api.mjs'
 import { Synthese } from '../app/modele.mjs'
 import { GetSynthese, GetPartition, SetEspaceOptionA, NouvellePartition, SetQuotasA,
   DownloadStatC, DownloadStatC2 } from '../app/operations4.mjs'
@@ -206,7 +206,6 @@ const qnE = computed(() => {
   const q = session.espace.quotas.qn
   return q * UNITEN + ' [' + q + '] '
 })
-
 
 const qvE = computed(() => {
   const q = session.espace.quotas.qv
@@ -396,7 +395,7 @@ async function editerqA () {
   let maxv = rqv < 0 ? q.qv : rqv
   if (maxv > qm[1]) maxv = qm[1]
   quotasA.value = { 
-    qc: 0, qn: q.qn, qv: q.qv,
+    qc: q.qc, qn: q.qn, qv: q.qv,
     minc: 0, minn: 0, minv: 0,
     maxc: qm[2], maxn, maxv,
     err: ''

@@ -43,6 +43,7 @@
     <q-expansion-item switch-toggle-side dense group="tkdon"
       header-class="titre-md text-bold bg-primary text-white"
       :label="$t('TKdons')">
+      <div v-if="lstDons.length === 0" class="q-mt-md text-center text-italic titre-md">{{$t('TKndon')}}</div>
       <div v-for="(d, idx) in lstDons" :key="idx" class="q-ml-md">
         <div class="row justify-between">
           <div v-if="d.m > 0">{{$t('TKcr', [d.m])}}</div>

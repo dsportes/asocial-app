@@ -958,7 +958,7 @@ export default {
   CHGtit: 'Chat du groupe {0}',
   CHGadd: 'Ajouter un item',
   CHGnot: 'Aucun avatar du groupe a accès aux membres (donc au chat).',
-  CHmutE: 'Le copmpte {0} m\'a demandé de LE muter en compte "{1}"',
+  CHmutE: 'Le compte {0} m\'a demandé de LE muter en compte "{1}"',
   CHmutI: 'J\'ai demandé à {0} de ME muter en compte "{1}"',
   CHmutIx: 'Mutation demandée',
   CHmutEx: 'Mutation à faire',
@@ -1679,6 +1679,7 @@ export default {
   TKimu2b: 'Ce ticket ne peut plus être enregistré, il a été généré à M-2 ou avant.',
 
   TKdons: 'Dons reçus / donnés',
+  TKndon: 'Aucun don enregistré',
   TKdb: 'Donné: {0}c',
   TKcr: 'Reçu: {0}c',
   TKdg: 'Génération le: {0}',

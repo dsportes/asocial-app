@@ -325,7 +325,8 @@ export const useSessionStore = defineStore('session', {
     }, 
 
     setCompta (compta) {
-      if (!this.compta || this.compta.v < compta.v) this.compta = compta
+      if (!this.compta || this.compta.id !== compta.id || this.compta.v < compta.v)
+        this.compta = compta
     },
 
     setEspace (espace, estAdmin) {

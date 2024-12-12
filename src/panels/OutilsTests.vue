@@ -1,18 +1,18 @@
 <template>
 <q-dialog v-model="ui.d.a.outilsTests" full-height position="left" persistent>
   <q-layout container view="hHh lpR fFf" :class="styp('md')">
-    <q-header elevated class="bg-secondary text-white">
-      <q-toolbar>
+    <q-header elevated>
+      <q-toolbar class="bg-secondary text-white">
         <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
         <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('OTtit')}}</q-toolbar-title>
         <bouton-help page="page1"/>
       </q-toolbar>
-      <q-toolbar inset>
+      <q-toolbar inset class="bg-primary text-white">
         <q-tabs v-model="tab" inline-label outside-arrows mobile-arrows no-caps class="full-width">
-          <q-tab name="tst" class="titre-md text-bold" :label="$t('OTtst')" @click="tab='tst'"/>
           <q-tab name="cpt" class="titre-md text-bold" :label="$t('OTcpt')" @click="ouvCpt()"/>
           <q-tab name="ps" class="titre-md text-bold" :label="$t('OTps')" @click="tab='ps'"/>
-          <q-tab v-if="config.phrases" name="compteurs" class="titre-md text-bold" label="Test Compteurs" @click="tab='compteurs'"/>
+          <q-tab name="tst" class="titre-md text-bold" :label="$t('OTtst')" @click="tab='tst'"/>
+          <q-tab v-if="testCompteurs" name="compteurs" class="titre-md text-bold" label="Test Compteurs" @click="tab='compteurs'"/>
         </q-tabs>
       </q-toolbar>
     </q-header>
@@ -114,7 +114,7 @@
                 <div class="col-1">{{it.trig}}</div>
                 <div class="col-3 fs-sm font-mono">{{it.hps1}}</div>
                 <span v-if="!it.vu" class="col-8 text-right">
-                  <btn-cond :disable="ui.d[idc].OTrunning" @ok.stop="getVU(it)"
+                  <btn-cond :disable="ui.d[idc].OTrunning" stop @ok="getVU(it)"
                     no-caps :label="$t('GBvol')"/>
                 </span>
               </div>
@@ -170,14 +170,17 @@ import BoutonHelp from '../components/BoutonHelp.vue'
 import BtnCond from '../components/BtnCond.vue'
 import TestCompteurs from '../components/TestCompteurs.vue'
 import { EchoTexte, ErreurFonc, PingDB } from '../app/operations4.mjs'
-import { styp, dhcool, $t, html, afficherDiag, edvol, b64ToU8, u8ToB64, random } from '../app/util.mjs'
+import { styp, dhcool, $t, html, afficherDiag, 
+  sleep, edvol, b64ToU8, u8ToB64 } from '../app/util.mjs'
 import { ping } from '../app/net.mjs'
-import { vuIDB, deleteIDB } from '../app/db.mjs'
+import { vuIDB, deleteIDB, idb } from '../app/db.mjs'
 
 const encoder = new TextEncoder()
 const decoder = new TextDecoder()
 
-const tab = ref('tst')
+const testCompteurs = false
+
+const tab = ref('cpt')
 const ps = ref(null)
 const htx = ref(new Set())
 const resultat1a = ref('-')
@@ -193,7 +196,7 @@ const aSt = stores.avatar
 const config = stores.config
 const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
-const bases = {}
+const bases = ref()
 const nbbases = ref(0)
 
 const pfx = '$asocial$-'
@@ -201,6 +204,7 @@ const pfx = '$asocial$-'
 function getBases () {
   // trigs[nombase] = [reseau, trig]
   // localStore : key: reseau-hps1 val = nombase
+  const mb = {}
   const nt = pfx + 'trigrammes'
   const x = localStorage.getItem(nt)
   let trigs
@@ -211,21 +215,22 @@ function getBases () {
   }
   for (const nb in trigs) {
     const i = trigs[nb]
-    bases[nb] = { nb: nb, trig: i, hps1: [], v1: 0, v2: 0, vu: false }
+    mb[nb] = { nb: nb, trig: i, hps1: '?', v1: 0, v2: 0, vu: false }
     nbbases.value++
   }
   for (const lsk in localStorage) {
     if (!lsk.startsWith(pfx) || lsk === nt) continue
     const hps1 = lsk.substring(pfx.length)
     const nb = localStorage.getItem(lsk)
-    const x = bases[nb]
+    const x = mb[nb]
     if (x) {
       x.hps1 = hps1
     } else {
       nbbases.value++
-      bases[nb] = { nb: nb, trig: '???', hps1: hps1, v1: 0, v2: 0, vu: false }
+      mb[nb] = { nb: nb, trig: '???', hps1: hps1, v1: 0, v2: 0, vu: false }
     }
   }
+  bases.value = mb
 }
 
 async function delIDB (it) {
@@ -233,11 +238,11 @@ async function delIDB (it) {
     ui.fD()
     deleteIDB(it.nb)
     localStorage.removeItem(pfx + it.hps1)
-    delete bases[it.nb]
+    delete bases.value[it.nb]
     nbbases.value = 0
     const trigs = {}
-    for (const nb in bases) {
-      trigs[nb] = bases[nb].nb
+    for (const nb in bases.value) {
+      trigs[nb] = bases.value[nb].nb
       nbbases.value++
     }
     const buf = u8ToB64(new Uint8Array(encode(trigs)), true)
@@ -330,7 +335,8 @@ async function pingIDB () {
     resultat3a.value = '-'
     resultat3b.value = '-'
     try {
-      // await getCompte() // TODO
+      await sleep(2000)
+      await idb.getBoot()
       resultat3a.value = 'OK'
     } catch (exc) {
       resultat3a.value = 'KO'
