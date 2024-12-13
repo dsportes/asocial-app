@@ -428,7 +428,6 @@ export const useSessionStore = defineStore('session', {
     */
     async getQuotasP (c, mut) { // { qn, qv ...}
       const qm = this.config.quotasMaxC
-      await new GetPartition().run(this.compte.idp)
       const s = this.partition.synth
       let maxn = s.q.qn - s.qt.qn + (mut ? 0 : c.qn)
       if (maxn <= 0) maxn = mut ? 0 : c.qv.qn

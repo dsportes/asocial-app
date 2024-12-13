@@ -4,7 +4,7 @@
 
     <div class="col-4 row items-start justify-between">
       <div class="col row q-gutter-xs items-start">
-        <btn-cond v-if="lg.id !== '0' && session.estComptable" size="sm" round icon="more_vert" color="primary">
+        <btn-cond v-if="lg.id !== '0' && ui.page !== 'partition'" size="sm" round icon="more_vert" color="primary">
           <q-menu anchor="bottom left" self="top left" max-height="20rem" 
             max-width="32rem">
             <q-list class="q-py-xs bord1 bg-black text-white fs-md ">

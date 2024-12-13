@@ -25,7 +25,6 @@
       <div v-else class="col p-px-xs fs-md bg-primary text-white q-my-xs">{{$t('TUpart', [session.codePart(p.id)])}}</div>
     </div>
 
-
     <q-toolbar class="bg-secondary text-white">
       <q-toolbar-title class="titre-md q-ma-xs">{{$t('PTtit' + (session.pow === 4 ? '1' : '2'))}}</q-toolbar-title>          
       <btn-cond v-if="session.estDelegue || session.estComptable" cond="cEdit"
@@ -89,6 +88,7 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+    
   </div>
   <div v-else class="titre-lg text-italic full-width text-center">{{$t('TUnopart')}}</div>
 

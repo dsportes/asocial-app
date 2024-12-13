@@ -100,7 +100,7 @@ On passe d'un groupe à l'autre en cliquant sur les flèches encadrant le nom du
 
 #### Alertes sur _partitions_
 4 compteurs:
-- 1 s'il y a une alterte.
+- 1 s'il y a une alerte.
 - 1 s'il y a une alerte de niveau informatif sans restriction,
 - 1 s'il y a une alerte avec restriction en LECTURE SEULEMENT,
 - 1 s'il y a une alerte avec ACCÈS RESTREINT.

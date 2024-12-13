@@ -216,6 +216,7 @@ async function oknom (nom) {
 
 async function editerq () { // Délégués et comptes "A" - Pour le compte lui-même
   await new GetCompta().run()
+  if (!estA.value) await new GetPartition().run(session.compte.idp)
   quotas.value = estA.value ? await session.getQuotasA(session.compta.compteurs.qv) 
     : await session.getQuotasP(session.compta.compteurs.qv)
   ui.oD('PTedq', idc)

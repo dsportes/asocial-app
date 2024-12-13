@@ -385,6 +385,7 @@
     cf.value = false
     texte.value = $t('PPmsg' + type.value, [session.compte.idp])
     await new GetCompta().run(chatX.value.idE, chatX.value.ids)
+    if (t !== 'A') await new GetPartition().run(session.compte.idp)
     // pour le compte idE (pas pour l'exécutant) - Compta chargée
     quotas.value = t === 'A' ? await session.getQuotasA(session.compta.compteurs.qv) 
       : await session.getQuotasP(session.compta.compteurs.qv, true)
