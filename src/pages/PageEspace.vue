@@ -1,21 +1,7 @@
 <template>
   <q-page v-if="session.synthese" class="q-pa-xs">
     <div class="q-my-md spmd">
-      <q-expansion-item switch-toggle-side dense group="somegroup"
-        header-class="bg-primary text-white titre-lg" :label="$t('PEstm1')">
-        <div class="q-ml-lg q-my-sm">
-          <div class="row q-gutter-xs q-mb-md items-center">
-            <div class="titre-md">{{$t('PEstm')}}</div>
-            <btn-cond class="self-start b1" label="M" @ok="dlstat(0)"/>
-            <btn-cond class="self-start b1" label="M-1" @ok="dlstat(1)"/>
-            <btn-cond class="self-start b1" label="M-2" @ok="dlstat(2)"/>
-            <btn-cond class="self-start b1" label="M-3" @ok="dlstat(3)"/>
-          </div>
-          <saisie-mois v-model="mois" :dmax="maxdl" :dmin="mindl" :dinit="maxdl"
-            @ok="dlstat2" icon="download" :label="$t('ESdlc')"/>
-        </div>
-      </q-expansion-item>
-      
+
       <q-expansion-item switch-toggle-side dense group="somegroup"
         header-class="bg-primary text-white titre-lg" :label="$t('PEoptg')">
         <div class="q-ml-lg q-my-sm">
@@ -92,6 +78,21 @@
               <btn-cond round icon="edit" class="self-start"  @ok="editerqA()"/>
             </div>
           </div>
+        </div>
+      </q-expansion-item>
+      
+      <q-expansion-item switch-toggle-side dense group="somegroup"
+        header-class="bg-primary text-white titre-lg" :label="$t('PEstm1')">
+        <div class="q-ml-lg q-my-sm">
+          <div class="row q-gutter-xs q-mb-md items-center">
+            <div class="titre-md">{{$t('PEstm')}}</div>
+            <btn-cond class="self-start b1" label="M" @ok="dlstat(0)"/>
+            <btn-cond class="self-start b1" label="M-1" @ok="dlstat(1)"/>
+            <btn-cond class="self-start b1" label="M-2" @ok="dlstat(2)"/>
+            <btn-cond class="self-start b1" label="M-3" @ok="dlstat(3)"/>
+          </div>
+          <saisie-mois v-model="mois" :dmax="maxdl" :dmin="mindl" :dinit="maxdl"
+            @ok="dlstat2" icon="download" :label="$t('ESdlc')"/>
         </div>
       </q-expansion-item>
       
