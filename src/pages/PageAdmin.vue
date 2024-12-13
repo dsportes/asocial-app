@@ -146,7 +146,7 @@
             <div v-if="dorg" class="col-6 text-negative bg-yellow-3 text-bold q-px-xs">{{dorg}}</div>
           </div>
           <div class="column justify-center q-mt-md">
-            <phrase-contact declaration :orgext="org" @ok="okps" :disable="!org"/>
+            <phrase-contact declaration orgext="fake" @ok="okps" :disable="!org"/>
             <bouton-confirm class="q-my-lg maauto" :actif="ps !== null && !dns && !dorg" 
               :confirmer="creerNS"/>
           </div>
@@ -347,8 +347,8 @@ async function startDemon () {
 }
 
 function aNS (ns) {
-  for (const e of lstEsp.value)
-    if (e.id === ns) return true
+  for (const e of lstEspB.value)
+    if (e.ns === ns) return true
   return false
 }
 

@@ -52,5 +52,8 @@
     "ht_cvmaj",
     "ht_htcomm",
     "ht_mutation_oa"
+  ],
+  ["special",
+    "page_admin"
   ]
 ]
