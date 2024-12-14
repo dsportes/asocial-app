@@ -51,7 +51,7 @@
     <!-- Download des notes sélectionnées -->
     <q-dialog v-model="ui.d[idc].PNdl" persistent>
       <q-card :class="styp('md')">
-        <q-toolbar class="bg-secondary text-white">
+        <q-toolbar class="tbs">
           <btn-cond color="warning" icon="close" @ok="dlfin"/>
           <q-toolbar-title class="titre-lg full-width text-center">
             {{$t('PNOdlc')}}
@@ -127,7 +127,7 @@
 
     <q-dialog v-model="ui.d[idc].NM" persistent>
       <div :class="styp('md')">
-        <q-toolbar class="bg-secondary text-white">
+        <q-toolbar class="btbs">
           <btn-cond color="warning" icon="chevron_left" @ok="fermer"/>
           <q-toolbar-title class="titre-lg full-width text-center">
             {{$t('PNOht0')}}
@@ -236,7 +236,7 @@
         </div>
       </div>
           
-      <div class="row full-width bg-secondary text-white items-center justify-between">
+      <div class="row full-width tbs items-center justify-between">
         <btn-cond class="q-mr-sm" flat icon="file_download" color="white" :label="$t('PNOdlc')" @ok="dlopen"/>
         <btn-cond v-if="!expandAll" size="sm" icon="unfold_more"
           :label="$t('PNOdep')" @ok="tree.expandAll();expandAll=true"/>

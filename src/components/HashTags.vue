@@ -1,6 +1,6 @@
 <template>
 <q-card>
-  <q-toolbar class="bg-secondary text-white">
+  <q-toolbar class="tbs">
     <btn-cond color="warning" icon="undo" @ok="undo"/>
     <q-toolbar-title class="titre-md full-width text-center">{{titre || $t('HTtit')}}</q-toolbar-title>
     <bouton-bulle idtext="BULLEhashtags"/>

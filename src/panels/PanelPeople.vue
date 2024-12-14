@@ -1,7 +1,7 @@
 <template>
 <q-dialog v-model="ui.d.a.detailspeople" position="left" persistent>
 <q-layout container view="hHh lpR fFf" :class="styp('md')">
-  <q-header elevated class="bg-secondary text-white">
+  <q-header elevated class="tbs">
     <q-toolbar>
       <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
       <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('APtit', [session.getCV(id).nom])}}</q-toolbar-title>
@@ -40,7 +40,7 @@
   <!-- Affichage des compteurs de compta du compte "courant"-->
   <q-dialog v-model="ui.d[idc].BPcptdial" position="left" persistent>
     <q-layout container view="hHh lpR fFf" :class="styp('md')">
-      <q-header elevated class="bg-secondary text-white">
+      <q-header elevated class="tbs">
         <q-toolbar>
           <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">

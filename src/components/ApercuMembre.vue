@@ -117,7 +117,7 @@ a accès aux membres (donc dans l'onglet "membres").
   <q-dialog v-model="ui.d[idc].AMinvit" persistent full-height position="left">
     <q-layout container view="hHh lpR fFf" :class="styp('md')">
       <q-header elevated>
-        <q-toolbar class="bg-secondary text-white">
+        <q-toolbar class="tbs">
           <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">
             {{$t('AMinvtit', [nomm, nomg])}}</q-toolbar-title>
@@ -197,7 +197,7 @@ a accès aux membres (donc dans l'onglet "membres").
   <q-dialog v-model="ui.d[idc].AMdroits" persistent full-height position="left">
     <q-layout container view="hHh lpR fFf" :class="styp('md')">
       <q-header elevated>
-        <q-toolbar class="bg-secondary text-white">
+        <q-toolbar class="tbs">
           <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">
             {{$t('AMdroitstit', [nomm, nomg])}}</q-toolbar-title>
@@ -245,7 +245,7 @@ a accès aux membres (donc dans l'onglet "membres").
   <q-dialog v-model="ui.d[idc].AMradiation" persistent full-height position="left">
     <q-layout container view="hHh lpR fFf" :class="styp('md')">
       <q-header elevated>
-        <q-toolbar class="bg-secondary text-white">
+        <q-toolbar class="tbs">
           <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">
             {{$t('AMradtit', [nomm, nomg])}}</q-toolbar-title>

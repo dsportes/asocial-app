@@ -1,6 +1,6 @@
 <template>
   <div class="q-pa-xs fs-md full-width">
-    <div class="full-width row items-start titre-md text-italic bg-secondary text-white text-bold">
+    <div class="full-width row items-start titre-md text-italic tbs text-bold">
       <div class="col-4">{{$t('RScav')}}</div>
       <div class="col-2 text-center">{{$t('RScno')}}</div>
       <div class="col-2 text-center">{{$t('RScch')}}</div>
@@ -17,7 +17,7 @@
         <div class="col-2 font-mono text-center">{{item.tickets.size}}</div>
       </div>
     </div>
-    <div class="full-width row items-start titre-md text-italic bg-secondary text-white text-bold">
+    <div class="full-width row items-start titre-md text-italic tbs text-bold">
       <div class="col-4">{{$t('RScgr')}}</div>
       <div class="col-2 text-center">{{$t('RScno')}}</div>
       <div class="col-2 text-center">{{$t('RScmb')}}</div>

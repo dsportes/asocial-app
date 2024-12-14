@@ -2,7 +2,7 @@
 <q-dialog v-model="ui.d.a.dialoguehelp" position="left" persistent>
 <q-layout container view="hHh lpR fFf" :class="styp('xl')">
   <q-header elevated>
-    <q-toolbar class="bg-secondary text-white">
+    <q-toolbar class="tbs">
       <btn-cond icon="chevron_left" color="warning" @ok="ui.fermerHelp">
         <q-tooltip class="bg-white text-primary">{{$t('HLPfermer')}}</q-tooltip>
       </btn-cond>
@@ -12,7 +12,7 @@
       <q-toolbar-title class="titre-lg">{{$t('A_' + selected)}}</q-toolbar-title>
     </q-toolbar>
     <q-separator color="grey-5" size="2px"/>
-    <q-toolbar class="bg-primary text-white">
+    <q-toolbar class="tbp">
       <q-toolbar-title>
         <a class="q-mr-sm text-italic text-white text-underlined titre-md text-bold cursor-pointer"
           :href="docsurl + '/index.html'" target="_blank">

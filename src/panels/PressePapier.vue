@@ -1,7 +1,7 @@
 <template>
 <q-dialog v-model="ui.d.a.pressepapier" full-height position="left" persistent>
 <q-layout container view="hHh lpR fFf" :class="styp('md')">
-    <q-header elevated class="bg-secondary text-white">
+    <q-header elevated class="tbs">
       <q-toolbar>
         <btn-cond icon="chevron_left" color="warning" @ok="ui.fD"/>
         <q-toolbar-title class="titre-lg">{{$t('MLApp')}}</q-toolbar-title>

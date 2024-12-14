@@ -26,7 +26,7 @@
 
     <q-dialog v-model="ui.d[idc].MMedition">
       <q-card :class="styp('md')">
-        <q-toolbar class="col-auto bg-secondary text-white">
+        <q-toolbar class="col-auto tbs">
           <btn-cond icon="close" color="warning" @ok="ui.fD"/>
           <q-toolbar-title>{{$t('MMCap', [nom])}}</q-toolbar-title>
           <bouton-help page="htcomm_maj"/>

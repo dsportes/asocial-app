@@ -16,7 +16,7 @@
   <!-- Changement de partition -->
   <q-dialog v-model="ui.d[idc].BPchgTr" persistent>
     <q-card :class="styp('sm') + ' q-pa-sm'">
-      <div class="titre-lg bg-secondary text-white text-center">
+      <div class="titre-lg tbs text-center">
         {{$t('PPchgpart', [cv.nom, session.codePart(idp)])}}</div>
       <div class="q-mx-sm titre-md">{{$t('PPqvn', [cpt.qv.qn, edn(cpt.qv.qn), cpt.pcn])}}</div>
       <div class="q-mx-sm titre-md">{{$t('PPqvv', [cpt.qv.qv, edv(cpt.qv.qv), cpt.pcv])}}</div>
@@ -74,7 +74,7 @@
   <!-- Affichage des compteurs de compta du compte "courant"-->
   <q-dialog v-model="ui.d[idc].BPcptdial" position="left" persistent>
     <q-layout container view="hHh lpR fFf" :class="styp('md')">
-      <q-header elevated class="bg-secondary text-white">
+      <q-header elevated class="tbs">
         <q-toolbar>
           <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">

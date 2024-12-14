@@ -1,6 +1,6 @@
 <template>
   <q-card :class="styp('sm') + 'column'">
-    <q-toolbar class="col-auto bg-secondary text-white">
+    <q-toolbar class="col-auto tbs">
       <btn-cond color="warning" icon="close" @ok="ui.fD"/>
       <btn-cond v-if="net" class="q-ml-xs" round icon="refresh" cond="cVisu" @ok="refresh">
         <q-tooltip>{{$t('CVraf1')}}</q-tooltip>

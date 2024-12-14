@@ -3,7 +3,7 @@
     <div class="row q-mt-xs q-mb-lg">
       <btn-cond class="col-auto q-mr-sm self-start" icon="refresh" @ok="reload()"/>
       <q-expansion-item v-if="session.estDelegue || session.estComptable"
-        class="col" header-class="bg-primary text-white" 
+        class="col" header-class="tbp" 
         switch-toggle-side expand-separator dense>
         <template v-slot:header>
           <div class="full-width titre-md text-bold">{{$t('TUpart', [session.codePart(p.id)])}}</div>
@@ -22,10 +22,10 @@
             :notif="ntfp" :type="1" :cible="p.id"/>
         </div>
       </q-expansion-item>
-      <div v-else class="col p-px-xs fs-md bg-primary text-white q-my-xs">{{$t('TUpart', [session.codePart(p.id)])}}</div>
+      <div v-else class="col p-px-xs fs-md tbp q-my-xs">{{$t('TUpart', [session.codePart(p.id)])}}</div>
     </div>
 
-    <q-toolbar class="bg-secondary text-white">
+    <q-toolbar class="tbs">
       <q-toolbar-title class="titre-md q-ma-xs">{{$t('PTtit' + (session.pow === 4 ? '1' : '2'))}}</q-toolbar-title>          
       <btn-cond v-if="session.estDelegue || session.estComptable" cond="cEdit"
         :label="$t('PTnvc')" @ok="ui.oD('NSnvsp', idc)"/>
@@ -76,7 +76,7 @@
     <!-- Dialogue de mise à jour des quotas du compte -->
     <q-dialog v-model="ui.d[idc].PTedq" persistent>
       <q-card :class="styp('sm')">
-        <q-toolbar class="bg-secondary text-white">
+        <q-toolbar class="tbs">
           <btn-cond color="warning" icon="close" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTqu')}}</q-toolbar-title>
         </q-toolbar>

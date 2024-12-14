@@ -17,7 +17,7 @@
 
   <div v-if="session.compta">
     <q-expansion-item switch-toggle-side dense group="tkdon"
-      header-class="titre-md text-bold bg-primary text-white"
+      header-class="titre-md text-bold tbp"
       :label="$t('TK' + (session.estComptable ? '1' : '2') + att)">
       <div class="row justify-center">
         <q-radio v-model="att" checked-icon="task_alt" unchecked-icon="panorama_fish_eye" 
@@ -41,7 +41,7 @@
     <q-separator size="3px"/>
 
     <q-expansion-item switch-toggle-side dense group="tkdon"
-      header-class="titre-md text-bold bg-primary text-white"
+      header-class="titre-md text-bold tbp"
       :label="$t('TKdons')">
       <div v-if="lstDons.length === 0" class="q-mt-md text-center text-italic titre-md">{{$t('TKndon')}}</div>
       <div v-for="(d, idx) in lstDons" :key="idx" class="q-ml-md">

@@ -2,7 +2,7 @@
 <q-dialog v-model="ui.d.a.phrasesecrete" persistent position="top"
   transition-show="slide-down" transition-hide="fade">
   <q-card :class="styp('sm')" style="position:relative; top:2.5rem">
-    <q-toolbar class="bg-secondary text-white">
+    <q-toolbar class="tbs">
       <btn-cond color="warning" icon="close" @ok="ko"/>
       <q-toolbar-title class="titre-lg">
         {{$t('PSm' + phase)}}

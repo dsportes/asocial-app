@@ -1,6 +1,6 @@
 <template>
   <q-layout container view="hHh lpR fFf" :class="styp('md')">
-    <q-header elevated class="bg-secondary text-white">
+    <q-header elevated class="tbs">
       <q-toolbar>
         <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
         <q-toolbar-title class="titre-lg text-center q-mx-sm">
@@ -56,7 +56,7 @@
     <!-- Dialogue d'ajout d'un item au chat -->
     <q-dialog v-model="ui.d[idc].ACGchatedit" persistent>
       <q-card :class="styp()">
-        <q-toolbar class="bg-secondary text-white">
+        <q-toolbar class="tbs">
           <btn-cond color="warning" icon="close" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CHadd1')}}</q-toolbar-title>
           <bouton-help page="page1"/>

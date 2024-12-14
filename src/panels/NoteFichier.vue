@@ -1,6 +1,6 @@
 <template>
 <q-layout container view="hHh lpR fFf" :class="styp('md')">
-  <q-header elevated class="bg-secondary text-white">
+  <q-header elevated class="tbs">
     <q-toolbar>
       <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
       <q-toolbar-title class="titre-lg full-width text-center">
@@ -16,7 +16,7 @@
 
   <q-page-container>
     <q-page class="q-pa-xs column items-center">
-      <q-expansion-item class="full-width q-my-xs" dense :label="$t('PNOapropos')" header-class="bg-secondary text-white">
+      <q-expansion-item class="full-width q-my-xs" dense :label="$t('PNOapropos')" header-class="tbs">
         <div class="q-pa-sm">
           <node-parent />
           <q-separator class="q-my-sm" color="orange"/>
@@ -24,7 +24,7 @@
         </div>
       </q-expansion-item>
 
-      <div class="full-width bg-secondary text-white row justify-between items-center">
+      <div class="full-width tbs row justify-between items-center">
         <div class="col titre-md q-pa-xs">
           {{$t('PNOlstfic', note.mfa.size, {count: note.mfa.size}) + (note.mfa.size ? ' - ' + edvol(note.vf) : '')}}
         </div>

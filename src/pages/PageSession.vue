@@ -27,7 +27,7 @@
     </div>
 
     <q-expansion-item v-if="session.status" group="etc" class="full-width" switch-toggle-side default-opened
-      header-class="expansion-header-class-1 titre-md bg-primary text-white" 
+      header-class="expansion-header-class-1 titre-md tbp" 
       :label="$t('RStit', [nc])">
       <rapport-synchro class="q-ma-sm"/>
     </q-expansion-item>

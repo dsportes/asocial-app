@@ -63,7 +63,7 @@
     <!-- Dialogue de mutation en compte A -->
     <q-dialog v-model="ui.d[idc].PCmuta" persistent>
       <q-card :class="styp('md')">
-        <q-toolbar class="bg-secondary text-white">
+        <q-toolbar class="tbs">
           <btn-cond icon="close" color="warning" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg full-width text-center">{{$t('CPTautoA')}}</q-toolbar-title>
           <bouton-help page="page2"/>
@@ -88,7 +88,7 @@
     <!-- Dialogue de création d'un nouvel avatar -->
     <q-dialog v-model="ui.d[idc].PCnvav" persistent>
       <q-card :class="styp('md')">
-        <q-toolbar class="bg-secondary text-white">
+        <q-toolbar class="tbs">
           <btn-cond icon="close" color="warning" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg full-width text-center">{{$t('CPTnvav2')}}</q-toolbar-title>
           <bouton-help page="page1"/>
@@ -105,7 +105,7 @@
     <!-- Dialogue de mise à jour des quotas du compte -->
     <q-dialog v-model="ui.d[idc].PTedq" persistent>
       <q-card :class="styp('sm')">
-        <q-toolbar class="bg-secondary text-white">
+        <q-toolbar class="tbs">
           <btn-cond color="warning" icon="close" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTqu')}}</q-toolbar-title>
         </q-toolbar>

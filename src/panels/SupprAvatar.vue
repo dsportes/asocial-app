@@ -1,6 +1,6 @@
 <template>
 <q-layout container view="hHh lpR fFf" :class="styp('md')">
-  <q-header elevated class="bg-secondary text-white">
+  <q-header elevated class="tbs">
     <q-toolbar>
       <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
       <q-toolbar-title v-if="avid!==0" class="titre-lg full-width text-center">{{$t('SAVtit1', [cv.nom])}}</q-toolbar-title>

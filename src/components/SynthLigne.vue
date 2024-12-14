@@ -65,7 +65,7 @@
   <!-- Dialogue de mise à jour des quotas des comptes A -->
   <q-dialog v-model="ui.d[idc].PEedqP" persistent>
     <q-card :class="styp('sm')">
-      <q-toolbar class="bg-secondary text-white">
+      <q-toolbar class="tbs">
         <btn-cond color="warning" icon="close" @ok="ui.fD"/>
         <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTqutp', [code])}}</q-toolbar-title>
       </q-toolbar>
@@ -81,7 +81,7 @@
   <!-- Edition du code d'une partition -->
   <q-dialog v-model="ui.d[idc].PEedcom" persistent>
     <q-card :class="styp('sm')">
-      <q-toolbar class="bg-secondary text-white">
+      <q-toolbar class="tbs">
         <btn-cond color="warning" icon="close" @ok="ui.fD"/>
         <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTinfo')}}</q-toolbar-title>
       </q-toolbar>

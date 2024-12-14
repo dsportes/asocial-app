@@ -56,7 +56,7 @@
     </div>
 
     <div  v-if="mesav">
-      <div class="titre-lg full-width text-center text-white bg-secondary q-my-sm q-pa-xs">
+      <div class="titre-lg full-width text-center tbs q-my-sm q-pa-xs">
         {{$t('PGmesav', mesav.length)}}
       </div>
       
@@ -90,7 +90,7 @@
   <!-- Gérer le mode simple / unanime -->
   <q-dialog v-model="ui.d[idc].AGediterUna" full-height position="left" persistent>
     <q-layout container view="hHh lpR fFf" :class="styp('md')">
-      <q-header elevated class="bg-primary text-white">
+      <q-header elevated class="tbp">
         <q-toolbar>
           <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('AGuna', [nomg])}}</q-toolbar-title>
@@ -140,7 +140,7 @@
   <!-- Gérer l'hébergement, changer les quotas -->
   <q-dialog v-model="ui.d[idc].AGgererheb" full-height position="left" persistent>
   <q-layout container view="hHh lpR fFf" :class="styp('md')">
-      <q-header elevated class="bg-secondary text-white">
+      <q-header elevated class="tbs">
         <q-toolbar>
           <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('AGgerh', [nomg])}}</q-toolbar-title>

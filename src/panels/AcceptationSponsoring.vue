@@ -1,6 +1,6 @@
 <template>
 <q-layout container view="hHh lpR fFf" :class="styp('md')">
-  <q-header elevated class="bg-primary text-white">
+  <q-header elevated class="tbp">
     <q-toolbar>
       <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
       <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('NPtit')}}</q-toolbar-title>

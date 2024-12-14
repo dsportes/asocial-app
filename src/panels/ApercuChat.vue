@@ -1,14 +1,14 @@
 <template>
   <q-layout container view="hHh lpR fFf" :class="styp('md')">
     <q-header elevated>
-      <q-toolbar class="bg-secondary text-white">
+      <q-toolbar class="tbs">
         <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
         <q-toolbar-title class="titre-lg text-center q-mx-sm">
           {{!zombi ? $t('CHoch3', [cvI.nom, cvE.nom]) : $t('CHzombi')}}
         </q-toolbar-title>
         <bouton-help page="chat_maj"/>
       </q-toolbar>
-      <q-toolbar inset v-if="!zombi" class="bg-secondary text-white">
+      <q-toolbar inset v-if="!zombi" class="tbs">
         <div v-if="racE || racI || dispE" class="row q-gutter-sm">
           <div v-if="racE" class="msg">{{$t('CHraccroche2', [cvE.nom])}}</div>
           <div v-if="racI" class="msg">{{$t('CHraccroche')}}</div>
@@ -57,7 +57,7 @@
     <!-- Gestion des mutations -->
     <q-dialog v-model="ui.d[idc].mutation" persistent>
       <q-card :class="styp('sm')">
-        <q-toolbar class="bg-secondary text-white">
+        <q-toolbar class="tbs">
           <btn-cond color="warning" icon="close" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">
             {{$t('CHmutit' + (session.compte.del ? 1 : 2))}}
@@ -133,7 +133,7 @@
     <!-- Mutation de type de compte en "type" -->
     <q-dialog v-model="ui.d[idc].BPmut" persistent>
       <q-card :class="styp('md')">
-        <q-toolbar class="bg-secondary text-white">
+        <q-toolbar class="tbs">
           <btn-cond icon="close" color="warning" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg full-width text-center">{{$t('PPmuter' + type)}}</q-toolbar-title>
         </q-toolbar>
@@ -191,7 +191,7 @@
     <!-- Affichage des compteurs de compta du compte "courant"-->
     <q-dialog v-model="ui.d[idc].BPcptdial" position="left" persistent>
       <q-layout container view="hHh lpR fFf" :class="styp('md')">
-        <q-header elevated class="bg-secondary text-white">
+        <q-header elevated class="tbs">
           <q-toolbar>
             <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
             <q-toolbar-title class="titre-lg text-center q-mx-sm">
@@ -209,12 +209,12 @@
     <!-- Dialogue d'ajout d'un item au chat -->
     <q-dialog v-model="ui.d[idc].ACchatedit">
       <q-card :class="styp('sm')">
-        <q-toolbar class="bg-secondary text-white">
+        <q-toolbar class="tbs">
           <btn-cond color="warning" icon="close" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CHadd1')}}</q-toolbar-title>
           <bouton-help page="chat_maj"/>
         </q-toolbar>
-        <q-toolbar v-if="avecDon" inset class="bg-secondary text-white">
+        <q-toolbar v-if="avecDon" inset class="tbs">
           <q-toolbar-title class="row justify-center items-center q-gutter-md">
             <div v-if="stE.cpt">
               <div class="titre-md text-bold">{{$t('CHmdon')}}</div>

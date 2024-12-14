@@ -5,7 +5,8 @@
     :disable="disable"
     :flat="flat"
     dense
-    :color="!diag ? (color || 'primary') : 'accent'"
+    :color="clr"
+    :text-color="tc"
     :size="size || 'md'"
     :label="label"
     :round="round"
@@ -19,7 +20,8 @@
     :disable="disable"
     :flat="flat"
     dense
-    :color="!diag ? (color || 'primary') : 'accent'"
+    :color="clr"
+    :text-color="tc"
     :size="size || 'md'"
     :label="label"
     :round="round"
@@ -52,6 +54,19 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['ok'])
+
+const tc = computed(() => { const x = diag.value ? 'white' : (
+  !props.color || props.color === 'primary' ? 'btntc' : 
+  (props.color === 'warning' ? 'btwtc' : 'white'))
+  return x
+})
+
+const clr = computed(() => { const x = diag.value ? 'accent' : ( 
+  !props.color || props.color === 'primary' ? 'btnbg' : 
+  (props.color === 'warning' ? 'btwbg' : props.color))
+  return x
+})
+
 
 const diag = computed(() => session[props.cond])
 

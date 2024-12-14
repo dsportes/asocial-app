@@ -2,12 +2,12 @@
 <q-dialog v-model="ui.d.a.outilsTests" full-height position="left" persistent>
   <q-layout container view="hHh lpR fFf" :class="styp('md')">
     <q-header elevated>
-      <q-toolbar class="bg-secondary text-white">
+      <q-toolbar class="tbs">
         <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
         <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('OTtit')}}</q-toolbar-title>
         <bouton-help page="page1"/>
       </q-toolbar>
-      <q-toolbar inset class="bg-primary text-white">
+      <q-toolbar inset class="tbp">
         <q-tabs v-model="tab" inline-label outside-arrows mobile-arrows no-caps class="full-width">
           <q-tab name="cpt" class="titre-md text-bold" :label="$t('OTcpt')" @click="ouvCpt()"/>
           <q-tab name="ps" class="titre-md text-bold" :label="$t('OTps')" @click="tab='ps'"/>

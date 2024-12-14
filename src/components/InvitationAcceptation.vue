@@ -2,7 +2,7 @@
 
 <q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated>
-    <q-toolbar class="bg-secondary text-white">
+    <q-toolbar class="tbs">
       <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
       <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('ICtit2', [nomm, nomg])}}</q-toolbar-title>
       <bouton-help page="page1"/>
@@ -11,7 +11,7 @@
 
   <q-page-container class="q-pa-xs">
     <q-expansion-item  :label="$t('ICti1')" class="q-my-xs q-mx-xs"
-      header-class="bg-primary text-white titre-md"
+      header-class="tbp titre-md"
       switch-toggle-side expand-separator dense group="trgroup">
       <apercu-genx :id="inv.idg" :idx="0"/>
       <q-separator class="q-my-xs" color="orange"/>
@@ -19,14 +19,14 @@
     </q-expansion-item>
 
     <q-expansion-item  :label="$t('ICti2')" class="q-my-xs q-mx-xs"
-      header-class="bg-primary text-white titre-md"
+      header-class="tbp titre-md"
       switch-toggle-side expand-separator dense group="trgroup">
       <div class="titre-lg">{{$t('AMinvvp')}}</div>
       <apercu-genx class="q-my-xs" v-for="(id, idx) in inv.invpar" :key="id" :id="id" :idx="idx"/>
     </q-expansion-item>
 
     <q-expansion-item  :label="$t('ICti3')" class="q-my-xs q-mx-xs"
-      header-class="bg-primary text-white titre-md"
+      header-class="tbp titre-md"
       switch-toggle-side expand-separator dense group="trgroup">
       <div class="q-my-md titre-lg text-bold">
         <span class="text-italic">{{$t('ICflags')}}</span>

@@ -1,7 +1,7 @@
 <template>
   <q-page class="q-px-xs q-pb-sm">
 
-    <q-tabs  class="col titre-md bg-primary text-white" v-model="tab" 
+    <q-tabs  class="col titre-md tbp" v-model="tab" 
       inline-label outside-arrows mobile-arrows no-caps dense>
       <q-tab name="espaces" :label="$t('EStabe')"/>
       <q-tab name="taches" :label="$t('EStabt')"/>
@@ -48,7 +48,7 @@
       </div>
     </div>
 
-    <div v-if="tab==='espaces'" class="row justify-between text-white bg-secondary q-pa-xs full-width q-my-sm">
+    <div v-if="tab==='espaces'" class="row justify-between tbs q-pa-xs full-width q-my-sm">
       <btn-cond icon="refresh" @ok="loadEsp"/>
       <div class="col titre-lg text-center">{{$t('ESlo', lstEsp.length, { count: lstEsp.length })}}</div>
       <btn-cond icon="add" :label="$t('ESne')" @ok="plusNS"/>
@@ -78,7 +78,7 @@
             @ok="ovnspc(esp)" />
           
           <q-expansion-item class="q-my-xs" 
-            switch-toggle-side expand-separator dense header-class="bg-primary text-white titre-md"
+            switch-toggle-side expand-separator dense header-class="tbp titre-md"
             :label="$t('ESquotas')" group="espaces2">
             <div class="q-my-sm">
               <div class="row justify-between">
@@ -89,7 +89,7 @@
           </q-expansion-item>
 
           <q-expansion-item class="q-my-xs" 
-            switch-toggle-side expand-separator dense header-class="bg-primary text-white titre-md"
+            switch-toggle-side expand-separator dense header-class="tbp titre-md"
             :label="$t('ESal')" group="espaces2">
             <div class="q-my-sm">
               <bouton-dlvat :espace="esp" @close="finDlv"/>
@@ -99,7 +99,7 @@
           </q-expansion-item>
 
           <q-expansion-item v-if="!esp.hTC" class="q-my-xs" 
-            switch-toggle-side expand-separator dense header-class="bg-primary text-white titre-md"
+            switch-toggle-side expand-separator dense header-class="tbp titre-md"
             :label="$t('ESoptc')" group="espaces2">
             <div class="q-my-sm">
               <div class="titre-md q-my-sm">{{$t('ESnbmi2', [esp.nbmi])}}</div>
@@ -108,7 +108,7 @@
           </q-expansion-item>
 
           <q-expansion-item v-if="!esp.hTC" class="q-my-xs" 
-            switch-toggle-side expand-separator dense header-class="bg-primary text-white titre-md"
+            switch-toggle-side expand-separator dense header-class="tbp titre-md"
             :label="$t('PEstm1')" group="espaces2">
             <div class="q-ml-lg q-my-sm">
               <div class="row q-gutter-xs q-mb-md items-center">
@@ -129,7 +129,7 @@
     <!-- Création d'un espace -->
     <q-dialog v-if="ui.d[idc]" v-model="ui.d[idc].PAcreationesp" persistent>
       <q-card :class="styp('sm')">
-        <q-toolbar class="bg-secondary text-white">
+        <q-toolbar class="tbs">
           <btn-cond icon="close" color="warning" @ok="cancelNS"/>
           <q-toolbar-title class="titre-lg full-width text-center">{{$t('ESne2')}}</q-toolbar-title>
           <bouton-help page="page1"/>
@@ -157,7 +157,7 @@
     <!-- Changement de la phrase de sponsoring du Comptable -->
     <q-dialog v-if="ui.d[idc]" v-model="ui.d[idc].PAnvspc" persistent>
       <q-card :class="styp('sm')">
-        <q-toolbar class="bg-secondary text-white">
+        <q-toolbar class="tbs">
           <btn-cond color="warning" icon="close" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg full-width text-center">{{$t('ENnpspc')}}</q-toolbar-title>
         </q-toolbar>
@@ -175,7 +175,7 @@
     <!-- Changement des quotas de l'espace -->
     <q-dialog v-if="ui.d[idc]" v-model="ui.d[idc].PAedprf" persistent>
       <q-card :class="styp('sm')">
-        <q-toolbar class="bg-secondary text-white">
+        <q-toolbar class="tbs">
           <btn-cond color="warning" icon="close" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg full-width text-center">{{$t('ESchg')}}</q-toolbar-title>
         </q-toolbar>

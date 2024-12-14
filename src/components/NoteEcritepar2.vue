@@ -3,7 +3,7 @@
     <q-btn-dropdown no-caps dense :color="naAut ? 'primary' : 'warning'"
       :label="naAut ? $t('PNOaut1' + (fic || ''), [naAut.nom]) : $t('PNOaut' + (g ? '2' : '3'))" 
       content-style="width:25rem!important">
-      <q-list class="bg-secondary text-white q-py-xs">
+      <q-list class="tbs q-py-xs">
         <q-item v-for="e in la" :key="e.id" 
           :clickable="!e.ko"
           v-close-popup @click="selAut(e)"

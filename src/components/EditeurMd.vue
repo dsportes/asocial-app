@@ -4,7 +4,7 @@
     <div :style="'height:' + (mh || '10rem')" class="dlx">
       <q-layout container view="hHh lpR fFf">
         <q-header elevated>
-          <q-toolbar class="fs-md full-width bg-secondary text-white">
+          <q-toolbar class="fs-md full-width tbs">
             <btn-cond class="q-mr-xs" @ok="ui.oD('EMmax', idc)" icon="zoom_out_map" flat color="white"/>
             <btn-cond v-if="editable" flat color="white" :icon="md ? 'edit' : 'visibility'" 
               round @ok="md = !md"/>
@@ -32,7 +32,7 @@
     transition-show="slide-up" transition-hide="slide-down">
     <div ref="root2" :class="sty() + 'column'">
       <q-header elevated>
-        <q-toolbar class="fs-md full-width bg-secondary text-white">
+        <q-toolbar class="fs-md full-width tbs">
           <btn-cond class="q-mr-xs" @ok="ui.fD" icon="zoom_in_map" flat color="white"/>
           <btn-cond v-if="editable" flat color="white" :icon="md ? 'edit' : 'visibility'" 
             round @ok="md = !md"/>

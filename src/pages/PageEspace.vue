@@ -3,12 +3,12 @@
     <div class="q-my-md spmd">
 
       <q-expansion-item switch-toggle-side dense group="somegroup"
-        header-class="bg-primary text-white titre-lg" :label="$t('PEoptg')">
+        header-class="tbp titre-lg" :label="$t('PEoptg')">
         <div class="q-ml-lg q-my-sm">
           <q-toggle class="q-my-sm" v-model="optionA" :label="$t('PTopto')" />
           <div class="q-mb-sm row justify-start" style="height:1.8rem;overflow:hidden">
             <div class="titre-md q-mx-sm">{{$t('ESnbmi')}}</div>
-            <q-select class="col-auto items-start items-start text-bold bg-primary text-white titre-lg q-pl-sm" 
+            <q-select class="col-auto items-start items-start text-bold tbp titre-lg q-pl-sm" 
               standout style="position:relative;top:-8px;"
               :disable="session.pow !== 2"
               v-model.number="nbmi" :options="optionsNbmi" dense />
@@ -17,7 +17,7 @@
       </q-expansion-item>
 
       <q-expansion-item switch-toggle-side dense group="somegroup"
-        header-class="bg-primary text-white titre-lg" :label="$t('PEquotas')">
+        header-class="tbp titre-lg" :label="$t('PEquotas')">
 
         <div class="q-ml-lg q-my-sm">
           <div class="q-my-sm row text-italic text-bold titre-md items-center">
@@ -82,7 +82,7 @@
       </q-expansion-item>
       
       <q-expansion-item switch-toggle-side dense group="somegroup"
-        header-class="bg-primary text-white titre-lg" :label="$t('PEstm1')">
+        header-class="tbp titre-lg" :label="$t('PEstm1')">
         <div class="q-ml-lg q-my-sm">
           <div class="row q-gutter-xs q-mb-md items-center">
             <div class="titre-md">{{$t('PEstm')}}</div>
@@ -98,7 +98,7 @@
       
     </div>
 
-    <div class="row justify-between items-center titre-lg q-pa-xs q-mt-md q-mb-sm bg-secondary text-white">
+    <div class="row justify-between items-center titre-lg q-pa-xs q-mt-md q-mb-sm tbs">
       <div class="titre-lg text-italic ">{{$t('PEdetpart')}}</div>
       <btn-cond cond="cUrgence" icon="add" class="self-start" :label="$t('PTnv')" @ok="ovnvPart"/>
     </div>
@@ -118,7 +118,7 @@
     <!-- Dialogue de mise à jour des quotas des comptes A -->
     <q-dialog v-model="ui.d[idc].PEedqA" persistent>
       <q-card :class="styp('sm')">
-        <q-toolbar class="bg-secondary text-white">
+        <q-toolbar class="tbs">
           <btn-cond color="warning" icon="close" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTquta')}}</q-toolbar-title>
         </q-toolbar>

@@ -3,7 +3,7 @@
   <q-btn round size="sm" class="btr" icon="print" @click="c.print()"/>
 
   <q-expansion-item switch-toggle-side default-opened dense group="somegroup"
-      header-class="bg-primary text-white">
+      header-class="btbp">
     <template v-slot:header>
       <div class="full-width row justify-between items-center">
         <div class="titre-md text-bold">{{$t('PCPsynth', [dhcool(c.dh, true)])}}</div>
@@ -78,7 +78,7 @@
   <q-separator size="3px"/>
 
   <q-expansion-item switch-toggle-side dense group="somegroup"
-      header-class="bg-primary text-white">
+      header-class="tbp">
     <template v-slot:header>
       <div class="full-width row justify-between items-center">
         <div class="titre-md text-bold">{{$t('PCPdet')}}</div>
@@ -94,7 +94,7 @@
   <q-separator size="3px"/>
 
   <q-expansion-item switch-toggle-side dense group="somegroup"
-      header-class="bg-primary text-white">
+      header-class="tbp">
     <template v-slot:header>
       <div class="full-width row justify-between items-center">
         <div class="titre-md text-bold">{{$t('PCPtarifs')}}</div>

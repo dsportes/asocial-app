@@ -1,6 +1,6 @@
 <template>
   <q-card :class="styp('md')">
-    <q-toolbar class="bg-secondary text-white">
+    <q-toolbar class="tbs">
       <btn-cond color="warning" icon="close" @ok="ui.fD"/>
       <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CVtit')}}</q-toolbar-title>
       <bouton-help page="page1"/>

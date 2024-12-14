@@ -50,7 +50,7 @@
     <!-- Confirmation du contact ------------------------------------------------>
     <q-dialog v-model="ui.d[idc].PInvit" persistent>
       <q-card :class="styp('sm')">
-        <q-toolbar class="bg-secondary text-white">
+        <q-toolbar class="tbs">
           <btn-cond color="warning" icon="close" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center">{{$t('PItit', [nomg])}}</q-toolbar-title>
           <bouton-help page="page1"/>
@@ -68,7 +68,7 @@
     </q-dialog>
 
     <q-page-sticky v-if="session.accesNet" position="top" :offset="[0, 0]">
-      <div class="row bg-secondary text-white justify-between" style="width:100vw">
+      <div class="row tbs justify-between" style="width:100vw">
         <btn-cond :label="$t('renoncer')" @ok="ui.setPage('groupe', 'groupe')"/>
         <q-checkbox v-model="propos" :label="$t('PIfi')" />
         <btn-cond :label="$t('CVraf')" @ok="rafCvs"/>

@@ -1,8 +1,11 @@
 <template>
 <q-layout view="hHh lpR fFf">
   <q-header elevated>
-    <q-toolbar class="full-width">
-
+    <q-toolbar class="full-width tbp">
+      <!--
+      <btn-cond label="NORM"/> <btn-cond color="warning" label="WARN"/>
+      <div class="titre-xl text-bold msg" style="width:30px">TT</div>
+      -->
       <btn-cond v-if="session.estAdmin && session.status" color="warning" icon="logout" 
         @ok="discon">
         <q-tooltip>{{$t('MLAdrc')}}</q-tooltip>
@@ -66,7 +69,7 @@
     </q-toolbar>
 
     <q-toolbar v-if="ui.page === 'compta'" inset 
-      class="full-width bg-secondary text-white row justify-between">
+      class="full-width tbp row justify-between">
       <btn-cond icon="refresh" @ok="session.reloadCompta()"/>
       <q-tabs  class="col titre-md" v-model="ui.pagetab" inline-label outside-arrows mobile-arrows no-caps>
         <q-tab name="notif" :label="$t('PNCntf')" @click="ui.setTab('alertes')"/>
@@ -80,7 +83,7 @@
     </q-toolbar>
 
     <q-toolbar v-if="ui.page === 'groupe'" inset 
-      class="full-width bg-secondary text-white row justify-between">
+      class="full-width tbp row justify-between">
       <q-tabs  class="col titre-md" v-model="ui.pagetab" inline-label outside-arrows mobile-arrows no-caps>
         <q-tab name="groupe" :label="$t('ACtgr')" @click="ui.setTab('groupe')"/>
         <q-tab name="membres" :label="$t('ACtmb')" @click="ui.setTab('membres')"/>
@@ -90,18 +93,17 @@
   </q-header>
 
   <q-footer>
-    <q-toolbar class="sombre overflow-hidden">
-      <!--bouton-help page="DOCpg"/-->
+    <q-toolbar class="tbs overflow-hidden">
 
       <bouton-langue style="position:relative;top:2px;"/>
 
       <!-- Dark ou clair -->
-      <btn-cond icon="contrast" round @ok="clairFonce" color="none">
+      <btn-cond icon="contrast" round @ok="clairFonce">
         <q-tooltip class="ttip">{{$t('clairfonce')}}</q-tooltip>
       </btn-cond>
 
       <!-- Outils et tests -->
-      <btn-cond icon="settings" round @ok="ui.oD('outilsTests', 'a')" color="none">
+      <btn-cond icon="settings" round @ok="ui.oD('outilsTests', 'a')">
         <q-tooltip class="ttip">{{$t('MLAout')}}</q-tooltip>
       </btn-cond>
 
@@ -313,7 +315,7 @@
   <!-- Choix de déconnexion. Déconnexion, reconnexion, continuer -->
   <q-dialog v-model="ui.d.a.dialoguedrc" persistent>
     <q-card :class="styp('sm')">
-      <q-toolbar class="bg-secondary text-white">
+      <q-toolbar class="tbs">
         <q-toolbar-title class="titre-lg full-width text-center">{{$t('MLAdrc')}}</q-toolbar-title>
         <bouton-help page="page1"/>
       </q-toolbar>
@@ -482,9 +484,18 @@ import PageInvitation from './pages/PageInvitation.vue'
 const $t = useI18n().t
 const $q = useQuasar()
 
+const session = stores.session
+const aSt = stores.avatar 
+const gSt = stores.groupe
+const people = stores.people
+const config = stores.config
+const ui = stores.ui
+const hb = stores.hb
+
 function setCss() {
-  setCssVar('primary', $q.dark.isActive ? '#29B6F6' : '#0277BD')
-  setCssVar('secondary', $q.dark.isActive ? '#7CB342' : '#33691E')
+  const d = $q.dark.isActive ? 0 : 1
+  const t = config.theme
+  for(const c in t) setCssVar(c, t[c][d])
 }
 
 $q.dark.set(true)
@@ -493,14 +504,6 @@ setCss()
 set$t($t, $q)
 
 function clairFonce () { $q.dark.toggle(); setCss() }
-
-const session = stores.session
-const aSt = stores.avatar 
-const gSt = stores.groupe
-const people = stores.people
-const config = stores.config
-const ui = stores.ui
-const hb = stores.hb
 
 ui.setScreenWH($q.screen.width, $q.screen.height)
 watchEffect(() => {

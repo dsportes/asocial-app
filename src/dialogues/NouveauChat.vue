@@ -1,7 +1,7 @@
 <template> <!-- BtnCond incorporés -->
 <q-dialog v-model="ui.d[idc].CCouvrir" persistent>
   <q-card :class="styp('sm')">
-  <q-toolbar class="bg-secondary text-white">
+  <q-toolbar class="tbs">
     <btn-cond color="warning" icon="close" @ok="ui.fD"/>
     <q-toolbar-title class="titre-lg full-size text-center">{{$t('CChtit')}}</q-toolbar-title>
     <bouton-help page="page1"/>

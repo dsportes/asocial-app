@@ -4,7 +4,7 @@
     <q-btn padding="1px 1px" dense no-caps flat :label="tit" icon-right="expand_more">
     <q-menu anchor="bottom left" self="top left" max-height="10rem" 
       max-width="20rem">
-      <q-list class="bg-secondary text-white">
+      <q-list class="tbs">
         <q-item clickable v-close-popup @click="val=null">
           <span class="fs-md">{{$t('FItavgr')}}</span>
         </q-item>

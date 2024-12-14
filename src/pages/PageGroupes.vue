@@ -25,7 +25,7 @@
   <q-card class="spmd q-my-lg">
     <div class="row">
       <div class="col-6 q-px-xs">
-        <div class="full-width titre-md text-italic bg-primary text-white text-center">{{$t('ICtita')}}</div>
+        <div class="full-width titre-md text-italic tbp text-center">{{$t('ICtita')}}</div>
         <div v-for="(inv, idx) of gSt.invitsAtt" :key="inv.idg + '/' + inv.ida">
           <div :class="dkli(idx) + 'q-my-xs row invs items-center cursor-pointer'" @click="ouvaccinv(inv)">
             <div class="col-6 text-center">{{session.getCV(inv.ida).nom}}</div>
@@ -34,7 +34,7 @@
         </div>
       </div>
       <div class="col-6 q-px-xs">
-        <div class="full-width titre-md text-italic bg-primary text-white text-center">{{$t('ICtitc')}}</div>
+        <div class="full-width titre-md text-italic tbp text-center">{{$t('ICtitc')}}</div>
         <div v-for="(inv, idx) of gSt.contactsAtt" :key="inv.idg + '/' + inv.ida">
           <div :class="dkli(idx) + 'q-my-xs row invs items-center cursor-pointer'" @click="ouvaccinv(inv)">
             <div class="col-6 text-center">{{session.getCV(inv.ida).nom}}</div>
@@ -81,7 +81,7 @@
   <!-- Contact du groupe ------------------------------------------------>
   <q-dialog v-model="ui.d[idc].PGctc" persistent>
     <q-card :class="styp('sm')">
-      <q-toolbar class="bg-secondary text-white">
+      <q-toolbar class="tbs">
         <btn-cond color="warning" icon="close" @ok="ui.fD"/>
         <q-toolbar-title class="titre-lg text-center">{{$t('PGctc', [nomgi] )}}</q-toolbar-title>
         <bouton-help page="page1"/>
@@ -102,7 +102,7 @@
   <!-- Nouveau groupe ------------------------------------------------>
   <q-dialog v-model="ui.d[idc].PGcrgr" persistent>
     <q-card :class="styp('sm')">
-      <q-toolbar class="bg-secondary text-white">
+      <q-toolbar class="tbs">
         <btn-cond color="warning" icon="close" @ok="ui.fD"/>
         <q-toolbar-title class="titre-lg text-center">{{$t('PGcrea')}}</q-toolbar-title>
         <bouton-help page="page1"/>
