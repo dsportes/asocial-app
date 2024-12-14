@@ -130,7 +130,8 @@ module.exports = configure(function (ctx) {
           btnbg: '#1976D2',
           btntc: '#000000',
           btwbg: '#E65100',
-          btwtc: '#000000'
+          btwtc: '#000000',
+          mdtitre: '#64B5F6'
         }
       },
 

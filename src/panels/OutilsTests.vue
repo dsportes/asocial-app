@@ -12,6 +12,7 @@
           <q-tab name="cpt" class="titre-md text-bold" :label="$t('OTcpt')" @click="ouvCpt()"/>
           <q-tab name="ps" class="titre-md text-bold" :label="$t('OTps')" @click="tab='ps'"/>
           <q-tab name="tst" class="titre-md text-bold" :label="$t('OTtst')" @click="tab='tst'"/>
+          <q-tab name="theme" class="titre-md text-bold" :label="$t('OTtheme')" @click="tab='theme'"/>
           <q-tab v-if="testCompteurs" name="compteurs" class="titre-md text-bold" label="Test Compteurs" @click="tab='compteurs'"/>
         </q-tabs>
       </q-toolbar>
@@ -19,28 +20,121 @@
 
     <q-page-container>
       <div class="font-mono fs-sm q-my-sm q-ml-sm">{{$t('OTbuild', [config.BUILD])}}</div>
-      <!--
-      <div class="font-def fs-sm">Normal sm</div>
-      <div class="font-def fs-md">Normal md</div>
-      <div class="font-def text-italic fs-md">Normal italic md</div>
-      <div class="font-def text-bold fs-md">Normal bold md</div>
-      <div class="font-def text-bold text-italic fs-md">Normal italic bold md</div>
-      <div class="font-def fs-xl">Normal xl</div>
-      <div class="fs-xl">Normal Def xl</div>
-      <div class="fs-sm font-mono q-mt-md">Mono 1 l 0 O wiw sm</div>
-      <div class="fs-md font-mono">Mono 1 l 0 O wiw md</div>
-      <div class="text-italic fs-md font-mono">Mono 1 l 0 O wiw italic md</div>
-      <div class="text-bold fs-md font-mono">Mono 1 l 0 O wiw italic md</div>
-      <div class="text-italic text-bold fs-md font-mono">Mono 1 l 0 O wiw italic bold md</div>
-      <div class="fs-xl font-mono">Mono 1 l 0 O iii xl</div>
-      <div class="fs-xl font-mono">Mono 1 l 0 O www xl</div>
-      <div class="titre-sm q-mt-md">Titre sm</div>
-      <div class="titre-md">Titre md</div>
-      <div class="text-italic titre-md">Titre italic md</div>
-      <div class="text-bold titre-md">Titre italic md</div>
-      <div class="text-italic text-bold titre-md">Titre italic bold md</div>
-      <div class="titre-xl">Titre xl</div>
-      -->
+      
+      <div v-if="tab === 'theme'">
+        <div class="font-def fs-sm">Normal sm</div>
+        <div class="font-def fs-md">Normal md</div>
+        <div class="font-def text-italic fs-md">Normal italic md</div>
+        <div class="font-def text-bold fs-md">Normal bold md</div>
+        <div class="font-def text-bold text-italic fs-md">Normal italic bold md</div>
+        <div class="font-def fs-xl">Normal xl</div>
+        <div class="fs-xl">Normal Def xl</div>
+        <div class="fs-sm font-mono q-mt-md">Mono 1 l 0 O wiw sm</div>
+        <div class="fs-md font-mono">Mono 1 l 0 O wiw md</div>
+        <div class="text-italic fs-md font-mono">Mono 1 l 0 O wiw italic md</div>
+        <div class="text-bold fs-md font-mono">Mono 1 l 0 O wiw italic md</div>
+        <div class="text-italic text-bold fs-md font-mono">Mono 1 l 0 O wiw italic bold md</div>
+        <div class="fs-xl font-mono">Mono 1 l 0 O iii xl</div>
+        <div class="fs-xl font-mono">Mono 1 l 0 O www xl</div>
+        <div class="titre-sm q-mt-md">Titre sm</div>
+        <div class="titre-md">Titre md</div>
+        <div class="text-italic titre-md">Titre italic md</div>
+        <div class="text-bold titre-md">Titre italic md</div>
+        <div class="text-italic text-bold titre-md">Titre italic bold md</div>
+        <div class="titre-xl">Titre xl</div>
+      
+        <q-separator color="orange" class="q-my-md"/>
+        <div class="spsm">
+        <div class="q-my-sm row reverse q-gutter-sm items-center">
+          <div class="col titre-md w10 ">{{$t('THprimary')}}</div>
+          <div class="dk col-auto"><div class="pal" :style="styd('primary')"/></div>
+          <div class="li col-auto"><div class="pal" :style="styd('primary')"/></div>
+        </div>
+        <div class="q-my-sm row reverse q-gutter-sm items-center">
+          <div class="col titre-md w10 ">{{$t('THsecondary')}}</div>
+          <div class="dk col-auto"><div class="pal" :style="styd('secondary')"/></div>
+          <div class="li col-auto"><div class="pal" :style="styd('secondary')"/></div>
+        </div>
+
+        <div class="q-my-sm row reverse q-gutter-sm items-center">
+          <div class="col titre-md w10 ">{{$t('THinfo')}}</div>
+          <div class="dk col-auto"><div class="pal" :style="styd('info')"/></div>
+          <div class="li col-auto"><div class="pal" :style="styd('info')"/></div>
+        </div>
+
+        <div class="q-my-sm row reverse q-gutter-sm items-center">
+          <div class="col titre-md w10 ">{{$t('THaccent')}}</div>
+          <div class="dk col-auto"><div class="pal" :style="styd('accent')"/></div>
+          <div class="li col-auto"><div class="pal" :style="styd('accent')"/></div>
+        </div>
+
+        <div class="q-my-sm row reverse q-gutter-sm items-center">
+          <div class="col titre-md w10 ">{{$t('THpositive')}}</div>
+          <div class="dk col-auto"><div class="pal" :style="styd('positive')"/></div>
+          <div class="li col-auto"><div class="pal" :style="styd('positive')"/></div>
+        </div>
+
+        <div class="q-my-sm row reverse q-gutter-sm items-center">
+          <div class="col titre-md w10 ">{{$t('THnegative')}}</div>
+          <div class="dk col-auto"><div class="pal" :style="styd('negative')"/></div>
+          <div class="li col-auto"><div class="pal" :style="styd('negative')"/></div>
+        </div>
+
+        <div class="q-my-sm row reverse q-gutter-sm items-center">
+          <div class="col titre-md w10 ">{{$t('THwarning')}}</div>
+          <div class="dk col-auto"><div class="pal" :style="styd('warning')"/></div>
+          <div class="li col-auto"><div class="pal" :style="styd('warning')"/></div>
+        </div>
+
+        <div class="q-my-sm row reverse q-gutter-sm items-center">
+          <div class="col titre-md w10 ">{{$t('THmsgbg')}}</div>
+          <div class="dk col-auto"><div class="pal" :style="styd('msgbg')"/></div>
+          <div class="li col-auto"><div class="pal" :style="styd('msgbg')"/></div>
+        </div>
+        <div class="q-my-sm row reverse q-gutter-sm items-center">
+          <div class="col titre-md w10 ">{{$t('THmsgtc')}}</div>
+          <div class="dk col-auto"><div class="pal" :style="styd('msgtc')"/></div>
+          <div class="li col-auto"><div class="pal" :style="styd('msgtc')"/></div>
+        </div>
+
+        <div class="q-my-sm row reverse q-gutter-sm items-center">
+          <div class="col titre-md w10 ">{{$t('THtbptc')}}</div>
+          <div class="dk col-auto"><div class="pal" :style="styd('tbptc')"/></div>
+          <div class="li col-auto"><div class="pal" :style="styd('tbptc')"/></div>
+        </div>
+        <div class="q-my-sm row reverse q-gutter-sm items-center">
+          <div class="col titre-md w10 ">{{$t('THtbstc')}}</div>
+          <div class="dk col-auto"><div class="pal" :style="styd('tbstc')"/></div>
+          <div class="li col-auto"><div class="pal" :style="styd('tbstc')"/></div>
+        </div>
+        <div class="q-my-sm row reverse q-gutter-sm items-center">
+          <div class="col titre-md w10 ">{{$t('THbtnbg')}}</div>
+          <div class="dk col-auto"><div class="pal" :style="styd('btnbg')"/></div>
+          <div class="li col-auto"><div class="pal" :style="styd('btnbg')"/></div>
+        </div>
+        <div class="q-my-sm row reverse q-gutter-sm items-center">
+          <div class="col titre-md w10 ">{{$t('THbtntc')}}</div>
+          <div class="dk col-auto"><div class="pal" :style="styd('btntc')"/></div>
+          <div class="li col-auto"><div class="pal" :style="styd('btntc')"/></div>
+        </div>
+        <div class="q-my-sm row reverse q-gutter-sm items-center">
+          <div class="col titre-md w10 ">{{$t('THbtwbg')}}</div>
+          <div class="dk col-auto"><div class="pal" :style="styd('btwbg')"/></div>
+          <div class="li col-auto"><div class="pal" :style="styd('btwbg')"/></div>
+        </div>
+        <div class="q-my-sm row reverse q-gutter-sm items-center">
+          <div class="col titre-md w10 ">{{$t('THbtwtc')}}</div>
+          <div class="dk col-auto"><div class="pal" :style="styd('btwtc')"/></div>
+          <div class="li col-auto"><div class="pal" :style="styd('btwtc')"/></div>
+        </div>
+        <div class="q-my-sm row reverse q-gutter-sm items-center">
+          <div class="col titre-md w10 ">{{$t('THmdtitre')}}</div>
+          <div class="dk col-auto"><div class="pal" :style="styd('mdtitre')"/></div>
+          <div class="li col-auto"><div class="pal" :style="styd('mdtitre')"/></div>
+        </div>
+        </div>
+      </div>
+
       <div v-if="tab === 'compteurs'">
         <test-compteurs/>
       </div>
@@ -198,6 +292,12 @@ const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 const bases = ref()
 const nbbases = ref(0)
+
+const styd = (c) => {
+  const x = 'background:' + config.theme[c][0]
+  return x
+}
+const styl = (c) => 'background:' + config.theme[c][1]
 
 const pfx = '$asocial$-'
 
@@ -364,6 +464,18 @@ async function getVU (it) {
 @import '../css/app.sass'
 .q-card__section
   padding: 5px
+.pal
+  width: 40px
+  height: 24px
+  margin: 8px
+.dk
+  background: var(--q-dark)
+  border: 1px solid white
+  border-radius: 8px
+.li
+  background: white
+  border: 1px solid black
+  border-radius: 8px
 
 .t1
   font-style: italic

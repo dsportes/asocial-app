@@ -49,7 +49,7 @@
               <div class="text-bold titre-md">{{c.t}}</div>
               <div v-if="c.m.length" class="self-end q-mr-sm">
                 <div v-for="m in c.m" :key="m.value" @click.stop="goto(m.value)"
-                  class="x1 text-primary text-italic titre-md cursor-pointer">
+                  class="x1 text-positive text-italic text-bold titre-md cursor-pointer">
                   {{m.label}}
                 </div>
               </div>

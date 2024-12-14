@@ -25,11 +25,12 @@ export const config = {
     msgbg: ['#FFF176', '#FFF176'],
     msgtc: ['#B71C1C', '#B71C1C'],
     tbptc: ['#82C8E8', '#0101FF'],
-    tbstc: ['#BBDEFB', '#212121'],
+    tbstc: ['#DCEDC8', '#212121'],
     btnbg: ['#1976D2', '#1976D2'],
     btntc: ['#FFFFFF', '#FFFFFF'],
     btwbg: ['#E65100', '#E65100'],
     btwtc: ['#FFFFFF', '#FFFFFF'],
+    mdtitre: ['#64B5F6', '#1565C0']
   },
 
   motscles: {
