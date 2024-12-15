@@ -417,7 +417,13 @@ async function validerqA () {
 .w10
   width: 10rem
 .b1
-  width: 2rem
+  min-width: 2.5rem !important
+  padding: 0 5px
+  color: white
+  background: $primary
+  cursor: pointer
+  border-radius: 6px
+  text-align: center
 .trc
   font-weight: bold
   font-style: italic

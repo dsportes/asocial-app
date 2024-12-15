@@ -1,6 +1,6 @@
 Dans la documentation générale, lire <a href="$$/appli/alertes.html" target="_blank">Alertes et restrictions d'accès associées</a>
 
-## Déclaration d\'une alerte à tous les comptes d'une partition
+## Déclaration d'une alerte à tous les comptes d'une partition
 Cette alerte ne concernent que les comptes "O".
 
 Elle est émise par le Comptable ou un de ses délégués: quand elle a été créée ou mise à jour par le Comptable, un délégué ne peut plus intervenir dessus.

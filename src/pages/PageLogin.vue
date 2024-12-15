@@ -18,7 +18,7 @@
 
     <div class="row justify-center q-gutter-sm q-mt-sm q-mr-xl">
       <btn-cond class="titre-lg" no-caps @ok="ouvrirPS(1)">
-       <div class="row items-center q-gutter-sm">
+        <div class="row items-center q-gutter-sm">
           <q-icon size="sm"><img src="~assets/sync_saved_locally.svg"/></q-icon>
           <div>{{$t('sync')}}</div>
         </div>

@@ -1,6 +1,6 @@
 <template>
-  <span class="row justify-between items-center">
-    <div class="col titre-md">{{label}}</div>
+  <span class="row items-center">
+    <div class="titre-md">{{label}}</div>
     <div class="col-auto q-mx-sm column items-center bord">
       <div class="row" style="overflow:hidden;height:2rem">
         <q-input class="font-mono text-bold fs-md q-mr-xs" v-model="aa" dense

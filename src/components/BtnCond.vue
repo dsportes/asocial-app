@@ -1,15 +1,17 @@
 <template>
+<span>
   <q-btn v-if="stop"
     :icon="diag ? 'error' : icon"
     padding="none" 
-    :disable="disable"
-    :flat="flat"
+    :disable="disable || false"
+    :flat="flat || false"
     dense
+    :no-caps="noCaps"
     :color="clr"
     :text-color="tc"
     :size="size || 'md'"
-    :label="label"
-    :round="round"
+    :label="label || ''"
+    :round="round || false"
     @click.stop="ok">
     <q-tooltip v-if="tp || diag" class="bg-white text-primary">{{diag || tp}}</q-tooltip>
     <slot />
@@ -17,18 +19,20 @@
   <q-btn v-else
     :icon="diag ? 'error' : icon"
     padding="none" 
-    :disable="disable"
-    :flat="flat"
+    :disable="disable || false"
+    :flat="flat || false"
     dense
+    :no-caps="noCaps"
     :color="clr"
     :text-color="tc"
     :size="size || 'md'"
-    :label="label"
-    :round="round"
+    :label="label || ''"
+    :round="round || false"
     @click="ok">
     <q-tooltip v-if="tp || diag" class="bg-white text-primary">{{diag || tp}}</q-tooltip>
     <slot />
   </q-btn>
+</span>
 </template>
 
 <script setup>
@@ -50,25 +54,28 @@ const props = defineProps({
   disable: Boolean,
   flat: Boolean,
   round: Boolean,
-  stop: Boolean
+  stop: Boolean,
+  noCaps: Boolean
 })
 
 const emit = defineEmits(['ok'])
 
-const tc = computed(() => { const x = diag.value ? 'white' : (
+const tc = computed(() => { 
+  if (props.flat) return clr.value
+  const x = diag.value ? 'white' : (
   !props.color || props.color === 'primary' ? 'btntc' : 
   (props.color === 'warning' ? 'btwtc' : 'white'))
   return x
 })
 
-const clr = computed(() => { const x = diag.value ? 'accent' : ( 
-  !props.color || props.color === 'primary' ? 'btnbg' : 
-  (props.color === 'warning' ? 'btwbg' : props.color))
+const clr = computed(() => { 
+  const x = diag.value ? 'accent' : ( 
+    !props.color || props.color === 'primary' ? 'btnbg' : 
+    (props.color === 'warning' ? 'btwbg' : (props.color || 'none')))
   return x
 })
 
-
-const diag = computed(() => session[props.cond])
+const diag = computed(() => props.cond ? session[props.cond] : '')
 
 async function ok () {
   if (!diag.value) { 
@@ -77,6 +84,8 @@ async function ok () {
   }
   await afficherDiag(diag.value)
 }
+
+// console.log(props.label, props.color)
 
 </script>
 

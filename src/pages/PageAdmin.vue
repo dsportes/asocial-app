@@ -470,5 +470,11 @@ async function tacheGo (t) {
 .bord7
   border: 2px solid $primary
 .b1
-  width: 2rem
+  min-width: 2.5rem !important
+  padding: 0 5px
+  color: white
+  background: $primary
+  cursor: pointer
+  border-radius: 6px
+  text-align: center
 </style>

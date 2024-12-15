@@ -503,7 +503,10 @@ setCss()
 
 set$t($t, $q)
 
-function clairFonce () { $q.dark.toggle(); setCss() }
+function clairFonce () { 
+  $q.dark.toggle()
+  setCss() 
+}
 
 ui.setScreenWH($q.screen.width, $q.screen.height)
 watchEffect(() => {

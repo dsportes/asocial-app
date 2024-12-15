@@ -1,6 +1,6 @@
 Dans la documentation générale, lire <a href="$$/appli/alertes.html" target="_blank">Alertes et restrictions d'accès associées</a>
 
-## Déclaration d\'une alerte générale par l'Administrateur Technique
+## Déclaration d'une alerte générale par l'Administrateur Technique
 Cette alerte concerne tous les comptes: elle peut être seulement informative ou expliquer une restriction de fonctionnement.
 - quand aucune des cases à cocher ne l'est, il s'agit d'une alerte informative.
 - si l'une des deux case est cochée, c'est une alerte _espace FIGE_ ou _espace CLOS_.

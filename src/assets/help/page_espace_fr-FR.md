@@ -53,6 +53,8 @@ MAIS quand un quota est revu à la baisse, il peut être fixé **en-dessous du v
 Les opérations et les transferts de fichiers sont ralenties, d'autant plus que le dépassement du quota est important.
 
 # Statistiques CSV d'abonnement / consommation
+Cette statistique mensuelle est calculée au tout début de chaque mois pour le(s) mois antérieur(s) pas encore calculé(s). Le contenu est accessible au Comptable et à l'administrateur technique.
+
 Dans la documentation générale, lire <a href="$$/appli/stats.html" target="_blank">Statistiques partagées entre le Comptable et l'administrateur technique</a>
 
 La statistique **Abonnement / consommation** porte sur UN mois.
