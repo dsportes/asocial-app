@@ -5,7 +5,7 @@
       <q-toolbar class="tbs">
         <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
         <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('OTtit')}}</q-toolbar-title>
-        <bouton-help page="page1"/>
+        <bouton-help page="panel_outils"/>
       </q-toolbar>
       <q-toolbar inset class="tbp">
         <q-tabs v-model="tab" inline-label outside-arrows mobile-arrows no-caps class="full-width">
