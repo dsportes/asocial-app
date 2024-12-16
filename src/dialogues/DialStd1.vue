@@ -8,23 +8,26 @@
     <slot/>
     <q-card-actions align="right" class="q-gutter-sm">
       <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
-      <btn-cond v-if="!confirm" :color="okwarn ? 'warning' : 'primary'" 
+      <btn-cond v-if="!confirm || confok" :color="okwarn ? 'warning' : 'primary'" 
         :icon="okic || 'check'" 
         :label="$t(oklbl || 'valider')" 
         :disable="disable || false"
         :cond="cond"
-        @ok="okfn(ctx)"/>
-      <bouton-confirm v-else :actif="actif" :confirmer="okfn"/>
+        @ok="confok ? cf = true : okfn(ctx)"/>
+      <bouton-confirm v-if="confirm || confok" :actif="actif ? actif : cf" :confirmer="okfn"/>
     </q-card-actions>
   </q-card>
 </q-dialog>
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import BtnCond from '../components/BtnCond.vue'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import { styp, $t } from '../app/util.mjs'
+
+const cf = ref(false)
 
 const model = defineModel({
 })
@@ -39,6 +42,7 @@ const props = defineProps({
   okwarn: Boolean, // Bouton ok warning, sinomn primary
   cond: String, // condition du bouton ok
   confirm: Boolean,
+  confok: Boolean,
   actif: Boolean
 })
 

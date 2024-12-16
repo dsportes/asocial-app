@@ -1,130 +1,111 @@
 <template>
-<q-layout container view="hHh lpR fFf" :class="styp('md')">
-  <q-header elevated class="tbs">
-    <q-toolbar>
-      <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
-      <q-toolbar-title v-if="avid!==0" class="titre-lg full-width text-center">{{$t('SAVtit1', [cv.nom])}}</q-toolbar-title>
-      <q-toolbar-title v-else class="titre-lg full-width text-center msg">
-        {{$t('SAVtit2', [cv.nom])}}</q-toolbar-title>
-      <bouton-help page="page1"/>
-    </q-toolbar>
-    <div class="row justify-center items-center">
-      <div class="titre-md text-bold text-italic q-mr-md">{{$t('SAVval' + (avid !== 0 ? '1' : '2'))}}</div>
-      <bouton-confirm :actif="checksOK" :confirmer="cftop"/>
+  <div v-if="s" class="q-pa-xs">
+
+    <div v-if="s.ddel" class="row q-my-md items-start">
+      <q-checkbox class="col-auto cb" size="sm" v-model="checks._ddel" :label="$t('vu')" />
+      <div class="col titre-md">{{$t('SAVdspt')}}</div>
     </div>
-  </q-header>
 
-  <q-page-container>
-    <q-page v-if="s" :class="dkli(0) + ' q-pa-xs'">
-
-      <div v-if="s.ddel" class="row q-my-md items-start">
-        <q-checkbox class="col-auto cb" size="sm" v-model="checks._ddel" :label="$t('vu')" />
-        <div class="col titre-md">{{$t('SAVdspt')}}</div>
+    <div class="row q-my-md items-start">
+      <q-checkbox class="col-auto cb" size="sm" v-model="checks._notes" :label="$t('vu')" />
+      <div class="col">
+        <div class="titre-md">{{$t('SAVnotes', nbn, { count: nbn })}}</div>
+        <div v-if="nbn" class="q-my-sm q-ml-md">{{$t('SAVvlib', [edvol(v2n)])}}</div>
       </div>
+    </div>
 
-      <div class="row q-my-md items-start">
-        <q-checkbox class="col-auto cb" size="sm" v-model="checks._notes" :label="$t('vu')" />
-        <div class="col">
-          <div class="titre-md">{{$t('SAVnotes', nbn, { count: nbn })}}</div>
-          <div v-if="nbn" class="q-my-sm q-ml-md">{{$t('SAVvlib', [edvol(v2n)])}}</div>
+    <div class="row q-my-md items-start">
+      <q-checkbox class="col-auto cb" v-model="checks._chats" :label="$t('vu')" />
+      <div class="col">
+        <div class="titre-md">{{$t('SAVchats', s.ch.length, { count: s.ch.length })}}</div>
+        <div v-if="s.ch.length" class="q-ml-md">
+          <span v-for="c in s.ch" :key="c.pk" class="q-my-sm q-mr-sm b1">
+            {{session.getCV(c.idE).nomC}}</span>
         </div>
       </div>
+    </div>
 
-      <div class="row q-my-md items-start">
-        <q-checkbox class="col-auto cb" v-model="checks._chats" :label="$t('vu')" />
-        <div class="col">
-          <div class="titre-md">{{$t('SAVchats', s.ch.length, { count: s.ch.length })}}</div>
-          <div v-if="s.ch.length" class="q-ml-md">
-            <span v-for="c in s.ch" :key="c.pk" class="q-my-sm q-mr-sm b1">
-              {{session.getCV(c.idE).nomC}}</span>
-          </div>
+    <div v-if="s.sp.length" class="row q-my-md items-start">
+      <q-checkbox class="col-auto cb" v-model="checks._spons" :label="$t('vu')" />
+      <div class="col">
+        <div class="titre-md">{{$t('SAVspons', s.sp.length, { count: s.sp.length })}}</div>
+        <div class="q-ml-md">
+          <span v-for="x in s.sp" :key="x.ids" class="q-my-sm q-mr-sm b1">{{x.psp}}</span>
         </div>
       </div>
+    </div>
 
-      <div v-if="s.sp.length" class="row q-my-md items-start">
-        <q-checkbox class="col-auto cb" v-model="checks._spons" :label="$t('vu')" />
-        <div class="col">
-          <div class="titre-md">{{$t('SAVspons', s.sp.length, { count: s.sp.length })}}</div>
-          <div class="q-ml-md">
-            <span v-for="x in s.sp" :key="x.ids" class="q-my-sm q-mr-sm b1">{{x.psp}}</span>
-          </div>
+    <div v-if="s.gr1.length" class="row q-my-md items-start">
+      <q-checkbox class="col-auto cb" size="sm" v-model="checks._gr1" :label="$t('vu')" />
+      <div class="col column">
+        <div class="titre-md">{{$t('SAVgr1', s.gr1.length, { count: s.gr1.length })}}</div>
+        <div class="q-ml-md q-my-sm" v-for="x in s.gr1" :key="x.id">
+          <span class="b1 q-mr-lg">{{x.nomC}}</span>
+          <span>{{$t('SAVvlib1', x.nn, {count: x.nn})}}</span>
+          <span class="q-ml-sm">{{$t('SAVvlib', [edvol(x.v2)])}}</span>
         </div>
       </div>
+    </div>
 
-      <div v-if="s.gr1.length" class="row q-my-md items-start">
-        <q-checkbox class="col-auto cb" size="sm" v-model="checks._gr1" :label="$t('vu')" />
-        <div class="col column">
-          <div class="titre-md">{{$t('SAVgr1', s.gr1.length, { count: s.gr1.length })}}</div>
-          <div class="q-ml-md q-my-sm" v-for="x in s.gr1" :key="x.id">
-            <span class="b1 q-mr-lg">{{x.nomC}}</span>
-            <span>{{$t('SAVvlib1', x.nn, {count: x.nn})}}</span>
-            <span class="q-ml-sm">{{$t('SAVvlib', [edvol(x.v2)])}}</span>
-          </div>
+    <div v-if="s.gr2.length" class="row q-my-md items-start">
+      <q-checkbox class="col-auto cb" size="sm" v-model="checks._gr2" :label="$t('vu')" />
+      <div class="col column">
+        <div class="titre-md">{{$t('SAVgr2', s.gr2.length, { count: s.gr2.length })}}</div>
+        <div class="q-ml-md q-my-sm" v-for="x in s.gr2" :key="x.id">
+          <span class="b1 q-mr-lg">{{x.nomC}}</span>
+          <span>{{$t('SAVvlib2', x.nn, {count: x.nn})}}</span>
+          <span class="q-ml-sm">{{$t('SAVvlib3m', [edvol(x.v2)])}}</span>
         </div>
       </div>
+    </div>
 
-      <div v-if="s.gr2.length" class="row q-my-md items-start">
-        <q-checkbox class="col-auto cb" size="sm" v-model="checks._gr2" :label="$t('vu')" />
-        <div class="col column">
-          <div class="titre-md">{{$t('SAVgr2', s.gr2.length, { count: s.gr2.length })}}</div>
-          <div class="q-ml-md q-my-sm" v-for="x in s.gr2" :key="x.id">
-            <span class="b1 q-mr-lg">{{x.nomC}}</span>
-            <span>{{$t('SAVvlib2', x.nn, {count: x.nn})}}</span>
-            <span class="q-ml-sm">{{$t('SAVvlib3m', [edvol(x.v2)])}}</span>
-          </div>
+    <div v-if="s.gr3.length" class="row q-my-md items-start">
+      <q-checkbox class="col-auto cb" size="sm" v-model="checks._gr3" :label="$t('vu')" />
+      <div class="col column">
+        <div class="titre-md">{{$t('SAVgr3', s.gr3.length, { count: s.gr3.length })}}</div>
+        <div class="q-ml-md q-my-sm" v-for="x in s.gr3" :key="x.id">
+          <span class="b1 q-mr-lg">{{x.nomC}}</span>
+          <span>{{$t('SAVvlib2', x.nn, {count: x.nn})}}</span>
         </div>
       </div>
+    </div>
 
-      <div v-if="s.gr3.length" class="row q-my-md items-start">
-        <q-checkbox class="col-auto cb" size="sm" v-model="checks._gr3" :label="$t('vu')" />
-        <div class="col column">
-          <div class="titre-md">{{$t('SAVgr3', s.gr3.length, { count: s.gr3.length })}}</div>
-          <div class="q-ml-md q-my-sm" v-for="x in s.gr3" :key="x.id">
-            <span class="b1 q-mr-lg">{{x.nomC}}</span>
-            <span>{{$t('SAVvlib2', x.nn, {count: x.nn})}}</span>
-          </div>
+    <div v-if="s.gr0.length" class="row q-my-md items-start">
+      <q-checkbox class="col-auto cb" size="sm" v-model="checks._gr0" :label="$t('vu')" />
+      <div class="col column">
+        <div class="titre-md">{{$t('SAVgr0', s.gr0.length, { count: s.gr0.length })}}</div>
+        <div class="q-ml-md q-my-sm" v-for="x in s.gr0" :key="x.id">
+          <span class="b1 q-mr-lg">{{x.nomC}}</span>
+          <span>{{$t('SAVvlib2', x.nn, {count: x.nn})}}</span>
         </div>
       </div>
+    </div>
 
-      <div v-if="s.gr0.length" class="row q-my-md items-start">
-        <q-checkbox class="col-auto cb" size="sm" v-model="checks._gr0" :label="$t('vu')" />
-        <div class="col column">
-          <div class="titre-md">{{$t('SAVgr0', s.gr0.length, { count: s.gr0.length })}}</div>
-          <div class="q-ml-md q-my-sm" v-for="x in s.gr0" :key="x.id">
-            <span class="b1 q-mr-lg">{{x.nomC}}</span>
-            <span>{{$t('SAVvlib2', x.nn, {count: x.nn})}}</span>
-          </div>
-        </div>
+    <div v-if="avid !== 0" class="row q-my-md items-start">
+      <q-checkbox class="col-auto cb" size="sm" v-model="checks._vol" :label="$t('vu')" />
+      <div class="col">
+        <div v-if="nbn" class="titre-md">{{$t('SAVvol')}}</div>        
+        <div v-if="s.nna" class="q-ml-lg q-my-sm">{{$t('SAVvola', [s.nna, edvol(s.v2a)])}}</div>
+        <div v-if="s.nng" lass="q-ml-lg q-my-sm">{{$t('SAVvolg', [s.nng, edvol(s.v2g)])}}</div>
+        <div class="titre-md">{{$t('SAVabo')}}</div>        
+        <div class="q-ml-md q-my-sm">
+          {{$t('SAVabo1', [nbn, s.ch.length, s.ng, nbtot])}}</div>
+        <div v-if="s.v2a" class="q-ml-md q-my-sm">
+          {{$t('SAVabo2', [edvol(s.v2a)])}}</div>
       </div>
+    </div>
 
-      <div v-if="avid !== 0" class="row q-my-md items-start">
-        <q-checkbox class="col-auto cb" size="sm" v-model="checks._vol" :label="$t('vu')" />
-        <div class="col">
-          <div v-if="nbn" class="titre-md">{{$t('SAVvol')}}</div>        
-          <div v-if="s.nna" class="q-ml-lg q-my-sm">{{$t('SAVvola', [s.nna, edvol(s.v2a)])}}</div>
-          <div v-if="s.nng" lass="q-ml-lg q-my-sm">{{$t('SAVvolg', [s.nng, edvol(s.v2g)])}}</div>
-          <div class="titre-md">{{$t('SAVabo')}}</div>        
-          <div class="q-ml-md q-my-sm">
-            {{$t('SAVabo1', [nbn, s.ch.length, s.ng, nbtot])}}</div>
-          <div v-if="s.v2a" class="q-ml-md q-my-sm">
-            {{$t('SAVabo2', [edvol(s.v2a)])}}</div>
-        </div>
-      </div>
+    <q-separator color="orange" class="q-my-sm"/>
 
-    </q-page>
-  </q-page-container>
-
-  <q-dialog v-model="ui.d[idc].SAconfirmsuppr" persistent>
-    <q-card :class="styp('sm') + 'q-pa-sm'">
-      <div class="q-mt-md titre-lg text-italic">{{$t('SAVcf' + (avid !== 0 ? '1' : '2'))}}</div>
-      <div class="q-mt-md row justify-center q-gutter-md">
-        <btn-cond flat :label="$t('renoncer')" color="primary" @ok="ui.fD"/>
-        <bouton-confirm actif :confirmer="valider"/>
-      </div>
-    </q-card>
-  </q-dialog>
-
-</q-layout>
+    <q-card-actions align="right" class="q-gutter-sm">
+      <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
+      <btn-cond color="warning" :disable="!checksOK" icon="delete" 
+        :label="$t('supprimer')" @ok="actif = true"/>
+      <bouton-confirm :actif="actif" :confirmer="valider"/>
+    </q-card-actions>
+    
+    <q-separator color="orange" class="q-my-sm"/>
+  </div>
 </template>
 
 <script setup>
@@ -139,7 +120,8 @@ import { GetPartition, SupprAvatar, SupprCompte } from '../app/operations4.mjs'
 import { deconnexion } from '../app/synchro.mjs'
 
 const ui = stores.ui
-const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))    
+const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
+
 const session = stores.session
 const aSt = stores.avatar
 const nSt = stores.note
@@ -151,6 +133,8 @@ const props = defineProps({
 
 if (!props.avid && session.compte.idp)
   onMounted(async () => { await new GetPartition().run(session.compte.idp) })
+
+const actif = ref(false)
 
 const checks = ref({ 
   _notes: false, _chats: false, _spons: false, _ddel: false, _vol: false,
@@ -263,13 +247,7 @@ const s = computed(() => {
 
 watch(s, () => { for (const x in checks.value) checks.value[x] = false })
 
-function cftop () {
-  ui.oD('SAconfirmsuppr', this.idc)
-}
-
 async function valider () {
-  ui.fD() // boite de confirmation
-  await sleep(50)
   ui.fD() // Dialogue de suppression
   if (props.avid) {
     const r = await new SupprAvatar().run(props.avid)

@@ -1897,6 +1897,7 @@ La "consommation mensuelle" de calcul est en centimes et est la somme des coûts
   A_chat_nouveau: 'Création d\'un nouveau "chat"',
   A_chat_maj: 'Visualisation et édition d\'un "chat"',
   A_contact_detail: 'Fiche détaillé d\'un contact',
+  A_suppr_avatar: 'Suppression d\'un avatar ou compte',
 
   A_special: 'Administration Technique',
   A_page_admin: 'Page de l\'Administrateur Technique'

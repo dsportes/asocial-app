@@ -19,13 +19,11 @@
       <div> <!-- Changement de phrase secrète -->
         <btn-cond class="q-ml-sm" icon="manage_accounts" cond="cUrgence"
           :label="$t('CPTchps')" flat @ok="saisiePS"/>
-        <bouton-help class="q-ml-sm" page="page1"/>
       </div>
 
       <div> <!-- Nouvel avatar -->
         <btn-cond class="q-ml-sm" icon="add" cond="cEdit"
           :label="$t('CPTnvav')" flat @ok="ouvrirNvav"/>
-        <bouton-help class="q-ml-sm" page="page1"/>
       </div>
       
       <div> <!-- maj quotas du compte -->
@@ -61,29 +59,13 @@
     </q-card>
 
     <!-- Dialogue de mutation en compte A -->
-    <q-dialog v-model="ui.d[idc].PCmuta" persistent>
-      <q-card :class="styp('md')">
-        <q-toolbar class="tbs">
-          <btn-cond icon="close" color="warning" @ok="ui.fD"/>
-          <q-toolbar-title class="titre-lg full-width text-center">{{$t('CPTautoA')}}</q-toolbar-title>
-          <bouton-help page="page2"/>
-        </q-toolbar>
-
-        <q-card-section>
-          <choix-quotas v-model="quotas"/>
-          <div v-if="quotas.err" class="bg-yellow-5 text-bold text-black q-pa-xs">
-            {{$t('PPquot')}}
-          </div>
-        </q-card-section>
-
-        <q-card-actions class="q-pa-xs q-mt-sm q-gutter-sm" align="center">
-          <btn-cond icon="undo" flat :label="$t('renoncer')" @ok="ui.fD"/>
-          <btn-cond :disable="quotas.err !== ''" color="warning" icon="change_history" 
-            cond="cUrgence" :label="$t('valider')" @ok="cf=true"/>
-          <bouton-confirm :actif="cf" :confirmer="mutA"/>
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+    <dial-std1 v-if="m1" v-model="m1" :titre="$t('CPTautoA')" okic="change_history"
+      confok warning :disable="quotas.err !== ''" cond="cUrgence" :okfn="mutA">
+      <q-card-section>
+        <choix-quotas v-model="quotas"/>
+        <div v-if="quotas.err" class="msg">{{$t('PPquot')}}</div>
+      </q-card-section>
+    </dial-std1>
 
     <!-- Dialogue de création d'un nouvel avatar -->
     <q-dialog v-model="ui.d[idc].PCnvav" persistent>
@@ -91,31 +73,21 @@
         <q-toolbar class="tbs">
           <btn-cond icon="close" color="warning" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg full-width text-center">{{$t('CPTnvav2')}}</q-toolbar-title>
-          <bouton-help page="page1"/>
         </q-toolbar>
-        <nom-avatar icon-valider="check" verif :label-valider="$t('valider')" @ok-nom="oknom" />
+        <nom-avatar class="q-my-xs q-mt-sm" icon-valider="check" verif :label-valider="$t('valider')" @ok-nom="oknom" />
       </q-card>
     </q-dialog>
 
     <!-- Dialogue de suppression d'un avatar -->
-    <q-dialog v-model="ui.d[idc].SAsuppravatar" full-height position="left" persistent>
+    <dial-std2 v-if="m3" v-model="m3" help="suppr_avatar" :titre="$t('SAVtit1', [cv.nom])">
       <suppr-avatar :avid="avid"/>
-    </q-dialog>
+    </dial-std2>
 
     <!-- Dialogue de mise à jour des quotas du compte -->
-    <q-dialog v-model="ui.d[idc].PTedq" persistent>
-      <q-card :class="styp('sm')">
-        <q-toolbar class="tbs">
-          <btn-cond color="warning" icon="close" @ok="ui.fD"/>
-          <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTqu')}}</q-toolbar-title>
-        </q-toolbar>
-        <choix-quotas class="q-mt-sm" v-model="quotas"/>
-        <q-card-actions align="right" class="q-gutter-sm">
-          <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
-          <btn-cond icon="check" :disable="quotas.err || !quotas.chg" :label="$t('valider')" @ok="validerq"/>
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+    <dial-std1 v-if="m2" v-model="m2" :titre="$t('PTqu')"
+      warning cond="cUrgence" :okfn="validerq">
+      <choix-quotas class="q-mt-sm" v-model="quotas"/>
+    </dial-std1>
 
   </q-page>
 </template>
@@ -134,14 +106,22 @@ import SupprAvatar from '../panels/SupprAvatar.vue'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import BtnCond from '../components/BtnCond.vue'
+import DialStd1 from '../dialogues/DialStd1.vue'
+import DialStd2 from '../dialogues/DialStd2.vue'
 import { $t, styp, afficherDiag } from '../app/util.mjs'
 import { isAppExc, ID } from '../app/api.mjs'
 
 const session = stores.session
 const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
+const m1 = computed(() => ui.d[idc].PCmuta)
+const m2 = computed(() => ui.d[idc].PTedq)
+const m3 = computed(() => ui.d[idc].SAsuppravatar)
+
 const aSt = stores.avatar
 const fSt = stores.filtre
+
+const cv = computed(() => session.getCV(avid.value || session.compteId))
 
 const ps = ref(null)
 const nomav = ref('')
