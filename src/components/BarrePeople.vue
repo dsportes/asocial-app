@@ -13,81 +13,62 @@
       cond="cUrgence" :label="$t('PPcompta')" @ok="voirCompta"/>
   </div>
 
-  <!-- Changement de partition -->
-  <q-dialog v-model="ui.d[idc].BPchgTr" persistent>
-    <q-card :class="styp('sm') + ' q-pa-sm'">
-      <div class="titre-lg tbs text-center">
-        {{$t('PPchgpart', [cv.nom, session.codePart(idp)])}}</div>
+  <dial-std1 v-if="m1" v-model="m1" :titre="$t('PPchgpart', [cv.nom])"
+    warning :disable="!selx || !selx.okc || !selx.okn || !selx.okv" cond="cUrgence" :okfn="changerPart">
+    <q-card-section>
+      <div class="q-mb-sm titre-lg tbs text-center">{{$t('PPchgpart2', [session.codePart(idp)])}}</div>
       <div class="q-mx-sm titre-md">{{$t('PPqvn', [cpt.qv.qn, edn(cpt.qv.qn), cpt.pcn])}}</div>
       <div class="q-mx-sm titre-md">{{$t('PPqvv', [cpt.qv.qv, edv(cpt.qv.qv), cpt.pcv])}}</div>
       <div class="q-mx-sm titre-md">{{$t('PPqvc', [cpt.qv.qc, cpt.pcc])}}</div>
+    </q-card-section>
 
+    <q-card-section>
+      <div class="titre-md text-italic tbs">{{$t('PPfp')}}</div>
       <q-input filled v-model="filtre" :label="$t('PPnt')" />
-      <q-separator class="q-mt-sm"/>
+    </q-card-section>
 
-      <q-card-section>
-        <div class="titre-md text-italic row items-center">
-          <div class="col-3">{{$t('PPc1')}}</div>
-          <div class="col-3 text-center">{{$t('PPcn', [cpt.qv.qn])}}</div>
-          <div class="col-3 text-center">{{$t('PPcv', [cpt.qv.qv])}}</div>
-          <div class="col-3 text-center">{{$t('PPcc', [cpt.qv.qc])}}</div>
-        </div>
-        <div class="titre-md q-mt-sm text-bold text-italic">{{$t('PPc0')}}</div>
-      </q-card-section>
+    <q-card-section>
+      <div class="titre-md text-italic row items-center">
+        <div class="col-3">{{$t('PPc1')}}</div>
+        <div class="col-3 text-center">{{$t('PPcn', [cpt.qv.qn])}}</div>
+        <div class="col-3 text-center">{{$t('PPcv', [cpt.qv.qv])}}</div>
+        <div class="col-3 text-center">{{$t('PPcc', [cpt.qv.qc])}}</div>
+      </div>
+      <div class="titre-md q-mt-sm text-bold text-italic">{{$t('PPc0')}}</div>
+    </q-card-section>
 
-      <q-card-section style="height: 30vh" class="scroll bord1">
-        <div v-for="x in lst" :key="x.id" :class="cllst(x)"  @click="selx = x">
-          <div class="col-3">{{x.code}}</div>
-          <div class="col-3 q-px-xs">
-            <div :class="'text-center' + (x.okn ? '' : ' bg-yellow-5 text-bold text-negative')">
-              <span >{{x.dn}}</span>
-              <span class="q-mx-sm">/</span>
-              <span>{{x.qn}}</span>
-            </div>
-          </div>
-          <div class="col-3 q-px-xs">
-            <div :class="'text-center' + (x.okv ? '' : ' bg-yellow-5 text-bold text-negative')">
-              <span >{{x.dv}}</span>
-              <span class="q-mx-sm">/</span>
-              <span>{{x.qv}}</span>
-            </div>
-          </div>
-          <div class="col-3 q-px-xs">
-            <div :class="'text-center' + (x.okc ? '' : ' bg-yellow-5 text-bold text-negative')">
-              <span >{{x.dc}}</span>
-              <span class="q-mx-sm">/</span>
-              <span>{{x.qc}}</span>
-            </div>
+    <q-card-section style="height: 30vh" class="scroll bord1">
+      <div v-for="x in lst" :key="x.id" :class="cllst(x)"  @click="selx = x">
+        <div class="col-3">{{x.code}}</div>
+        <div class="col-3 q-px-xs">
+          <div :class="'text-center' + (x.okn ? '' : ' bg-yellow-5 text-bold text-negative')">
+            <span >{{x.dn}}</span>
+            <span class="q-mx-sm">/</span>
+            <span>{{x.qn}}</span>
           </div>
         </div>
-      </q-card-section>
-
-      <q-separator />      
-      <q-card-actions align="right" class="q-gutter-sm">
-        <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
-        <btn-cond color="warning" cond="cUrgence"
-          :label="$t('valider')" :disable="!selx || !selx.okc || !selx.okn || !selx.okv" @ok="changerPart()"/>
-      </q-card-actions>
-    </q-card>
-  </q-dialog>
+        <div class="col-3 q-px-xs">
+          <div :class="'text-center' + (x.okv ? '' : ' bg-yellow-5 text-bold text-negative')">
+            <span >{{x.dv}}</span>
+            <span class="q-mx-sm">/</span>
+            <span>{{x.qv}}</span>
+          </div>
+        </div>
+        <div class="col-3 q-px-xs">
+          <div :class="'text-center' + (x.okc ? '' : ' bg-yellow-5 text-bold text-negative')">
+            <span >{{x.dc}}</span>
+            <span class="q-mx-sm">/</span>
+            <span>{{x.qc}}</span>
+          </div>
+        </div>
+      </div>
+    </q-card-section>
+  </dial-std1>
 
   <!-- Affichage des compteurs de compta du compte "courant"-->
-  <q-dialog v-model="ui.d[idc].BPcptdial" position="left" persistent>
-    <q-layout container view="hHh lpR fFf" :class="styp('md')">
-      <q-header elevated class="tbs">
-        <q-toolbar>
-          <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
-          <q-toolbar-title class="titre-lg text-center q-mx-sm">
-            {{$t('PTcompta', [cv.nomC])}}</q-toolbar-title>
-        </q-toolbar>
-      </q-header>
-      <q-page-container>
-        <q-card>
-          <panel-compta style="margin:0 auto" :c="session.compta.compteurs"/>
-        </q-card>
-      </q-page-container>
-    </q-layout>
-  </q-dialog>
+  <dial-std2 v-if="m2" v-model="m2" :titre="$t('PTcompta', [cv.nomC])" size="md">
+    <panel-compta style="margin:0 auto" :c="session.compta.compteurs"/>
+  </dial-std2>
 
 </div>
 </template>
@@ -105,6 +86,8 @@ import MicroChat from '../components/MicroChat.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 import PhraseContact from '../components/PhraseContact.vue'
+import DialStd1 from '../dialogues/DialStd1.vue'
+import DialStd2 from '../dialogues/DialStd2.vue'
 import { $t, styp, edvol, afficherDiag } from '../app/util.mjs'
 import { StatutChatE, ChangerPartition, DeleguePartition, GetCompta, GetComptaQv,  
   GetAvatarPC, GetSynthese, GetPartition } from '../app/operations4.mjs'
@@ -114,6 +97,8 @@ const cfg = stores.config
 const aSt = stores.avatar
 const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
+const m1 = computed(() => ui.d[idc].BPchgTr)
+const m2 = computed(() => ui.d[idc].BPcptdial)
 
 const props = defineProps({ 
   id: String

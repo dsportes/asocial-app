@@ -74,20 +74,10 @@
     <nouveau-sponsoring v-if="idc && ui.d[idc].NSnvsp" :idc2="idc"/>
     
     <!-- Dialogue de mise à jour des quotas du compte -->
-    <q-dialog v-model="ui.d[idc].PTedq" persistent>
-      <q-card :class="styp('sm')">
-        <q-toolbar class="tbs">
-          <btn-cond color="warning" icon="close" @ok="ui.fD"/>
-          <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTqu')}}</q-toolbar-title>
-        </q-toolbar>
-        <choix-quotas class="q-mt-sm" v-model="quotas"/>
-        <q-card-actions align="right" class="q-gutter-sm">
-          <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
-          <btn-cond icon="check" :disable="quotas.err || !quotas.chg" 
-            :label="$t('valider')" @ok="validerq"/>
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+    <dial-std1 v-if="m1" v-model="m1" :titre="$t('PTqu')"
+      warning :disable="quotas.err || !quotas.chg" cond="cEdit" :okfn="validerq">
+      <choix-quotas class="q-pa-sm" v-model="quotas"/>
+    </dial-std1>
     
   </div>
   <div v-else class="titre-lg text-italic full-width text-center">{{$t('TUnopart')}}</div>
@@ -109,11 +99,13 @@ import ApercuGenx from '../components/ApercuGenx.vue'
 import QuotasVols from '../components/QuotasVols.vue'
 import NouveauSponsoring from '../panels/NouveauSponsoring.vue'
 import BarrePeople from '../components/BarrePeople.vue'
+import DialStd1 from '../dialogues/DialStd1.vue'
 import { GetNotifC, GetPartition, SetQuotas, GetCompta } from '../app/operations4.mjs'
 import { styp } from '../app/util.mjs'
 
 const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
+const m1 = computed(() => ui.d[idc].PTedq)
 
 const ic = ['check', 'report', 'alarm_on', 'lock']
 const txt = ['green-3', 'green-5', 'warning', 'negative']

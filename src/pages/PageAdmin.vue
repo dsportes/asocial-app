@@ -127,66 +127,40 @@
     </div>
 
     <!-- Création d'un espace -->
-    <q-dialog v-if="ui.d[idc]" v-model="ui.d[idc].PAcreationesp" persistent>
-      <q-card :class="styp('sm')">
-        <q-toolbar class="tbs">
-          <btn-cond icon="close" color="warning" @ok="cancelNS"/>
-          <q-toolbar-title class="titre-lg full-width text-center">{{$t('ESne2')}}</q-toolbar-title>
-          <bouton-help page="page1"/>
-        </q-toolbar>
-        <q-card-section class="q-pa-xs">
-          <div class="row items-center full-width">
-            <q-input class="col-6 q-pr-md" v-model="ns"
-              :label="$t('ESns')" :hint="$t('ESnsh')" dense/>
-            <div v-if="dns" class="col-6 text-negative bg-yellow-3 text-bold q-px-xs">{{dns}}</div>
-          </div>
-          <div class="row items-center full-width">
-            <q-input class="col-6  q-pr-md" v-model="org"
-              :label="$t('ESorg')" hint="monorg" dense/>
-            <div v-if="dorg" class="col-6 text-negative bg-yellow-3 text-bold q-px-xs">{{dorg}}</div>
-          </div>
-          <div class="column justify-center q-mt-md">
-            <phrase-contact declaration orgext="fake" @ok="okps" :disable="!org"/>
-            <bouton-confirm class="q-my-lg maauto" :actif="ps !== null && !dns && !dorg" 
-              :confirmer="creerNS"/>
-          </div>
-        </q-card-section>
-      </q-card>
-    </q-dialog>
+    <dial-std1 v-if="m3" v-model="m3" :titre="$t('ESne2')"
+      confirm :okfn="creerNS" :actif="ps !== null && !dns && !dorg">
+      <q-card-section class="q-my-md q-mx-sm">
+        <div class="row items-center full-width">
+          <q-input class="col-6 q-pr-md" v-model="ns"
+            :label="$t('ESns')" :hint="$t('ESnsh')" dense/>
+          <div v-if="dns" class="col-6 text-negative bg-yellow-3 text-bold q-px-xs">{{dns}}</div>
+        </div>
+        <div class="row items-center full-width">
+          <q-input class="col-6  q-pr-md" v-model="org"
+            :label="$t('ESorg')" hint="monorg" dense/>
+          <div v-if="dorg" class="col-6 text-negative bg-yellow-3 text-bold q-px-xs">{{dorg}}</div>
+        </div>
+        <div class="column justify-center q-mt-md">
+          <phrase-contact declaration orgext="fake" @ok="okps" :disable="!org"/>
+        </div>
+      </q-card-section>
+    </dial-std1>
 
     <!-- Changement de la phrase de sponsoring du Comptable -->
-    <q-dialog v-if="ui.d[idc]" v-model="ui.d[idc].PAnvspc" persistent>
-      <q-card :class="styp('sm')">
-        <q-toolbar class="tbs">
-          <btn-cond color="warning" icon="close" @ok="ui.fD"/>
-          <q-toolbar-title class="titre-lg full-width text-center">{{$t('ENnpspc')}}</q-toolbar-title>
-        </q-toolbar>
-        <q-card-section class="q-my-md q-mx-sm">
-          <phrase-contact declaration :orgext="esp.org" @ok="okps" :disable="!org"/>
-        </q-card-section>
-        <q-card-actions align="right" class="q-gutter-sm">
-          <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
-          <btn-cond color="warning" icon="check" 
-            :label="$t('valider')" :disable="!ps" @ok="nvspc"/>
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+    <dial-std1 v-if="m2" v-model="m2" :titre="$t('ENnpspc')"
+      :disable="!ps" :okfn="nvspc">
+      <q-card-section class="q-my-md q-mx-sm">
+        <phrase-contact declaration :orgext="esp.org" @ok="okps" :disable="!org"/>
+      </q-card-section>
+    </dial-std1>
 
-    <!-- Changement des quotas de l'espace -->
-    <q-dialog v-if="ui.d[idc]" v-model="ui.d[idc].PAedprf" persistent>
-      <q-card :class="styp('sm')">
-        <q-toolbar class="tbs">
-          <btn-cond color="warning" icon="close" @ok="ui.fD"/>
-          <q-toolbar-title class="titre-lg full-width text-center">{{$t('ESchg')}}</q-toolbar-title>
-        </q-toolbar>
-        <choix-quotas v-model="quotas"/>
-        <q-card-actions align="right" class="q-gutter-sm">
-          <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
-          <btn-cond color="warning" icon="check" 
-            :label="$t('valider')" :disable="quotas.err || !quotas.chg" @ok="valider"/>
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+    <!-- Changement des quotas de l'espace
+    v-if: pour se protéger de l'absence de quotas avant ouverture du dialogue 
+    -->
+    <dial-std1 v-if="m1" v-model="m1" :titre="$t('ESchg')"
+      :disable="quotas.err || !quotas.chg" okwarn :okfn="valider">
+      <choix-quotas v-model="quotas"/>
+    </dial-std1>
 
   </q-page>
 </template>
@@ -210,6 +184,7 @@ import SaisieMois from '../components/SaisieMois.vue'
 import IconAlerte from '../components/IconAlerte.vue'
 import QuotasVols from '../components/QuotasVols.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
+import DialStd1 from '../dialogues/DialStd1.vue'
 import { GetEspaces, CreationEspace, MajSponsEspace, SetEspaceQuotas, InitTachesGC, 
   DownloadStatC, DownloadStatC2, GetTaches, DelTache, GoTache } from '../app/operations4.mjs'
 import { get } from '../app/net.mjs'
@@ -219,6 +194,9 @@ import { styp, edvol, mon, nbn, dkli, afficherDiag, dhstring } from '../app/util
 
 const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
+const m1 = computed(() => ui.d[idc].PAedprf)
+const m2 = computed(() => ui.d[idc].PAnvspc)
+const m3 = computed(() => ui.d[idc].PAcreationesp)
 
 const reg = /^([a-z0-9\-]+)$/
 
@@ -394,7 +372,7 @@ async function creerNS () {
   await loadEsp()
 }
 
-async function valider () {
+async function valider (ctx) {
   await new SetEspaceQuotas().run(esp.value.ns, quotas.value)
   ui.fD()
   await loadEsp()

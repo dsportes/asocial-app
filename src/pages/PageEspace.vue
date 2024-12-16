@@ -116,38 +116,21 @@
     </div>
 
     <!-- Dialogue de mise à jour des quotas des comptes A -->
-    <q-dialog v-model="ui.d[idc].PEedqA" persistent>
-      <q-card :class="styp('sm')">
-        <q-toolbar class="tbs">
-          <btn-cond color="warning" icon="close" @ok="ui.fD"/>
-          <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTquta')}}</q-toolbar-title>
-        </q-toolbar>
-        <choix-quotas class="q-mt-sm" v-model="quotasA"/>
-        <q-card-actions align="right" class="q-gutter-sm">
-          <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
-          <btn-cond :disable="quotasA.err || !quotasA.chg" icon="check" cond="cUrgence"
-            :label="$t('ok')" @ok="validerqA"/>
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+    <dial-std1 v-if="m1" v-model="m1" :titre="$t('PTquta')"
+      warning :disable="quotasA.err || !quotasA.chg" cond="cUrgence" :okfn="validerqA">
+      <choix-quotas class="q-mt-sm" v-model="quotasA"/>
+    </dial-std1>
 
     <!-- Dialogue de création d'une nouvelle partition -->
-    <q-dialog v-model="ui.d[idc].PEnt" persistent>
-      <q-card :class="styp('sm')">
-        <div class="titre-lg q-my-sm">{{$t('PTnv')}}</div>
-        <div class="q-pa-sm">
-          <q-input v-model="nom" clearable :placeholder="$t('PTinfoph')">
-            <template v-slot:hint>{{$t('PTinfoh')}}</template>
-          </q-input>
-        </div>
-        <choix-quotas v-model="quotasP" />
-        <q-card-actions align="right" class="q-gutter-sm">
-          <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
-          <btn-cond color="warning" icon="add" :disable="!nom || quotasP.err !== ''" 
-            :label="$t('valider')" @ok="creer"/>
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+    <dial-std1 v-if="m2" v-model="m2" :titre="$t('PTinfoph')"
+      warning :disable="!nom || quotasP.err !== ''" okic="add" cond="cUrgence" :okfn="creer">
+      <div class="q-pa-sm">
+        <q-input v-model="nom" clearable :placeholder="$t('PTinfoph')">
+          <template v-slot:hint>{{$t('PTinfoh')}}</template>
+        </q-input>
+      </div>
+      <choix-quotas v-model="quotasP" />
+    </dial-std1>
 
   </q-page>
 </template>
@@ -163,6 +146,7 @@ import ChoixQuotas from '../components/ChoixQuotas.vue'
 import SynthHdrs from '../components/SynthHdrs.vue'
 import SynthLigne from '../components/SynthLigne.vue'
 import FiltreNom from '../components/FiltreNom.vue'
+import DialStd1 from '../dialogues/DialStd1.vue'
 import { dkli, styp, $t, mon, afficherDiag, edvol } from '../app/util.mjs'
 import { ID, AMJ, Tarif, UNITEN, UNITEV } from '../app/api.mjs'
 import { Synthese } from '../app/modele.mjs'
@@ -171,6 +155,8 @@ import { GetSynthese, GetPartition, SetEspaceOptionA, NouvellePartition, SetQuot
 
 const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
+const m1 = computed(() => ui.d[idc].PEedqA)
+const m2 = computed(() => ui.d[idc].PEnt)
 
 async function refreshSynth () {
   await new GetSynthese().run()
