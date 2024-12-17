@@ -36,8 +36,8 @@
     <q-card class="q-my-md q-pa-xs" v-for="(id, idx) in session.compte.mav" :key="id">
       <div v-if="eltav(id)" class="row items-start">
         <div class="col-auto column items-center q-mr-sm">
-          <btn-cond flat icon="navigate_next" size="lg"
-            :color="id === session.avatarId ? 'warning' : 'primary'" @ok="courant(id)"/>
+          <!--btn-cond flat icon="navigate_next" size="lg"
+            :color="id === session.avatarId ? 'warning' : 'primary'" @ok="courant(id)"/-->
           <btn-cond icon="delete" size="md" class="q-mt-sm" cond="cEdit"
             @ok="delAvatar(id)"/>
         </div>

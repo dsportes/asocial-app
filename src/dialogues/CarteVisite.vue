@@ -3,16 +3,16 @@
     <q-toolbar class="tbs">
       <btn-cond color="warning" icon="close" @ok="ui.fD"/>
       <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CVtit')}}</q-toolbar-title>
-      <bouton-help page="page1"/>
+      <bouton-help page="cv_maj"/>
     </q-toolbar>
     <div class="marginauto q-pa-md">
       <span class='titre-lg'>{{ncv.nom}}</span>
       <span class='q-mx-md fs-sm font-mono'>[{{ncv.id}}]</span>
     </div>
     <q-separator />
-    <q-card-section class="row justify-start">
-      <img  class="col-auto classeph q-mr-sm" :src="ncv.ph" :width="taillephoto.width" :height="taillephoto.height"/>
-      <div class="col column jusitify-center">
+    <q-card-section class="row justify-between">
+      <img  class="classeph q-mr-sm" :src="ncv.ph" :width="taillephoto.width" :height="taillephoto.height"/>
+      <div class="row q-gutter-sm">
         <btn-cond icon="mode_edit" :label="$t('CVcph')" @ok="setEnEdition" />
         <btn-cond :disable="!modifph" icon="undo" :label="$t('CVgph')" @ok="undoph" />
       </div>
@@ -28,8 +28,8 @@
           <btn-cond flat :disable="!camOn" :label="$t('CVawc')" @ok="stopCam" />
           <btn-cond flat :disable="camOn" icon="flip_camera_ios" @ok="flipCam" />
         </div>
-        <div class="row justify-center q-gutter-md">
-          <btn-cond class="col" :flat="!camOn" :disable="!camOn" color="green-5"
+        <div class="full-width self-center text-center q-my-sm">
+          <btn-cond :flat="!camOn" :disable="!camOn" size="lg" color="accent"
             :label="$t('CVpph')" @ok="snapCam" />
         </div>
         <div class="row justify-center q-gutter-sm">

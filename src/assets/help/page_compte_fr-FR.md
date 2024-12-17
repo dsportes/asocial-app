@@ -34,11 +34,32 @@ Ce bouton n'apparaît que pour les comptes "O" délégué de leur partition (don
 Les autres comptes ("O" non délégué) doivent le demander à un des délégués de leur partition ou au Comptable.
 
 # Détails des avatars
-(TODO)
+La liste des avatars présente en tête l'avatar principal.
+
+Le bouton à gauche d'un avatar avec une icône _poubelle_ ouvre le dialogue de suppression de l'avatar.
+
+A droite verticalement:
+
+#### La photo et le nom de l'avatar
+Le bouton au bout de ligne ouvre l'éditeur de la _carte de visite_.
+
+#### Le commentaire et les _hashtags_ personnels attachés à l'avatar
+Le bouton au bout de la ligne ouvre l'éditeur.
+
+#### La _phrase de contact actuelle_ 
+S'il n'y en a pas, le bouton au bout de la ligne ouvre l'éditeur.
+
+S'il y en a une, un bouton supplémentaire permet de l'effacer.
+
+#### Trois boutons
+Ils ouvrent les panneaux affichant,
+- les **groupes** dont fait partie l'avatar,
+- les **chats** ouverts avec lui,
+- les **sponsorings** déclarés par l'avatar.
 
 # Suppression d'un avatar | suppr_avatar
 Le bouton à gauche d'un avatar avec une icône _poubelle_ ouvre le dialogue de suppression de l'avatar.
 
-Voir la rubrique d'aide ci-dessus pour plus de détails.
+Voir la rubrique d'aide ci-dessus pour plus de détails sur cette opération délicate.
 
 > Pour **s'auto-résilier**, un compte doit supprimer d'abord ses avatars secondaires, puis finir par son avatar principal.

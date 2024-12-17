@@ -34,6 +34,38 @@ Afin de pouvoir _filtrer_ dans des listes de contacts ou de groupes, ceux d'un i
 - **ces _hashtags_ sont strictement personnels** et personne d'autre que le compte ne les voit: ils peuvent être parfaitement incorrects dans tous les sens du termes.
 
 # Édition d'une carte de visite d'un contact ou d'un groupe | cv_aff htcomm_maj
-(TODO)
+Le **texte** d'une carte de visite peut être édité dans la partie inférieure de la boîte de dialogue. Le début de la première ligne est utilisé pour afficher le _nom_ de l'avatar ou du groupe.
+
+En partie supérieure on peut choisir d'éditer la photo, voir de revenir à la photo initiale si la nouvelle n'est finalement jugée pas satisfaisante.
+
+## Changer la photo
+- première étape: acquérir la photo.
+  - soit en choisissant un fichier sur l'appareil,
+  - soit en utilisant la Webcam quand il y en a une.
+- seconde étape: choisir dans la _zone de clip_ le partie de la photo à retenir.
+
+### Choisir un fichier sur l'appareil
+Cliquer sur la zone intitulée **Changer la photo** et choisit le fichier souhaité (jpg png).
+
+L'image du fichier sélectionné apparaît en dessous dans la _zone de clip_.
+
+### Démarrer la Webcam, prendre la photo
+Le bouton à côté **Arrêter la Webcam** l'arrête. 
+
+L'icône à droite permute entre la Webcam avant et arrière quand il y a le choix (typiquement sur un mobile).
+
+En général au premier démarrage il faut donner au browser l'autorisation d'utiliser la Webcam.
+
+La vue de la Webcam s'affiche en dessous: appuyer sur le bouton **Prendre la photo** quand le cadrage apparaît satisfaisant.
+
+Le _clic_ de l'obturateur peut être rendu silencieux en cochant la case correspondante.
+
+### Cadrer et découper la photo
+La zone choisie est figurée par un cadre blanc mobile avec des _poignées_.
+
+Après cadrage, appuyer sur le bouton **La photo est trop top** si elle est satisfaisante ou **C'était mieux avant** dans le cas contraire.
+
+## Valider la _carte de visite_
+Utiliser le bouton **Valider** en bas du dialogue pour enregistrer la carte de visite.
 
 Voir aussi les boîtes de dialogue _Affichage d'une carte de visite_ et _Édition des commentaires / hashtags personnels_.
