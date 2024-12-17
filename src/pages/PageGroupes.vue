@@ -1,11 +1,11 @@
 <template>
 <q-page class="q-pa-sm column items-center">
-  <btn-cond class="q-my-sm" :label="$t('PGcrea')" @ok="nvGr" cond="cEdit"/>
+  <btn-cond class="q-my-sm" :label="$t('PGcrea')" @ok="nvGr" icon="add" cond="cEdit"/>
 
-  <q-card v-if="gSt.pgLgFT" class="spmd column items-center">
+  <q-card v-if="pg" class="spmd column items-center">
     <div v-if="pg" class="q-my-sm full-width">
-      <div class="row">
-        <div class="col-6">{{$t('PGstatsh')}}</div>
+      <div class="row q-my-sm">
+        <div class="col-6 fs-md text-italic text-right">{{$t('PGstatsh')}}</div>
         <div class="col-3 fs-md text-italic text-center">{{$t('nbnotes')}}</div>
         <div class="col-3 fs-md text-italic text-center">{{$t('volv2')}}</div>
       </div>
@@ -16,7 +16,7 @@
       </div>
       <div class="row">
         <div class="col-6 fs-md text-italic text-right">{{$t('PGvq')}}</div>
-        <div class="col-3 fs-md font-mono text-center">{{'[' + pg.stt.nn + '] / ' + edqn(pg.stt.nn)}}</div>
+        <div class="col-3 fs-md font-mono text-center">{{'[' + pg.stt.qn + '] / ' + edqn(pg.stt.nn)}}</div>
         <div class="col-3 fs-md font-mono text-center">{{ '[' + pg.stt.qv + '] / ' + edqv(pg.stt.qv)}}</div>
       </div>
     </div>
@@ -74,9 +74,13 @@
   </div>
 
   <!-- Acceptation / refus de l'invitation -->
-  <q-dialog v-model="ui.d[idc].IAaccinvit" full-height persistent position="left">
+  <!--<q-dialog v-model="ui.d[idc].IAaccinvit" full-height persistent position="left">
     <invitation-acceptation :inv="inv"/>
-  </q-dialog>
+  </q-dialog>-->
+
+  <dial-std2 v-if="m2" v-model="m2" :titre="titinv">
+    <invitation-acceptation :inv="inv"/>
+  </dial-std2>
 
   <!-- Contact du groupe ------------------------------------------------>
   <q-dialog v-model="ui.d[idc].PGctc" persistent>
@@ -100,28 +104,16 @@
   </q-dialog>
 
   <!-- Nouveau groupe ------------------------------------------------>
-  <q-dialog v-model="ui.d[idc].PGcrgr" persistent>
-    <q-card :class="styp('sm')">
-      <q-toolbar class="tbs">
-        <btn-cond color="warning" icon="close" @ok="ui.fD"/>
-        <q-toolbar-title class="titre-lg text-center">{{$t('PGcrea')}}</q-toolbar-title>
-        <bouton-help page="page1"/>
-      </q-toolbar>
-      <div class="q-pa-xs">
-        <sel-avid/>
-        <div class="titre-md q-mb-xs text-center">{{$t('PGnom', [nom || '?'])}}</div>
-        <nom-avatar class="titre-md q-mb-sm" verif groupe @ok-nom="oknom"/>
-        <div class="titre-md q-my-sm">{{$t('PGquotas')}}</div>
-        <choix-quotas v-model="quotas" groupe/>
-        <q-option-group :options="options" type="radio" v-model="una"/>
-        <q-card-actions align="right" class="q-gutter-sm">
-          <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD" />
-          <btn-cond color="warning" icon="add" cond="cEdit"
-            :disable="quotas.err || !nom" :label="$t('creer')" @ok="okCreation" />
-        </q-card-actions>
-      </div>
-    </q-card>
-  </q-dialog>
+  <dial-std1 v-if="m1" v-model="m1" :titre="$t('PGcrea')"
+    :disable="quotas.err || !nom" okic="add" :oklbl="$t('creer')" cond="cEdit" :okfn="okCreation">
+    <div class="q-pa-sm column">
+      <sel-avid class="self-center"/>
+      <nom-avatar class="titre-md q-my-sm" verif groupe @ok-nom="oknom"/>
+      <div class="titre-md q-mt-sm">{{$t('PGquotas')}}</div>
+      <choix-quotas v-model="quotas" groupe/>
+      <q-option-group class="q-my-md" dense :options="options" type="radio" v-model="una"/>
+    </div>
+  </dial-std1>
 
   <q-dialog v-model="ui.d[idc].PGACGouvrir" position="left" persistent>
     <apercu-chatgr />
@@ -143,6 +135,8 @@ import ApercuGenx from '../components/ApercuGenx.vue'
 import SelAvid from '../components/SelAvid.vue'
 import ApercuChatgr from '../panels/ApercuChatgr.vue'
 import InvitationAcceptation from '../components/InvitationAcceptation.vue'
+import DialStd1 from '../dialogues/DialStd1.vue'
+import DialStd2 from '../dialogues/DialStd2.vue'
 import { UNITEN, UNITEV } from '../app/api.mjs'
 import { NouveauGroupe, AnnulerContact } from '../app/operations4.mjs'
 
@@ -150,6 +144,9 @@ const props = defineProps({ tous: Boolean })
 
 const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
+const m1 = computed(() => ui.d[idc].PGcrgr)
+const m2 = computed(() => ui.d[idc].IAaccinvit)
+
 const session = stores.session
 const aSt = stores.avatar
 const fStore = stores.filtre
@@ -203,7 +200,7 @@ const pg = computed(() => {
       stt.qn += g.qn || 0
       stt.qv += g.qv || 0
     }
-    if (f.ngr && e.nom.startsWith(f.ngr)) continue
+    if (f.ngr && !e.nom.startsWith(f.ngr)) continue
     if (f.sansheb && !g.dfh) continue
     if (f.excedent && ((g.qn * UNITEN) > g.nn) && ((g.qv * UNITEV) > g.vf )) continue
     const mc = ci.mc.get(g.id)
@@ -226,8 +223,11 @@ const edqv = (n) => edvol(n * UNITEV)
 const edv = (n) => edvol(n)
 const nbiv = (e) => gSt.nbMesInvits(e)
 
+const titinv = ref()
+
 async function ouvaccinv (invx) {
   inv.value = invx
+  titinv.value = $t('ICtit2', [session.getCV(props.inv.ida).nom, session.getCV(props.inv.idg).nom])
   if (invx.invpar.size) ui.oD('IAaccinvit', idc)
   else ui.oD('PGctc', idc)
 }
@@ -244,9 +244,7 @@ async function chat (elt) {
 
 async function nvGr () {
   const cpt = session.compte.qv // { qc, qn, qv, pcc, pcn, pcv, nbj }
-  const maxn = Math.floor(cpt.qn * (100 - cpt.pcn) / 100)
-  const maxv = Math.floor(cpt.qn * (100 - cpt.pcv) / 100)
-  quotas.value = { qn: 0, qv: 0, qc: 0, minn: 0, minv: 0, maxn, maxv, err: ''}
+  quotas.value = { qn: 0, qv: 0, qc: 0, minn: 0, minv: 0, maxn: cpt.qn, maxv: cpt.qv, err: ''}
   nom.value = ''
   una.value = false
   ui.oD('PGcrgr', idc)

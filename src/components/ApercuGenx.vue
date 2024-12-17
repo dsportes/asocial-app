@@ -30,7 +30,7 @@
 
       <mc-memo v-if="!estComptable" :id="id" :idx="idx"/>     
 
-      <div v-if="!nodet" class="row">
+      <div v-if="!estGroupe && !nodet" class="row">
         <div class="col">
           <chats-avec :idE="id" :del="del" :urgence="urgence"/>
 

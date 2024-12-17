@@ -282,10 +282,13 @@ a accès aux membres (donc dans l'onglet "membres").
     </q-layout>
   </q-dialog>
 
-  <q-dialog v-model="ui.d[idc].IAaccinvit" full-height persistent position="left">
+  <!--<q-dialog v-model="ui.d[idc].IAaccinvit" full-height persistent position="left">
     <invitation-acceptation :inv="gSt.getInvit(gr.id, id)"/>
-  </q-dialog>
+  </q-dialog>-->
 
+  <dial-std2 v-if="m2" v-model="m2" :titre="$t('ICtit2', [nomm, nomg])">
+    <invitation-acceptation :inv="gSt.getInvit(gr.id, id)"/>
+  </dial-std2>
 </div>
 </template>
 
@@ -301,6 +304,7 @@ import BoutonHelp from './BoutonHelp.vue'
 import BtnCond from './BtnCond.vue'
 import { InvitationGroupe, MajDroitsMembre, RadierMembre } from '../app/operations4.mjs'
 import ShowHtml from './ShowHtml.vue'
+import DialStd2 from '../dialogues/DialStd2.vue'
 import InvitationAcceptation from './InvitationAcceptation.vue'
 import EditeurMd from './EditeurMd.vue'
 
@@ -308,6 +312,7 @@ const session = stores.session
 const gSt = stores.groupe
 const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
+const m2 = computed(() => ui.d[idc].IAaccinvit)
 
 const props = defineProps({ 
   id: String, // id de l'avatar membre

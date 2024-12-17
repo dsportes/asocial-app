@@ -1,5 +1,5 @@
 <template>
-  <q-card-section class="q-pt-none fs-md">
+  <div class="fs-md">
     <div class="titre-lg">{{$t('NAph0')}}</div>
     <div>
       <div class="text-italic titre-sm">{{$t('NAw1')}}</div>
@@ -23,7 +23,7 @@
       <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ko" />
       <btn-cond :label="labelValider" :icon="iconValider" :disable="!nomok" @ok="ok" />
     </div>
-  </q-card-section>
+  </div>
 </template>
 
 <script setup>
