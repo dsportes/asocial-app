@@ -1461,12 +1461,13 @@ export default {
   AGu4: 'Pour passer au mode "unanime", il suffit qu\'UN animateur le demande',
   AGu5: 'Etat des demandes des animateurs',
 
-  AGupasan: 'Seul un animateur peut agir sur le mode, choisir un de vos avatars "animateur" dans ce groupe.',
+  AGupasan: 'Seul un animateur peut effectuer cette action, choisir un de vos avatars "animateur" dans ce groupe.',
+  AGupasan2: 'Seul un animateur peut effectuer cette action, mais aucun de vos avatars n\'est "animateur" dans ce groupe.',
   AGumu: 'Passer en mode UNANIME',
   AGums: 'Je vote pour passer au mode "SIMPLE"',
   AGrumu: 'Annuler les votes et rester en mode UNANIME',
+  AGchan: 'Choisir votre avatar (animateur)',
 
-      
 ///////////////////////////////////
   // ApercuAvatar AcceptationSponsoring
   FAnocv: 'Pas de carte de visite',
@@ -1612,6 +1613,10 @@ export default {
 
   // SelAvid SupprAvatar
   SAVtit: 'Avatar sélectionné',
+  SAVz0: 'Avatar sélectionné: {0}',
+  SAVz1: 'AUCUN avatar du compte n\'est animateur du groupe: action impossible',
+  SAVz2: 'AUCUN avatar du compte n\'est membre du groupe: action impossible',
+  SAVz3: 'Sélectionner un avatar',
   SAVtit1: 'Suppression de l\'avatar {0}',
   SAVtit2: 'Résiliation du COMPTE {0}',
   SAVer1: 'La suppression du compte ne peut intervenir qu\'après la suppression de ses avatars secondaires',
@@ -1903,6 +1908,7 @@ La "consommation mensuelle" de calcul est en centimes et est la somme des coûts
   A_chatgr: 'Chatter dans un groupe',
   A_dial_una: 'Hébergement d\'un groupe SIMPLE / UNANIME',
   A_dial_heb: 'Gérer l\'hébergement d\'un groupe',
+  A_dial_invit: 'Invitation d\'un contact d\'un groupe',
 
   A_special: 'Administration Technique',
   A_page_admin: 'Page de l\'Administrateur Technique'

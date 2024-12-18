@@ -1,86 +1,75 @@
 <template>
+<div class="q-pa-sm">
+  <q-expansion-item  :label="$t('ICti1')" class="q-my-xs q-mx-xs"
+    header-class="tbp titre-md"
+    switch-toggle-side expand-separator dense group="trgroup">
+    <apercu-genx :id="inv.idg" :idx="0"/>
+    <q-separator class="q-my-xs" color="orange"/>
+    <apercu-genx :id="inv.ida" :idx="1"/>
+  </q-expansion-item>
 
-<q-layout container view="hHh lpR fFf" :class="styp('md')">
-  <q-header elevated>
-    <q-toolbar class="tbs">
-      <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
-      <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('ICtit2', [nomm, nomg])}}</q-toolbar-title>
-      <bouton-help page="page1"/>
-    </q-toolbar>
-  </q-header>
+  <q-expansion-item  :label="$t('ICti2')" class="q-my-xs q-mx-xs"
+    header-class="tbp titre-md"
+    switch-toggle-side expand-separator dense group="trgroup">
+    <div class="titre-lg">{{$t('AMinvvp')}}</div>
+    <apercu-genx class="q-my-xs" v-for="(id, idx) in inv.invpar" :key="id" :id="id" :idx="idx"/>
+  </q-expansion-item>
 
-  <q-page-container class="q-pa-xs">
-    <q-expansion-item  :label="$t('ICti1')" class="q-my-xs q-mx-xs"
-      header-class="tbp titre-md"
-      switch-toggle-side expand-separator dense group="trgroup">
-      <apercu-genx :id="inv.idg" :idx="0"/>
-      <q-separator class="q-my-xs" color="orange"/>
-      <apercu-genx :id="inv.ida" :idx="1"/>
-    </q-expansion-item>
+  <q-expansion-item  :label="$t('ICti3')" class="q-my-xs q-mx-xs"
+    header-class="tbp titre-md"
+    switch-toggle-side expand-separator dense group="trgroup">
+    <div class="q-my-md titre-lg text-bold">
+      <span class="text-italic">{{$t('ICflags')}}</span>
+      <span class="q-ml-md text-warning">{{edFlags}}</span>
+    </div>
 
-    <q-expansion-item  :label="$t('ICti2')" class="q-my-xs q-mx-xs"
-      header-class="tbp titre-md"
-      switch-toggle-side expand-separator dense group="trgroup">
-      <div class="titre-lg">{{$t('AMinvvp')}}</div>
-      <apercu-genx class="q-my-xs" v-for="(id, idx) in inv.invpar" :key="id" :id="id" :idx="idx"/>
-    </q-expansion-item>
+    <div class="titre-md q-mb-sm">{{$t('ICbienv')}}</div>
+    <show-html class="bord1" :texte="inv.msg" maxh="4rem" scroll zoom/>
 
-    <q-expansion-item  :label="$t('ICti3')" class="q-my-xs q-mx-xs"
-      header-class="tbp titre-md"
-      switch-toggle-side expand-separator dense group="trgroup">
-      <div class="q-my-md titre-lg text-bold">
-        <span class="text-italic">{{$t('ICflags')}}</span>
-        <span class="q-ml-md text-warning">{{edFlags}}</span>
-      </div>
+  </q-expansion-item>
 
-      <div class="titre-md q-mb-sm">{{$t('ICbienv')}}</div>
-      <show-html class="bord1" :texte="inv.msg" maxh="4rem" scroll zoom/>
+  <q-card class="q-my-lg row justify-end items-center q-gutter-md">
+    <btn-cond flat :label="$t('renoncer')" @ok="ui.fD"/>
+    <btn-cond :label="$t('ICacc')" cond="cEdit" @ok="accref(1)"/>
+    <btn-cond :label="$t('ICdec')" color="warning" cond="cEdit" @ok="accref(2)"/>
+  </q-card>
 
-    </q-expansion-item>
+  <div v-if="acc === 1">
+    <q-separator class="q-my-md" color="orange"/>
 
-    <q-card class="q-my-lg row justify-end items-center q-gutter-md">
+    <div class="bord1 column q-my-xs">
+      <q-checkbox v-model="iam" :label="$t('ICcflm')" />
+      <q-checkbox v-model="ian" :label="$t('ICcfln')" />
+    </div>
+
+    <div class="q-mt-md q-mb-xs titre-md text-italic">{{$t('ICrem1')}}</div>
+    <editeur-md :lgmax="1000" v-model="msg" :texte="defmsg" modetxt mh="8rem" editable />
+
+    <div class="row justify-end items-center q-gutter-md">
       <btn-cond flat :label="$t('renoncer')" @ok="ui.fD"/>
-      <btn-cond :label="$t('ICacc')" cond="cEdit" @ok="accref(1)"/>
-      <btn-cond :label="$t('ICdec')" color="warning" cond="cEdit" @ok="accref(2)"/>
-    </q-card>
+      <btn-cond class="q-ml-md" color="warning" :disable="!msg"
+        :label="$t('confirmer')" @ok="ok(1)"/>
+    </div>
+  </div>
 
-    <div v-if="acc === 1">
-      <q-separator class="q-my-md" color="orange"/>
-
-      <div class="bord1 column q-my-xs">
-        <q-checkbox v-model="iam" :label="$t('ICcflm')" />
-        <q-checkbox v-model="ian" :label="$t('ICcfln')" />
-      </div>
-
-      <div class="q-mt-md q-mb-xs titre-md text-italic">{{$t('ICrem1')}}</div>
-      <editeur-md :lgmax="1000" v-model="msg" :texte="defmsg" modetxt mh="8rem" editable />
-
-      <div class="row justify-end items-center q-gutter-md">
-        <btn-cond flat :label="$t('renoncer')" @ok="ui.fD"/>
-        <btn-cond class="q-ml-md" color="warning" :disable="!msg"
-          :label="$t('confirmer')" @ok="ok(1)"/>
-      </div>
+  <div v-if="acc === 2">
+    <q-separator class="q-my-md" color="orange"/>
+    <div class="bord1 column justify-left">
+      <span><q-radio v-model="decl" dense :val="2" :label="$t('ICd2')"/><bouton-bulle idtext="BULLEinv2"/></span>
+      <span><q-radio v-model="decl" dense :val="3" :label="$t('ICd3')" /><bouton-bulle idtext="BULLEinv3"/></span>
+      <span><q-radio v-model="decl" dense :val="4" :label="$t('ICd4')" /><bouton-bulle idtext="BULLEinv4"/></span>
     </div>
 
-    <div v-if="acc === 2">
-      <q-separator class="q-my-md" color="orange"/>
-      <div class="bord1 column justify-left">
-        <span><q-radio v-model="decl" dense :val="2" :label="$t('ICd2')"/><bouton-bulle idtext="BULLEinv2"/></span>
-        <span><q-radio v-model="decl" dense :val="3" :label="$t('ICd3')" /><bouton-bulle idtext="BULLEinv3"/></span>
-        <span><q-radio v-model="decl" dense :val="4" :label="$t('ICd4')" /><bouton-bulle idtext="BULLEinv4"/></span>
-      </div>
+    <div class="q-mt-md q-mb-xs titre-md text-italic">{{$t('ICrem2')}}</div>
+    <editeur-md :lgmax="1000" v-model="msg" :texte="defmsg" modetxt mh="8rem" editable />
 
-      <div class="q-mt-md q-mb-xs titre-md text-italic">{{$t('ICrem2')}}</div>
-      <editeur-md :lgmax="1000" v-model="msg" :texte="defmsg" modetxt mh="8rem" editable />
-
-      <div class="row justify-end items-center q-gutter-md">
-        <btn-cond flat :label="$t('renoncer')" @ok="ui.fD"/>
-        <btn-cond class="q-ml-md" color="warning" :disable="!decl || !msg"
-          :label="$t('confirmer')" @ok="ok(decl)"/>
-      </div>
+    <div class="row justify-end items-center q-gutter-md">
+      <btn-cond flat :label="$t('renoncer')" @ok="ui.fD"/>
+      <btn-cond class="q-ml-md" color="warning" :disable="!decl || !msg"
+        :label="$t('confirmer')" @ok="ok(decl)"/>
     </div>
-  </q-page-container>
-</q-layout>
+  </div>
+</div>
 </template>
 
 <script setup>

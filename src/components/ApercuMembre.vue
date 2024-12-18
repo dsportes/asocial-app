@@ -114,18 +114,16 @@ a accès aux membres (donc dans l'onglet "membres").
   </q-expansion-item>
 
   <!-- Dialogue d'invitation -->
-  <q-dialog v-model="ui.d[idc].AMinvit" persistent full-height position="left">
-    <q-layout container view="hHh lpR fFf" :class="styp('md')">
-      <q-header elevated>
-        <q-toolbar class="tbs">
-          <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
-          <q-toolbar-title class="titre-lg text-center q-mx-sm">
-            {{$t('AMinvtit', [nomm, nomg])}}</q-toolbar-title>
-          <bouton-help page="page1"/>
-        </q-toolbar>
-      </q-header>
-
-      <q-page-container>
+  <dial-std2 v-model="m1" :titre="$t('AMinvtit', [nomm, nomg])" help="dial_invit">
+    <div v-if="!estAnim" class="column items-center q-gutter-sm">
+      <div class="titre-md text-center msg">{{$t('AGupasan')}}</div>
+      <sel-avidgr :groupe="gr" anim/>
+      <btn-cond :label="$t('jailu')" @ok="ui.fD"/>
+    </div>
+    <div v-else class="row items-center q-gutter-sm">
+      <div class="titre-md">{{$t('AGchan')}}</div>
+      <sel-avidgr :groupe="gr" anim/>
+    
       <q-card-section>
         <div class="row justify betwwen items-end">
           <span class="titre-lg">{{$t('AMcas' + stm)}}</span>
@@ -147,7 +145,7 @@ a accès aux membres (donc dans l'onglet "membres").
         <div v-if="stm > 1" class="titre-md text-italic">{{$t('AMbienv')}}</div>
         <show-html class="bord1" v-if="stm > 1" :texte="mb.msg" :idx="0" maxh="4rem" zoom/>
         <div v-if="stm > 1" class="bordm">
-           <q-option-group dense v-model="rmsv" :options="optRMSV" color="primary" />
+            <q-option-group dense v-model="rmsv" :options="optRMSV" color="primary" />
         </div>
       </q-card-section>
 
@@ -189,9 +187,27 @@ a accès aux membres (donc dans l'onglet "membres").
           :disable="(rmsv === 0 || rmsv === 2) && (!nvfl || !msg)"
           @ok="inviter"/>
       </q-card-actions>
+    </div>
+  </dial-std2>
+
+<!--
+  <q-dialog v-model="ui.d[idc].AMinvit" persistent full-height position="left">
+    <q-layout container view="hHh lpR fFf" :class="styp('md')">
+      <q-header elevated>
+        <q-toolbar class="tbs">
+          <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
+          <q-toolbar-title class="titre-lg text-center q-mx-sm">
+            {{$t('AMinvtit', [nomm, nomg])}}</q-toolbar-title>
+          <bouton-help page="page1"/>
+        </q-toolbar>
+      </q-header>
+
+      <q-page-container>
+
       </q-page-container>
     </q-layout>
   </q-dialog>
+-->
 
   <!-- Dialogue de gestion des droits -->
   <q-dialog v-model="ui.d[idc].AMdroits" persistent full-height position="left">
@@ -307,12 +323,14 @@ import ShowHtml from './ShowHtml.vue'
 import DialStd2 from '../dialogues/DialStd2.vue'
 import InvitationAcceptation from './InvitationAcceptation.vue'
 import EditeurMd from './EditeurMd.vue'
+import SelAvidgr from './SelAvidgr.vue'
 
 const session = stores.session
 const gSt = stores.groupe
 const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 const m2 = computed(() => ui.d[idc].IAaccinvit)
+const m1 = computed(() => ui.d[idc].AMinvit)
 
 const props = defineProps({ 
   id: String, // id de l'avatar membre
@@ -345,6 +363,7 @@ const avid = computed(() => session.avatarId)
 const nomg = computed(() => session.getCV(gr.value.id).nom)
 const nomm = computed(() => session.getCV(props.id).nomC)
 const pasmoi = computed(() => !session.estAvc(props.id))
+const estAnim = computed(() => gr.value.estAnim(gr.value.mmb.get(session.avatarId)) )
 
 const mb = computed(() => gSt.egrC && gSt.egrC.membres ? gSt.egrC.membres.get(im.value) : null)
 const im = computed(() => gSt.egrC && gSt.egrC.groupe ? gSt.egrC.groupe.mmb.get(props.id) : 0)

@@ -115,12 +115,19 @@
           <q-separator class="q-mb-md q-mt-sm full-width" color="orange"/>
         </div>
       </div>
-      <div v-if="!estAnim" class="column items-center q-gutter-sm">
+
+      <div v-if="!estAnim && estAnim1" class="column items-center q-gutter-sm">
         <div class="titre-md text-center msg">{{$t('AGupasan')}}</div>
-        <sel-avid :groupe="gr"/>
+        <sel-avidgr :groupe="gr" anim/>
         <btn-cond :label="$t('jailu')" @ok="ui.fD"/>
       </div>
-      <div v-else class="column items-center q-gutter-sm">
+
+      <div v-if="!estAnim1" class="column items-center q-gutter-sm">
+        <div class="titre-md text-center msg">{{$t('AGupasan2')}}</div>
+        <btn-cond :label="$t('jailu')" @ok="ui.fD"/>
+      </div>
+
+      <div v-if="estAnim && estAnim1" class="column items-center q-gutter-sm">
         <btn-cond flat :label="$t('renoncer')" icon="undo" @ok="ui.fD"/>
         <btn-cond v-if="gr.msu" :label="$t('AGums')" color="warning" @ok="cfu = 1" cond="cEdit"/>
         <btn-cond v-if="gr.msu" :label="$t('AGrumu')" color="warning" @ok="cfu = 2" cond="cEdit"/>
@@ -263,7 +270,7 @@ const amb = computed(() => gSt.ambano[0])
 const lst = computed(() => pgLmFT.value.r)
 const nb = computed(() => pgLmFT.value.n)
 const vols = computed(() => { return { qn: gr.value.qn, qv: gr.value.qv, nn: gr.value.nn, v: gr.value.vf }})
-// const estAnim1 = computed(() => gSt.estAnim(session.groupeId))
+const estAnim1 = computed(() => gSt.estAnim(session.groupeId))
 const estAnim = computed(() => gr.value.estAnim(gr.value.mmb.get(session.avatarId)) )
 
 const restn = computed(() => { const cpt = session.compte.qv; return (cpt.qn * (100 - cpt.pcn) / 100) })
