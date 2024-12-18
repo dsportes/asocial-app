@@ -1413,6 +1413,8 @@ export default {
   AGhebvol: 'Quotas et volumes',
   AGnheb: 'N\'est PLUS hébergé. Date de disparition du groupe : {0}',
   AGfond: 'Fondateur: {0}',
+  AGheb1: 'Groupe hébergé',
+  AGheb2: 'Groupe NON hébergé',
 
   // PageGroupe
   AGnfond: 'Le fondateur du groupe a disparu',
@@ -1459,7 +1461,7 @@ export default {
   AGu4: 'Pour passer au mode "unanime", il suffit qu\'UN animateur le demande',
   AGu5: 'Etat des demandes des animateurs',
 
-  AGupasan: 'Seul un animateur peut agir sur ce mode.',
+  AGupasan: 'Seul un animateur peut agir sur le mode, choisir un de vos avatars "animateur" dans ce groupe.',
   AGumu: 'Passer en mode UNANIME',
   AGums: 'Je vote pour passer au mode "SIMPLE"',
   AGrumu: 'Annuler les votes et rester en mode UNANIME',
@@ -1898,6 +1900,9 @@ La "consommation mensuelle" de calcul est en centimes et est la somme des coûts
   A_chat_maj: 'Visualisation et édition d\'un "chat"',
   A_contact_detail: 'Fiche détaillé d\'un contact',
   A_suppr_avatar: 'Suppression d\'un avatar ou compte',
+  A_chatgr: 'Chatter dans un groupe',
+  A_dial_una: 'Hébergement d\'un groupe SIMPLE / UNANIME',
+  A_dial_heb: 'Gérer l\'hébergement d\'un groupe',
 
   A_special: 'Administration Technique',
   A_page_admin: 'Page de l\'Administrateur Technique'

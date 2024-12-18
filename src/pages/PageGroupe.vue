@@ -25,34 +25,41 @@
       <div v-if="!gr.estRadie(1)" class="q-mt-sm titre-md q-mr-sm">{{$t('AGfond', [nom(1)])}}</div>
       <div v-else class="q-mt-sm fs-md text-italic">{{$t('AGnfond')}}</div>
 
-      <div class="q-mt-sm row justify-between">
+      <div class="q-my-sm row justify-between">
         <div v-if="gr.msu" class="titre-md text-bold text-warning">{{$t('AGunanime')}}</div>
         <div v-else class="titre-md">{{$t('AGsimple')}}</div>
-        <btn-cond class="col-auto q-ml-sm self-start" size="sm" :label="$t('details')"
-          icon="edit" @ok="editUna" cond="cVisu"/>
+        <btn-cond class="col-auto q-ml-sm self-start" size="sm" :label="$t('gérer')"
+          icon="settings" @ok="editUna" cond="cVisu"/>
       </div>
 
-      <div :class="'q-mt-xs q-pa-xs ' + bcf()">
-        <div class="row justify-between">
-          <div v-if="!gr.dfh" class="row">
-            <span class="titre-md q-mr-sm">{{$t('AGheb')}}</span>
-            <span class="fs-md">{{nom(gr.imh)}}</span>
+      <q-expansion-item class="full-width" switch-toggle-side header-class="tbp titre-lg"
+        :label="$t('AGheb' + (gr.dfh ? '2' : '1'))">
+        <div class="q-ma-sm">
+          <div class="row justify-between">
+            <div v-if="!gr.dfh" class="row">
+              <span class="titre-md q-mr-sm">{{$t('AGheb')}}</span>
+              <span class="fs-md">{{nom(gr.imh)}}</span>
+            </div>
+            <div v-else class="col fs-md text-warning text-bold">
+              {{$t('AGnheb', [AMJ.editDeAmj(gr.dfh)])}}</div>
+            <btn-cond class="col-auto q-ml-sm self-start" size="sm" cond="cEdit"
+              :label="$t('gerer')" icon="settings" @ok="gererheb"/>
           </div>
-          <div v-else class="col fs-md text-warning text-bold">
-            {{$t('AGnheb', [AMJ.editDeAmj(gr.dfh)])}}</div>
-          <btn-cond class="col-auto q-ml-sm self-start" size="sm" cond="cEdit"
-            :label="$t('gerer')" icon="settings" @ok="gererheb"/>
+          <quotas-vols class="q-mt-xs q-ml-md" :vols="vols" groupe/>
         </div>
-        <quotas-vols class="q-mt-xs q-ml-md" :vols="vols" groupe/>
-      </div>
+      </q-expansion-item>
 
-      <div class="titre-md text-italic q-mt-xs">{{$t('AGstm')}}</div>
-      <div class="row spsm items-center titre-md text-italic">
-        <div v-for="i in 5" :key="i" class="col-2 text-center">{{$t('AGsts' + i)}}</div>
-      </div>
-      <div class="row spsm items-center font-mono">
-        <div v-for="i in 5" :key="i" class="col-2 text-center">{{gr.sts[i]}}</div>
-      </div>
+      <q-expansion-item class="full-width" switch-toggle-side header-class="tbp titre-lg"
+        :label="$t('AGstm')" expand-separator>
+        <div class="spsm q-mt-sm">
+          <div class="row items-center titre-md text-italic justify-around">
+            <div v-for="i in 5" :key="i" class="col-2 text-center">{{$t('AGsts' + i)}}</div>
+          </div>
+          <div class="row items-center font-mono justify-around">
+            <div v-for="i in 5" :key="i" class="col-2 text-center">{{gr.sts[i]}}</div>
+          </div>
+        </div>
+      </q-expansion-item>
     </div>
 
     <div  v-if="mesav">
@@ -88,134 +95,108 @@
   </div>
 
   <!-- Gérer le mode simple / unanime -->
-  <q-dialog v-model="ui.d[idc].AGediterUna" full-height position="left" persistent>
-    <q-layout container view="hHh lpR fFf" :class="styp('md')">
-      <q-header elevated class="tbp">
-        <q-toolbar>
-          <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
-          <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('AGuna', [nomg])}}</q-toolbar-title>
-          <bouton-help page="page1"/>
-        </q-toolbar>
-      </q-header>
-
-      <q-page-container>
-        <q-page class="q-pa-sm">
-          <sel-avid :groupe="gr"/>
-          <div class="titre-lg text-center text-bold q-my-sm" v-if="gr.msu===null">{{$t('AGms')}}</div>
-          <div class="titre-lg text-center text-bold q-my-sm" v-else>{{$t('AGmu')}}</div>
-          <div class="titre-md q-my-sm">{{$t('AGu1')}}</div>
-          <div class="titre-md q-my-sm">{{$t('AGu2')}}</div>
-          <div class="titre-md q-my-sm" v-if="gr.msu">{{$t('AGu3')}}</div>
-          <div class="titre-md q-my-sm" v-else>{{$t('AGu4')}}</div>
-          <div v-if="gr.msu">
-            <div class="spsm column items-center">
-              <q-separator class="q-mt-md q-mb-sm full-width" color="orange"/>
-              <div class="titre-md text-italic" >{{$t('AGu5')}}</div>
-              <div v-for="(v, idx) in lstVotes" :key="idx" 
-                :class="'row items-center justify-center ' + dkli(idx)" style="width:20rem">
-                <div class="col-8 fs-md text-center">{{v.nom}}</div>
-                <div class="col-4 fs-md">{{$t(v.oui ? 'oui' : 'non')}}</div>
-              </div>
-              <q-separator class="q-mb-md q-mt-sm full-width" color="orange"/>
-            </div>
+  <dial-std2 v-model="m3" :titre="$t('AGuna', [nomg])" help="dial_una">
+    <div class="q-pa-sm">
+      <div class="titre-lg text-center text-bold q-my-sm" v-if="gr.msu===null">{{$t('AGms')}}</div>
+      <div class="titre-lg text-center text-bold q-my-sm" v-else>{{$t('AGmu')}}</div>
+      <div class="titre-md q-my-sm">{{$t('AGu1')}}</div>
+      <div class="titre-md q-my-sm">{{$t('AGu2')}}</div>
+      <div class="titre-md q-mb-sm q-mt-lg" v-if="gr.msu">{{$t('AGu3')}}</div>
+      <div class="titre-md q-mb-sm q-mt-lg" v-else>{{$t('AGu4')}}</div>
+      <div v-if="gr.msu">
+        <div class="spsm column items-center">
+          <q-separator class="q-mt-md q-mb-sm full-width" color="orange"/>
+          <div class="titre-md text-italic" >{{$t('AGu5')}}</div>
+          <div v-for="(v, idx) in lstVotes" :key="idx" 
+            :class="'row items-center justify-center ' + dkli(idx)" style="width:20rem">
+            <div class="col-8 fs-md text-center">{{v.nom}}</div>
+            <div class="col-4 fs-md">{{$t(v.oui ? 'oui' : 'non')}}</div>
           </div>
-          <div v-if="!estAnim" class="row items-center q-gutter-sm">
-            <div class="titre-md text-center">{{$t('AGupasan')}}</div>
-            <btn-cond class="self-start" :label="$t('jailu')" @ok="ui.fD"/>
-          </div>
-          <div v-else class="column q-gutter-xs items-center">
-            <btn-cond v-if="gr.msu" :label="$t('AGums')" color="warning" @ok="cfu = 1" cond="cEdit"/>
-            <btn-cond v-if="gr.msu" :label="$t('AGrumu')" color="warning" @ok="cfu = 2" cond="cEdit"/>
-            <btn-cond v-if="!gr.msu" :label="$t('AGumu')" color="warning" @ok="cfu = 2" cond="cEdit"/>
-            <div class="q-mt-md row justify-center items-center q-gutter-md">
-              <btn-cond flat class="q-mrlg" :label="$t('renoncer')" @ok="ui.fD"/>
-              <bouton-confirm :actif="cfu!==0 && estAnim" :confirmer="chgU"/>
-            </div>
-          </div>
-        </q-page>
-      </q-page-container>
-    </q-layout>
-  </q-dialog>
+          <q-separator class="q-mb-md q-mt-sm full-width" color="orange"/>
+        </div>
+      </div>
+      <div v-if="!estAnim" class="column items-center q-gutter-sm">
+        <div class="titre-md text-center msg">{{$t('AGupasan')}}</div>
+        <sel-avid :groupe="gr"/>
+        <btn-cond :label="$t('jailu')" @ok="ui.fD"/>
+      </div>
+      <div v-else class="column items-center q-gutter-sm">
+        <btn-cond flat :label="$t('renoncer')" icon="undo" @ok="ui.fD"/>
+        <btn-cond v-if="gr.msu" :label="$t('AGums')" color="warning" @ok="cfu = 1" cond="cEdit"/>
+        <btn-cond v-if="gr.msu" :label="$t('AGrumu')" color="warning" @ok="cfu = 2" cond="cEdit"/>
+        <btn-cond v-if="!gr.msu" :label="$t('AGumu')" color="warning" @ok="cfu = 2" cond="cEdit"/>
+        <bouton-confirm :actif="cfu!==0 && estAnim" :confirmer="chgU"/>
+      </div>
+    </div>
+  </dial-std2>
 
   <!-- Gérer l'hébergement, changer les quotas -->
-  <q-dialog v-model="ui.d[idc].AGgererheb" full-height position="left" persistent>
-  <q-layout container view="hHh lpR fFf" :class="styp('md')">
-      <q-header elevated class="tbs">
-        <q-toolbar>
-          <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
-          <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('AGgerh', [nomg])}}</q-toolbar-title>
-          <bouton-help page="page1"/>
-        </q-toolbar>
-      </q-header>
+  <dial-std2 v-model="m2" :titre="$t('AGgerh', [nomg])" help="dial_heb">
+    <div class="q-pa-xs">
+      <div class="titre-lg text-center q-ma-sm">
+        <span v-if="cas===1">{{$t('AGcas1', [AMJ.editDeAmj(gr.dfh)])}}</span>
+        <span v-if="cas===2">{{$t('AGcas2')}}</span>
+        <span v-if="cas===3">{{$t('AGcas3')}}</span>
+      </div>
 
-      <q-page-container>
-        <q-page class="q-pa-xs">
-          <div class="titre-lg text-center q-ma-sm">
-            <span v-if="cas===1">{{$t('AGcas1', [AMJ.editDeAmj(gr.dfh)])}}</span>
-            <span v-if="cas===2">{{$t('AGcas2')}}</span>
-            <span v-if="cas===3">{{$t('AGcas3')}}</span>
+      <div v-if="hko" class="q-ma-sm q-pa-sm text-bold text-warning bg-yellow-3">
+        {{$t('AGhko' + hko)}}
+      </div>
+
+      <q-card v-else>
+        <q-separator color="orange" class="q-mt-md"/>
+        <div class="titre-lg q-my-sm text-italic">{{$t('AGselac')}}</div>
+        <div class="column q-ml-md">
+          <q-radio v-if="cas===1"  v-model="action" :val="1" :label="$t('AGac1')" />
+          <q-radio v-if="cas===2"  v-model="action" :val="4" :label="$t('AGac4')" />
+          <q-radio v-if="cas===2"  v-model="action" :val="2" :label="$t('AGac2')" />
+          <q-radio v-if="cas===2"  v-model="action" :val="3" :label="$t('AGac3')" />
+          <q-radio v-if="cas===3"  v-model="action" :val="5" :label="$t('AGac5')" />
+        </div>
+
+        <div v-if="(action === 1 || action === 3 || action === 5)" 
+          :class="'spsm row justify-center q-my-sm' + (options.length > 1 ? ' bord' : '')">
+          <div v-if="options.length > 1" class="row items-center">
+            <div class="titre-md q-mt-sm text-italic q-mr-md">{{$t('AGselav')}}</div>
+            <q-select class="lgsel" v-model="nvHeb" :options="options"/>
           </div>
+          <div v-if="options.length === 1">{{$t('AGselav2', [nvHeb.label])}}</div>
+        </div>
 
-          <div v-if="hko" class="q-ma-sm q-pa-sm text-bold text-warning bg-yellow-3">
-            {{$t('AGhko' + hko)}}
+        <div v-if="action !== 0 && action !== 2">
+          <choix-quotas class="q-my-sm" v-model="q" groupe/>
+          <div v-if="q.err" class="q-ma-sm q-pa-xs msg titre-md">{{$t('AGmx')}}</div>
+          <div v-else>
+            <div v-if="aln || alv">
+              <q-separator color="orange" class="q-my-xs"/>
+              <div v-if="aln && gr.imh" class="msg q-pa-xs">{{$t('AGaln')}}</div>
+              <div v-if="alv" class="msg q-pa-xs">{{$t('AGalv')}}</div>
+              <q-separator color="orange" class="q-my-xs"/>
+            </div>
           </div>
+        </div>
 
-          <q-card v-else>
-            <q-separator color="orange" class="q-mt-md"/>
-            <div class="titre-lg q-my-sm text-italic">{{$t('AGselac')}}</div>
-            <div class="column q-ml-md">
-              <q-radio v-if="cas===1"  v-model="action" :val="1" :label="$t('AGac1')" />
-              <q-radio v-if="cas===2"  v-model="action" :val="4" :label="$t('AGac4')" />
-              <q-radio v-if="cas===2"  v-model="action" :val="2" :label="$t('AGac2')" />
-              <q-radio v-if="cas===2"  v-model="action" :val="3" :label="$t('AGac3')" />
-              <q-radio v-if="cas===3"  v-model="action" :val="5" :label="$t('AGac5')" />
-            </div>
+        <div v-if="action !== 0 && action !== 2 && !q.err">
+          <div v-if="aln" class="q-pa-xs q-ma-sm msg titre-md">{{$t('AGaln')}}</div>
+          <div v-if="alv" class="q-pa-xs q-ma-sm msg titre-md">{{$t('AGalv')}}</div>
+          <div v-if="!aln" :class="'q-pa-xs titre-md q-ma-sm ' + (arn ? 'msg' : '')">{{$t('AGdisp1', [rstn])}}</div>
+          <div v-if="!alv" :class="'q-pa-xs titre-md q-ma-sm ' + (arv ? 'msg' : '')">{{$t('AGdisp2', [rstv])}}</div>
+        </div>
 
-            <div v-if="(action === 1 || action === 3 || action === 5)" 
-              :class="'spsm row justify-center q-my-sm' + (options.length > 1 ? ' bord' : '')">
-              <div v-if="options.length > 1" class="row items-center">
-                <div class="titre-md q-mt-sm text-italic q-mr-md">{{$t('AGselav')}}</div>
-                <q-select class="lgsel" v-model="nvHeb" :options="options"/>
-              </div>
-              <div v-if="options.length === 1">{{$t('AGselav2', [nvHeb.label])}}</div>
-            </div>
+        <div class="q-mt-md row justify-center items-center q-gutter-md">
+          <btn-cond size="md" class="q-mr-lg" :label="$t('renoncer')" flat @ok="ui.fD"/>
+          <bouton-confirm v-if="action === 2 || (action !== 0 && !q.err && !aln && !alv)" 
+            actif :confirmer="chgQ"/>
+        </div>
 
-            <div v-if="action !== 0 && action !== 2">
-              <choix-quotas class="q-my-sm" v-model="q" groupe/>
-              <div v-if="q.err" class="q-ma-sm q-pa-xs msg titre-md">{{$t('AGmx')}}</div>
-              <div v-else>
-                <div v-if="aln || alv">
-                  <q-separator color="orange" class="q-my-xs"/>
-                  <div v-if="aln && gr.imh" class="msg q-pa-xs">{{$t('AGaln')}}</div>
-                  <div v-if="alv" class="msg q-pa-xs">{{$t('AGalv')}}</div>
-                  <q-separator color="orange" class="q-my-xs"/>
-                </div>
-              </div>
-            </div>
+      </q-card>
 
-            <div v-if="action !== 0 && action !== 2 && !q.err">
-              <div v-if="aln" class="q-pa-xs q-ma-sm msg titre-md">{{$t('AGaln')}}</div>
-              <div v-if="alv" class="q-pa-xs q-ma-sm msg titre-md">{{$t('AGalv')}}</div>
-              <div v-if="!aln" :class="'q-pa-xs titre-md q-ma-sm ' + (arn ? 'msg' : '')">{{$t('AGdisp1', [rstn])}}</div>
-              <div v-if="!alv" :class="'q-pa-xs titre-md q-ma-sm ' + (arv ? 'msg' : '')">{{$t('AGdisp2', [rstv])}}</div>
-            </div>
+    </div>
+  </dial-std2>
 
-            <div class="q-mt-md row justify-center items-center q-gutter-md">
-              <btn-cond size="md" class="q-mr-lg" :label="$t('renoncer')" flat @ok="ui.fD"/>
-              <bouton-confirm v-if="action === 2 || (action !== 0 && !q.err && !aln && !alv)" 
-                actif :confirmer="chgQ"/>
-            </div>
-
-          </q-card>
-
-        </q-page>
-      </q-page-container>
-    </q-layout>
-  </q-dialog>
-
-  <q-dialog v-model="ui.d[idc].ACGouvrir" position="left" persistent>
+  <dial-std2  v-model="m1" :titre="$t('CHGtit', [nomg])" help="chatgr">
     <apercu-chatgr />
-  </q-dialog>
+  </dial-std2>
 
 </q-page>
 </template>
@@ -235,10 +216,15 @@ import BoutonConfirm from '../components/BoutonConfirm.vue'
 import QuotasVols from '../components/QuotasVols.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import ApercuChatgr from '../panels/ApercuChatgr.vue'
+import DialStd2 from '../dialogues/DialStd2.vue'
 import { ModeSimple, RafraichirCvsGr, HebGroupe } from '../app/operations4.mjs'
 
 const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
+const m1 = computed(() => ui.d[idc].ACGouvrir)
+const m2 = computed(() => ui.d[idc].AGgererheb)
+const m3 = computed(() => ui.d[idc].AGediterUna)
+
 const session = stores.session
 const gSt = stores.groupe
 
@@ -255,6 +241,10 @@ const arv = ref(false)
 const rstn = ref(0) 
 const rstv = ref(0)
 const lstVotes = ref()
+const nbSubst = ref(0)
+const cas = ref(0)
+const restqn = ref(0)
+const restqv = ref(0)
 
 const nomg = computed(() => session.getCV(session.groupeId).nom)
 const mesav = computed(() => { 
@@ -273,7 +263,9 @@ const amb = computed(() => gSt.ambano[0])
 const lst = computed(() => pgLmFT.value.r)
 const nb = computed(() => pgLmFT.value.n)
 const vols = computed(() => { return { qn: gr.value.qn, qv: gr.value.qv, nn: gr.value.nn, v: gr.value.vf }})
+// const estAnim1 = computed(() => gSt.estAnim(session.groupeId))
 const estAnim = computed(() => gr.value.estAnim(gr.value.mmb.get(session.avatarId)) )
+
 const restn = computed(() => { const cpt = session.compte.qv; return (cpt.qn * (100 - cpt.pcn) / 100) })
 const restv = computed(() => { const cpt = session.compte.qv; return (cpt.qv * (100 - cpt.pcv) / 100) })
 
@@ -322,7 +314,7 @@ async function editUna () {
   if (gr.value.msu) {
     for (let ids = 1; ids < gr.value.flags.length; ids++) {
       if (gr.value.st[ids] === 5)
-        lstVotes.value.push({ nom: this.nom(ids), oui: gr.value.msu.indexOf(ids) !== -1 })
+        lstVotes.value.push({ nom: nom(ids), oui: gr.value.msu.indexOf(ids) !== -1 })
     }
   }
   ui.oD('AGediterUna', idc)

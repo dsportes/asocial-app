@@ -1,75 +1,53 @@
 <template>
-  <q-layout container view="hHh lpR fFf" :class="styp('md')">
-    <q-header elevated class="tbs">
-      <q-toolbar>
-        <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
-        <q-toolbar-title class="titre-lg text-center q-mx-sm">
-          {{$t('CHGtit', [cvg.nom])}}
-        </q-toolbar-title>
-        <bouton-help page="page1"/>
-      </q-toolbar>
-      <q-toolbar inset>
-        <sel-avmbr v-model="avid" acmbr/>
-        <q-space/>
-        <btn-cond v-if="avid" :label="$t('CHGadd')" icon="add"
-          cond="cEdit" @ok="editer"/>
-        <div v-else class="msg">{{$t('CHGnot')}}</div>
-      </q-toolbar>
-      <apercu-genx class="q-ma-xs" :id="session.groupeId" nodet />
-    </q-header>
+<div>
+  <q-card class="q-pa-sm topm">
+    <div v-for="it in items" :key="it.dh + '/' + it.im">
+      <q-chat-message
+        bg-color="primary" 
+        text-color="white"
+        :stamp="dhcool(it.dh)">
+        <sd-blanc v-if="!it.dhx" :texte="it.t"/>
+        <div v-else class="text-italic text-negative">{{$t('CHeffa', [dhcool(it.dhx)])}}</div>
+        <template v-slot:name>
+          <div class="full-width row justify-between items-center">
+            <span>{{cvm(it.im).nomC }}</span>
+            <btn-cond cond="cEdit" v-if="egr.estAnim && !it.dhx" size="sm" 
+              icon="clear" color="warning" round
+              @ok="effacer(it.im, it.dh)"/>
+          </div>
+        </template>
+      </q-chat-message>
+    </div>
+  </q-card>
 
-    <q-page-container>
-      <q-card class="q-pa-sm">
-        <div v-for="it in items" :key="it.dh + '/' + it.im">
-          <q-chat-message
-            bg-color="primary" 
-            text-color="white"
-            :stamp="dhcool(it.dh)">
-            <sd-blanc v-if="!it.dhx" :texte="it.t"/>
-            <div v-else class="text-italic text-negative">{{$t('CHeffa', [dhcool(it.dhx)])}}</div>
-            <template v-slot:name>
-              <div class="full-width row justify-between items-center">
-                <span>{{cvm(it.im).nomC }}</span>
-                <btn-cond cond="cEdit" v-if="egr.estAnim && !it.dhx" size="sm" 
-                  icon="clear" color="warning" round
-                  @ok="effacer(it.im, it.dh)"/>
-              </div>
-            </template>
-          </q-chat-message>
-        </div>
-      </q-card>
-    </q-page-container>
+  <q-page-sticky position="top-left">
+    <q-toolbar class="tbp pwmd">
+      <sel-avmbr v-model="avid" acmbr/>
+      <q-space/>
+      <btn-cond v-if="avid" :label="$t('CHGadd')" icon="add"
+        cond="cEdit" @ok="editer"/>
+      <div v-else class="msg">{{$t('CHGnot')}}</div>
+    </q-toolbar>
+    <q-toolbar class="tbp" inset>
+      <q-expansion-item class="full-width" switch-toggle-side expand-separator 
+        icon="group" :label="cvg.nom">
+        <apercu-genx class="q-ma-xs" :id="session.groupeId" nodet />
+      </q-expansion-item>
+    </q-toolbar>
+  </q-page-sticky>
 
-    <!-- Confirmation d'effacement d'un échange -->
-    <q-dialog v-model="ui.d[idc].ACGconfirmeff">
-      <q-card :class="styp()">
-        <q-card-section class="q-pa-md fs-md text-center">
-          {{$t('CHeff')}}
-        </q-card-section>
-        <q-card-actions align="right" class="q-gutter-sm">
-          <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
-          <btn-cond color="warning" icon="clear" :label="$t('CHeffcf')" @ok="effop"/>
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+  <!-- Confirmation d'effacement d'un échange -->
+  <dial-std1 v-if="m1" v-model="m1" :titre="$t('CHeff')"
+    okwarn okic="clear" :okfn="effop" cond="cEdit">
+  </dial-std1>
 
-    <!-- Dialogue d'ajout d'un item au chat -->
-    <q-dialog v-model="ui.d[idc].ACGchatedit" persistent>
-      <q-card :class="styp()">
-        <q-toolbar class="tbs">
-          <btn-cond color="warning" icon="close" @ok="ui.fD"/>
-          <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CHadd1')}}</q-toolbar-title>
-          <bouton-help page="page1"/>
-        </q-toolbar>
-        <editeur-md mh="20rem" v-model="txt" :texte="''" editable modetxt/>
-        <q-card-actions align="right" class="q-gutter-sm">
-          <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
-          <btn-cond icon="add" :label="$t('valider')" @ok="addop"/>
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+  <!-- Dialogue d'ajout d'un item au chat -->
+  <dial-std1 v-if="m2" v-model="m2" :titre="$t('CHadd1')"
+    okic="add" :okfn="addop" cond="cEdit">
+    <editeur-md class="q-ma-xs" mh="20rem" v-model="txt" :texte="''" editable modetxt/>
+  </dial-std1>
 
-</q-layout>
+</div>
 </template>
 
 <script setup>
@@ -84,11 +62,15 @@ import BoutonHelp from '../components/BoutonHelp.vue'
 import SelAvmbr from '../components/SelAvmbr.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import BtnCond from '../components/BtnCond.vue'
+import DialStd1 from '../dialogues/DialStd1.vue'
 import { ItemChatgr } from '../app/operations4.mjs'
 
 const session = stores.session
 const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
+const m1 = computed(() => ui.d[idc].ACGconfirmeff)
+const m2 = computed(() => ui.d[idc].ACGchatedit)
+
 const gSt = stores.groupe
 const aSt = stores.avatar
 const naAut = ref()
@@ -111,9 +93,9 @@ const items = computed(() => gSt.chatgr && gSt.chatgr.items ? gSt.chatgr.items :
 
 const cvm = (im) => session.getCV(gr.value.tid[im])
 
-async function effacer (im, dh) {
-  im.value = im
-  dh.value = dh
+async function effacer (imx, dhx) {
+  im.value = imx
+  dh.value = dhx
   ui.oD('ACGconfirmeff', idc)
 }
 
@@ -143,4 +125,6 @@ async function editer () {
 .nom
   max-height: 1.3rem
   overflow: hidden
+.topm
+  margin-top: 6rem
 </style>

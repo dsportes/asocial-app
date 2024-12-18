@@ -73,16 +73,25 @@
     </q-card>
   </div>
 
-  <!-- Acceptation / refus de l'invitation -->
   <!--<q-dialog v-model="ui.d[idc].IAaccinvit" full-height persistent position="left">
     <invitation-acceptation :inv="inv"/>
   </q-dialog>-->
 
+  <!-- Acceptation / refus de l'invitation -->
   <dial-std2 v-if="m2" v-model="m2" :titre="titinv">
     <invitation-acceptation :inv="inv"/>
   </dial-std2>
 
   <!-- Contact du groupe ------------------------------------------------>
+  <dial-std1 v-if="m3" v-model="m3" :titre="$t('PGctc', [nomgi] )"
+    okic="close" cond="cEdit" :okfn="ctc">
+    <div class="q-pa-xs">
+      <apercu-genx :id="inv.idg" :idx="0"/>
+      <q-option-group v-model="ctcOpt" :options="options2" color="primary"/>
+    </div>
+  </dial-std1>
+
+<!--
   <q-dialog v-model="ui.d[idc].PGctc" persistent>
     <q-card :class="styp('sm')">
       <q-toolbar class="tbs">
@@ -92,6 +101,7 @@
       </q-toolbar>
       <div class="q-pa-xs">
         <apercu-genx :id="inv.idg" :idx="0"/>
+        <q-option-group v-model="ctcOpt" :options="options2" color="primary"/>
         <q-card-actions align="right" class="q-gutter-sm" vertical>
           <btn-cond flat icon="close" :label="$t('jailu')" @ok="ui.fD" />
           <btn-cond color="warning" icon="close" cond="cEdit"
@@ -102,6 +112,7 @@
       </div>
     </q-card>
   </q-dialog>
+-->
 
   <!-- Nouveau groupe ------------------------------------------------>
   <dial-std1 v-if="m1" v-model="m1" :titre="$t('PGcrea')"
@@ -115,9 +126,9 @@
     </div>
   </dial-std1>
 
-  <q-dialog v-model="ui.d[idc].PGACGouvrir" position="left" persistent>
+  <dial-std2  v-model="m4" :titre="$t('CHGtit', [session.getCV(session.groupeId).nom])" help="chatgr">
     <apercu-chatgr />
-  </q-dialog>
+  </dial-std2>
 
 </q-page>
 </template>
@@ -146,6 +157,8 @@ const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 const m1 = computed(() => ui.d[idc].PGcrgr)
 const m2 = computed(() => ui.d[idc].IAaccinvit)
+const m3 = computed(() => ui.d[idc].PGctc)
+const m4 = computed(() => ui.d[idc].PGACGouvrir)
 
 const session = stores.session
 const aSt = stores.avatar
@@ -157,6 +170,7 @@ const options = [
   { label: $t('AGsimple'), value: false },
   { label: $t('AGunanime'), value: true, color: 'warning' }
 ]
+const options2 = [{ label: $t('PGctc1'), value: false }, { label: $t('PGctc2'), value: true }]
 
 fStore.filtre.groupes.tous = props.tous || false
 
@@ -224,10 +238,12 @@ const edv = (n) => edvol(n)
 const nbiv = (e) => gSt.nbMesInvits(e)
 
 const titinv = ref()
+const ctcOpt = ref(false)
 
 async function ouvaccinv (invx) {
   inv.value = invx
-  titinv.value = $t('ICtit2', [session.getCV(props.inv.ida).nom, session.getCV(props.inv.idg).nom])
+  titinv.value = $t('ICtit2', [session.getCV(inv.value.ida).nom, session.getCV(inv.value.idg).nom])
+  ctcOpt.value = false
   if (invx.invpar.size) ui.oD('IAaccinvit', idc)
   else ui.oD('PGctc', idc)
 }
@@ -250,9 +266,9 @@ async function nvGr () {
   ui.oD('PGcrgr', idc)
 }
 
-async function ctc(ln) {
+async function ctc () {
   ui.fD()
-  const r = await new AnnulerContact().run(inv.value.idg, inv.value.ida, ln)
+  const r = await new AnnulerContact().run(inv.value.idg, inv.value.ida, ctcOpt.value)
   if (r) await afficher8000(r, inv.value.ida, inv.value.idg)
 }
 

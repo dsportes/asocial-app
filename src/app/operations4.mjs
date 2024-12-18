@@ -1700,12 +1700,7 @@ export class AnnulerContact extends Operation {
   async run (idg, ida, ln) {
     try {
       const session = stores.session
-      const args = { 
-        token: session.authToken, 
-        idg, 
-        ida,
-        ln
-      }
+      const args = { token: session.authToken, idg, ida, ln }
       await post(this, 'AnnulerContact', args)
       return this.finOK(0)
     } catch (e) {

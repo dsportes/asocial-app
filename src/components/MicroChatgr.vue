@@ -15,9 +15,9 @@
     <div v-if="chat.items.length" class="fs-md">{{chat.tit}}</div>
   </div>
 
-  <q-dialog v-model="ui.d[idc].MCACGouvrir" position="left" persistent>
+  <dial-std2  v-model="m1" :titre="$t('CHGtit', [nomg])" help="chatgr">
     <apercu-chatgr />
-  </q-dialog>
+  </dial-std2>
 
 </div>
 </template>
@@ -27,10 +27,13 @@ import { computed, onUnmounted } from 'vue'
 import stores from '../stores/stores.mjs'
 import { dhcool } from '../app/util.mjs'
 import ApercuChatgr from '../panels/ApercuChatgr.vue'
+import DialStd2 from '../dialogues/DialStd2.vue'
 import BtnCond from './BtnCond.vue'
 
 const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
+const m1 = computed(() => ui.d[idc].MCACGouvrir)
+
 const aSt = stores.avatar
 const session = stores.session
 
