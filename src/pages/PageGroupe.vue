@@ -28,7 +28,7 @@
       <div class="q-my-sm row justify-between">
         <div v-if="gr.msu" class="titre-md text-bold text-warning">{{$t('AGunanime')}}</div>
         <div v-else class="titre-md">{{$t('AGsimple')}}</div>
-        <btn-cond class="col-auto q-ml-sm self-start" size="sm" :label="$t('gérer')"
+        <btn-cond class="col-auto q-ml-sm self-start" size="sm" :label="$t('gerer')"
           icon="settings" @ok="editUna" cond="cVisu"/>
       </div>
 
@@ -218,7 +218,7 @@ import BtnCond from '../components/BtnCond.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import ApercuMembre from '../components/ApercuMembre.vue'
-import SelAvid from '../components/SelAvid.vue'
+import SelAvidgr from '../components/SelAvidgr.vue'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import QuotasVols from '../components/QuotasVols.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'

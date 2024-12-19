@@ -113,44 +113,47 @@ a accès aux membres (donc dans l'onglet "membres").
     </div>
   </q-expansion-item>
 
-  <!-- Dialogue d'invitation -->
+  <!-- Dialogue d'invitation 
+  A minima UN des avatars du compte est animateur, pas forcément l'avatar courant
+  -->
   <dial-std2 v-model="m1" :titre="$t('AMinvtit', [nomm, nomg])" help="dial_invit">
-    <div v-if="!estAnim" class="column items-center q-gutter-sm">
+    <div v-if="!estAnim" class="q-my-sm column items-center q-gutter-sm">
       <div class="titre-md text-center msg">{{$t('AGupasan')}}</div>
       <sel-avidgr :groupe="gr" anim/>
       <btn-cond :label="$t('jailu')" @ok="ui.fD"/>
     </div>
-    <div v-else class="row items-center q-gutter-sm">
-      <div class="titre-md">{{$t('AGchan')}}</div>
-      <sel-avidgr :groupe="gr" anim/>
+    <div v-else class="q-my-sm column items-center q-gutter-sm">
+      <!--div class="titre-md">{{$t('AGchan')}}</div-->
+      <sel-avidgr class="q-my-sm" :groupe="gr" anim/>
     
-      <q-card-section>
-        <div class="row justify betwwen items-end">
-          <span class="titre-lg">{{$t('AMcas' + stm)}}</span>
-          <span v-if="stm > 1" class="titre-md q-ml-md">[ {{edFlagsiv}} ]</span>
-        </div>
-        <div v-if="gr.msu">
-          <div v-if="stm > 1" class="fs-md">
-            <span class="text-italic">{{$t('AMinvvp')}}</span>
-            <span class="q-ml-sm" v-for="[id, cv] of animInv[0]" :key="id">{{cv.nomC}}</span>
-          </div>
-          <div v-if="stm === 2" class="fs-md">
-            <span class="text-italic">{{$t('AMinvvc')}}</span>
-            <span class="q-ml-sm" v-for="[id, cv] of animInv[1]" :key="id">{{cv.nomC}}</span>
-          </div>
-        </div>
-        <div v-else>
-          <div v-if="stm === 2">{{$t('AMinvpar', [invpar])}}</div>
-        </div>
-        <div v-if="stm > 1" class="titre-md text-italic">{{$t('AMbienv')}}</div>
-        <show-html class="bord1" v-if="stm > 1" :texte="mb.msg" :idx="0" maxh="4rem" zoom/>
-        <div v-if="stm > 1" class="bordm">
-            <q-option-group dense v-model="rmsv" :options="optRMSV" color="primary" />
-        </div>
-      </q-card-section>
+      <div class="q-my-sm row justify-betwwen items-end">
+        <span class="titre-lg">{{$t('AMcas' + stm)}}</span>
+        <span v-if="stm > 1" class="titre-md q-ml-md">[ {{edFlagsiv}} ]</span>
+      </div>
 
-      <q-card-section v-if="stm === 1 || rmsv === 2" class="q-ma-sm">
+      <div v-if="gr.msu" class="q-my-sm">
+        <div v-if="stm > 1" class="fs-md">
+          <span class="text-italic">{{$t('AMinvvp')}}</span>
+          <span class="q-ml-sm" v-for="[id, cv] of animInv[0]" :key="id">{{cv.nomC}}</span>
+        </div>
+        <div v-if="stm === 2" class="fs-md">
+          <span class="text-italic">{{$t('AMinvvc')}}</span>
+          <span class="q-ml-sm" v-for="[id, cv] of animInv[1]" :key="id">{{cv.nomC}}</span>
+        </div>
+      </div>
+      <div v-else class="q-my-sm">
+        <div v-if="stm === 2">{{$t('AMinvpar', [invpar])}}</div>
+      </div>
+
+      <div v-if="stm > 1" class="q-my-sm">
+        <div class="titre-md text-italic">{{$t('AMbienv')}}</div>
+        <show-html class="bord1" :texte="mb.msg" :idx="0" maxh="4rem" zoom/>
+        <q-option-group class="bordm" dense v-model="rmsv" :options="optRMSV" color="primary" />
+      </div>
+
+      <div v-if="stm === 1 || rmsv === 2" class="q-my-sm spsm">
         <!-- Edition / création d'une invitation -->
+        <!-- Avatar sélectionné plus haut par SelAvidgr
         <div v-if="!gr.msu">
           <div v-if="optAvAnims.length === 1">{{$t('AMinvpar2', [invparf.label])}}</div>
           <div v-else class="row items-center">
@@ -160,6 +163,7 @@ a accès aux membres (donc dans l'onglet "membres").
               popup-content-class="bg-accent text-white titre-md text-bold q-pa-sm"/>
           </div>
         </div>
+        -->
 
         <div class="bord2 column q-pa-xs q-mb-sm titre-md">
           <q-checkbox dense v-model="ina" :label="$t('AManimateur')" />
@@ -173,12 +177,12 @@ a accès aux membres (donc dans l'onglet "membres").
         <div class="q-mt-md titre-md text-italic">{{$t('AMbienv')}}</div>
         <editeur-md class="q-mb-sm bord1" :lgmax="1000" v-model="msg" :texte="msg"
           modetxt mh="8rem" editable/>
-      </q-card-section>
+      </div>
 
-      <q-card-section v-if="rmsv === 3" class="q-ma-sm">
+      <div v-if="rmsv === 3" class="q-my-sm">
         <!-- Suppression d'une invitation -->
         <q-option-group dense v-model="suppr" :options="optSuppr" color="primary" />
-      </q-card-section>
+      </div>
 
       <q-card-actions align="right" class="q-gutter-xs">
         <btn-cond flat size="md" icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
@@ -363,7 +367,13 @@ const avid = computed(() => session.avatarId)
 const nomg = computed(() => session.getCV(gr.value.id).nom)
 const nomm = computed(() => session.getCV(props.id).nomC)
 const pasmoi = computed(() => !session.estAvc(props.id))
-const estAnim = computed(() => gr.value.estAnim(gr.value.mmb.get(session.avatarId)) )
+
+// L'avatar COURANT du compte est "animateur"
+const estAnim = computed(() => {
+  const im = gr.value.mmb.get(session.avatarId)
+  const b = gr.value.estAnim(im)
+  return b
+})
 
 const mb = computed(() => gSt.egrC && gSt.egrC.membres ? gSt.egrC.membres.get(im.value) : null)
 const im = computed(() => gSt.egrC && gSt.egrC.groupe ? gSt.egrC.groupe.mmb.get(props.id) : 0)
@@ -377,7 +387,9 @@ const invits = computed(() => gr.value.invits[im.value] || { fl: 0, li: []})
 const invpar = computed(() => { const x = invits.value.li[0]
   return x ? session.getCV(gr.value.tid[x]).nomC : ''
 })
+
 const condm = computed(() => {
+  // gSt.egrC.estAnim: UN des avatars du compte est "animateur"
   const s = new Set()
   const ln = gr.value.enLNG(props.id) || gr.value.enLNC(props.id) 
   // Peut créer / modifier / supprimer une invitation
@@ -390,6 +402,7 @@ const condm = computed(() => {
   if (stm.value > 0 && (session.estAvc(props.id) || gSt.egrC.estAnim)) s.add(4)
   return s
 })
+
 const edFlagsiv = computed(() => { 
   const f = invits.value.fl
   if (!f) return ''
@@ -400,6 +413,7 @@ const edFlagsiv = computed(() => {
   else if (f & FLAGS.DN) ed.push($t('AMinvdn'))
   return ed.join(', ')
 })
+
 const edFlags2 = computed(() => { 
   const f = fl.value
   if (!f) return ''
@@ -410,6 +424,7 @@ const edFlags2 = computed(() => {
   else if (f & FLAGS.DN) ed.push($t('AMinvdn'))
   return ed.join(', ')
 })
+
 const nvfl = computed(() =>{ let fl = 0
   if (ina.value) fl |= FLAGS.AN 
   if (idm.value) fl |= FLAGS.DM 
@@ -417,6 +432,7 @@ const nvfl = computed(() =>{ let fl = 0
   if (ide.value) fl |= FLAGS.DE 
   return fl
 })
+
 const nvfl2 = computed(() =>{ let fl = 0
   if (iam.value) fl |= FLAGS.AM
   if (ian.value) fl |= FLAGS.AN
@@ -425,8 +441,12 @@ const nvfl2 = computed(() =>{ let fl = 0
   if (ide.value) fl |= FLAGS.DE 
   return fl
 })
+
 const chgDr = computed(() => nvfl2.value !== flAvant.value || (animAp.value !== (stm.value === 5 ? true : false)))
+
+// avatars du compte étant animateurs du groupe courant: [{ label: nom, value: id}] 
 const optAvAnims = computed(() => gSt.avcAnims)
+
 const nbAnimsAp = computed(() => { const anav = stm.value === 5 ? true : false; const n = gr.value.nbAnims
   if (animAp.value && !anav) return n + 1
   if (!animAp.value && anav) return n - 1
@@ -438,7 +458,6 @@ const nbAnimsAp2 = computed(() => { const anav = stm.value === 5 ? true : false;
 const nbActifsAp = computed(() => { const acav = stm.value >= 4 ? true : false; const n = gr.value.nbActifs
   return acav ? n - 1 : n
 })
-
 
 watch(ouvert, (v) => { if (v) session.setMembreId(im.value) })
 

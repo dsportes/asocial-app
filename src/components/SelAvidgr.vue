@@ -2,7 +2,7 @@
 <span>
   <span v-if="options && options.l.length === 0" class="msg">{{$t('SAVz' + anim ? 1 : 2)}}</span>
   <span v-if="options && options.l.length === 1" class="titre-md">{{$t('SAVz0', [options.l[0].label]) }}</span>
-  <span v-if="options" class="row items-center">
+  <span v-if="options  && options.l.length > 1" class="row items-center">
     <span class="text-italic text-bold q-mr-sm">{{$t('SAVz3')}}</span>
     <q-select v-model="cav" borderless dense options-dense standard filled
       :options="options.l" style="min-width:120px;max-width:240px"
@@ -37,10 +37,10 @@ const options = computed(() => {
   return {l, m}
 })
 
-if (options.value.l.size === 1) {
+if (options.value.l.length === 1) {
   const e0 = options.value.l[0]
   if (e0.value !== session.avatarId) session.setAvatarId(e0.value)
-} else if (options.value.l.size > 1) {
+} else if (options.value.l.length > 1) {
   const e = options.value.m.get(session.avatarId)
   cav.value = session.avatarId && e ? e : options.value.l[0]
 }
