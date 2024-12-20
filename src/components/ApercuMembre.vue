@@ -98,7 +98,7 @@ a accès aux membres (donc dans l'onglet "membres").
             <span v-if="invits.fl & FLAGS.DE" class="q-ml-sm">- {{$t('AMinven')}}</span>
           </div>
           <div class="titre-md text-italic q-mt-xs">{{$t('AMbienv')}}</div>
-          <show-html class="bord2" v-if="mb" :idx="idx" :texte="mb.msg" maxh="4rem" scroll zoom/>
+          <show-html class="bord1" v-if="mb" :idx="idx" :texte="mb.msg" maxh="4rem" scroll zoom/>
 
           <div class="fs-md">
             <span class="text-italic">{{$t('AMinvvp')}}</span>
@@ -145,10 +145,12 @@ a accès aux membres (donc dans l'onglet "membres").
         <div v-if="stm === 2">{{$t('AMinvpar', [invpar])}}</div>
       </div>
 
-      <div v-if="stm > 1" class="q-my-sm">
+      <div v-if="stm > 1" class="q-my-sm spsm">
         <div class="titre-md text-italic">{{$t('AMbienv')}}</div>
         <show-html class="bord1" :texte="mb.msg" :idx="0" maxh="4rem" zoom/>
-        <q-option-group class="bordm" dense v-model="rmsv" :options="optRMSV" color="primary" />
+        <div class="bordm q-my-sm">
+          <q-option-group dense v-model="rmsv" :options="optRMSV" color="primary" />
+        </div>
       </div>
 
       <div v-if="stm === 1 || rmsv === 2" class="q-my-sm spsm">
@@ -165,7 +167,7 @@ a accès aux membres (donc dans l'onglet "membres").
         </div>
         -->
 
-        <div class="bord2 column q-pa-xs q-mb-sm titre-md">
+        <div class="bord1 column q-pa-xs q-my-sm titre-md">
           <q-checkbox dense v-model="ina" :label="$t('AManimateur')" />
           <q-checkbox dense v-model="idm" :label="$t('AMmembres')" />
           <q-checkbox dense v-model="idn" :label="$t('AMlecture')" />
@@ -175,16 +177,16 @@ a accès aux membres (donc dans l'onglet "membres").
         <div class="stx fs-md" v-if="nvfl !== invits.fl && stm === 2">{{$t('AMchg')}}</div>
 
         <div class="q-mt-md titre-md text-italic">{{$t('AMbienv')}}</div>
-        <editeur-md class="q-mb-sm bord1" :lgmax="1000" v-model="msg" :texte="msg"
+        <editeur-md class="q-my-sm bord1" :lgmax="1000" v-model="msg" :texte="msg"
           modetxt mh="8rem" editable/>
       </div>
 
-      <div v-if="rmsv === 3" class="q-my-sm">
+      <div v-if="rmsv === 3" class="q-my-sm spsm bordm">
         <!-- Suppression d'une invitation -->
         <q-option-group dense v-model="suppr" :options="optSuppr" color="primary" />
       </div>
 
-      <q-card-actions align="right" class="q-gutter-xs">
+      <q-card-actions align="right" class="q-gutter-sm spsm">
         <btn-cond flat size="md" icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
         <btn-cond v-if="rmsv !== 1" color="warning" icon="check"
           :label="$t('AMconf' + rmsv)"
@@ -193,25 +195,6 @@ a accès aux membres (donc dans l'onglet "membres").
       </q-card-actions>
     </div>
   </dial-std2>
-
-<!--
-  <q-dialog v-model="ui.d[idc].AMinvit" persistent full-height position="left">
-    <q-layout container view="hHh lpR fFf" :class="styp('md')">
-      <q-header elevated>
-        <q-toolbar class="tbs">
-          <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
-          <q-toolbar-title class="titre-lg text-center q-mx-sm">
-            {{$t('AMinvtit', [nomm, nomg])}}</q-toolbar-title>
-          <bouton-help page="page1"/>
-        </q-toolbar>
-      </q-header>
-
-      <q-page-container>
-
-      </q-page-container>
-    </q-layout>
-  </q-dialog>
--->
 
   <!-- Dialogue de gestion des droits -->
   <q-dialog v-model="ui.d[idc].AMdroits" persistent full-height position="left">
@@ -232,7 +215,7 @@ a accès aux membres (donc dans l'onglet "membres").
           <span v-if="stm > 1" class="titre-md q-ml-md">[ {{edFlags2}} ]</span>
         </div>
 
-        <div v-if="optAvAnims.length" class="bord2 column q-pa-xs q-mb-sm titre-md">
+        <div v-if="optAvAnims.length" class="bord1 column q-pa-xs q-mb-sm titre-md">
           <q-checkbox :disable="stm === 5 && !session.compte.mav.has(id)"
             dense v-model="animAp" :label="$t('AManimateur')" />
           <q-checkbox dense v-model="idm" :label="$t('AMmembres')" />
@@ -242,7 +225,7 @@ a accès aux membres (donc dans l'onglet "membres").
         <div v-if="nbAnimsAp" class="titre-md text-italic q-my-sm">{{$t('AMnbanim', [nbAnimsAp])}}</div>
         <div v-if="!nbAnimsAp && !gr.nbAnims" class="titre-md text-italic q-my-sm">{{$t('AMnbanim1')}}</div>
         <div v-if="!nbAnimsAp && gr.nbAnims" class="stx2 titre-lg q-my-sm">{{$t('AMnbanim2')}}</div>
-        <div class="q-mt-sm bord2 column q-pa-xs q-mb-sm titre-md">
+        <div class="q-mt-sm bord1 column q-pa-xs q-mb-sm titre-md">
           <q-checkbox v-model="iam" dense 
             :label="$t('ICcflm' + (pasmoi ? 'b' : ''))" :disable="pasmoi"/>
           <q-checkbox v-model="ian" dense 
@@ -575,13 +558,11 @@ async function inviter () {
   margin-left: 3rem
 .q-tab
   min-height: 0 !important
-.bord2, .bordm
+.bord1, .bordm, .bord1
   border-radius: 5px
   padding: 3px
 .bordm
   border: 2px solid $primary
 .bord1
-  border-bottom: 1px solid $grey-5
-.bord2
   border: 1px solid $grey-5
 </style>
