@@ -131,21 +131,22 @@ a accès aux membres (donc dans l'onglet "membres").
         <span v-if="stm > 1" class="titre-md q-ml-md">[ {{edFlagsiv}} ]</span>
       </div>
 
-      <div v-if="gr.msu" class="q-my-sm">
-        <div v-if="stm > 1" class="fs-md">
-          <span class="text-italic">{{$t('AMinvvp')}}</span>
+      <div v-if="gr.msu && (stm === 1 || stm === 2)" class="q-my-sm">
+        <div v-if="animInv[0].size !== 0" class="fs-md">
+          <span class="text-italic">{{$t('AMinvvp1')}}</span>
           <span class="q-ml-sm" v-for="[id, cv] of animInv[0]" :key="id">{{cv.nomC}}</span>
         </div>
-        <div v-if="stm === 2" class="fs-md">
+        <div v-if="animInv[1].size !== 0" class="fs-md">
           <span class="text-italic">{{$t('AMinvvc')}}</span>
           <span class="q-ml-sm" v-for="[id, cv] of animInv[1]" :key="id">{{cv.nomC}}</span>
         </div>
+        <div v-else class="text-italic">{{$t('AMinvvc2')}}</div>
       </div>
-      <div v-else class="q-my-sm">
+      <div v-if="!gr.msu && (stm === 1 || stm === 2)" class="q-my-sm">
         <div v-if="stm === 2">{{$t('AMinvpar', [invpar])}}</div>
       </div>
 
-      <div v-if="stm > 1" class="q-my-sm spsm">
+      <div v-if="stm === 1 || stm === 2" class="q-my-sm spsm">
         <div class="titre-md text-italic">{{$t('AMbienv')}}</div>
         <show-html class="bord1" :texte="mb.msg" :idx="0" maxh="4rem" zoom/>
         <div class="bordm q-my-sm">
@@ -153,7 +154,7 @@ a accès aux membres (donc dans l'onglet "membres").
         </div>
       </div>
 
-      <div v-if="stm === 1 || rmsv === 2" class="q-my-sm spsm">
+      <div v-if="stm === 1 || stm === 2 || rmsv === 2" class="q-my-sm spsm">
         <!-- Edition / création d'une invitation -->
         <!-- Avatar sélectionné plus haut par SelAvidgr
         <div v-if="!gr.msu">
@@ -510,7 +511,7 @@ async function ouvririnvit () {
     { label: $t('AMopt2'), value: 2 },
     { label: $t('AMopt3'), value: 3 },
   ]
-  if (stm.value === 2 && animInv.value[1].size) {
+  if ((stm.value === 1 || stm.value === 2) && animInv.value[1].size !== 0) {
     let ok = false
     session.compte.mpg.get(session.groupeId).forEach(ida => {
       if (animInv.value[1].has(ida)) ok = true

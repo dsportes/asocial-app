@@ -148,14 +148,14 @@ export const useGroupeStore = defineStore('groupe', {
     animInv: (state) => { return (im) => {
         const lc = new Map() // vote contre (pas voté)
         const lp = new Map() // vote pour
-        const g = state.egrC.groupe
         if (!im) return [lc, lp]
-        const invits = g.invits[im] || { fl, li }
-        if (!invits.li) return [lp, lc]
+        const g = state.egrC.groupe
+        const invits = g.invits[im] || null
+        const lix = invits ? (invits.li || []) : []
         for(let i = 1; i < g.st.length; i++) {
           if (g.estAnim(i)) {
             const cv = state.session.getCV(g.tid[i])
-            if (invits.li.indexOf(i) === -1) lc.set(cv.id, cv); else lp.set(cv.id, cv)
+            if (lix.indexOf(i) === -1) lc.set(cv.id, cv); else lp.set(cv.id, cv)
           }
         }
         return [lp, lc]
