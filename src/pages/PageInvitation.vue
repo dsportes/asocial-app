@@ -33,19 +33,6 @@
         </q-expansion-item>
       </div>
     </div>
-<!--
-        <q-card class="q-my-md column justify-center" v-for="(p, idx) in nblst.lst" :key="p.id">
-          <apercu-genx class="q-pa-xs" :id="p.id" :idx="idx" nodet/>
-          <div :class="dkli(idx) + ' text-center'">
-            <span v-if="p.d[0] > 3" class="msg">
-              <span>{{$t('PPctc' + p.d[0])}}</span>
-              <span v-if="p.d[1]" class="q-ml-xs">({{$t('AMm' + p.d[1])}}}</span>
-            </span>
-            <btn-cond v-else cond="cEdit" icon="check" color="green-5" :label="$t('PPctcok')"
-              @ok="select(p)"/>
-          </div>
-        </q-card>
--->
 
     <!-- Confirmation du contact ------------------------------------------------>
     <q-dialog v-model="ui.d[idc].PInvit" persistent>

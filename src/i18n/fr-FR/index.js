@@ -147,9 +147,9 @@ export default {
 
   FLAGS0: 'a activé l\'accès aux membres', // AM
   FLAGS1: 'a activé l\'accès aux notes',  // AN
-  FLAGS2: 'a accès de voir membres', // DM
-  FLAGS3: 'a droit de voir les notes', // DN
-  FLAGS4: 'a droit d\'éditer les notes', // DE
+  FLAGS2: 'a le droit de voir les membres', // DM
+  FLAGS3: 'a le droit de voir les notes', // DN
+  FLAGS4: 'a le droit d\'éditer les notes', // DE
   FLAGS5: 'a pu voir les membres', // HM
   FLAGS6: 'a pu voir les notes', // HN
   FLAGS7: 'a pu éditer les notes', // HE
@@ -1312,7 +1312,7 @@ export default {
 
   AMinvit3: 'Invitation en attente de réponse avec droits:',
   AMinvit2: 'Invitation en cours de vote avec droits:',
-  AMinvittg: 'Invitation impossible, le groupe a déjà atteint sa taille maximale de {0} membres actifs / invités.',
+  AMinvittg: 'Invitations impossibles, le groupe a déjà atteint sa taille maximale de {0} membres actifs / invités.',
   AMinvitbtn1: 'Invitation',
   AMinvitbtn2: 'Accepter / décliner l\'invitation',
   AMinvitbtn3: 'Droits d\'accès',
@@ -1330,10 +1330,12 @@ export default {
   AMcas3: 'Invitation lancée',
   AMcas4: 'Membre actif',
   AMcas5: 'Animateur',
+  AMopt0: 'Création d\'une nouvelle invitation',
   AMopt1: 'Laisser cette invitation telle quelle',
   AMopt2: 'Modifier cette invitation',
   AMopt3: 'Supprimer cette invitation',
-  AMopt4: 'Voter cette invitation telle quelle',
+  AMopt4: 'Voter cette invitation, avec ajustement éventuel',
+
   AMoptSupp1: 'Remettre l\'invité comme simple "contact"',
   AMoptSupp2: 'Radier l\'invité, n\'apparaîtra plus dans le groupe',
   AMoptSupp3: 'Radier l\'invité et le mettre en liste noire pour qu\'il n\'apparaisse plus jamais dans le groupe',
@@ -1346,7 +1348,8 @@ export default {
   AMconf0: 'Confirmer l\'invitation',
   AMconf2: 'Confirmer la modification',
   AMconf3: 'Confirmer la suppression',
-  AMconf4: 'Confirmer le vote',
+  AMconf4a: 'Confirmer le vote',
+  AMconf4m: 'Confirmer le vote et les modifications',
   AMconf5: 'Confirmer le changement des droits',
   AMconf6: 'Confirmer la radiation',
 
@@ -1359,14 +1362,14 @@ export default {
   AMinvdm: 'accès aux membres',
   AMinvdn: 'lecture des notes',
   AMinvde: 'écriture des notes',
-  AMbienv: 'Message de bienvenue pour l\'invité:',
+  AMbienv: 'Message de bienvenue actuel à l\'invité:',
   AMinvvp: 'Invité par:',
   AMinvvp1: 'Déjà invité par:',
   AMinvvc: 'N\'ont pas encore voté:',
   AMinvvc2: 'Tous ont voté.',
-  AMinvpar: 'Actuellement invité par {0}',
+  AMinvpar: 'Invité par {0}',
   AMchinv: 'Quel avatar est "invitant" ?',
-  AMchg: 'Les droits ont changé : les validations des autres animateurs seront effacées.',
+  AMchg: 'Les droits où le message de bienvenue ont changé, les votes des autres animateurs seront effacées.',
   AMlng: 'en liste noire (par un animateur)',
   AMlnc: 'en liste noire (par lui-même)',  
 
@@ -1462,14 +1465,16 @@ export default {
   AGu4: 'Pour passer au mode "unanime", il suffit qu\'UN animateur le demande',
   AGu5: 'Etat des demandes des animateurs',
 
-  AGupasan: 'Seul un animateur peut effectuer cette action, choisir un de vos avatars "animateur" dans ce groupe.',
-  AGupasan2: 'Seul un animateur peut effectuer cette action, mais aucun de vos avatars n\'est "animateur" dans ce groupe.',
+  AGupasanam: 'Seul un animateur ayant accès aux membres est habilité pour cette action, mais ce n\'est le cas pour aucun de vos avatars.',
+  AGupasan: 'Seul un animateur est habilité pour cette action, mais aucun de vos avatars n\'est "animateur" dans ce groupe.',
+  AGpasdroits: 'Un animateur ne peut pas changer les droits d\'un autre animateur (sauf les siens)',
+  AGpasrad: 'Un animateur ne peut pas radier un autre animateur (sauf lui-même)',
+  AGpasrad2: 'Un membre NON animateur peut s\'auto-radier mais ne peut pas radier d\'autres membres',
   AGumu: 'Passer en mode UNANIME',
   AGums: 'Je vote pour passer au mode "SIMPLE"',
   AGrumu: 'Annuler les votes et rester en mode UNANIME',
   AGchan: 'Choisir votre avatar (animateur)',
 
-///////////////////////////////////
   // ApercuAvatar AcceptationSponsoring
   FAnocv: 'Pas de carte de visite',
   FAphc: 'Déclaration de la phrase de contact',
@@ -1612,12 +1617,13 @@ export default {
   PPquot: 'Corriger les valeurs non admissibles dans les quotas c-dessus',
   PPctcok: 'Choisir',
 
+  // SelAvidgr
+  SAVz0: 'Action exécutée au nom de {0}',
+  SAVz1: 'AUCUN avatar du compte n\'est animateur du groupe: action impossible',
+  SAVz3: 'Sélectionner un avatar du compte',
+
   // SelAvid SupprAvatar
   SAVtit: 'Avatar sélectionné',
-  SAVz0: 'Avatar sélectionné: {0}',
-  SAVz1: 'AUCUN avatar du compte n\'est animateur du groupe: action impossible',
-  SAVz2: 'AUCUN avatar du compte n\'est membre du groupe: action impossible',
-  SAVz3: 'Sélectionner un avatar',
   SAVtit1: 'Suppression de l\'avatar {0}',
   SAVtit2: 'Résiliation du COMPTE {0}',
   SAVer1: 'La suppression du compte ne peut intervenir qu\'après la suppression de ses avatars secondaires',
@@ -1910,6 +1916,8 @@ La "consommation mensuelle" de calcul est en centimes et est la somme des coûts
   A_dial_una: 'Hébergement d\'un groupe SIMPLE / UNANIME',
   A_dial_heb: 'Gérer l\'hébergement d\'un groupe',
   A_dial_invit: 'Invitation d\'un contact d\'un groupe',
+  A_dial_droits: 'Gérer les droits d\'un membre dans un groupe',
+  A_dial_radiation: 'Radier un membre d\'un groupe',
 
   A_special: 'Administration Technique',
   A_page_admin: 'Page de l\'Administrateur Technique'

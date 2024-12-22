@@ -59,7 +59,7 @@ export const useGroupeStore = defineStore('groupe', {
         if (!state.ambano[0]) return [4, 0] // NON, le compte n'a pas d'avatars ayant accès aux membres
         const g = state.egrC.groupe
         const im = g.mmb.get(ida)
-        if (im) return [5, g.st[im]] // NON ida est déjà connu du groupe
+        if (im && g.st[im]) return [5, g.st[im]] // NON ida est déjà connu du groupe
         if (g.enLNG(ida)) return [6, 0] // NON est en liste noire "groupe" du groupe
         if (g.enLNC(ida)) return [7, 0] // NON est en liste noire "compte" du groupe
         return [0, 0] // OUI, ida PEUT être sélectionné pour devenir contact du groupe
@@ -130,16 +130,38 @@ export const useGroupeStore = defineStore('groupe', {
       }
     },
 
-    /* avatars du compte étant animateurs du groupe courant: [{ label: nom, value: id}] */
+    /* avatars du compte étant animateurs du groupe courant: { l, m }
+    l : [{ label: nom, value: id}] 
+    m: Map id, [{ label: nom, value: id}
+    */
     avcAnims: (state) => {
-      const l = []
+      const l = [], m = new Map()
       const g = state.egrC.groupe
-      state.session.compte.mav.forEach(id => { 
-        if (g.estAnim(g.mmb.get(id)))
-          l.push({ label: state.session.getCV(id).nom, value: id }) 
-      })
-      return l
+      if (g) {
+        state.session.compte.mav.forEach(id => { 
+          const im = g.mmb.get(id)
+          if (g.estAnim(im)) {
+            const e ={ label: state.session.getCV(id).nom, value: id }
+            l.push(e)
+            m.set(id, e)
+          }
+        })
+      }
+      return { l, m }
     },
+
+    avcAnimsAM: (state) => {
+      const g = state.egrC.groupe
+      const s = new Set()
+      if (g) {
+        state.session.compte.mav.forEach(id => { 
+          const im = g.mmb.get(id)
+          if (g.estAnim(im)) s.add(im)
+        })
+      }
+      return g && g.aUnAccesMembre(s)
+    },
+
 
     /* Animateurs du groupe courant:
     - ayant invité ou voter pour inviter le membre courant 

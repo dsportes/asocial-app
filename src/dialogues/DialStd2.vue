@@ -7,7 +7,6 @@
         <q-toolbar-title class="titre-lg text-center q-mx-sm">{{titre}}</q-toolbar-title>
         <bouton-help v-if="help" :page="help"/>
       </q-toolbar>
-      <slot name="hdr"></slot>
     </q-header>
     <q-page-container>
       <slot/>

@@ -283,7 +283,7 @@ const pgLmFT = computed(() => {
   const r = []
   let n = 0
   const g = gSt.egrC.groupe
-  for (let im = 1; im < g.st.length; im++) {
+  if (g) for (let im = 1; im < g.st.length; im++) {
     const stm = g.st[im]
     if (!stm) continue
     const idm = g.tid[im]

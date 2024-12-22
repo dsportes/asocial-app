@@ -1,6 +1,6 @@
 <template>
 <span>
-  <span v-if="options && options.l.length === 0" class="msg">{{$t('SAVz' + anim ? 1 : 2)}}</span>
+  <span v-if="options && options.l.length === 0" class="msg">{{$t('SAVz1')}}</span>
   <span v-if="options && options.l.length === 1" class="titre-md">{{$t('SAVz0', [options.l[0].label]) }}</span>
   <span v-if="options  && options.l.length > 1" class="row items-center">
     <span class="text-italic text-bold q-mr-sm">{{$t('SAVz3')}}</span>
@@ -16,26 +16,12 @@ import { ref, computed, watch } from 'vue'
 
 import stores from '../stores/stores.mjs'
 
-const props = defineProps({ 
-  groupe: Object,
-  anim: Boolean
-})
-
 const cav = ref()
-const session = stores.session
 
-const options = computed(() => {
-  const l = [], m = new Map()
-  session.compte.mav.forEach(id => {
-    const im = props.groupe.mmb.get(id)
-    if (im && (!props.anim || props.groupe.estAnim(im))) {
-      const e = { label: session.getCV(id).nom, value: id }
-      l.push(e)
-      m.set(id, e)
-    }
-  })
-  return {l, m}
-})
+const session = stores.session
+const gSt = stores.groupe
+
+const options = computed(() => gSt.avcAnims)
 
 if (options.value.l.length === 1) {
   const e0 = options.value.l[0]
@@ -43,9 +29,10 @@ if (options.value.l.length === 1) {
 } else if (options.value.l.length > 1) {
   const e = options.value.m.get(session.avatarId)
   cav.value = session.avatarId && e ? e : options.value.l[0]
+  watch(cav, (ap) => { 
+    session.setAvatarId(ap.value)
+  })
 }
-
-watch(cav, (ap) => { session.setAvatarId(ap.value) })
 
 </script>
 

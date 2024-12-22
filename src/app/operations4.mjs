@@ -1741,7 +1741,7 @@ export class InvitationGroupe extends Operation {
         rmsv, idi, flags, 
         suppr: rmsv === 3 ? suppr : 0,
         cleGA: await crypter(clea, cleg),
-        msgG: await crypter(cleg, gzipB(msg))
+        msgG: await crypter(cleg, gzipB(msg), 1)
       }
       await post(this, 'InvitationGroupe', args)
       return this.finOK(0)
