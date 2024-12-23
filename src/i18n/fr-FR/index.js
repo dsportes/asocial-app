@@ -1401,8 +1401,8 @@ export default {
   ICbienv: 'Message d\'invitation',
   ICrem1: 'Remerciement ...',
   ICrem2: 'Raison du refus ...',
-  ICacc: 'J\'accepte l\'invitation', 
-  ICdec: 'Je décline l\'invitation ...', 
+  ICacc: 'J\'accepte', 
+  ICdec: 'Je décline', 
   ICd2: 'Me conserver comme contact, je pourrai plus tard être à nouveau invité',
   ICd3: 'Me radier de ce groupe, je n\'y apparaîtrai plus',
   ICd4: 'Me radier de ce groupe ET me mettre en "liste noire"',
@@ -1474,6 +1474,20 @@ export default {
   AGums: 'Je vote pour passer au mode "SIMPLE"',
   AGrumu: 'Annuler les votes et rester en mode UNANIME',
   AGchan: 'Choisir votre avatar (animateur)',
+
+  // DroitsMembre
+  DMtit: 'Droits de {0} dans le groupe {1}',
+  DMpcAnim: 'Le droit "Animateur" ne peut être changé que par un animateur (et PAS pour un autre animateur).',
+  DMpcIA: 'Les "Acceptations des droits" ne peuvent être changées que par le compte LUI-MEME quand il est ACTIF.',
+  DMpcID: 'Les "Droits d\'accès" aux membres, lecture et écriture des notes ne peuvent être changés que par un animateur (et PAS pour un autre animateur).',
+  DMdroits: 'Droits d\'accès: fixés par un animateur',
+  DMaccepts: 'Acceptations: fixées par le compte',
+  DMapplic: 'Droits effectivement appliqués',
+  DMdanim: 'Est ANIMATEUR',
+  DMdam: 'Droit à voir les membres et a être vu d\'eux.',
+  DMdln: 'Droit de lecture des notes',
+  DMden: 'Droit d\'écriture des notes',
+
 
   // ApercuAvatar AcceptationSponsoring
   FAnocv: 'Pas de carte de visite',
