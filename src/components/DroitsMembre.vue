@@ -172,7 +172,7 @@ const nbAnimsAp = computed(() => {
 })
 
 // Peut changer anim: compte animateur et membre pas animateur
-const pcAnim = computed(() => cptAnim.value && !mbAnim.value )
+const pcAnim = computed(() => cptAnim.value && (!mbAnim.value || moi))
 
 // Peut changer idm/idn/ide: compte animateur et membre pas animateur OU moi
 const pcID = computed(() => cptAnim.value && (!mbAnim.value || moi.value))

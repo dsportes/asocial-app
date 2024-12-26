@@ -213,7 +213,7 @@ import { ref, computed, watch, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import { UNITEN, UNITEV, AMJ } from '../app/api.mjs'
-import { bcf, dhcool, styp, dkli, edvol, afficher8000 } from '../app/util.mjs'
+import { $t, bcf, dhcool, styp, dkli, edvol, afficher8000 } from '../app/util.mjs'
 import BtnCond from '../components/BtnCond.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'

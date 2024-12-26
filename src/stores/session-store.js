@@ -37,7 +37,7 @@ export const useSessionStore = defineStore('session', {
     partitionId: '', // id de la partition actuelle du compte
     avatarId: '', // avatar "courant"
     groupeId: '', // groupe "courant"
-    membreId: '', // membre "courant" (son im/ids dans son groupe)
+    // membreId: '', // membre "courant" (son im/ids dans son groupe) !!! jamais lu !!!
     peopleId: '', // people "courant"
     notifC: null, // notifC du people courant
     notifP: null, // notifP de la partition du compte
@@ -356,7 +356,7 @@ export const useSessionStore = defineStore('session', {
 
     setGroupeId (id) { this.groupeId = id },
 
-    setMembreId (id) { this.membreId = id },
+    // setMembreId (id) { this.membreId = id },
 
     opCount () {
       const self = this

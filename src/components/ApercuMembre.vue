@@ -30,7 +30,7 @@ a accès aux membres (donc dans l'onglet "membres").
         </div>
 
         <div class="q-mt-xs row justify-end q-gutter-xs">
-          <btn-cond v-if="stm >= 1 && stm.value <= 3 && gSt.egrC.estAnim" 
+          <btn-cond v-if="stm >= 1 && stm <= 3 && gSt.egrC.estAnim" 
             icon="grade" cond="cEdit" stop flat
             :label="$t('AMinvitbtn1')" @ok="ouvririnvit"/>
           <btn-cond v-if="stm === 3 && session.estAvc(id)" 
@@ -369,7 +369,7 @@ const nbActifsAp = computed(() => {
   return acav ? n - 1 : n
 })
 
-watch(ouvert, (v) => { if (v) session.setMembreId(im.value) })
+// watch(ouvert, (v) => { if (v) session.setMembreId(im.value) })
 
 const edd = (ad) => {
   let r
@@ -399,7 +399,7 @@ async function gererDroits () {
   drMb.value = { fl: fl.value, anim: stm.value === 5 ? true : false }
   drMbAv.value = { ...drMb.value }
 
-  session.setMembreId(im.value)
+  // session.setMembreId(im.value)
   ui.oD('AMdroits', idc)
 }
 
@@ -427,7 +427,7 @@ async function radiation () {
   if (gr.value.st[im.value] > 1) optRad.value .push({ label: $t('AMoptRad1' + x), value: 1})
   optRad.value.push({ label: $t('AMoptRad2' + x), value: 2})
   optRad.value.push({ label: $t('AMoptRad3' + x), value: 3})
-  session.setMembreId(im.value)
+  // session.setMembreId(im.value)
   ui.oD('AMradiation', idc)
 }
 
@@ -457,7 +457,7 @@ async function ouvririnvit () {
   
   msg.value = mb.value.msg || $t('invitation')
   suppr.value = 1
-  session.setMembreId(im.value)
+  // session.setMembreId(im.value)
   ui.oD('AMinvit', idc)
 }
 

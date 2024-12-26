@@ -27,8 +27,8 @@
 
       <div v-for="idg in sgr" :key="idg">
         <div class="q-my-sm row q-gutter-sm">
-          <span class="fs-md col">{{session.getCV(idg).nomc}} - {{$t('AMm' + stmb(idg))}}</span>
-          <btn-cond class="col-auto" size="sm" icon-right="open_in_new"
+          <span class="fs-md col">{{session.getCV(idg).nomC}} - {{$t('AMm' + stmb(idg))}}</span>
+          <btn-cond class="col-auto" icon="open_in_new"
             :label="$t('PGvg')" @ok="voirgr(idg)"/>
         </div>
       </div>
@@ -112,12 +112,15 @@ async function voirCompta () { // comptable OU délégué
 }
 
 const gr = (idg) => { const e = gSt.egr(idg); return e ? e.groupe : null }
-const im = (idg) => { const g = gr.value(idg); return g ? g.tid[id.value] : 0 }
-const stmb = (idg) => { const i = im.value(idg); return i ? g.statutMajeur(i) : 0 }
+const im = (idg) => { const g = gr(idg); return g ? g.mmb.get(id.value) : 0 }
+const stmb = (idg) => { 
+  const i = im(idg)
+  return i ? gr(idg).st[i] : 0 }
 
 function voirgr (idg) {
   session.setGroupeId(idg)
-  session.setMembreId(im.value(idg))
+  // session.setMembreId(im(idg))
+  ui.fD()
   ui.setPage('groupe', 'membres')
 }
 
