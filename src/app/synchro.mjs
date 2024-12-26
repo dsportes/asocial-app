@@ -231,7 +231,7 @@ class SB {
         }
       }
       else { 
-        this.g.setMembre(mb); 
+        this.g.setMembre(mb)
         this.p.setPGr(mb.ida, mb.id) 
       }
     }

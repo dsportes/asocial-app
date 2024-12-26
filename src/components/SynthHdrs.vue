@@ -55,5 +55,5 @@ function moins () {
   font-style: italic
   text-decoration: underline
   cursor: pointer
-  color: $primary
+  color: var(--q-primary)
 </style>

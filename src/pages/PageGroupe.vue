@@ -439,7 +439,7 @@ async function chgQ () {
 .top3
   margin-top: 3rem
 .bord
-  border: 3px solid $warning
+  border: 3px solid var(--q-warning)
   border-radius: 5px !important
   padding: 3px
 </style>

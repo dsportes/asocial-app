@@ -208,6 +208,6 @@ function tousChats () {
   background-color: white !important
 .bord
   border-radius: 8px 
-  border: 2px solid $negative
+  border: 2px solid var(--q-negative)
   max-width: 20rem
 </style>

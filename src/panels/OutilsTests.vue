@@ -479,7 +479,7 @@ async function getVU (it) {
 
 .t1
   font-style: italic
-  color: $primary
+  color: var(--q-primary)
 .t2
   font-family: 'Ubuntu Mono'
 </style>

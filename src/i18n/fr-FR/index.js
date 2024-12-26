@@ -411,6 +411,7 @@ export default {
   EX9343: '(BUG) Pour s\'auto-muter en compte A il faut être délégué (et pas Comptable).',
   EX9344: '(BUG) Organisation inconnue {0}',
   EX9345: '(BUG) NaN dans calcul compteurs. Mois {0}, cpt {1}',
+  EX9346: '(BUG) Un animateur {0} d\'un groupe {1} doit avoir droit d\'accès aux membres',
 
   // EX9100: 'Erreur de cryptage AES: {0}',
   // EX9101: 'Erreur de cryptage RSA: {0}',
@@ -1330,6 +1331,8 @@ export default {
   AMcas3: 'Invitation lancée',
   AMcas4: 'Membre actif',
   AMcas5: 'Animateur',
+  AMenln: 'Ce membre est inscrit en liste noire, invitation impossible',
+  AMenln2: 'Vous êtres inscrit en liste noire, invitation impossible',
   AMopt0: 'Création d\'une nouvelle invitation',
   AMopt1: 'Laisser cette invitation telle quelle',
   AMopt2: 'Modifier cette invitation',
@@ -1465,11 +1468,14 @@ export default {
   AGu4: 'Pour passer au mode "unanime", il suffit qu\'UN animateur le demande',
   AGu5: 'Etat des demandes des animateurs',
 
-  AGupasanam: 'Seul un animateur ayant accès aux membres est habilité pour cette action, mais ce n\'est le cas pour aucun de vos avatars.',
   AGupasan: 'Seul un animateur est habilité pour cette action, mais aucun de vos avatars n\'est "animateur" dans ce groupe.',
+  AGupasan2: 'Seul un animateur ayant accès aux membres est habilité pour cette action, mais ce n\'est le cas pour aucun de vos avatars.',
   AGpasdroits: 'Un animateur ne peut pas changer les droits d\'un autre animateur (sauf les siens)',
   AGpasrad: 'Un animateur ne peut pas radier un autre animateur (sauf lui-même)',
   AGpasrad2: 'Un membre NON animateur peut s\'auto-radier mais ne peut pas radier d\'autres membres',
+  AGpasdroits: 'Un animateur ne peut pas changer les droits d\'un autre animateur (sauf lui-même)',
+  AGpasdroits2: 'Un membre NON animateur peut changer ses propres droits, mais pas ceux d\'autres membres',
+
   AGumu: 'Passer en mode UNANIME',
   AGums: 'Je vote pour passer au mode "SIMPLE"',
   AGrumu: 'Annuler les votes et rester en mode UNANIME',

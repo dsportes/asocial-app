@@ -97,9 +97,9 @@ function undoc () { model.value.qc = qci }
 <style lang="sass" scoped>
 @import '../css/input2.sass'
 .bordok
-  border: 1px solid $green-5
+  border: 1px solid var(--q-positive)
 .bordko
-  border: 1px solid $warning
+  border: 1px solid var(--q-warning)
 .mh
   max-height: 1.2rem
   overflow-y: hidden

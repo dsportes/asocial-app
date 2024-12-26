@@ -133,8 +133,8 @@ function cllc (t) {
 @import '../css/app.sass'
 .bord1
   border-radius: 5px
-  border: 1px solid $secondary
+  border: 1px solid var(--q-secondary)
 .bord2
   border-radius: 5px
-  border: 1px solid $primary
+  border: 1px solid var(--q-primary)
 </style>

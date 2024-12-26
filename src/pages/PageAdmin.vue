@@ -444,14 +444,14 @@ async function tacheGo (t) {
 .bord5
   border: 2px solid transparent
 .bord6
-  border: 2px solid $warning
+  border: 2px solid var(--q-warning)
 .bord7
-  border: 2px solid $primary
+  border: 2px solid var(--q-primary)
 .b1
   min-width: 2.5rem !important
   padding: 0 5px
   color: white
-  background: $primary
+  background: var(--q-primary)
   cursor: pointer
   border-radius: 6px
   text-align: center

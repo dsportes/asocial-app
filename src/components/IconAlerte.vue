@@ -46,6 +46,6 @@ const props = defineProps({
   border: 2px solid none
   border-radius: 5px
 .bord2
-  border: 2px solid $negative
+  border: 2px solid var(--q-negative)
   border-radius: 5px
 </style>

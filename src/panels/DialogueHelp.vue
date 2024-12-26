@@ -269,6 +269,6 @@ function back () {
   max-height: 10rem
   overflow-y: scroll
 .chap
-  border: 1px solid $primary
+  border: 1px solid var(--q-primary)
   border-radius: 8px
 </style>

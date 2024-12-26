@@ -5,11 +5,7 @@
     <btn-cond icon="undo" @ok="undo" :disable="!anChg && !flChg"/>
     <bouton-help page="dial_droits"/>
   </q-toolbar>
-  <!--
-  <div :class="'font-mono fs-sm ' + (anChg || flChg ? 'msg' : '')">
-    {{flAvant}} -> {{model.fl}} -- {{anAvant}} -> {{model.anim}}
-  </div>
-  -->
+
   <div class="full-width q-pa-sm fs-md">
     <div v-if="!pcAnim" class="q-mt-sm row q-gutter-sm">
       <q-icon name="info" size="sm" color="primary" class="col-auto"/>

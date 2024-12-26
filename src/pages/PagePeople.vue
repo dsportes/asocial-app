@@ -54,6 +54,7 @@ import { ID } from '../app/api.mjs'
 const session = stores.session
 const ui = stores.ui
 const pSt = stores.people
+const gSt = stores.groupe
 
 const peLpF = computed(() => {
   const ci = session.compti
@@ -67,7 +68,22 @@ const peLpF = computed(() => {
     if (f.avecgr && (!p.sgr.size)) continue
     if (fsetp && !ci.aHT(id, fsetp)) continue
     if (fsetn && ci.aHT(id, fsetn)) continue
-    r.push({ id, cv, nom: cv.nom, sgr: p.sgr, sch: p.sch })
+    // pour ceux connus seulement en tant que membre d'un groupe
+    // seulement s'ils ont accès aux membres
+    // ou que le compte est animateur
+    let sel = false
+    if (p.del || p.sch.size) sel = true
+    else {
+      for (const idg of p.sgr) {
+        const egr = gSt.egr(idg)
+        const g = egr ? egr.groupe : null
+        if (!g) continue
+        if (egr.estAnim) { sel = true; break }
+        const im = g.mmb.get(id)
+        if (im && g.accesMembre(im)) { sel = true; break }
+      }
+    }
+    if (sel) r.push({ id, cv, nom: cv.nom, sgr: p.sgr, sch: p.sch })
   }
   r.sort((a, b) => (ID.estComptable(a.id) || a.nom < b.nom) ? -1 : (a.nom > b.nom ? 1 : 0))
   return r

@@ -185,13 +185,13 @@ const pccl = (x, y) => { const q = pc(x, y)
   right: 0
 .p80
   padding: 0 3px
-  border: 1px solid $warning
+  border: 1px solid var(--q-warning)
   color: black
   background-color: $yellow-5
 .p100
   padding: 0 3px
   font-weight: bold
-  border: 2px solid $negative
+  border: 2px solid var(--q-negative)
   color: black
   background-color: $yellow-5
 </style>

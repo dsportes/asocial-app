@@ -284,7 +284,7 @@ function raz () {
   font-size: 1.1rem
   font-weight: bold
   font-style: italic
-  color: $primary
+  color: var(--q-primary)
 .q-card__section
   padding: 0.3rem
 .hg-theme-default

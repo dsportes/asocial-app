@@ -406,7 +406,7 @@ async function validerqA () {
   min-width: 2.5rem !important
   padding: 0 5px
   color: white
-  background: $primary
+  background: var(--q-primary)
   cursor: pointer
   border-radius: 6px
   text-align: center
@@ -415,7 +415,7 @@ async function validerqA () {
   font-style: italic
   text-decoration: underline
   cursor: pointer
-  color: $primary
+  color: var(--q-primary)
 .w10
   max-width: 10rem
 </style>

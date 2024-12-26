@@ -120,5 +120,5 @@ async function perdre () {
 .bord1
   border: 2px solid transparent
 .bord2
-  border: 2px solid $warning
+  border: 2px solid var(--q-warning)
 </style>

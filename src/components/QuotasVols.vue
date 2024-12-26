@@ -70,7 +70,7 @@ const col6 = computed(() => acj.value ? 'col-4 text-center ' : 'col-12 text-cent
 <style lang="sass" scoped>
 @import '../css/app.sass'
 .b
-  border: 1px solid $primary
+  border: 1px solid var(--q-primary)
 .b2
   border-left: 1px solid transparent
   border-right: 1px solid transparent

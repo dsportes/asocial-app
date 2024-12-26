@@ -663,9 +663,9 @@ $hb2: 17rem
   margin-top: 15px
   width: 100%
 .cl1
-  border-top: 3px solid $primary
+  border-top: 3px solid var(--q-primary)
 .cl2
-  border-top: 3px solid $orange
+  border-top: 3px solid var(--q-warning)
 .cl3
   border-top: 3px solid $grey-5
 </style>

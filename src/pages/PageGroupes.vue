@@ -283,6 +283,6 @@ async function okCreation () {
 <style lang="sass" scoped>
 @import '../css/app.sass'
 .invs:hover
-  background-color: $secondary !important
+  background-color: var(--q-secondary) !important
   color: white !important
 </style>

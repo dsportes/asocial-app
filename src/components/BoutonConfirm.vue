@@ -35,6 +35,6 @@ watch(text, (ap, av) => {
 .bord9991
   border: 4px solid transparent
 .bord9992
-  border: 4px solid $warning
+  border: 4px solid var(--q-warning)
   border-radius: 5px
 </style>

@@ -29,14 +29,18 @@ a accès aux membres (donc dans l'onglet "membres").
           <bouton-bulle2 :texte="edit(fl, $t, '\n')"/>
         </div>
 
-        <div class="q-mt-xs row q-gutter-xs">
-          <btn-cond v-if="condm.has(1)" icon="grade" cond="cEdit" size="sm" stop
+        <div class="q-mt-xs row justify-end q-gutter-xs">
+          <btn-cond v-if="stm >= 1 && stm.value <= 3 && gSt.egrC.estAnim" 
+            icon="grade" cond="cEdit" stop flat
             :label="$t('AMinvitbtn1')" @ok="ouvririnvit"/>
-          <btn-cond v-if="condm.has(2)" icon="check" cond="cEdit" size="sm" stop
-            :label="$t('AMinvitbtn2')" @ok="ui.oD('IAaccinvit', idc)"/>
-          <btn-cond v-if="condm.has(3)" icon="check" cond="cEdit" size="sm" stop
+          <btn-cond v-if="stm === 3 && session.estAvc(id)" 
+            icon="check" cond="cEdit" stop flat
+            :label="$t('AMinvitbtn2')" @ok="accinvit"/>
+          <btn-cond v-if="stm >= 4" 
+            icon="check" cond="cEdit" stop flat
             :label="$t('AMinvitbtn3')" @ok="gererDroits"/>
-          <btn-cond v-if="condm.has(4)" icon="close" cond="cEdit" size="sm" stop
+          <btn-cond v-if="stm > 0" 
+            icon="close" cond="cEdit" stop flat
             :label="$t('AMinvitbtn4')" @ok="radiation"/>
         </div>
       </div>
@@ -119,6 +123,7 @@ a accès aux membres (donc dans l'onglet "membres").
   <dial-std2 v-if="m1" v-model="m1" :titre="$t('AMinvtit', [nomm, nomg])" help="dial_invit">
     <div class="spsm column items-center q-gutter-sm q-pb-md">
       <div v-if="tropGros" class="titre-lg msg">{{$t('AMinvittg', [MAXTAILLEGROUPE])}}</div>
+      <div v-if="ln" class="titre-md msg">{{$t('AMenln')}}</div>
 
       <!--affiche l'avatar du compte animateur choisi, en forçante à choisir, si choix il y a -->
       <sel-avidgr/>
@@ -156,14 +161,6 @@ a accès aux membres (donc dans l'onglet "membres").
       rmsv: 0: inviter, 1: renoncer, 2: modifier, 3: supprimer, 4: voter pour -->
       <div v-if="rmsv !== 3 && rmsv !== 1" class="full-width">
         <droits-membre v-model="drMb" :id="id" />
-        <!--
-        <div class="bord1 column q-pa-xs q-my-sm titre-md">
-          <q-checkbox dense v-model="ina" :label="$t('AManimateur')" />
-          <q-checkbox dense v-model="idm" :label="$t('AMmembres')" />
-          <q-checkbox dense v-model="idn" :label="$t('AMlecture')" />
-          <q-checkbox dense v-if="idn" v-model="ide" :label="$t('AMecriture')" />
-        </div>
-        -->
 
         <div class="q-mt-md titre-md text-italic">{{$t('AMbienv')}}</div>
         <editeur-md class="q-my-sm bord1" :lgmax="1000" v-model="msg" :texte="msg"
@@ -313,20 +310,15 @@ const invpar = computed(() => { const x = invits.value.li[0]
 })
 const tropGros = computed(() => gr.value.taille >= MAXTAILLEGROUPE)
 
-const condm = computed(() => {
-  // gSt.egrC.estAnim: UN des avatars du compte est "animateur"
-  const s = new Set()
-  const ln = gr.value.enLNG(props.id) || gr.value.enLNC(props.id) 
-  // Peut créer / modifier / supprimer une invitation
-  if (stm.value >= 1 && stm.value <= 3 && gSt.egrC.estAnim && !ln) s.add(1)
-  // Peut accepter / refuser SA PROPRE invitation
-  if (stm.value === 3 && session.estAvc(props.id) && !ln) s.add(2)
-  // Gestion des droits et accès
-  if (stm.value >= 4 && !ln && (session.estAvc(props.id) || gSt.egrC.estAnim)) s.add(3)
-  // Gestion radiations
-  if (stm.value > 0 && (session.estAvc(props.id) || gSt.egrC.estAnim)) s.add(4)
-  return s
-})
+const ln = computed(() => gr.value.enLNG(props.id) || gr.value.enLNC(props.id))
+
+async function accinvit () {
+  if (ln.value) {
+    await afficherDiag($t('AMenln2'))
+    return
+  }
+  ui.oD('IAaccinvit', idc)
+}
 
 const edFlagsiv = computed(() => { 
   const f = invits.value.fl
@@ -349,17 +341,6 @@ const edFlags2 = computed(() => {
   else if (f & FLAGS.DN) ed.push($t('AMinvdn'))
   return ed.join(', ')
 })
-
-/*
-const nvfl = computed(() =>{ 
-  let fl = 0
-  if (ina.value) fl |= FLAGS.AN 
-  if (idm.value) fl |= FLAGS.DM 
-  if (idn.value) fl |= FLAGS.DN
-  if (ide.value) fl |= FLAGS.DE 
-  return fl
-})
-*/
 
 const drMb = ref()
 const drMbAv = ref()
@@ -401,21 +382,20 @@ const edd = (ad) => {
 
 const xd = (d) => !d ? '-' : AMJ.editDeAmj(d, true)
 
-/* Check si un des avatar du compte animateur a accès aux membres
-Ne sert en théorie à rien. Un animateur qui n'accèderait pas aux membres
-du groupe ne pourrait pas appuyer sur ces boutons.
-*/
-async function checkAM () {
-  if (!gSt.avcAnimsAM) {
-    await afficherDiag($t('AGupasanam'))
-    return false
-  }
-  return true
-}
-
 const chgDr = computed(() => (drMb.value.fl !== drMbAv.value.fl) || (drMb.value.anim !== drMbAv.value.anim))
 
 async function gererDroits () {
+  if (gSt.egrC.estAnim) {
+    if (stm.value === 5 && !session.compte.mav.has(props.id)) {
+      await afficherDiag($t('AGpasdroits'))
+      return
+    }
+  } else { 
+    if (!session.compte.mav.has(props.id)) {
+      await afficherDiag($t('AGpasdroits2'))
+      return
+    }
+  }
   drMb.value = { fl: fl.value, anim: stm.value === 5 ? true : false }
   drMbAv.value = { ...drMb.value }
 
@@ -430,15 +410,17 @@ async function changer () {
 }
 
 async function radiation () {
-  if (stm.value === 5 && !session.compte.mav.has(props.id)) {
-    await afficherDiag($t('AGpasrad'))
-    return
+  if (gSt.egrC.estAnim) {
+    if (stm.value === 5 && !session.compte.mav.has(props.id)) {
+      await afficherDiag($t('AGpasrad'))
+      return
+    }
+  } else { 
+    if (!session.compte.mav.has(props.id)) {
+      await afficherDiag($t('AGpasrad2'))
+      return
+    }
   }
-  if (stm.value === 4 && !gSt.egrC.estAnim && !session.compte.mav.has(props.id)) {
-    await afficherDiag($t('AGpasrad2'))
-    return
-  }
-  if (!await checkAM()) return
 
   const x = session.estAvc(props.id) ? 'b' : 'a'
   optRad.value  = [ ]
@@ -457,17 +439,13 @@ async function radier () {
 
 const optRMSV = computed(() => {
   const l = [{ label: $t('AMopt1'), value: 1 }]
-  if (!gr.value.msu && !tropGros.value) l.push({ label: $t('AMopt2'), value: 2 })
+  if (!gr.value.msu && !tropGros.value && !ln.value) l.push({ label: $t('AMopt2'), value: 2 })
   if (stm.value > 1) l.push({ label: $t('AMopt3'), value: 3 })
-  if (gr.value.msu && !tropGros.value) l.push({ label: $t('AMopt4'), value: 4 })
+  if (gr.value.msu && !tropGros.value && !ln.value) l.push({ label: $t('AMopt4'), value: 4 })
   return l
 })
 
 async function ouvririnvit () {
-  if (!gSt.egrC.estAnim) {
-    await afficherDiag($t('AGupasan'))
-    return
-  }
   rmsv.value  = stm.value === 1 ? 0 : 1
   const f = invits.value.fl
   const anim = ((f & FLAGS.AN) !== 0)
@@ -477,12 +455,6 @@ async function ouvririnvit () {
   if ((f & FLAGS.DE) !== 0) fl |= FLAGS.DE
   drMb.value = { fl, anim }
   
-  /*
-  ina.value = (fl & FLAGS.AN) !== 0
-  idm.value = (fl & FLAGS.DM) !== 0
-  idn.value = (fl & FLAGS.DN) !== 0
-  ide.value = (fl & FLAGS.DE) !== 0
-  */
   msg.value = mb.value.msg || $t('invitation')
   suppr.value = 1
   session.setMembreId(im.value)
@@ -512,7 +484,7 @@ async function inviter () {
   color: black
   margin: 0 2px 0 0
 .stx2
-  background-color: $negative
+  background-color: var(--q-negative)
   font-size: 0.8rem
   padding: 1px
   font-weight: bold
@@ -528,7 +500,7 @@ async function inviter () {
   border-radius: 5px
   padding: 3px
 .bordm
-  border: 2px solid $primary
+  border: 2px solid var(--q-primary)
 .bord1
   border: 1px solid $grey-5
 </style>
