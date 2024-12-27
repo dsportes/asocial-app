@@ -37,7 +37,7 @@
         <template v-slot:header>
           <div class="row full-width items-center justify-between">
             <div class="row items-center">
-              <img class="photomax" :src="c.cv.photo" />
+              <!--img class="photomax" :src="c.cv.photo" /-->
               <div class="titre-md q-ml-sm">{{c.cv.nomC}}
                 <span v-if="session.compteId === c.id" class="q-ml-sm">[{{$t('moi')}}]</span>
                 <span v-if="c.del" class="q-ml-sm">[{{$t('delegue')}}]</span>
@@ -46,13 +46,13 @@
                 :class="'q-ml-md ' + tclr(c) + ' ' + bgclr(c)"/>
             </div>
             
-            <btn-cond v-if="session.compteId !== c.id" class="q-ml-md" icon="open_in_new"
-              stop @ok="voirpage(c)"/>
+            <!--btn-cond v-if="session.compteId !== c.id" class="q-ml-md" icon="open_in_new"
+              stop @ok="voirpage(c)"/-->
           </div>
         </template>
 
         <div class="q-ml-lg">
-          <apercu-genx v-if="(session.compteId !== c.id)" nodetP :id="c.id" :idx="idx" :del="c.del"/>
+          <apercu-genx v-if="(session.compteId !== c.id)" :id="c.id" :idx="idx" :del="c.del"/>
 
           <barre-people :id="c.id" />
 
@@ -219,10 +219,12 @@ async function selCpt (c) {
   session.setPeopleId(c.id)
 }
 
+/*
 function voirpage (c) { 
   session.setPeopleId(c.id)
   ui.oD('detailspeople', 'a')
 }
+*/
 
 async function editerq (c) {
   quotas.value = await session.getQuotasP(c.q)

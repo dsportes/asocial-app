@@ -27,17 +27,14 @@
               <img :src="session.getCV(p.id).photo" class="photomax"/>
               <div class="titre-md text-bold">{{session.getCV(p.id).nom}}</div>
             </div>
-            <btn-cond icon="zoom_in" round stop @ok="ouvrirdetails(p.id)"/>
+            <!--btn-cond icon="zoom_in" round stop @ok="ouvrirdetails(p.id)"/-->
           </div>
         </template>
-        <apercu-genx class="q-ml-xl" :id="p.id" :idx="idx" nodetP
+        <apercu-genx class="q-ml-xl" :id="p.id" :idx="idx"
           :del="session.eltPart(p.id).del"/>
       </q-expansion-item>
     </div>
 
-    <!--q-page-sticky v-if="session.accesNet && !session.estA" position="top-left" :offset="[3, 3]">
-      <btn-cond icon="refresh" @ok="reload()" :cond="session.estAdmin ? 'cUrgence' : 'cVisu'"/>
-    </q-page-sticky-->
   </q-page>
 </template>
 
@@ -91,10 +88,12 @@ const peLpF = computed(() => {
 
 watch(peLpF, (ap) => {ui.fmsg(ap.length)})
 
+/*
 function ouvrirdetails (id) {
   session.setPeopleId(id)
   ui.oD('detailspeople', 'a')
 }
+*/
 
 /*
 async function reload () {

@@ -1271,6 +1271,7 @@ export default {
   CAVtit: 'Chats avec :',
   CAVtit2: 'Carte de visite inconnue, chat impossible',
   CAVmb: 'Membre des groupes :',
+  CAchmb: '[{0}] chat(s) / [{1}] groupe(s)',
 
   // PageInvitation
   PIfi: 'Seulement ceux proposables',
@@ -1439,9 +1440,8 @@ export default {
   AGcas1: 'Il n\'y a pas d\'hébergeur pour ce groupe: disparition prévue le {0}.',
   AGcas2: 'Je suis hébergeur de ce groupe',
   AGcas3: 'Il y a un hébergeur mais ce n\'est pas un avatar de mon compte.',
-  AGhko1: 'Je ne peux pas être hébergeur, aucun de mes avatars n\'a accès aux notes du groupe.',
-  AGhko2: 'Je suis hébergeur, mais je ne peux pas transférer l\'hébergement à un autre de mes avatars, aucun n\'ayant accès aux notes du groupe',
-  AGhko3: 'L\'hébergeur actuel étant animateur, je ne peux pas me substituer à lui aucun de mes avatars ayant accès aux notes du groupe n\'est animateur.',
+  AGhko2: 'Je ne peux pas transférer l\'hébergement à un autre de mes avatars, aucun n\'est membre du groupe',
+  AGhko3: 'L\'hébergeur actuel étant animateur, je ne peux pas me substituer à lui aucun de mes avatars n\'est animateur.',
 
   AGselac: 'Que voulez-vous faire ?',
   AGselav: 'Au nom de mon avatar ...',
@@ -1615,8 +1615,7 @@ export default {
   PPmutmc: 'Ligne de chat à ajouter pour information',
   PPmsgO: 'Votre compte est désormais de type "COMPTE DE L\'ORGANISATION" attaché à la partition #{0}',
   PPmsgA: 'Votre compte est désormais de type "AUTONOME"',
-  PPkodel: 'Retirer le statut de "délégué"',
-  PPokdel: 'Conférer le statut de "délégué"',
+  PPpmdel: 'Statut de "délégué"',
   PPchgpart: 'Départ de {0} de sa partition',
   PPchgpart2: 'Partition actuelle: {0}',
   PPfp: 'Filtre sur les partitions possibles',

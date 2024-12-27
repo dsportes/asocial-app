@@ -956,7 +956,6 @@ export class Chat extends GenDoc {
       if (!this.tit && t) this.tit = titre(t)
     }
     this.txt = a.join('\n')
-    if (!this.tit) this.tit = '???'
   }
 
 }
@@ -1184,7 +1183,7 @@ export class Chatgr extends GenDoc {
     const cle = RegCles.get(this.id)
     this.items = []
     this.dh = 0
-    this.tit = '?'
+    this.tit = ''
     if (row.items) for (const item of row.items) {
       const i = { im: item.im, dh: item.dh, t: '', dhx: item.dhx}
       if (!item.dhx) {

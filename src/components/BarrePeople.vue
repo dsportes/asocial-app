@@ -1,16 +1,16 @@
 <template>
 <div>
-  <div class="row justify-center q-gutter-sm q-my-sm items-center">
+  <div class="row justify-right q-gutter-sm q-my-sm items-center">
     <btn-cond v-if="session.estComptable && !ID.estComptable(id)"
-      cond="cUrgence" :label="$t('PPchpart')" @ok="chgPartition"/>
+      icon="settings" color="warning" cond="cUrgence" :label="$t('PPchpart')" @ok="chgPartition"/>
     <btn-cond v-if="estDel && session.estComptable && !ID.estComptable(id)" 
-      icon="check" color="warning" cond="cUrgence"
-      :label="$t('PPkodel')" @ok="changerDel(false)"/>
+      icon="remove" color="warning" cond="cUrgence"
+      :label="$t('PPpmdel')" @ok="changerDel(false)"/>
     <btn-cond v-if="!estDel && session.estComptable && !ID.estComptable(id)"
-      icon="check" color="warning" cond="cUrgence"
-      :label="$t('PPokdel')" @ok="changerDel(true)"/>
+      icon="add" color="warning" cond="cUrgence"
+      :label="$t('PPpmdel')" @ok="changerDel(true)"/>
     <btn-cond v-if="id !== session.compteId && !ID.estComptable(id)"
-      cond="cUrgence" :label="$t('PPcompta')" @ok="voirCompta"/>
+      icon="euro" cond="cUrgence" :label="$t('PPcompta')" @ok="voirCompta"/>
   </div>
 
   <dial-std1 v-if="m1" v-model="m1" :titre="$t('PPchgpart', [cv.nom])"

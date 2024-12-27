@@ -42,8 +42,8 @@
             </div>
             <div v-else class="col fs-md text-warning text-bold">
               {{$t('AGnheb', [AMJ.editDeAmj(gr.dfh)])}}</div>
-            <btn-cond class="col-auto q-ml-sm self-start" size="sm" cond="cEdit"
-              :label="$t('gerer')" icon="settings" @ok="gererheb"/>
+            <btn-cond class="col-auto q-ml-sm self-start" size="md" cond="cEdit"
+              icon="settings" @ok="gererheb"/>
           </div>
           <quotas-vols class="q-mt-xs q-ml-md" :vols="vols" groupe/>
         </div>
@@ -146,18 +146,19 @@
         <span v-if="cas===3">{{$t('AGcas3')}}</span>
       </div>
 
-      <div v-if="hko" class="q-ma-sm q-pa-sm text-bold text-warning bg-yellow-3">
-        {{$t('AGhko' + hko)}}
+      <div v-if="hko" class="column q-mt-md items-center q-gutter-md">
+        <div class="q-ma-sm msg">{{$t('AGhko' + hko)}}</div>
+        <btn-cond v-if="!dejaHeb" :label="$t('jailu')" flat @ok="ui.fD"/>
       </div>
 
-      <q-card v-else>
+      <q-card>
         <q-separator color="orange" class="q-mt-md"/>
         <div class="titre-lg q-my-sm text-italic">{{$t('AGselac')}}</div>
         <div class="column q-ml-md">
           <q-radio v-if="cas===1"  v-model="action" :val="1" :label="$t('AGac1')" />
           <q-radio v-if="cas===2"  v-model="action" :val="4" :label="$t('AGac4')" />
           <q-radio v-if="cas===2"  v-model="action" :val="2" :label="$t('AGac2')" />
-          <q-radio v-if="cas===2"  v-model="action" :val="3" :label="$t('AGac3')" />
+          <q-radio v-if="cas===2 && options.length"  v-model="action" :val="3" :label="$t('AGac3')" />
           <q-radio v-if="cas===3"  v-model="action" :val="5" :label="$t('AGac5')" />
         </div>
 
@@ -347,18 +348,16 @@ async function chgU () {
 function setCas () {
   /* Pour être / devenir hébergeur, il faut:
   - a) que le nn et vf actuels du groupe ne fasse pas excéder les quotas du compte
-  - b) que l'avatar choisi ait accès aux notes en écriture
-  Si l'hébergeur actuel est animateur et un autre compte, il faut être animateur pour prendre l'hébergment.
+  Si l'hébergeur actuel est un autre compte animateur, 
+  il faut être animateur pour prendre l'hébergment.
   */
   nvHeb.value = null
   action.value = 0
-  nbSubst.value = 0
   cas.value = 0
   hko.value = 0
   /*
-  AGhko1: 'Je ne peux pas être hébergeur, aucun de mes avatars n\'a accès aux notes du groupe.',
-  AGhko2: 'Je suis hébergeur, mais je ne peux pas transférer l\'hébergement à un autre de mes avatars, aucun n\'ayant accès aux notes du groupe',
-  AGhko3: 'L\'hébergeur actuel étant animateur, je ne peux pas me substituer à lui aucun de mes avatars ayant accès aux notes du groupe n\'est animateur.',
+  AGhko2: 'Je suis hébergeur, mais je ne peux pas transférer l\'hébergement à un autre de mes avatars, aucun n\'est membre du groupe',
+  AGhko3: 'L\'hébergeur actuel étant animateur, je ne peux pas me substituer à lui aucun de mes avatars n\'est animateur.',
   */
 
   /* Liste des avatars du compte pouvant être hébergeur (sauf celui actuel):
@@ -370,17 +369,13 @@ function setCas () {
     const im = gr.value.mmb.get(id)
     if (im) {
       if (im === gr.value.imh) continue
-      if (gr.value.accesNote2(im) === 2) { // accès aux notes en écriture
-        nbSubst.value++
-        if (actuelAnim.value && !dejaHeb.value 
-          && gr.value.st[im] !== 5) continue
-        const cv = session.getCV(id)
-        options.value.push({ label: cv.nom, value: id, cv, im })
-      }
+      nbSubst.value++
+      if (actuelAnim.value && !dejaHeb.value && gr.value.st[im] !== 5) continue
+      const cv = session.getCV(id)
+      options.value.push({ label: cv.nom, value: id, cv, im })
     }
   }
   if (options.value.length) nvHeb.value = options.value[0]
-  if (nbSubst.value === 0) hko.value = 1
 
   if (!gr.value.imh) { // Cas 1 : il n'y a pas d'hébergeur.
     cas.value = 1
@@ -395,7 +390,7 @@ function setCas () {
 
   /* cas 3 : il y a un hébergeur mais ce n'est pas un des avatars de mon compte */
   cas.value = 3
-  if (nbSubst.value !== 0 && options.value.length === 0) hko.value = 3
+  if (options.value.length === 0) hko.value = 3
 }
 
 async function gererheb () {

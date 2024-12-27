@@ -21,27 +21,31 @@
           <div class="col-auto row q-gutter-xs" v-if="!estComptable">
             <btn-cond v-if="estAvc" icon="badge" round stop @ok="edcv"/>
             <btn-cond v-if="!estAvc && estPeople" icon="badge" round stop @ok="ovcv"/>
-            <btn-cond v-if="estPeople && !nodetP && !detPeople" round icon="zoom_in" 
-              stop @ok="ouvrirdetails"/>
+            <!--btn-cond v-if="estPeople && !nodetP && !detPeople" round icon="zoom_in" 
+              stop @ok="ouvrirdetails"/-->
           </div>
         </div>
       </div>
       <div v-if="(estGroupe || estPeople) && cv.texte" class="titre-md">{{titre(cv.texte)}}</div>
 
-      <mc-memo v-if="!estComptable" :id="id" :idx="idx"/>     
+      <mc-memo v-if="!estComptable" :id="id" :idx="idx"/>
+    </div>
+  </div>
 
-      <div v-if="!estGroupe && !nodet" class="row">
-        <div class="col">
-          <chats-avec :idE="id" :del="del" :urgence="urgence"/>
+  <q-expansion-item v-if="!estGroupe && !nochgr" header-class="tbs"
+    switch-toggle-side expand-separator dense :label="$t('CAchmb', [sch.size, sgr.size])">
+    <div class="col">
+      <chats-avec :idE="id" :del="del" class="q-mt-sm" :urgence="urgence"/>
 
-          <div v-if="groupes.size" class="row q-gutter-sm">
-            <span class="text-italic titre-md">{{$t('CAVmb')}}</span>
-            <span v-for="idg in groupes" :key="idg" class="fs-md bord">{{session.getCV(idg).nomC}}</span>
-          </div>
+      <div v-if="sgr.size" class="row items-center q-gutter-sm q-mt-sm">
+        <div class="text-italic titre-md text-bold">{{$t('CAVmb')}}</div>
+        <div v-for="idg in sgr" :key="idg" class="fs-md bord">
+          <span>{{session.getCV(idg).nomC}} - {{$t('AMm' + stmb(idg))}}</span>
+          <btn-cond class="q-ml-md" icon="open_in_new" @ok="voirgr(idg)"/>
         </div>
       </div>
     </div>
-  </div>
+  </q-expansion-item>
 
   <q-dialog v-model="ui.d[idc].ACVouvrir" persistent>
     <apercu-cv :cv="cv"/>
@@ -75,8 +79,7 @@ const props = defineProps({
   id: String, // id du groupe, avatar du compte ou contact
   del: Boolean, // true si délégué, pour l'afficher
   im: Number, // pour un membre pour l'afficher
-  nodet: Boolean, // true si ne pas afficher CV et groupe
-  nodetP: Boolean, // true si le panel de détail ne DOIT PAS être visible
+  nochgr: Boolean, // true ne pas afficher chats et groupes
   idx: Number,
   urgence: Boolean // true si invoqué depuis tab URGENCE
 })
@@ -89,24 +92,36 @@ const gSt = stores.groupe
 const pSt = stores.people
 const session = stores.session
 
-const groupes = computed(() => pSt.getSgr(props.id))
+const sch = computed(() => pSt.getSch(props.id))
+const sgr = computed(() => pSt.getSgr(props.id))
+
+const gr = (idg) => { const e = gSt.egr(idg); return e ? e.groupe : null }
+const imx = (idg) => { const g = gr(idg); return g ? g.mmb.get(props.id) : 0 }
+const stmb = (idg) => { const i = imx(idg); return i ? gr(idg).st[i] : 0 }
+
 const estGroupe = computed(() => ID.estGroupe(props.id))
 const estAnim = computed(() => gSt.estAnim(props.id))
 const estComptable = computed(() => ID.estComptable(props.id))
 const estAvc = computed(() => session.compte.mav.has(props.id))
 const cv = computed(() => session.getCV(props.id))
 // true si le panel de détail est déjà ouvert
-const det = computed(() => session.peopleId === props.id && ui.estOuvert('detailspeople'))
+// const det = computed(() => session.peopleId === props.id && ui.estOuvert('detailspeople'))
 // Peut être choisi pour devenir contact du groupe courant
 const diagC = computed(() => gSt.diagContact(props.id))
 const estPeople = computed(() => pSt.estPeople(props.id))
 
-const detPeople = computed(() => ui.estOuvert('detailspeople'))
+// const detPeople = computed(() => ui.estOuvert('detailspeople'))
 
 if (props.del && !estComptable.value && !estPeople.value) onMounted(async () => {
   const cv = await new GetCv().run(props.id)
   if (cv) pSt.setPeopleDelegue(cv)
 })
+
+function voirgr (idg) {
+  session.setGroupeId(idg)
+  ui.fD()
+  ui.setPage('groupe', 'membres')
+}
 
 function ovcv () {
   ui.oD('ACVouvrir', idc)
@@ -116,10 +131,12 @@ function edcv () {
   ui.oD('CVedition', idc)
 }
 
+/*
 function ouvrirdetails () {
   session.setPeopleId(props.id)
   ui.oD('detailspeople', 'a')
 }
+*/
 
 async function select () {
   ui.selectContact(props.id)

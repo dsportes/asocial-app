@@ -334,7 +334,7 @@
   <dialogue-erreur v-if="ui.d.a.dialogueerreur"/>
   <dialogue-help v-if="ui.d.a.dialoguehelp"/>
   <presse-papier v-if="ui.d.a.pressepapier"/>
-  <panel-people v-if="ui.d.a.detailspeople"/>
+  <!--panel-people v-if="ui.d.a.detailspeople"/-->
   <outils-tests v-if="ui.d.a.outilsTests"/>
   <phrase-secrete v-if="ui.d.a.phrasesecrete"/>
 
@@ -472,7 +472,7 @@ import PageChats from './pages/PageChats.vue'
 import PageCompta from './pages/PageCompta.vue'
 import PageNotes from './pages/PageNotes.vue'
 import PagePartition from './pages/PagePartition.vue'
-import PanelPeople from './panels/PanelPeople.vue'
+// import PanelPeople from './panels/PanelPeople.vue'
 
 // Niveau 8
 import PageGroupes from './pages/PageGroupes.vue'

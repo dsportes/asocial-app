@@ -17,7 +17,7 @@ a accès aux membres (donc dans l'onglet "membres").
     switch-toggle-side expand-separator dense group="trgroup">
     <template v-slot:header>
       <div class="column full-width">
-        <apercu-genx :id="id" :im="im" :idx="idx"/>
+        <apercu-genx :id="id" :im="im" :idx="idx" :nochgr="!pasmoi"/>
         <div class="row titre-md items-center">
           <span class="stx">{{$t('AMm' + stm)}}</span>
           <span v-if="gr.imh === im" class="stx">{{$t('AMmh')}}</span>

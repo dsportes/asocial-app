@@ -11,7 +11,7 @@
     <div v-if="diag" class="q-ma-sm q-pa-xs bg-yellow-3 text-negative text-bold">{{diag}}</div>
   </q-card-section>
   <q-card-section v-if="step===2">
-    <apercu-genx :id="nvIdE || idE" nodet/>
+    <apercu-genx :id="nvIdE || idE"/>
     <div class="q-mt-md q-mb-sm titre-md">{{$t('CHech1')}}</div>
     <editeur-md mh="20rem" v-model="txt" :texte="''" editable modetxt/>
   </q-card-section>

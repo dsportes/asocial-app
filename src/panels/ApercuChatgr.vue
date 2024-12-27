@@ -31,7 +31,7 @@
     <q-toolbar class="tbp" inset>
       <q-expansion-item class="full-width" switch-toggle-side expand-separator 
         icon="group" :label="cvg.nom">
-        <apercu-genx class="q-ma-xs" :id="session.groupeId" nodet />
+        <apercu-genx class="q-ma-xs" :id="session.groupeId"/>
       </q-expansion-item>
     </q-toolbar>
   </q-page-sticky>
