@@ -77,6 +77,7 @@ const err = computed(() =>
   (model.value.qv < model.value.minv) || (model.value.qv > model.value.maxv) ||
   (model.value.qc < model.value.minc) || (model.value.qc > model.value.maxc)
 )
+model.value.err = err.value
 const chg = computed(() => model.value.qn !== qni || model.value.qv !== qvi || model.value.qc !== qci )
 
 watch(err, () => { model.value.err = err.value})

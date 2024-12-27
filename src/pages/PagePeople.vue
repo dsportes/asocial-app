@@ -59,28 +59,13 @@ const peLpF = computed(() => {
   const fsetp = f.mcp && f.mcp.size ? f.mcp : null
   const fsetn = f.mcn && f.mcn.size ? f.mcn : null
   const r = []
-  for (const [id, p] of pSt.map) {
+  for (const [id, p] of pSt.visiblePeople) {
     const cv = session.getCV(id)
     if (f.nom && !cv.nom.startsWith(f.nom) && (!ci.stW(id, f.nom))) continue
     if (f.avecgr && (!p.sgr.size)) continue
     if (fsetp && !ci.aHT(id, fsetp)) continue
     if (fsetn && ci.aHT(id, fsetn)) continue
-    // pour ceux connus seulement en tant que membre d'un groupe
-    // seulement s'ils ont accès aux membres
-    // ou que le compte est animateur
-    let sel = false
-    if (p.del || p.sch.size) sel = true
-    else {
-      for (const idg of p.sgr) {
-        const egr = gSt.egr(idg)
-        const g = egr ? egr.groupe : null
-        if (!g) continue
-        if (egr.estAnim) { sel = true; break }
-        const im = g.mmb.get(id)
-        if (im && g.accesMembre(im)) { sel = true; break }
-      }
-    }
-    if (sel) r.push({ id, cv, nom: cv.nom, sgr: p.sgr, sch: p.sch })
+    r.push({ id, cv, nom: cv.nom, sgr: p.sgr, sch: p.sch })
   }
   r.sort((a, b) => (ID.estComptable(a.id) || a.nom < b.nom) ? -1 : (a.nom > b.nom ? 1 : 0))
   return r

@@ -32,8 +32,8 @@
           icon="settings" @ok="editUna" cond="cVisu"/>
       </div>
 
-      <q-expansion-item class="full-width" switch-toggle-side header-class="tbp titre-lg"
-        :label="$t('AGheb' + (gr.dfh ? '2' : '1'))">
+      <q-expansion-item class="full-width q-mt-sm q-mb-xs" switch-toggle-side header-class="tbp titre-lg"
+        :label="$t('AGheb' + (gr.dfh ? '2' : '1'))" expand-separator>
         <div class="q-ma-sm">
           <div class="row justify-between">
             <div v-if="!gr.dfh" class="row">
@@ -140,38 +140,43 @@
   <!-- Gérer l'hébergement, changer les quotas -->
   <dial-std2 v-model="m2" :titre="$t('AGgerh', [nomg])" help="dial_heb">
     <div class="q-pa-xs">
-      <div class="titre-lg text-center q-ma-sm">
-        <span v-if="cas===1">{{$t('AGcas1', [AMJ.editDeAmj(gr.dfh)])}}</span>
-        <span v-if="cas===2">{{$t('AGcas2')}}</span>
-        <span v-if="cas===3">{{$t('AGcas3')}}</span>
-      </div>
-
       <div v-if="hko" class="column q-mt-md items-center q-gutter-md">
-        <div class="q-ma-sm msg">{{$t('AGhko' + hko)}}</div>
+        <div class="q-ma-sm msg">{{$t('AGhko')}}</div>
         <btn-cond v-if="!dejaHeb" :label="$t('jailu')" flat @ok="ui.fD"/>
       </div>
 
-      <q-card>
+      <div v-if="!gr.dfh" class="row">
+        <span class="titre-md q-mr-sm">{{$t('AGheb')}}</span>
+        <span class="fs-md">{{nom(gr.imh)}}</span>
+      </div>
+      <div v-else class="q-my-sm msg">{{$t('AGcas1', [AMJ.editDeAmj(gr.dfh)])}}</div>
+      <div v-if="gSt.egrC.estAnim" class="q-my-sm">{{$t('AGcas3')}}</div>
+      <div v-if="dejaHeb" class="q-my-sm">{{$t('AGcas2')}}</div>
+      <div v-if="gr.imh && !dejaHeb && actuelAnim" class="q-my-sm">{{$t('AGcas4')}}</div>
+
+      <div v-if="!hko">
         <q-separator color="orange" class="q-mt-md"/>
         <div class="titre-lg q-my-sm text-italic">{{$t('AGselac')}}</div>
         <div class="column q-ml-md">
-          <q-radio v-if="cas===1"  v-model="action" :val="1" :label="$t('AGac1')" />
-          <q-radio v-if="cas===2"  v-model="action" :val="4" :label="$t('AGac4')" />
-          <q-radio v-if="cas===2"  v-model="action" :val="2" :label="$t('AGac2')" />
-          <q-radio v-if="cas===2 && options.length"  v-model="action" :val="3" :label="$t('AGac3')" />
-          <q-radio v-if="cas===3"  v-model="action" :val="5" :label="$t('AGac5')" />
+          <q-radio v-if="cas.has(1)"  v-model="action" :val="1" :label="$t('AGac1')" />
+          <q-radio v-if="cas.has(2)"  v-model="action" :val="2" :label="$t('AGac2')" />
+          <q-radio v-if="cas.has(3)"  v-model="action" :val="3" :label="$t('AGac3')" />
+          <q-radio v-if="cas.has(4)"  v-model="action" :val="4" :label="$t('AGac4')" />
         </div>
 
-        <div v-if="(action === 1 || action === 3 || action === 5)" 
-          :class="'spsm row justify-center q-my-sm' + (options.length > 1 ? ' bord' : '')">
-          <div v-if="options.length > 1" class="row items-center">
+        <div v-if="(action === 1 || action === 3) && options.length > 1" 
+          class="spsm row justify-center q-my-sm bord">
+          <div class="row items-center">
             <div class="titre-md q-mt-sm text-italic q-mr-md">{{$t('AGselav')}}</div>
             <q-select class="lgsel" v-model="nvHeb" :options="options"/>
           </div>
-          <div v-if="options.length === 1">{{$t('AGselav2', [nvHeb.label])}}</div>
         </div>
 
-        <div v-if="action !== 0 && action !== 2">
+        <div v-if="(action === 1 || action === 3) && nvHeb" class="q-my-sm text-italic text-center titre-lg text-bold">
+          {{$t('AGselav2', [nvHeb.label])}}
+        </div>
+
+        <div v-if="action !== 0 && action !== 2" class="q-my-md">
           <choix-quotas class="q-my-sm" v-model="q" groupe/>
           <div v-if="q.err" class="q-ma-sm q-pa-xs msg titre-md">{{$t('AGmx')}}</div>
           <div v-else>
@@ -192,13 +197,14 @@
         </div>
 
         <div class="q-mt-md row justify-center items-center q-gutter-md">
-          <btn-cond size="md" class="q-mr-lg" :label="$t('renoncer')" flat @ok="ui.fD"/>
-          <bouton-confirm v-if="action === 2 || (action !== 0 && !q.err && !aln && !alv)" 
-            actif :confirmer="chgQ"/>
+          <btn-cond size="md" :label="$t('renoncer')" flat icon="undo" @ok="ui.fD"/>
+          <bouton-confirm v-if="action === 2" actif :confirmer="chgQ"/>
+          <bouton-confirm v-if="action === 4" 
+            :actif="!q.err && !aln && !alv && (q.qn !== gr.qn || q.qv !== gr.qv)" :confirmer="chgQ"/>
+          <bouton-confirm v-if="action === 1 || action === 3" 
+            :actif="!q.err && !aln && !alv" :confirmer="chgQ"/>
         </div>
-
-      </q-card>
-
+      </div>
     </div>
   </dial-std2>
 
@@ -239,7 +245,8 @@ const gSt = stores.groupe
 const cfu = ref(0)
 const options = ref([])
 const nvHeb = ref(0)
-const hko = ref(0)
+// AGhko: 'L\'hébergeur actuel étant animateur, je ne peux pas me substituer à lui aucun de mes avatars n\'est animateur.',
+const hko = computed(() => !dejaHeb.value && !gSt.egrC.estAnim && actuelAnim.value)
 const q = ref({})
 const action = ref(0)
 const aln = ref(false) 
@@ -249,8 +256,7 @@ const arv = ref(false)
 const rstn = ref(0) 
 const rstv = ref(0)
 const lstVotes = ref()
-const nbSubst = ref(0)
-const cas = ref(0)
+const cas = ref()
 const restqn = ref(0)
 const restqv = ref(0)
 
@@ -264,8 +270,12 @@ const mesav = computed(() => {
 const idg = computed(() => session.groupeId)
 const sav = computed(() => session.compte.mpg.get(idg.value) || new Set())
 const gr = computed(() => gSt.egrC ? gSt.egrC.groupe : null)
-const actuelAnim = computed(() => gr.value.imh && gr.value.st[gr.value.imh] === 5)
-const dejaHeb = computed(() => sav.value.has(gr.value.tid[gr.value.imh]))
+
+const dejaHeb = computed(() => gr.value.imh && sav.value.has(gr.value.tid[gr.value.imh]))
+const idHebAc = computed(() => gr.value.imh ? gr.value.tid[gr.value.imh] : '')
+const stHebAv = computed(() => gr.value.imh ? gr.value.st[gr.value.imh] : 0)
+const actuelAnim = computed(() => stHebAv.value === 5)
+
 const nbiv = computed(() => gr.value.nbInvites)
 const amb = computed(() => gSt.ambano[0])
 const lst = computed(() => pgLmFT.value.r)
@@ -345,6 +355,7 @@ async function chgU () {
   ui.fD()
 }
 
+
 function setCas () {
   /* Pour être / devenir hébergeur, il faut:
   - a) que le nn et vf actuels du groupe ne fasse pas excéder les quotas du compte
@@ -353,12 +364,8 @@ function setCas () {
   */
   nvHeb.value = null
   action.value = 0
-  cas.value = 0
-  hko.value = 0
-  /*
-  AGhko2: 'Je suis hébergeur, mais je ne peux pas transférer l\'hébergement à un autre de mes avatars, aucun n\'est membre du groupe',
-  AGhko3: 'L\'hébergeur actuel étant animateur, je ne peux pas me substituer à lui aucun de mes avatars n\'est animateur.',
-  */
+  cas.value = new Set()
+  if (hko.value) return
 
   /* Liste des avatars du compte pouvant être hébergeur (sauf celui actuel):
     - options : [{ label, value, cv, im}] - mes avatars pouvant être hébergeur
@@ -369,41 +376,38 @@ function setCas () {
     const im = gr.value.mmb.get(id)
     if (im) {
       if (im === gr.value.imh) continue
-      nbSubst.value++
-      if (actuelAnim.value && !dejaHeb.value && gr.value.st[im] !== 5) continue
+      if (!dejaHeb.value && actuelAnim.value && gr.value.st[im] !== 5) continue
       const cv = session.getCV(id)
       options.value.push({ label: cv.nom, value: id, cv, im })
     }
   }
   if (options.value.length) nvHeb.value = options.value[0]
 
-  if (!gr.value.imh) { // Cas 1 : il n'y a pas d'hébergeur.
-    cas.value = 1
-    return
+  if (dejaHeb.value) {
+    // 2: 'Je PEUX cesse d\'héberger ce groupe',
+    cas.value.add(2)
+    // 3: 'Je PEUX transmettre l\'hébergement à un autre de mes avatars',
+    if (options.value.length) cas.value.add(3) 
+    // 4: 'Je PEUX mettre seulement à jour les nombres de notes et volumes de fichiers maximum attribués au groupe',
+    cas.value.add(4)
+  } else {
+    // 1: 'Je PEUX prendre l\'hébergement à mon compte'
+    if (!gr.value.imh || !actuelAnim.value || gSt.egrC.estAnim) cas.value.add(1)
   }
-
-  if (dejaHeb.value) { // Cas 2 : je suis hébergeur
-    cas.value = 2
-    if (options.value.length === 0) hko.value = 2
-    return
-  }
-
-  /* cas 3 : il y a un hébergeur mais ce n'est pas un des avatars de mon compte */
-  cas.value = 3
-  if (options.value.length === 0) hko.value = 3
 }
 
 async function gererheb () {
   setCas()
   const cpt = session.compte.qv
-  restqn.value = Math.floor(((cpt.qn * UNITEN) * (100 - cpt.pcn) / 100) / UNITEN) + (dejaHeb.value ? gr.value.qn : 0)
-  restqv.value =  Math.floor(((cpt.qv * UNITEV) * (100 - cpt.pcv) / 100) / UNITEV) + (dejaHeb.value ? gr.value.qv : 0)
+  const cptn = cpt.nn + cpt.nc + cpt.ng
+  restqn.value = Math.floor(((cpt.qn * UNITEN) - cptn) / UNITEN) + (dejaHeb.value ? gr.value.qn : 0)
+  restqv.value =  Math.floor(((cpt.qv * UNITEV) - cpt.v) / UNITEV) + (dejaHeb.value ? gr.value.qv : 0)
   q.value.qn = gr.value.qn || 0
   q.value.qv = gr.value.qv || 0
   q.value.minn = 0
   q.value.minv = 0
-  q.value.maxn = restqn.value
-  q.value.maxv = restqv.value
+  q.value.maxn = cpt.qn // restqn.value
+  q.value.maxv = cpt.qv // restqv.value
   q.value.err = false
   onChgQ()
   ui.oD('AGgererheb', idc)
@@ -423,7 +427,8 @@ function onChgQ () {
 
 async function chgQ () {
   if (action.value === 5) action.value = 1
-  const r = await new HebGroupe().run(action.value, nvHeb.value.value, q.value.qn, q.value.qv )
+  const nh = nvHeb.value ? nvHeb.value.value : idHebAc.value
+  const r = await new HebGroupe().run(action.value, nh, q.value.qn, q.value.qv )
   if (r) await afficher8000(r, 0, session.groupeId, nvHeb.value.value)
   ui.fD()
 }
@@ -434,7 +439,7 @@ async function chgQ () {
 .top3
   margin-top: 3rem
 .bord
-  border: 3px solid var(--q-warning)
+  border: 1px solid var(--q-warning)
   border-radius: 5px !important
   padding: 3px
 </style>

@@ -990,6 +990,7 @@ export class Groupe extends GenDoc {
     this.alias = row.alias
     this.qn = row.qn; this.qv = row.qv; this.nn = row.nn; this.vf = row.vf
     this.imh = row.imh
+    this.dfh = row.dfh || 0
     this.msu = row.msu || null
     this.invits = row.invits || {}
 

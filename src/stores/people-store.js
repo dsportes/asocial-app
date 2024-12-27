@@ -103,8 +103,30 @@ export const usePeopleStore = defineStore('people', {
         const vcv = e.cv ? e.cv.v : 0
         return { idE, vcv, lch, lmb }
       }
-    }
+    },
 
+    visiblePeople: (state) => {
+      const r = new Map()
+      for (const [id, p] of state.map) {
+        // pour ceux connus seulement en tant que membre d'un groupe
+        // seulement s'ils ont accès aux membres
+        // ou que le compte est animateur
+        let sel = false
+        if (p.del || p.sch.size) sel = true
+        else {
+          for (const idg of p.sgr) {
+            const egr = state.gSt.egr(idg)
+            const g = egr ? egr.groupe : null
+            if (!g) continue
+            if (egr.estAnim) { sel = true; break }
+            const im = g.mmb.get(id)
+            if (im && g.accesMembre(im)) { sel = true; break }
+          }
+        }
+        if (sel) r.set(id, p)
+      } 
+      return r
+    }
   },
   
   actions: {

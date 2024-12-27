@@ -42,7 +42,9 @@
 
     <q-item clickable @click="ui.setPage('compte')">
       <q-item-section>
-        <q-item-label lines="1">{{$t('ACmesav' + (session.estDelegue ? '1' : '2'))}}</q-item-label>
+        <q-item-label lines="1">{{$t('ACmesav' + (session.estDelegue ? '1' : '2'))}}
+          <q-badge color="primary" rounded>{{nbav}}</q-badge>
+        </q-item-label>
       </q-item-section>
     </q-item>
 
@@ -66,7 +68,9 @@
 
     <q-item clickable @click="ui.setPage('people')">
       <q-item-section>
-        <q-item-label lines="1">{{$t('ACmesctc')}}</q-item-label>
+        <q-item-label lines="1">{{$t('ACmesctc')}}
+          <q-badge color="primary" rounded>{{nbpeople}}</q-badge>
+        </q-item-label>
       </q-item-section>
     </q-item>
 
@@ -157,13 +161,16 @@ const props = defineProps({
 
 const aSt = stores.avatar
 const gSt = stores.groupe
+const pSt = stores.people
 const faSt = stores.ficav
 const session = stores.session
 const ui = stores.ui
 const fSt = stores.filtre
 
+const nbav = computed(() => session.compte.mav.size)
 const nbchats = computed(() => aSt.nbchats )
 const nbchatsAv = computed(() => { const x = aSt.eavC; return x ? x.chats.size : 0 })
+const nbpeople = computed(() => pSt.visiblePeople.size )
 const nbspons = computed(() => { const x = aSt.eavC; return x ? x.sponsorings.size : 0 })
 const nbgrps = computed(() => session.compte ? session.compte.idGroupes(session.avatarId).size : 0)
 const nbgrpsT = computed(() => session.compte ? session.compte.idGroupes().size : 0)

@@ -51,7 +51,7 @@
     <div class="row full-width fs-md">
       <q-checkbox class="col-1" dense
         v-model="idm" color="primary" :disable="!pcID"/>
-      <q-checkbox v-if="estActif || !gr" class="col-1" dense
+      <q-checkbox v-if="estActifInv || !gr" class="col-1" dense
         v-model="iam" color="accent" :disable="!pcIA"/>
       <div v-else class="col-1"></div>
       <q-checkbox class="col-1" dense 
@@ -62,7 +62,7 @@
     <div class="row full-width fs-md">
       <q-checkbox class="col-1" dense
         v-model="idn" color="primary" :disable="!pcID"/>
-      <q-checkbox v-if="estActif || !gr" class="col-1" dense
+      <q-checkbox v-if="estActifInv || !gr" class="col-1" dense
         v-model="ian" color="accent" :disable="!pcIA"/>
       <div v-else class="col-1"></div>
       <q-checkbox class="col-1" dense 
@@ -118,7 +118,7 @@ const nomm = computed(() => session.getCV(props.id).nomC)
 const moi = computed(() => session.estAvc(props.id))
 
 const stm = computed(() => gr.value ? gr.value.st[im.value] : 1)
-const estActif = computed(() => stm.value > 3)
+const estActifInv = computed(() => stm.value >= 3)
 // L'avatar COURANT du compte est "animateur"
 const mbAnim = computed(() => stm.value >= 4 && gr.value.estAnim(gr.value.mmb.get(session.avatarId)))
 const cptAnim = computed(() => gr.value ? gSt.egrC.estAnim : false)
@@ -178,7 +178,7 @@ const pcAnim = computed(() => cptAnim.value && (!mbAnim.value || moi))
 const pcID = computed(() => cptAnim.value && (!mbAnim.value || moi.value))
 
 // Peut changer iam/ian: moi si actif
-const pcIA = computed(() => (moi.value && estActif.value) || !gr.value )
+const pcIA = computed(() => (moi.value && estActifInv.value) || !gr.value )
 
 watch(anim, (ap) => { // Un animateur A TOUJOURS accès aux membres
   if (ap) idm.value = true
