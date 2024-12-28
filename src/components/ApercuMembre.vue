@@ -191,7 +191,7 @@ a accès aux membres (donc dans l'onglet "membres").
 
   <!-- Dialogue de gestion des droits -->
   <dial-std2 v-if="m3" v-model="m3" :titre="$t('AMdroitstit', [nomm, nomg])" help="dial_droits">
-    <div class="spsm column items-center q-gutter-sm">
+    <div class="q-mt-sm spsm column items-center q-gutter-sm">
       <droits-membre v-model="drMb" :id="id"/>
       <q-card-actions align="right" class="q-gutter-xs full-width">
         <btn-cond flat size="md" icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>

@@ -1887,7 +1887,7 @@ export class ItemChatgr extends Operation {
         token: session.authToken, 
         idg: session.groupeId,
         msgG: msg ? await crypter(cleg, gzipB(msg)) : null,
-        idaut: idaut || 0,
+        idaut: idaut || '',
         dh: dh || 0 
       }
       await post(this, 'ItemChatgr', args)

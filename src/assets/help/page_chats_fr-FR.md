@@ -63,13 +63,14 @@ En cochant cette case, seuls les chats impliqués dans une demande mutation sont
 # Détail d'un chat listé | chat_maj
 Deux niveaux de détails sont disponibles:
 - **_en dépliant_ un des chats** on fait apparaître:
-  - un résumé succinct du chat:
+  - **un résumé succinct du chat:**
     - son état _actif / passif_,
-    - nombre d'échanges qu'il comporte,
+    - le nombre d'échanges qu'il comporte,
     - la date-heure de dernière mise à jour,
     - le début du texte de l'échange le plus récent.
-  - _la carte de visite_ du contact ou du groupe,
-  - _l'alias et les hashtags attribués personnellement_ au contact ou au groupe: ils peuvent être mis à jour.
-  - la liste des _chats_ ouverts avec un des avatars du compte,
-  - la liste des _groupes_ où les avatars du compte et le contact sont membres actifs.
+  - **un aperçu de l'avatar avec qui le _chat_ est ouvert:**
+    - sa _carte de visite_,
+    - _son alias / commentaire et les hashtags attribués personnellement_ au contact: ils peuvent être mis à jour.
+    - la liste des _chats_ ouverts ou pouvant être ouverts avec un des avatars du compte. Pour chaque chat l'appui sur le bouton associé ouvre la page du _chat_.
+    - la liste des _groupes_ où les avatars du compte et le contact sont membres actifs. Pour chaque groupe l'appui sur le bouton associé ouvre la page du groupe.
 - **en cliquant sur l'icône _chat_**, une fiche détaillée du chat apparaît (et recouvre la liste des chats). Voir la section de l'aide détaillant un chat.

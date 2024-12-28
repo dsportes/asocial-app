@@ -36,15 +36,17 @@
       <q-card  v-if="!zombi" class="q-pa-sm">
         <div v-for="it in chatX.items" :key="it.dh + '/' + it.a">
           <q-chat-message :sent="it.a===0" 
-            :bg-color="it.a ? 'brown-10' : 'secondary'" 
-            text-color="white"
-            :stamp="dhcool(it.dh)">
-            <sd-blanc v-if="!it.dhx" :texte="it.t"/>
-            <div v-else class="text-italic bg-yellow-3 text-negative">{{$t('CHeffa', [dhcool(it.dhx)])}}</div>
+            :bg-color="it.a ? 'primary' : 'secondary'"
+            text-color="white">
+            <div>
+              <sd-blanc v-if="!it.dhx" :texte="it.t"/>
+              <div :class="'text-italic q-mt-sm ' + (!it.dhx ? 'bordt' : '')">{{dhcool(it.dh)}}</div>
+              <div v-if="it.dhx" class="msg">{{$t('CHeffa', [dhcool(it.dhx)])}}</div>
+            </div>
             <template v-slot:name>
               <div class="full-width row justify-between items-center">
                 <span>{{it.a===0 ? $t('moi') : cvE.nom}}</span>
-                <btn-cond v-if="it.a===0 && !it.dhx" size="sm" icon="clear" color="secondary"
+                <btn-cond v-if="it.a===0 && !it.dhx" size="sm" icon="clear" color="warning"
                   @ok="effacer(it.dh)" 
                   :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
               </div>
@@ -413,4 +415,6 @@
 @import '../css/app.sass'
 .bordb
   border-bottom: 1px solid $grey-5
+.bordt
+  border-top: 1px solid $grey-5
 </style>

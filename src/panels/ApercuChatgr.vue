@@ -3,15 +3,18 @@
   <q-card class="q-pa-sm topm">
     <div v-for="it in items" :key="it.dh + '/' + it.im">
       <q-chat-message
-        bg-color="primary" 
-        text-color="white"
-        :stamp="dhcool(it.dh)">
-        <sd-blanc v-if="!it.dhx" :texte="it.t"/>
-        <div v-else class="text-italic text-negative">{{$t('CHeffa', [dhcool(it.dhx)])}}</div>
+        :sent="moi(it.im)" 
+        :bg-color="moi(it.im) ? 'primary' : 'secondary'"
+        text-color="white">
+        <div>
+          <sd-blanc v-if="!it.dhx" :texte="it.t"/>
+          <div :class="'text-italic q-mt-sm ' + (!it.dhx ? 'bordt' : '')">{{dhcool(it.dh)}}</div>
+          <div v-if="it.dhx" class="msg">{{$t('CHeffa', [dhcool(it.dhx)])}}</div>
+        </div>
         <template v-slot:name>
           <div class="full-width row justify-between items-center">
             <span>{{cvm(it.im).nomC }}</span>
-            <btn-cond cond="cEdit" v-if="egr.estAnim && !it.dhx" size="sm" 
+            <btn-cond cond="cEdit" v-if="(egr.estAnim || moi(it.im)) && !it.dhx" size="sm" 
               icon="clear" color="warning" round
               @ok="effacer(it.im, it.dh)"/>
           </div>
@@ -92,6 +95,10 @@ const gr = computed(() => egr.value.groupe )
 const items = computed(() => gSt.chatgr && gSt.chatgr.items ? gSt.chatgr.items : [])
 
 const cvm = (im) => session.getCV(gr.value.tid[im])
+const moi = (im) => {
+  const id = gr.value.tid[im]
+  return id === session.avatarId
+}
 
 async function effacer (imx, dhx) {
   im.value = imx
@@ -100,7 +107,7 @@ async function effacer (imx, dhx) {
 }
 
 async function effop () {
-  const r = await new ItemChatgr().run(0, dh.value, null)
+  const r = await new ItemChatgr().run(null, dh.value, null)
   if (r) await afficher8000(r, 0, session.groupeId)
   im.value = 0
   dh.value = 0
@@ -127,4 +134,6 @@ async function editer () {
   overflow: hidden
 .topm
   margin-top: 6rem
+.bordt
+  border-top: 1px solid $grey-5
 </style>

@@ -300,12 +300,13 @@ const pgLmFT = computed(() => {
     const idm = g.tid[im]
     if (!idm) continue
     if (c.mav.has(idm)) continue
+    const mb = g.accesMembre(im)
+    if (!mb && !estAnim1.value) continue
     n++
     const nom = session.getCV(idm).nomC
     if (f.nmb && !nom.startsWith(f.nmb)) continue
     if (f.stmb && stm !== f.stmb) continue
     if (f.ambno) {
-      const mb = g.accesMembre(im)
       const no = g.accesNote(im)
       if (f.ambno === 1 && !(mb && !no)) continue
       if (f.ambno === 2 && !(no && !mb)) continue

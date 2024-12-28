@@ -91,32 +91,9 @@
     </div>
   </dial-std1>
 
-<!--
-  <q-dialog v-model="ui.d[idc].PGctc" persistent>
-    <q-card :class="styp('sm')">
-      <q-toolbar class="tbs">
-        <btn-cond color="warning" icon="close" @ok="ui.fD"/>
-        <q-toolbar-title class="titre-lg text-center">{{$t('PGctc', [nomgi] )}}</q-toolbar-title>
-        <bouton-help page="page1"/>
-      </q-toolbar>
-      <div class="q-pa-xs">
-        <apercu-genx :id="inv.idg" :idx="0"/>
-        <q-option-group v-model="ctcOpt" :options="options2" color="primary"/>
-        <q-card-actions align="right" class="q-gutter-sm" vertical>
-          <btn-cond flat icon="close" :label="$t('jailu')" @ok="ui.fD" />
-          <btn-cond color="warning" icon="close" cond="cEdit"
-            :label="$t('PGctc1')" @ok="ctc(false)" />
-          <btn-cond color="warning" icon="close" cond="cEdit"
-            :label="$t('PGctc2')" @ok="ctc(true)" />
-        </q-card-actions>
-      </div>
-    </q-card>
-  </q-dialog>
--->
-
   <!-- Nouveau groupe ------------------------------------------------>
   <dial-std1 v-if="m1" v-model="m1" :titre="$t('PGcrea')"
-    :disable="quotas.err || !nom" okic="add" :oklbl="$t('creer')" cond="cEdit" :okfn="okCreation">
+    :disable="quotas.err || !nom" okic="add" oklbl="creer" cond="cEdit" :okfn="okCreation">
     <div class="q-pa-sm column">
       <sel-avid class="self-center"/>
       <nom-avatar class="titre-md q-my-sm" verif groupe @ok-nom="oknom"/>

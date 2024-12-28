@@ -1,3 +1,3 @@
 
-## Hébergement d'un groupe, SIMPLE ou UNANIME
+## Invitation à un groupe: modes SIMPLE / UNANIME
 (TODO)

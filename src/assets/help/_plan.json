@@ -25,14 +25,16 @@
       "compta_credits",
       "compta_chats" 
     ],
-    "page_groupes", 
+    ["page_groupes",
+      "page_groupe", "dial_una", "dial_heb", "dial_contact", "dial_invit",
+      "dial_droits", "dial_radiation", "chatgr"
+    ],
     "page_people", 
     "page_chats", 
     "page_ficav",
     ["page_sponsoring",
       "sponsoring_d", "sponsoring_a"
     ],
-    "page_groupe",
     "boite_automaj",
     "panel_outils"
   ],
@@ -46,13 +48,7 @@
     "htcomm_maj",
     "chat_nouveau",
     "chat_maj",
-    "suppr-avatar",
-    "chatgr",
-    "dial_una",
-    "dial_heb",
-    "dial_invit",
-    "dial_droits",
-    "dial_radiation"
+    "suppr-avatar"
   ],
   ["how_to",
     "ht_sponsoriser",
