@@ -1,60 +1,75 @@
 <template> 
-  <q-page>
-    <q-card class="spmd q-mb-lg q-pa-sm row justify-center items-center" 
-      v-if="session.estDelegue || session.estComptable || (session.estA && session.espace.opt > 0)"> 
-      <!-- Nouveau sponsoring -->
-      <btn-cond class="q-mt-sm q-ml-xs" size="md" icon="manage_accounts"
-        :label="$t('NPnouv')" color="warning" cond="cEdit" @ok="nouveausp"/>
-      <bouton-help class="q-ml-sm" page="page1"/>
-    </q-card>
+  <div class="spmd fs-md q-pa-sm">
+    <!-- Nouveau sponsoring -->
+    <div v-if="session.estDelegue || session.estComptable || session.espace.opt"
+        class="q-my-md text-center">
+      <btn-cond icon="manage_accounts" :label="$t('NPnouv')" color="warning" cond="cEdit" @ok="nouveausp"/>
+    </div>
 
-    <q-card class="spmd q-pa-sm titre-lg text-center">{{sponsorings.length ? $t('NPspex') : $t('NPnosp')}}</q-card>
+    <div class="q-my-md q-pa-sm titre-lg text-center">{{sponsorings.length ? $t('NPspex') : $t('NPnosp')}}</div>
 
-    <q-card class="spmd q-my-md" v-for="(sp, idx) in sponsorings" :key="sp.ids">
-      <div :class="'q-px-sm ' + dkli(idx)">
-        <div :class="'titre-md ' + clx[sp.st]">{{$t('NPst' + sp.st, [dhcool(sp.dh)])}}</div>
-        <div class="titre-md">{{$t('NPphr')}}
-          <span class="q-ml-sm font-mono text-bold fs-md">{{sp.psp}}</span>
-        </div>
-        <div class="titre-md">{{$t('NPdlv')}}
-          <span class="q-ml-sm font-mono text-bold fs-md">{{AMJ.editDeAmj(sp.dlv)}}</span>
-        </div>
-        <div class="titre-md">{{$t('NPnom')}}
-          <span class="text-bold font-mono q-px-md">{{sp.nom}}</span>
-        </div>
+    <div v-for="(sp, idx) in sponsorings" :key="sp.ids">
+      <q-expansion-item switch-toggle-side dense class="q-mt-xs"
+        group="somegroup" :default-opened="idx === 0" header-class="tbs">
+        <template v-slot:header>
+          <div class="full-width row justify-between items-center">
+            <div class="titre-lg text-bold">{{sp.nom}}</div>
+            <div class="row q-gutter-md items-center">
+              <q-icon :name="icx[sp.st]" size="md" :color="clx[sp.st]"/>
+              <div class="titre-md text-italic">{{$t('NPst' + sp.st, [dhcool(sp.dh)])}}</div>
+            </div>
+          </div>
+        </template>
 
-        <div v-if="sp.estA" class="row q-gutter-sm titre-md">
-          <div class="text-warning">{{$t('compteA')}}</div>
+        <div class="q-ml-lg column q-gutter-sm">
+          <div class="titre-md q-mt-md">{{$t('NPphr')}}
+            <span class="q-ml-sm font-mono text-bold fs-md">{{sp.psp}}</span>
+          </div>
+          <div class="titre-md">{{$t('NPdlv')}}
+            <span class="q-ml-sm font-mono text-bold fs-md">{{AMJ.editDeAmj(sp.dlv)}}</span>
+          </div>
+
+          <div v-if="sp.estA" class="titre-md">{{$t('compteA')}}</div>
+          <div v-else class="titre-md">{{$t(sp.del ? 'compteD' : 'compteO', [sp.partitionId || 0])}}</div>
+            
           <div>{{$t('don', [sp.don])}}</div>
-        </div>
-        <div v-else class="titre-md">{{$t(sp.del ? 'compteD' : 'compteO', [sp.partitionId || 0])}}</div>
-        <div v-if="sp.dconf">{{$t('conf')}}</div>
 
-        <div class="titre-md">{{$t('NPquo')}}</div>
-        <quotas-vols class="q-ml-md" :vols="sp.quotas"/>
-        <div class="titre-md q-mt-xs">{{$t('NPmot')}}</div>
-        <show-html class="q-mb-xs bord" zoom maxh="4rem" :texte="sp.ard" :idx="idx"/>
+          <div v-if="sp.dconf">{{$t('conf')}}</div>
 
-        <div v-if="sp.st===0" class="q-my-sm row justify-center items-center q-gutter-sm">
-          <div class="titre-md text-italic q-mr-sm">{{$t('NPpro')}}</div>
-          <btn-cond class="q-mr-xs" cond="cEdit"
-            :label="$t('NPpro7')" @ok="prolonger(sp, 7)"/>
-          <btn-cond class="q-mr-xs" cond="cEdit"
-            :label="$t('NPpro20')" @ok="prolonger(sp, 20)"/>
-          <btn-cond class="q-mr-lg" cond="cEdit"
-            :label="$t('NPpro30')" @ok="prolonger(sp, 30)"/>
+          <div>
+            <div class="titre-md">{{$t('NPquo')}}</div>
+            <quotas-vols class="q-ml-md" :vols="sp.quotas"/>
+          </div>
+
+          <div>
+            <div class="titre-md">{{$t('NPmot')}}</div>
+            <show-html class="q-mb-xs bord" zoom maxh="4rem" :texte="sp.ard"/>
+          </div>
+
+          <div v-if="sp.st===0" class="q-my-sm row items-center q-gutter-sm">
+            <div class="titre-md text-italic q-mr-sm">{{$t('NPpro')}}</div>
+            <btn-cond class="q-mr-xs" cond="cEdit"
+              :label="$t('NPpro7')" @ok="prolonger(sp, 7)"/>
+            <btn-cond class="q-mr-xs" cond="cEdit"
+              :label="$t('NPpro20')" @ok="prolonger(sp, 20)"/>
+            <btn-cond class="q-mr-lg" cond="cEdit"
+              :label="$t('NPpro30')" @ok="prolonger(sp, 30)"/>
+          </div>
+
+          <div class="text-right">
+            <btn-cond v-if="sp.st===0" class="q-my-md" color="warning" cond="cEdit"
+              icon="close" :label="$t('NPann')" @ok="prolonger(sp, 0)"/>
+          </div>
         </div>
-        <div class="text-center">
-          <btn-cond v-if="sp.st===0" class="q-my-md" color="warning" cond="cEdit"
-            :label="$t('NPann')" @ok="prolonger(sp, 0)"/>
-        </div>
-      </div>
-    </q-card>
+      </q-expansion-item>
+    </div>
 
     <!-- Dialogue de création d'un sponsoring ici la partition est la sienne -->
-    <nouveau-sponsoring v-if="ui.d[idc] && ui.d[idc].NSnvsp" :idc2="idc"/>
+    <q-dialog v-if="ui.d[idc] && ui.d[idc].NSnvsp" v-model="ui.d[idc].NSnvsp" position="left" persistent>
+      <nouveau-sponsoring/>
+    </q-dialog>
 
-  </q-page>
+  </div>
 </template>
 
 <script setup>
@@ -76,12 +91,14 @@ const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 const aSt = stores.avatar
 const session = stores.session
 
-const clx = [
-  'text-primary',
-  'text-warning bg-yellow-3',
-  'text-green-5',
-  'text-negative bg-yellow-3',
-]
+const clx = ['white', 'negative', 'positive', 'negative']
+const icx = ['timer', 'block', 'check', 'close']
+/*
+  NPst0: 'Proposition en attente de réponse déposée {0}',
+  NPst1: 'Proposition refusée {0}',
+  NPst2: 'Proposition acceptée {0}',
+  NPst3: 'Proposition annulée par l\'avatar sponsor {0}',
+*/
 
 const sponsorings = computed(() => { 
   const r = Array.from(aSt.getSponsorings(aSt.avC.id).values()) || []

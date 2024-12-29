@@ -1,106 +1,106 @@
 <template>
-<q-dialog v-model="ui.d[idc2].NSnvsp" full-height position="left" persistent>
-  <q-layout container view="hHh lpR fFf" :class="styp('md')">
+<q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated class="tbs">
     <q-toolbar>
       <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
       <q-toolbar-title class="titre-lg full-width text-center">{{$t('NPtit')}}</q-toolbar-title>
-      <bouton-help page="page1"/>
+      <bouton-help page="sponsoring_d"/>
     </q-toolbar>
   </q-header>
 
   <q-page-container>
-    <q-page :class="dkli(0)">
-      <q-stepper v-model="step" vertical color="primary" animated>
-        <q-step v-if="!session.estA" :name="0" :title="$t('NPprof')" icon="settings" :done="step > 0">
-          <div class="q-my-sm">
-            <q-option-group :options="optionsOSA" type="radio" dense v-model="optOSA" />
-          </div>
-          <div>
-            <q-checkbox class="titre-md text-bold" size="md" dense 
-              left-label v-model="dconf" :label="$t('CHconfid')" />
-          </div>
-          <q-stepper-navigation>
-            <btn-cond flat @ok="step = 1" :label="$t('suivant')"/>
-          </q-stepper-navigation>
-        </q-step>
+  <div class="spsm q-my-sm q-pa-sm">
+    <q-stepper v-model="step" vertical color="primary" animated>
+      <q-step v-if="!session.estA" :name="0" :title="$t('NPprof')" icon="settings" :done="step > 0">
+        <div class="q-my-sm">
+          <q-option-group :options="optionsOSA" type="radio" dense v-model="optOSA" />
+        </div>
+        <div>
+          <q-checkbox class="titre-md text-bold" size="md" dense 
+            left-label v-model="dconf" :label="$t('CHconfid')" />
+        </div>
+        <q-stepper-navigation>
+          <btn-cond flat @ok="step = 1" icon="arrow_downward" :label="$t('suivant')"/>
+        </q-stepper-navigation>
+      </q-step>
 
-        <q-step :name="1" :title="$t('NPpdon')" icon="settings" :done="step > 1">
-          <div class="q-my-sm">
-            <q-option-group :options="optionsDon" type="radio" dense v-model="optDon" />
-          </div>
-          <div v-if="diagDon" class="msg text-bold">{{diagDon}}</div>
-          <q-stepper-navigation>
-            <btn-cond flat @ok="step = 0" class="q-mr-sm" :label="$t('precedent')"/>
-            <btn-cond flat @ok="setDon" :disable="diagDon !== ''" :label="$t('suivant')"/>
-          </q-stepper-navigation>
-        </q-step>
+      <q-step :name="1" :title="$t('NPpdon')" icon="settings" :done="step > 1">
+        <div class="q-my-sm">
+          <q-option-group :options="optionsDon" type="radio" dense v-model="optDon" />
+        </div>
+        <div v-if="diagDon" class="msg text-bold">{{diagDon}}</div>
+        <q-stepper-navigation>
+          <btn-cond flat @ok="step = 0" class="q-mr-md" 
+            icon="arrow_upward" :label="$t('precedent')"/>
+          <btn-cond flat @ok="setDon" :disable="diagDon !== ''" 
+            icon="arrow_downward"  :label="$t('suivant')"/>
+        </q-stepper-navigation>
+      </q-step>
 
-        <q-step :name="2" :title="$t('NPphr')" icon="settings" :done="step > 2">
-          <span class="titre-sm q-py-sm">{{$t('NPnpc')}}</span>
-          <div ref="step2">
-            <phrase-contact @ok="crypterphrase" :orgext="session.org" 
-              :init-val="pc && pc.phrase ? pc.phrase : ''"/>
-          </div>
-          <q-stepper-navigation>
-            <btn-cond :label="$t('precedent')" @ok="step = 1" flat/>
-          </q-stepper-navigation>
-        </q-step>
+      <q-step :name="2" :title="$t('NPphr')" icon="settings" :done="step > 2">
+        <span class="titre-sm q-py-sm">{{$t('NPnpc')}}</span>
+        <div ref="step2">
+          <phrase-contact @ok="crypterphrase" :orgext="session.org" 
+            :init-val="pc && pc.phrase ? pc.phrase : ''"/>
+        </div>
+        <q-stepper-navigation>
+          <btn-cond @ok="step = 1" flat icon="arrow_upward" :label="$t('precedent')"/>
+        </q-stepper-navigation>
+      </q-step>
 
-        <q-step :name="3" :title="$t('NPavp')" icon="settings" :done="step > 3" >
-          <div ref="step3">
-            <nom-avatar class="q-ma-xs" @ok-nom="oknom" verif :init-val="nom || ''"
-              icon-valider="check" :label-valider="$t('suivant')"></nom-avatar>
-          </div>
-          <q-stepper-navigation>
-            <btn-cond flat @ok="step = 2" :label="$t('precedent')"/>
-          </q-stepper-navigation>
-        </q-step>
+      <q-step :name="3" :title="$t('NPavp')" icon="settings" :done="step > 3" >
+        <div ref="step3">
+          <nom-avatar class="q-ma-xs" @ok-nom="oknom" verif :init-val="nom || ''"
+            icon-valider="check" :label-valider="$t('suivant')"></nom-avatar>
+        </div>
+        <q-stepper-navigation>
+          <btn-cond flat @ok="step = 2" icon="arrow_upward" :label="$t('precedent')"/>
+        </q-stepper-navigation>
+      </q-step>
 
-        <q-step :name="4" :title="$t('NPmot')" icon="settings" :done="step > 4" >
-          <div ref="step4">
-            <editeur-md :texte="mot1" v-model="mot" editable modetxt mh="10rem"/>
-          </div>
-          <div v-if="motko" class="fs-sm text-warning">{{$t('NP10s', [mot.length])}}</div>
-          <q-stepper-navigation>
-            <btn-cond flat @ok="step = 3" :label="$t('precedent')"/>
-            <btn-cond flat @ok="okmot" :label="$t('suivant')" 
-              :disable="motko" class="q-ml-sm" />
-          </q-stepper-navigation>
-        </q-step>
+      <q-step :name="4" :title="$t('NPmot')" icon="settings" :done="step > 4" >
+        <div ref="step4">
+          <editeur-md :texte="mot1" v-model="mot" editable modetxt mh="10rem"/>
+        </div>
+        <div v-if="motko" class="fs-sm text-warning">{{$t('NP10s', [mot.length])}}</div>
+        <q-stepper-navigation>
+          <btn-cond flat @ok="step = 3" icon="arrow_upward" class="q-mr-md" :label="$t('precedent')"/>
+          <btn-cond flat @ok="okmot" icon="arrow_downward" :label="$t('suivant')" 
+            :disable="motko" class="q-ml-sm" />
+        </q-stepper-navigation>
+      </q-step>
 
-        <q-step :name="5" :title="$t('NPquo1')" icon="settings" :done="step > 5" >
-          <choix-quotas v-model="quotas"/>
-          <q-stepper-navigation>
-            <btn-cond flat @ok="step = 4" :label="$t('precedent')" />
-            <btn-cond flat @ok="step = 6" :disable="quotas.err"
-              :label="$t('suivant')" class="q-ml-sm" />
-          </q-stepper-navigation>
-        </q-step>
+      <q-step :name="5" :title="$t('NPquo1')" icon="settings" :done="step > 5" >
+        <choix-quotas v-model="quotas"/>
+        <q-stepper-navigation>
+          <btn-cond flat @ok="step = 4" icon="arrow_upward" class="q-mr-md" :label="$t('precedent')" />
+          <btn-cond flat @ok="step = 6" icon="arrow_downward" :disable="quotas.err"
+            :label="$t('suivant')" class="q-ml-sm" />
+        </q-stepper-navigation>
+      </q-step>
 
-        <q-step :name="6" :title="$t('NPconf')" icon="check" :done="step > 6" >
+      <q-step :name="6" :title="$t('NPconf')" icon="check" :done="step > 6">
+        <div class="column q-gutter-sm">
           <div class="titre-md">{{$t('NPphr')}} : <span class="font-mono q-pl-md">{{pc.phrase}}</span></div>
           <div class="titre-md">{{$t('NPnav')}} : <span class="font-mono q-pl-md">{{nom}}</span></div>
           <div class="titre-md">{{$t('NPmotc')}} : <span class="font-mono q-pl-md">{{mot}}</span></div>
-          <div>
-            <div class="titre-md">{{$t(estDelegue ? 'compteD' : 'compteO', [partition.id])}}</div>
-            <quotas-vols class="q-ml-md" :vols="quotas"/>
-          </div>
+          <div v-if="estAutonome" class=" titre-md">{{$t('compteA')}}</div>
+          <div v-else class="titre-md">{{$t(estDelegue ? 'compteD' : 'compteO', [partition.id])}}</div>
+          <quotas-vols class="q-ml-md" :vols="quotas"/>
           <div v-if="dconf" class="titre-md">{{$t('conf')}}</div>
-          <div v-if="estAutonome" class="text-warning titre-md">{{$t('compteA')}}</div>
           <div v-if="don" class="titre-md">{{$t('NPdon2', [don])}}</div>
-          <q-stepper-navigation class="row items-center q-gutter-sm q-mt-md">
-            <btn-cond flat @ok="step = 5" :label="$t('corriger')"/>
-            <btn-cond @ok="confirmer" color="warning" :label="$t('confirmer')" 
-            icon="check" cond="cEdit"/>
-          </q-stepper-navigation>
-        </q-step>
+        </div>
+        <q-stepper-navigation>
+          <btn-cond flat @ok="step = 5" icon="arrow_upward" class="q-mr-md" :label="$t('corriger')"/>
+          <btn-cond @ok="confirmer" color="warning" icon="check" :label="$t('confirmer')" 
+            cond="cEdit"/>
+        </q-stepper-navigation>
+      </q-step>
 
-      </q-stepper>
-    </q-page>
+    </q-stepper>
+  </div>
   </q-page-container>
 </q-layout>
-</q-dialog>
 </template>
 
 <script setup>
@@ -133,15 +133,11 @@ onMounted (async () => {
   solde.value = session.compta.compteurs.soldeCourant
 })
 
-const props = defineProps({ 
-  idc2: Number
-})
-
-const optionsOSA = [
+const optionsOSA = session.estDelegue || session.estComptable ? [
   { label: $t('compteO', [partition ? session.codePart(partition.id) : '']), value: 0 },
   { label: $t('compteD', [partition ? session.codePart(partition.id) : '']), value: 1 }
-]
-if (session.espace.opt > 0) optionsOSA.push({ label: $t('compteA'), value: 2 })
+] : []
+if (session.espace.opt) optionsOSA.push({ label: $t('compteA'), value: 2 })
 
 const isPwd = ref(false)
 const max = ref([])
@@ -157,7 +153,7 @@ const step4 = ref(null)
 const step2 = ref(null)
 const step3 = ref(null)
 const step = ref(0)
-const optOSA = ref(session.estA ? 2 : 0)
+const optOSA = ref(optionsOSA[0].value)
 
 const optionsDon = ref([ { label: $t('pasdon'), value: 0}])
 for (const d of cfg.dons) optionsDon.value.push({ label: $t('don', [d]), value: d})
@@ -293,7 +289,7 @@ async function confirmer () {
 .q-stepper--bordered
   border: none
 .q-stepper__tab
-  padding: 10px 0 !important
+  padding: 10px 5px !important
 .q-stepper__step-inner
   padding: 0px 2px 2px 18px !important
 .q-stepper__nav
