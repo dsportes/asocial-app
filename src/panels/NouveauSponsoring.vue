@@ -281,17 +281,6 @@ async function confirmer () {
   overflow-y: auto
 .q-dialog__inner
   padding: 0 !important
-</style>
-
-<style lang="sass">
 .bordt
   border-top: 1px solid $grey-5
-.q-stepper--bordered
-  border: none
-.q-stepper__tab
-  padding: 10px 5px !important
-.q-stepper__step-inner
-  padding: 0px 2px 2px 18px !important
-.q-stepper__nav
-  padding: 5px 0 !important
 </style>

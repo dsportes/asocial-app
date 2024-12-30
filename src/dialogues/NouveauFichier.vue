@@ -245,4 +245,6 @@ function selFic () {
   border: 1px solid $grey-5
   padding: 3px
   border-radius: 5px
+.bordt
+  border-top: 1px solid $grey-5
 </style>

@@ -75,6 +75,7 @@ export default {
   don: 'Don de {0}c', // PageSponsoring NouveauSponsoring
   pasdon: 'Pas de don', // PageSponsoring NouveauSponsoring
   conf: 'Contact CONFIDENTIEL, sans "chat"', // ...
+  conf2: 'Contact avec "chat"', // ...
   total: 'Total', // PageEspace
   ping: 'Ping', // OutilsTests
 
@@ -1892,7 +1893,7 @@ La "consommation mensuelle" de calcul est en centimes et est la somme des coûts
   A_page_login_pp: 'Le "presse-papier" de notes et fichiers',
   A_nouvelle_version: '"Nouvelle version disponible"',
 
-  A_page_sponsoring: 'Sponsoriser des comptes',
+  A_page_sponsoring: 'Sponsorings en cours et récents',
   A_sponsoring_d: 'Déclarer un sponsoring',
   A_sponsoring_a: 'Accepter ou refuser un sponsoring',
 

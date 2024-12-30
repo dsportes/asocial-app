@@ -4,57 +4,64 @@
     <q-toolbar>
       <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
       <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('NPtit')}}</q-toolbar-title>
-      <bouton-help page="page1"/>
+      <bouton-help page="sponsoring_a"/>
     </q-toolbar>
   </q-header>
 
   <q-page-container>
     <q-page class="q-pa-sm">
-    <q-stepper v-model="step" vertical color="primary" animated>
-      <q-step name="0" :title="$t('NPst' + sp.st, [dhcool(sp.dh)])"
-          class="titre-md" icon="settings" :done="step > '0'">
+    <q-stepper v-model="step" vertical animated header-class="titre-lg"
+      done-color="positive" active-color="white" inactive-color="secondary">
 
-        <div class="titre-md">{{$t('NPphr')}}
-          <span class="q-ml-sm font-mono text-bold fs-md">{{pc.phrase}}</span>
-        </div>
-        <div class="titre-md">{{$t('NPdlv')}}
-          <span class="q-ml-sm font-mono text-bold fs-md">{{AMJ.editDeAmj(sp.dlv)}}</span>
-        </div>
-        <div class="titre-md">{{$t('NPnom')}}
-          <span class="text-bold font-mono q-px-md">{{sp.nom}}</span>
-        </div>
-        <div class="q-mt-md titre-md">{{$t('NPsponsor')}}</div>
-        <div class="row items-start">
-          <img class="photomax col-auto q-mr-sm" :src="sp.cv.photo" />
-          <div class="col column">
-            <div>
-              <span class="text-bold fs-md q-mr-sm">{{sp.cv.nomc}}</span> 
-              <span class="text-bold fs-sm font-mono q-mr-sm">#{{sp.cv.id}}</span> 
+      <q-step name="0" :title="$t('NPst' + sp.st, [dhcool(sp.dh)])"
+        icon="settings" :done="step > '0'">
+        <div class="titre-md column q-gutter-sm">
+          <div class="titre-md">{{$t('NPnom')}}
+            <span class="text-bold font-mono q-px-md">{{sp.nom}}</span>
+          </div>
+
+          <div class="titre-md">{{$t('NPdlv')}}
+            <span class="q-ml-sm font-mono text-bold fs-md">{{AMJ.editDeAmj(sp.dlv)}}</span>
+          </div>
+
+          <div class="titre-md">{{$t('NPphr')}}
+            <span class="q-ml-sm font-mono text-bold fs-md">{{pc.phrase}}</span>
+          </div>
+          
+          <div class="titre-md column">
+            <div class="row items-center q-gutter-md">
+              <div>{{$t('NPsponsor')}}</div>
+              <div class="text-bold">{{sp.cv.nomC}}</div> 
+              <div class="text-bold fs-sm font-mono">#{{sp.cv.id}}</div>
             </div>
-            <show-html v-if="sp.cv.texte" class="q-my-xs border1" zoom maxh="4rem" :texte="sp.cv.texte"/>
-            <div v-else class="text-italic">{{$t('FAnocv')}}</div>
+            <div class="row">
+              <img class="photomax col-auto q-mr-sm" :src="sp.cv.photo" />
+              <show-html class="col column border1" zoom maxh="4rem" :texte="sp.cv.texte"/>
+            </div>
+          </div>
+
+          <div v-if="sp.estA" class="titre-md">{{$t('compteA')}}</div>
+          <div v-else class="titre-md">{{$t(sp.del ? 'compteD' : 'compteO', [sp.partitionId || ''])}}</div>
+
+          <div>{{$t('don', [sp.don])}}</div>
+
+          <div>{{$t('conf' + (sp.dconf ? '' : '2'))}}</div>
+
+          <div>
+            <div class="titre-md">{{$t('NPquo')}}</div>
+            <quotas-vols class="q-ml-md" :vols="sp.quotas"/>
+          </div>
+
+          <div>
+            <div class="titre-md">{{$t('NPmot')}}</div>
+            <show-html class="border1" zoom maxh="4rem" :texte="sp.ard"/>
           </div>
         </div>
 
-        <div v-if="sp.estA" class="text-warning titre-md text-bold">{{$t('compteA')}}</div>
-        <div v-if="sp.don" class="titre-md">{{$t('NPdon', [sp.don])}}</div>
-
-        <div v-if="sp.dconf">{{$t('conf')}}</div>
-
-        <div :class="'titre-md ' + (sp.del ? 'text-warning' : 'text.primary')">
-          {{$t(sp.del ? 'compteD' : 'compteO', [sp.partitionId])}}
-        </div>
-
-        <div class="titre-md">{{$t('NPquo')}}</div>
-        <quotas-vols class="q-ml-md" :vols="sp.quotas"/>
-
-        <div class="titre-md q-mt-xs">{{$t('NPmot')}}</div>
-        <show-html class="q-mb-xs border1" zoom maxh="4rem" :texte="sp.ard"/>
-
         <q-stepper-navigation class="font-def" >
           <btn-cond flat @ok="ui.fd" icon="undo" :label="$t('renoncer')"/>
-          <btn-cond class="q-ml-sm" @ok="step='1'" :label="$t('NPacc')"/>
-          <btn-cond class="q-ml-sm" @ok="step='2'" :label="$t('NPdec')"/>
+          <btn-cond class="q-ml-sm" @ok="step='1'" icon="check" :label="$t('NPacc')"/>
+          <btn-cond class="q-ml-sm" @ok="step='2'" icon="close" :label="$t('NPdec')"/>
         </q-stepper-navigation>
       </q-step>
 
@@ -66,10 +73,10 @@
           <editeur-md mh="10rem" v-model="texte" :texte="textedef" editable modetxt/>
           
           <q-stepper-navigation class="font-def">
-            <btn-cond flat @ok="step='0'" :label="$t('precedent')" class="q-ml-sm" />
-            <btn-cond flat class="q-ml-sm" @ok="fermer" :label="$t('renoncer')"/>
+            <btn-cond flat @ok="step='0'" icon="arrow_upward" :label="$t('precedent')" class="q-ml-sm" />
+            <btn-cond flat class="q-ml-sm" @ok="fermer" icon="undo" :label="$t('renoncer')"/>
             <btn-cond class="q-ml-sm" @ok="confirmer" :disable="texte.length === 0"
-              color="warning" :label="$t('APAconf')"/>
+              color="warning" icon="arrow_downward" :label="$t('APAconf')"/>
           </q-stepper-navigation>
         </div>
       </q-step>
@@ -79,9 +86,9 @@
         <editeur-md mh="10rem" v-model="texte" :texte="textedef" editable modetxt/>
       
         <q-stepper-navigation class="font-def">
-          <btn-cond flat @ok="step='0'" :label="$t('precedent')" class="q-ml-sm" />
-          <btn-cond flat class="q-ml-sm" @ok="fermer" :label="$t('renoncer')"/>
-          <btn-cond @ok="refuser" color="warning" :disable="texte.length === 0"
+          <btn-cond flat @ok="step='0'" icon="arrow_upward" :label="$t('precedent')" class="q-ml-sm" />
+          <btn-cond flat class="q-ml-sm" icon="undo" @ok="fermer" :label="$t('renoncer')"/>
+          <btn-cond @ok="refuser" color="warning" icon="close" :disable="texte.length === 0"
             :label="$t('APAdec2')" class="q-ml-sm" />
         </q-stepper-navigation>
       </q-step>
@@ -133,6 +140,7 @@ watch(step, (ap, av) => {
   if (ap === '1' && !ps.value) {
     ui.ps = {
       labelValider: 'ok',
+      labelRenoncer: 'precedent',
       verif: true,
       orgext: props.org,
       ok: okps,
@@ -160,7 +168,7 @@ async function okps (p) {
       return
     }
     ps.value = p
-  }
+  } else step.value = '0'
 }
 
 async function confirmer () {
@@ -183,12 +191,6 @@ async function refuser () {
 .border1
   border-top: 1px solid $grey-5
   border-bottom: 1px solid $grey-5
-.q-stepper--bordered
-  border: none
-.q-stepper__tab
-  padding: 10px 0 !important
-.q-stepper__step-inner
-  padding: 0px 2px 2px 18px !important
-.q-stepper__nav
-  padding: 5px 0 !important
+.bordt
+  border-top: 1px solid $grey-5
 </style>

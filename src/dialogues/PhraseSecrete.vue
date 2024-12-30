@@ -47,8 +47,8 @@
         </div>
         <div v-else></div>
         <div>
-          <btn-cond class="q-mr-sm" flat icon="undo" :label="$t('renoncer')" @ok="ko"/>
-          <btn-cond color="warning" :label="labelVal()" :icon-right="iconValider"
+          <btn-cond class="q-mr-sm" flat icon="undo" :label="labelRenoncer" @ok="ko"/>
+          <btn-cond color="warning" :label="labelVal()" :icon="iconValider"
             :disable="!ligne1 || ligne1.length < lgph || !orgL"
             @ok="ok" />
         </div>
@@ -107,6 +107,7 @@ const vkb = ref(false)
 const iconValider = ref(ui.ps.iconValider || 'check')
 const verif = ref(ui.ps.verif || false) // vérifier par double saisie
 const labelValider = ref(ui.ps.labelValider || '')
+const labelRenoncer = ref($t(ui.ps.labelRenoncer || 'renoncer'))
 // Vient de login: proposer le raz de la base locale ET enregistrer org
 const login = ref(ui.ps.login || false)
 const orgext = ref(ui.ps.orgext || '') // le code de l'organisation a été saisi en dehors de ce dialogue
@@ -200,17 +201,6 @@ watch(ligne1, (ap) => {
     forceInput(s)
   }
 })
-
-/*
-watch(ligne1, (ap) => {
-  if (ap && ap.length === 3 && ap.startsWith('*')) {
-    const c = ap.substring(1, 3)
-    let s = ''
-    for (let i = 0; i < (lgph / 2); i++) s += c
-    forceInput(s)
-  }
-})
-*/
 
 watch(razdb, async (ap) => {
   if (ap === true) await afficherDiag($t('LOGrazbl'))

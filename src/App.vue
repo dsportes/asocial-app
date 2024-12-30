@@ -611,6 +611,18 @@ un élément qui apparaît quand le drawer est caché*/
 @import './css/app.sass'
 .ttip
   min-width: 15rem
+.q-stepper--bordered
+  border: none
+.q-stepper__tab
+  padding: 10px 5px !important
+.q-stepper__step-inner
+  padding: 0px 2px 2px 18px !important
+.q-stepper__nav
+  padding: 5px 0 !important
+.q-stepper__title
+  font-family: "Comfortaa" !important
+  font-size:  1.1rem !important
+  font-weight: bold !important
 </style>
 
 <style lang="sass" scoped>

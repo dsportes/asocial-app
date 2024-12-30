@@ -30,11 +30,11 @@
           </div>
 
           <div v-if="sp.estA" class="titre-md">{{$t('compteA')}}</div>
-          <div v-else class="titre-md">{{$t(sp.del ? 'compteD' : 'compteO', [sp.partitionId || 0])}}</div>
+          <div v-else class="titre-md">{{$t(sp.del ? 'compteD' : 'compteO', [sp.partitionId || ''])}}</div>
             
           <div>{{$t('don', [sp.don])}}</div>
 
-          <div v-if="sp.dconf">{{$t('conf')}}</div>
+          <div>{{$t('conf' + (sp.dconf ? '' : '2'))}}</div>
 
           <div>
             <div class="titre-md">{{$t('NPquo')}}</div>
