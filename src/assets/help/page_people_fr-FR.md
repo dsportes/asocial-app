@@ -30,7 +30,7 @@ Le contact n'est retenu dans la liste résultat **que si le compte lui a attach�
 #### N'AYANT AUCUN DES HASHTAGS
 Le contact n'est retenu dans la liste résultat **que si le compte ne lui a attaché AUCUN DES hashtags cités**.
 
-# Détail d'un contact listé | contact_detail
+# Détail d'un contact listé
 _En dépliant_ un des contact on fait apparaître:
 - sa _carte de visite_,
 - _son alias / commentaire et les hashtags attribués personnellement_ au contact: ils peuvent être mis à jour.

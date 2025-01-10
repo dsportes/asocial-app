@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { $t, hms } from '../app/util.mjs'
 
 const seuillarge = 900
-const pagesF = new Set(['admin', 'chats', 'partition', 'people', 'groupes', 'groupesac', 'groupe', 'invitation', 'notes'])
+const pagesF = new Set(['admin', 'chats', 'partition', 'people', 'groupes', 'groupesac', 'groupe', 'contactgr', 'notes'])
 const tabF = new Set(['espaces', 'membres'])
 const pagesB = new Set(['espace', 'compte', 'groupes', 'groupesac'])
 
@@ -252,7 +252,6 @@ export const useUiStore = defineStore('ui', {
     selectContact (id) {
       this.selContact = id
       this.egrplus = false
-      // TODO revenir au dialogue de nouveau contact
     }
 
   }

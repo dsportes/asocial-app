@@ -26,7 +26,7 @@
       "compta_chats" 
     ],
     ["page_groupes",
-      "page_groupe", "dial_una", "dial_heb", "dial_contact", "dial_invit",
+      "page_groupe", "page_contactgr", "dial_una", "dial_heb", "dial_invit",
       "dial_droits", "dial_radiation", "chatgr"
     ],
     "page_people", 
@@ -48,7 +48,7 @@
     "htcomm_maj",
     "chat_nouveau",
     "chat_maj",
-    "suppr-avatar"
+    "suppr_avatar"
   ],
   ["how_to",
     "ht_sponsoriser",

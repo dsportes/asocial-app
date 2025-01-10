@@ -1,4 +1,4 @@
-Lire dans la documentation générale<a href="$$/appli/comptes.html" target="_blank">Les comptes et leurs avatars</a>
+Lire dans la documentation générale: <a href="$$/appli/comptes.html" target="_blank">Les comptes et leurs avatars</a>
 
 ## Sponsorings en cours et récents
 

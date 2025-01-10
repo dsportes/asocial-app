@@ -184,7 +184,7 @@
           <filtre-stmb nom="groupe" prop="stmb" :idx="1"/>
           <filtre-ambno nom="groupe" prop="ambno" :idx="0"/>
         </div>
-        <div v-if="ui.page === 'invitation'" class="column justify-start">
+        <div v-if="ui.page === 'contactgr'" class="column justify-start">
           <filtre-nom nom="people" prop='nom' :idx="0"/>
           <filtre-mc nom="people" attr="mcp" :idx="1"/>
           <filtre-mc nom="people" attr="mcn" :idx="0"/>
@@ -222,7 +222,7 @@
       <page-groupes tous class="page" v-if="ui.page === 'groupes'"/>
       <page-groupes class="page" v-if="ui.page === 'groupesac'"/>
       <page-groupe class="page" v-if="ui.page === 'groupe'"/>    
-      <page-invitation class="page" v-if="ui.page === 'invitation'"/>    
+      <page-contactgr class="page" v-if="ui.page === 'contactgr'"/>    
       <page-notes class="page" v-if="ui.page === 'notes'"/>    
       <page-ficav class="page" v-if="ui.page === 'ficavion'"/>
     </transition-group>
@@ -479,7 +479,7 @@ import PageGroupes from './pages/PageGroupes.vue'
 
 // Niveau 10
 import PageGroupe from './pages/PageGroupe.vue'
-import PageInvitation from './pages/PageInvitation.vue'
+import PageContactgr from './pages/PageContactgr.vue'
 
 const $t = useI18n().t
 const $q = useQuasar()
@@ -531,7 +531,7 @@ const titrePage = computed(() => {
     case 'sponsorings' : { arg = aSt.avC ? people.getCV(session.avatarId).nom : '?'; break }
     case 'groupesac' : { arg = aSt.avC ? people.getCV(session.avatarId).nom : '?'; break }
     case 'groupe' : { arg = gSt.egrC ? people.getCV(session.groupeId).nom : $t('disparu'); break }
-    case 'invitation' : { arg = gSt.egrC ? people.getCV(session.groupeId).nom : $t('disparu'); break }
+    case 'contactgr' : { arg = gSt.egrC ? people.getCV(session.groupeId).nom : $t('disparu'); break }
   }
   return $t('P' + p, [arg])
 })

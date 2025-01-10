@@ -4,7 +4,7 @@
   <div v-if="ui.pagetab==='groupe' && gSt.egrC" class="q-pa-sm spmd column justify-center">
     <div class="row q-mt-lg q-mb-md justify-around">
       <btn-cond icon="people" cond="cEdit"
-        :label="$t('PGinvitation')" @ok="ui.setPage('invitation')"/>
+        :label="$t('PGajctc')" @ok="ui.setPage('contactgr')"/>
       <btn-cond v-if="gSt.ambano[0]" icon="chat" :label="$t('PGchat')" cond="cVisu"
         @ok="ui.oD('ACGouvrir', idc)"/>
     </div>

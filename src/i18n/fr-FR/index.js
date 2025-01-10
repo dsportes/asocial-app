@@ -1276,7 +1276,7 @@ export default {
   PIfi: 'Seulement ceux proposables',
 
   // Page groupe(s)
-  PGinvitation: 'Ajouter un contact',
+  PGajctc: 'Ajouter un contact',
   PGvide: 'Aucun groupe (sur {0}) ne répond au critère de filtre',
   PGvut: 'Réellement utilisé',
   PGvq: 'Somme des maximum attribués',
@@ -1871,10 +1871,10 @@ La "consommation mensuelle" de calcul est en centimes et est la somme des coûts
 
   A_page_groupes: 'Page des participations aux groupes',
   A_page_groupe: 'Page de détail d\'un groupe',
+  A_page_contactgr: 'Page d\'ajout d\'un contact à un groupe',
   A_chatgr: 'Chatter dans un groupe',
   A_dial_una: 'Invitation à un groupe: modes SIMPLE / UNANIME',
   A_dial_heb: 'Gérer l\'hébergement d\'un groupe',
-  A_dial_contact: 'Ajouter un contact à un groupe',
   A_dial_invit: 'Invitation à un groupe, acceptation, refus',
   A_dial_droits: 'Gérer les droits d\'un membre dans un groupe',
   A_dial_radiation: 'Radier un membre d\'un groupe',
@@ -1935,7 +1935,6 @@ La "consommation mensuelle" de calcul est en centimes et est la somme des coûts
   A_htcomm_maj: 'Édition des commentaires / hashtags personnels',
   A_chat_nouveau: 'Création d\'un nouveau "chat"',
   A_chat_maj: 'Visualisation et édition d\'un "chat"',
-  A_contact_detail: 'Fiche détaillé d\'un contact',
   A_suppr_avatar: 'Suppression d\'un avatar ou compte',
 
   A_special: 'Administration Technique',

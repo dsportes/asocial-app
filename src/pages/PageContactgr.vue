@@ -125,7 +125,7 @@ function select (p) {
 async function okAjouter () {
   const r = await new NouveauContact().run()
   if (r) await afficher8000(r, session.peopleId, session.groupeId)
-  else ui.setPage('groupe', 'groupe')
+  else ui.setPage('groupe', 'membres')
 }
 
 </script>
