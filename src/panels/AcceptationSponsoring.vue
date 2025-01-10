@@ -24,9 +24,9 @@
             <span class="q-ml-sm font-mono text-bold fs-md">{{AMJ.editDeAmj(sp.dlv)}}</span>
           </div>
 
-          <div class="titre-md">{{$t('NPphr')}}
+          <!--div class="titre-md">{{$t('NPphr')}}
             <span class="q-ml-sm font-mono text-bold fs-md">{{pc.phrase}}</span>
-          </div>
+          </div-->
           
           <div class="titre-md column">
             <div class="row items-center q-gutter-md">
@@ -59,7 +59,7 @@
         </div>
 
         <q-stepper-navigation class="font-def" >
-          <btn-cond flat @ok="ui.fd" icon="undo" :label="$t('renoncer')"/>
+          <btn-cond flat @ok="ui.fD" icon="undo" :label="$t('renoncer')"/>
           <btn-cond class="q-ml-sm" @ok="step='1'" icon="check" :label="$t('NPacc')"/>
           <btn-cond class="q-ml-sm" @ok="step='2'" icon="close" :label="$t('NPdec')"/>
         </q-stepper-navigation>
