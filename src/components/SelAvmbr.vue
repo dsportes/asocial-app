@@ -1,20 +1,10 @@
 <template>
-<span class="row items-center">
-  <span class="text-italic text-bold q-mr-sm">{{$t('SAVtit')}}</span>
-  <q-select v-model="cav" borderless dense standard filled
-    :options="options" style="min-width:120px;max-width:240px">
-    <template v-slot:option="scope">
-      <div v-bind="scope.itemProps" 
-        class="cursor-pointer bg-accent full-width text-white text-bold q-pa-sm">
-        {{ scope.opt.label }}
-      </div>
-    </template>
-  </q-select>
-</span>
+<sel-genx v-model="cav" :options="options" :titre="$t('SAVtit')"/>
 </template>
 
 <script setup>
 import { ref, computed, watch } from 'vue'
+import SelGenx from './SelGenx.vue'
 import stores from '../stores/stores.mjs'
 
 const props = defineProps({ 
@@ -56,10 +46,4 @@ watch(cav, (ap) => {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.q-item
-  min-height: 20px !important
-  padding: 3px 1rem !important
-.bord9
-  border: 2px solid $grey-5
-  border-radius: 5px
 </style>

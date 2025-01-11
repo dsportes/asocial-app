@@ -7,11 +7,10 @@
     <div class="col">
       <div class="row justify-between items-center">
         <div class="row q-gutter-sm">
-          <span class="text-bold titre-lg">{{cv.nomC}}</span> 
+          <span class="text-bold titre-lg">{{cv.nom}}</span> 
           <span v-if="estAvc" class="fs-md">[{{$t('moi')}}]</span> 
           <span v-if="del && !estComptable" class="fs-md">[{{$t('delegue')}}]</span> 
           <span v-if="estGroupe || estPeople" class="fs-sm font-mono">{{'#' + id}}</span> 
-          <span v-if="im" class="fs-sm font-mono">{{'[' + im + ']'}}</span> 
         </div>
         <div v-if="estGroupe" class="col-auto row q-gutter-xs">
           <btn-cond v-if="estAnim" icon="badge" round stop @ok="edcv"/>
@@ -78,7 +77,6 @@ const $t = useI18n().t
 const props = defineProps({ 
   id: String, // id du groupe, avatar du compte ou contact
   del: Boolean, // true si délégué, pour l'afficher
-  im: Number, // pour un membre pour l'afficher
   nochgr: Boolean, // true ne pas afficher chats et groupes
   idx: Number,
   urgence: Boolean // true si invoqué depuis tab URGENCE

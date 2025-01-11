@@ -1,9 +1,17 @@
 Lire dans la documentation générale, lire <a href="$$/appli/groupes.html" target="_blank">Les groupes et leurs notes</a>
 
 ## Page des participations aux groupes
-Un bouton en haut de la page ouvre le dialogue de création d'un nouveau groupe.
+Un bouton en haut de la page ouvre le dialogue de **création d'un nouveau groupe**.
 
-Cette page affiche tous les groupes dans lesquels les avatars du compte sont mentionnés,
+Un tableau synthétise l'impact sur les quotas du compte des groupes **hébergés par le compte**:
+- nombre de notes: 
+  - nombre total des notes effectivement existantes dans ces groupes,
+  - total des nombres maximum des notes fixés par le compte à chacun des groupes qu'il héberge.
+- volume des fichiers attachés à ces notes:
+  - volume réellement occupé,
+  - somme des volumes maximum fixés par le compte.
+
+Cette page affiche ensuite tous les groupes dans lesquels les avatars du compte sont mentionnés,
 - soit comme _simple contact_ (non actif),
 - soit comme _invité_ mais n'ayant pas encore accepté ou refusé cette invitation,
 - soit comme membre _actif_ (voire _animateur_).

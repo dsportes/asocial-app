@@ -2,24 +2,14 @@
 <span>
   <span v-if="options && options.l.length === 0" class="msg">{{$t('SAVz1')}}</span>
   <span v-if="options && options.l.length === 1" class="titre-md">{{$t('SAVz0', [options.l[0].label]) }}</span>
-  <span v-if="options  && options.l.length > 1" class="row items-center">
-    <span class="text-italic text-bold q-mr-sm">{{$t('SAVz3')}}</span>
-    <q-select v-model="cav" borderless dense standard filled
-      :options="options.l" style="min-width:120px;max-width:240px">
-      <template v-slot:option="scope">
-        <div v-bind="scope.itemProps" 
-          class="cursor-pointer bg-accent full-width text-white text-bold q-pa-sm">
-          {{ scope.opt.label }}
-        </div>
-      </template>
-    </q-select>
-  </span>
+  <sel-genx v-model="cav" v-if="options  && options.l.length > 1" 
+    :options="options.l" :titre="$t('SAVz3')"/>
 </span>
 </template>
 
 <script setup>
 import { ref, computed, watch } from 'vue'
-
+import SelGenx from './SelGenx.vue'
 import stores from '../stores/stores.mjs'
 
 const cav = ref()

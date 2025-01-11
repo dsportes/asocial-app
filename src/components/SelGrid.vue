@@ -1,15 +1,10 @@
 <template>
-<span class="row items-center">
-  <span class="text-italic text-bold q-mr-sm">{{$t('SGRtit')}}</span>
-  <q-select v-model="cav" borderless dense options-dense standard filled
-    :options="options" style="min-width:120px;max-width:240px"
-    popup-content-class="bg-accent text-white titre-lg text-bold q-pa-sm"/>
-</span>
+<sel-genx v-model="cav" :options="options" :titre="$t('SGRtit')"/>
 </template>
 
 <script setup>
 import { ref, computed, watch } from 'vue'
-
+import SelGenx from './SelGenx.vue'
 import stores from '../stores/stores.mjs'
 
 const props = defineProps({ 

@@ -52,12 +52,12 @@
   <div class="spmd" v-else>
     <q-card v-for="(e, idx) in pg.r" :key="e.groupe.id" :class="dkli(idx) + 'q-mb-md'">
       <apercu-genx :id="e.groupe.id" :idx="idx" />
+      <div v-if="e.groupe.dfh" class="q-mr-sm">
+        <q-icon name="warning" size="md" color="negative"/>
+        <span class="q-ml-xs msg">{{$t('AGnheb', [AMJ.editDeAmj(e.groupe.dfh)])}}</span>
+      </div>
       <div class="row full-width items-center justify-between">
         <div>
-          <div v-if="e.groupe.dfh" class="q-mr-sm">
-            <q-icon name="warning" size="md" color="negative"/>
-            <span class="q-ml-xs q-pa-xs bg-yellow-3 text-negative">{{$t('PGnh')}}</span>
-          </div>
           <div class="q-mr-sm">
             <q-icon v-if= "nbiv(e)" class="q-mr-xs" name="star" size="md" color="green-5"/>
             <span class="text-italic">{{$t('PGinv', nbiv(e), {count: nbiv(e)})}}</span>
@@ -72,10 +72,6 @@
       </div>
     </q-card>
   </div>
-
-  <!--<q-dialog v-model="ui.d[idc].IAaccinvit" full-height persistent position="left">
-    <invitation-acceptation :inv="inv"/>
-  </q-dialog>-->
 
   <!-- Acceptation / refus de l'invitation -->
   <dial-std2 v-if="m2" v-model="m2" :titre="titinv">
@@ -125,7 +121,7 @@ import ApercuChatgr from '../panels/ApercuChatgr.vue'
 import InvitationAcceptation from '../components/InvitationAcceptation.vue'
 import DialStd1 from '../dialogues/DialStd1.vue'
 import DialStd2 from '../dialogues/DialStd2.vue'
-import { UNITEN, UNITEV } from '../app/api.mjs'
+import { AMJ, UNITEN, UNITEV } from '../app/api.mjs'
 import { NouveauGroupe, AnnulerContact } from '../app/operations4.mjs'
 
 const props = defineProps({ tous: Boolean })

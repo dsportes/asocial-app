@@ -1051,6 +1051,13 @@ export class Groupe extends GenDoc {
     return false
   }
 
+  get cptSetIm () {
+    const session = stores.session
+    const s = new Set()
+    for(const ida of session.compte.mav) s.add(this.mmb.get(ida))
+    return s
+  }
+
   get cptOkExclu () {
     if (!this.im) return true
     const session = stores.session

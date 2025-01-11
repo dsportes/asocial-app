@@ -125,7 +125,7 @@ a accès aux membres (donc dans l'onglet "membres").
       <div v-if="tropGros" class="titre-lg msg">{{$t('AMinvittg', [MAXTAILLEGROUPE])}}</div>
       <div v-if="ln" class="titre-md msg">{{$t('AMenln')}}</div>
 
-      <!--affiche l'avatar du compte animateur choisi, en forçante à choisir, si choix il y a -->
+      <!--affiche l'avatar du compte animateur choisi, en forçant à choisir, si choix il y a -->
       <sel-avidgr/>
     
       <div class="row justify-betwwen items-end">

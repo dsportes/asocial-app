@@ -2,7 +2,7 @@
 <q-page>
   <!-- Tab "groupe" -------------------------------------------------->
   <div v-if="ui.pagetab==='groupe' && gSt.egrC" class="q-pa-sm spmd column justify-center">
-    <div class="row q-mt-lg q-mb-md justify-around">
+    <div v-if="amb" class="row q-mt-lg q-mb-md justify-around">
       <btn-cond icon="people" cond="cEdit"
         :label="$t('PGajctc')" @ok="ui.setPage('contactgr')"/>
       <btn-cond v-if="gSt.ambano[0]" icon="chat" :label="$t('PGchat')" cond="cVisu"
@@ -11,11 +11,6 @@
 
     <div>
       <apercu-genx :id="idg" :idx="0"/>
-
-      <div v-if="gr.dfh" class="q-mr-sm">
-        <q-icon name="warning" size="md" color="negative"/>
-        <span class="q-ml-xs q-pa-xs bg-yellow-3 text-negative">{{$t('PGnh')}}</span>
-      </div>
 
       <div class="q-mr-sm">
         <q-icon v-if="nbiv" class="q-mr-xs" name="star" size="md" color="green-5"/>
@@ -28,12 +23,13 @@
       <div class="q-my-sm row justify-between">
         <div v-if="gr.msu" class="titre-md text-bold text-warning">{{$t('AGunanime')}}</div>
         <div v-else class="titre-md">{{$t('AGsimple')}}</div>
-        <btn-cond class="col-auto q-ml-sm self-start" size="sm" :label="$t('gerer')"
+        <btn-cond class="col-auto q-ml-sm self-start" round
           icon="settings" @ok="editUna" cond="cVisu"/>
       </div>
 
-      <q-expansion-item class="full-width q-mt-sm q-mb-xs" switch-toggle-side header-class="tbp titre-lg"
-        :label="$t('AGheb' + (gr.dfh ? '2' : '1'))" expand-separator>
+      <q-expansion-item class="full-width q-mt-sm q-mb-xs" switch-toggle-side 
+        :header-class="'titre-lg ' + (gr.dfh ? 'tbw' : 'tbp')"
+        :label="$t('AGheb' + (gr.dfh ? '2' : '1'))">
         <div class="q-ma-sm">
           <div class="row justify-between">
             <div v-if="!gr.dfh" class="row">
@@ -50,7 +46,7 @@
       </q-expansion-item>
 
       <q-expansion-item class="full-width" switch-toggle-side header-class="tbp titre-lg"
-        :label="$t('AGstm')" expand-separator>
+        :label="$t('AGstm')">
         <div class="spsm q-mt-sm">
           <div class="row items-center titre-md text-italic justify-around">
             <div v-for="i in 5" :key="i" class="col-2 text-center">{{$t('AGsts' + i)}}</div>
@@ -63,12 +59,12 @@
     </div>
 
     <div  v-if="mesav">
-      <div class="titre-lg full-width text-center tbs q-my-sm q-pa-xs">
+      <div class="titre-lg full-width text-center tbs q-mt-lg q-pa-xs">
         {{$t('PGmesav', mesav.length)}}
       </div>
       
       <div v-if="mesav.length">
-        <div v-for="(id, idx) of mesav" :key="id" class="q-mt-sm">
+        <div v-for="(id, idx) of mesav" :key="id" class="q-my-sm">
           <apercu-membre :id="id" :idx="idx"/>
           <!--div>{{session.getCV(id).nom}}</div-->
           <q-separator v-if="idx < (sav.size - 1)" color="orange"/>
@@ -78,7 +74,7 @@
   </div>
 
   <!-- Tab "membres" -------------------------------------------------->
-  <div v-if="ui.pagetab==='membres' && gSt.egrC" class="q-pa-sm spmd">
+  <div v-if="ui.pagetab==='membres' && gSt.egrC">
     <div v-if="amb">
       <div><btn-cond cond="cEdit" icon="check" :label="$t('PGrafcvs')" @ok="rafCvs"/></div>
       <div v-if="!nb" class="titre-lg text-italic">
@@ -91,7 +87,7 @@
           class="q-my-lg" :id="e.id" :idx="idx"/>
       </div>
     </div>
-    <div v-else class="titre-lg text-italic">{{$t('PGnoamb')}}</div>
+    <div v-else class="titre-lg text-italic q-pa-sm">{{$t('PGnoamb')}}</div>
   </div>
 
   <!-- Gérer le mode simple / unanime -->
@@ -437,8 +433,6 @@ async function chgQ () {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.top3
-  margin-top: 3rem
 .bord
   border: 1px solid var(--q-warning)
   border-radius: 5px !important
