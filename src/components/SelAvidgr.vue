@@ -4,9 +4,15 @@
   <span v-if="options && options.l.length === 1" class="titre-md">{{$t('SAVz0', [options.l[0].label]) }}</span>
   <span v-if="options  && options.l.length > 1" class="row items-center">
     <span class="text-italic text-bold q-mr-sm">{{$t('SAVz3')}}</span>
-    <q-select v-model="cav" borderless dense options-dense standard filled
-      :options="options.l" style="min-width:120px;max-width:240px"
-      popup-content-class="bg-secondary text-white titre-lg text-bold q-pa-sm"/>
+    <q-select v-model="cav" borderless dense standard filled
+      :options="options.l" style="min-width:120px;max-width:240px">
+      <template v-slot:option="scope">
+        <div v-bind="scope.itemProps" 
+          class="cursor-pointer bg-accent full-width text-white text-bold q-pa-sm">
+          {{ scope.opt.label }}
+        </div>
+      </template>
+    </q-select>
   </span>
 </span>
 </template>
