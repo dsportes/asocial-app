@@ -8,6 +8,7 @@ export const useFiltreStore = defineStore('filtre', {
       chats: { tous: true, rac: 0 },
       partition: {},
       people: {},
+      contactgr: { invitables: true },
       groupes: { tous: true },
       groupe: {},
       notes: {},

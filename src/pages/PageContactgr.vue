@@ -4,7 +4,7 @@
       
       <div class="q-my-md titre-lg text-italic">
         {{$t('APnbsel', nblst.nb, { count: nblst.nb})}}
-        <span>{{$t('APsur', [nblst.lst.length])}}</span>
+        <span>{{$t('APsur', [lst1.length])}}</span>
       </div>
 
       <div v-if="nblst.lst.length">
@@ -15,8 +15,8 @@
             <div class="column full-width">
             <div class="row justify-between items-center">
               <div class="row q-gutter-sm items-center">
-                <img :src="session.getCV(p.id).photo" class="photomax"/>
-                <div class="titre-md text-bold">{{session.getCV(p.id).nom}}</div>
+                <img :src="p.cv.photo" class="photomax"/>
+                <div class="titre-md text-bold">{{p.cv.nom}}</div>
               </div>
               <btn-cond v-if="p.d[0] <= 3" style="color:black !important;"
                 cond="cEdit" icon="check" color="green-5" :label="$t('PPctcok')"
@@ -57,7 +57,7 @@
     <q-page-sticky v-if="session.accesNet" position="top" :offset="[0, 0]">
       <div class="row tbs justify-between" style="width:100vw">
         <btn-cond :label="$t('renoncer')" @ok="ui.setPage('groupe', 'groupe')"/>
-        <q-checkbox v-model="propos" :label="$t('PIfi')" />
+        <!--q-checkbox v-model="propos" :label="$t('PIfi')" /-->
         <btn-cond :label="$t('CVraf')" @ok="rafCvs"/>
       </div>
     </q-page-sticky>
@@ -81,26 +81,42 @@ const session = stores.session
 const pSt = stores.people
 const gSt = stores.groupe
 
-const propos = ref(true)
-
 const nomg = computed(() => session.getCV(session.groupeId).nom)
     
-const nblst = computed(() => { 
+const lst1 = computed(() => { 
   const l = []
-  let nb = 0
   session.compte.lstAvatars.forEach(x => {
     const y = { id: x.id }
     y.d = gSt.diagContact(x.id)
-    if (y.d[0] <= 3) nb++
-    if (!y.d[0] || propos.value) l.push(y)
+    y.cv = session.getCV(x.id)
+    l.push(y)
   })
   pSt.map.forEach((x, id) => {
     const y = { id: id }
     y.d = gSt.diagContact(id)
-    if (y.d[0] <= 3) nb++
-    if (!y.d[0] || propos.value) l.push(y)
+    y.cv = session.getCV(id)
+    l.push(y)
   })
-  return { nb, lst: l }
+  l.sort((a, b) => { return a.cv.nom < b.cv.nom ? -1 : (a.cv.nom === b.cv.nom ? 0 : 1)})
+  return l
+})
+
+const nblst = computed(() => { 
+  const l = []
+  let nb = 0
+  const f = stores.filtre.filtre.contactgr
+  const ci = session.compti
+  const fsetp = f.mcp && f.mcp.size ? f.mcp : null
+  const fsetn = f.mcn && f.mcn.size ? f.mcn : null
+  for (const x of lst1.value) {
+    if (f.invitables && x.d[0]) continue
+    if (f.nom && !x.cv.nom.startsWith(f.nom) && (!ci.stW(x.id, f.nom))) continue
+    if (fsetp && !ci.aHT(x.id, fsetp)) continue
+    if (fsetn && ci.aHT(x.id, fsetn)) continue
+    if (x.d[0] < 3) nb++
+    l.push(x)
+  }
+  return { nb, lst: l}
 })
 
 async function rafCvs () {

@@ -754,6 +754,7 @@ export default {
   FIavecsp: 'Seulement les délégués',
   FIavecmut: 'Chats avec MUTATIONS seulement',
   FIavecgr: 'Membre d\'un groupe',
+  FIinvitables: 'Seulement les contacts proposables',
 
   FInotif: 'Ayant une Alerte ... {0}',
   FIstmb: 'Ayant un statut ... {0}',
@@ -1846,6 +1847,7 @@ La "consommation mensuelle" de calcul est en centimes et est la somme des coûts
   Pgroupe: 'Groupe {0}',
   Pinvitation: 'Invitation au groupe {0}',
   Ppeople: 'Tous les contacts',
+  Pcontactgr: 'Tous les contacts',
   Pnotes: 'Toutes les notes',
   Pficavion: 'Fichiers visibles en avion',
   

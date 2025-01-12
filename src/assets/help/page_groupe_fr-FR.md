@@ -75,5 +75,32 @@ Sélectionner tous les membres sans tenir compte de ses droits d'accès OU seulm
 - ni aux membres ni aux notes
 - aux notes en écriture.
 
-# Détail d'un membre
-(TODO)
+# Détail d'un membre | dial_invit dial_droits dial_radiation
+
+### Carte de visite ...
+- _carte de visite_ du membre,
+- _alias / commentaire_ attribué par le compte et visible que par lui.
+- _hashtags_ attribués par le compte et visibles que par lui.
+
+### Statut et droits effectifs
+- statut: contact / pré-invité / invité / actif / animateur
+- droits effectifs applicables: accès aux membres / accès aux notes / accès en écriture aux notes
+
+Un bouton _Information_ détaille les droits entre _droits fixés par l'animateur_ et _droits activés ou non par le compte_
+
+### Actions possibles
+Plusieurs boutons ouvrent des dialogues selon le statut du membre:
+- **INVITATION** : pour gérer l'invitation d'un membre non actif (animateur seulement).
+- **DROITS D'ACCÈS** : pour mettre à jour ses propres droits d'accès ou ceux d'un membre _actif_ autre que soi-même pour un animateur.
+- **RADIATION** : pour s'auto-radier ou radier un membre _actif_ autre que soi-même pour un animateur.
+
+Voir la rubrique d'aide correspondante citée ci-dessus.
+
+### Historique simple
+En _dépliant_ la carte de détail, un historique simple des dates marquantes de la vie du membre dans le groupe apparaît. Par exemple:
+
+    Date de la dernière invitation: 26/12/2024
+    En activité: depuis 26/12/2024
+    A accès aux membres: entre 26/12/2024 et 11/1/2025
+    A accès en lecture aux notes: depuis 26/12/2024
+    A accès en écriture aux notes: jamais

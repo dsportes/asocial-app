@@ -185,9 +185,10 @@
           <filtre-ambno nom="groupe" prop="ambno" :idx="0"/>
         </div>
         <div v-if="ui.page === 'contactgr'" class="column justify-start">
-          <filtre-nom nom="people" prop='nom' :idx="0"/>
-          <filtre-mc nom="people" attr="mcp" :idx="1"/>
-          <filtre-mc nom="people" attr="mcn" :idx="0"/>
+          <filtre-invitables nom="contactgr" prop="invitables" :idx="0"/>
+          <filtre-nom nom="contactgr" prop='nom' :idx="1"/>
+          <filtre-mc nom="contactgr" attr="mcp" :idx="0"/>
+          <filtre-mc nom="contactgr" attr="mcn" :idx="1"/>
         </div>
         <div v-if="ui.page === 'notes'" class="column justify-start">
           <filtre-avgr nom="notes" prop='avgr' :idx="0"/>
@@ -434,6 +435,7 @@ import FiltreNotif from './components/FiltreNotif.vue'
 import FiltreSansheb from './components/FiltreSansheb.vue'
 import FiltreEnexcedent from './components/FiltreEnexcedent.vue'
 import FiltreAinvits from './components/FiltreAinvits.vue'
+import FiltreInvitables from './components/FiltreInvitables.vue'
 import FiltreStmb from './components/FiltreStmb.vue'
 import FiltreAmbno from './components/FiltreAmbno.vue'
 import FiltreAvgr from './components/FiltreAvgr.vue'

@@ -43,19 +43,19 @@
         :style="ui.portrait ? 'height: 50vh;padding-bottom:10px;border-bottom:5px solid grey' : 'height: 80vh;'">
         <show-html v-if="intro" class="q-mx-sm q-my-md" :texte="intro"/>
         <q-expansion-item v-for="c in chaps" :key="c.t" class="q-my-sm"
-          group="somegroup" expand-separator>
+          group="somegroup">
           <template v-slot:header>
             <div class="full-width column chap q-pa-xs">
               <div class="text-bold titre-md">{{c.t}}</div>
               <div v-if="c.m.length" class="self-end q-mr-sm">
                 <div v-for="m in c.m" :key="m.value" @click.stop="goto(m.value)"
-                  class="x1 text-positive text-italic text-bold titre-md cursor-pointer">
+                  class="q-my-xs x1 text-positive text-italic text-bold titre-md cursor-pointer">
                   {{m.label}}
                 </div>
               </div>
             </div>
           </template>
-          <show-html class="q-mx-sm q-mb-md" :texte="c.tx"/>
+          <show-html class="q-mx-sm q-my-md" :texte="c.tx"/>
         </q-expansion-item>
       </q-scroll-area>
 
