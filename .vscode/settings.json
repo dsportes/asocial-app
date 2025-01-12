@@ -1,4 +1,7 @@
 {
   "scm.showIncomingChanges": "auto",
-  "scm.showOutgoingChanges": "auto"
+  "scm.showOutgoingChanges": "auto",
+  "cSpell.words": [
+    "réaffiche"
+  ]
 }

@@ -1461,7 +1461,7 @@ export default {
   AGmx: 'Impossible d\'allouer des quotas supérieurs aux volumes libres sur le compte.',
 
   AGu1: 'Mode "simple" : un seul des animateurs peut "inviter" un contact à être membre du groupe.',
-  AGu2: 'Mode "unanime" : if faut que TOUS les animateurs "invitent" un contact à être membre du groupe pour que l\'invitation soit effective.',
+  AGu2: 'Mode "unanime" : il faut que TOUS les animateurs "invitent" un contact à être membre du groupe pour que l\'invitation soit effective.',
   AGu3: 'Pour revenir au mode "simple", il faut que TOUS les animateurs l\'aient demandé.',
   AGu4: 'Pour passer au mode "unanime", il suffit qu\'UN animateur le demande',
   AGu5: 'Etat des demandes des animateurs',
