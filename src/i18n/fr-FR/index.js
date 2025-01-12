@@ -1876,7 +1876,8 @@ La "consommation mensuelle" de calcul est en centimes et est la somme des coûts
   A_chatgr: 'Chatter dans un groupe',
   A_dial_una: 'Invitation à un groupe: modes SIMPLE / UNANIME',
   A_dial_heb: 'Gérer l\'hébergement d\'un groupe',
-  A_dial_invit: 'Invitation à un groupe, acceptation, refus',
+  A_dial_invit: 'Invitation à un groupe',
+  A_dial_invitack: 'Acceptation / refus d{une invitation à un groupe',
   A_dial_droits: 'Gérer les droits d\'un membre dans un groupe',
   A_dial_radiation: 'Radier un membre d\'un groupe',
 

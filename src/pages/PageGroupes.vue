@@ -74,7 +74,7 @@
   </div>
 
   <!-- Acceptation / refus de l'invitation -->
-  <dial-std2 v-if="m2" v-model="m2" :titre="titinv">
+  <dial-std2 v-if="m2" v-model="m2" :titre="titinv" help="dial_invitack">
     <invitation-acceptation :inv="inv"/>
   </dial-std2>
 
@@ -215,6 +215,7 @@ const ctcOpt = ref(false)
 
 async function ouvaccinv (invx) {
   inv.value = invx
+  session.setGroupeId(inv.value.idg)
   titinv.value = $t('ICtit2', [session.getCV(inv.value.ida).nom, session.getCV(inv.value.idg).nom])
   ctcOpt.value = false
   if (invx.invpar.size) ui.oD('IAaccinvit', idc)

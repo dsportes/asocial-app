@@ -75,7 +75,7 @@ Sélectionner tous les membres sans tenir compte de ses droits d'accès OU seulm
 - ni aux membres ni aux notes
 - aux notes en écriture.
 
-# Détail d'un membre | dial_invit dial_droits dial_radiation
+# Détail d'un membre | dial_invitack dial_invit dial_droits dial_radiation
 
 ### Carte de visite ...
 - _carte de visite_ du membre,

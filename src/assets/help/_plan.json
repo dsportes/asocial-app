@@ -26,7 +26,7 @@
       "compta_chats" 
     ],
     ["page_groupes",
-      "page_groupe", "page_contactgr", "dial_una", "dial_heb", "dial_invit",
+      "page_groupe", "page_contactgr", "dial_una", "dial_heb", "dial_invit", "dial_invitack",
       "dial_droits", "dial_radiation", "chatgr"
     ],
     "page_people", 
