@@ -152,87 +152,89 @@
     </q-dialog>
 
     <q-page-sticky expand position="top" class="splg">
-      <div :class="sty() + ' box2 full-width q-pa-xs'">
-        <div v-if="!selected" class="q-ml-xs titre-md text-italic">{{$t('PNOnosel')}}</div>
-        
-        <div v-if="selected" class="row justify-between">
-          <div class="titre-md">{{lib2}}</div>
-          <div v-if="nSt.note" class="col-auto font-mono fs-sm">
-            <span v-if="nSt.node && nSt.node.note" class="q-mr-xs font-mono fs-sm">#{{nSt.node.note.shIds}}</span>
-            <span class="q-mr-sm">({{edvol(nSt.note.texte.length)}})</span>
-            <span>{{dhcool(nSt.note.d)}}</span>
+      <div :class="sty() + ' box2 full-width q-pa-xs column justify-between'">
+        <div>
+          <div v-if="!selected" class="q-ml-xs titre-md text-italic">{{$t('PNOnosel')}}</div>
+          
+          <div v-if="selected" class="row justify-between">
+            <div class="titre-md">{{lib2}}</div>
+            <div v-if="nSt.note" class="col-auto font-mono fs-sm">
+              <span v-if="nSt.node && nSt.node.note" class="q-mr-xs font-mono fs-sm">#{{nSt.node.note.shIds}}</span>
+              <span class="q-mr-sm">({{edvol(nSt.note.texte.length)}})</span>
+              <span>{{dhcool(nSt.note.d)}}</span>
+            </div>
+            <div v-if="nSt.node.type === 3" class="titre-md text-italic text-bold">
+              {{$t('PNOtype3')}}</div>
+            <div v-if="nSt.node.type === 6 || nSt.node.type === 7" class="titre-md text-italic text-bold">
+              {{$t('PNOtype67')}}</div>
           </div>
-          <div v-if="nSt.node.type === 3" class="titre-md text-italic text-bold">
-            {{$t('PNOtype3')}}</div>
-          <div v-if="nSt.node.type === 6 || nSt.node.type === 7" class="titre-md text-italic text-bold">
-            {{$t('PNOtype67')}}</div>
-        </div>
 
-        <div v-if="selected && nSt.note" class="q-ml-md row"> 
-          <show-html class="col bord1 q-mr-lg" :texte="nSt.note.texte" zoom maxh="4rem" />
-          <btn-cond :disable="rec!==0" class="col-auto self-start" round icon="edit" @ok="ui.oD('NE', idc)"/>
-        </div>
-
-        <liste-auts v-if="selected && nSt.note && nSt.estGr"/>
-
-        <div v-if="selected && nSt.note && !rec" class="q-my-sm row justify-between"> 
-          <div class="col row q-gutter-xs">
-            <span class="text-italic">{{$t('hashtags')}} : </span>
-            <span v-for="ht of nSt.note.tousHt" :key="ht">{{ht}}</span>
+          <div v-if="selected && nSt.note" class="q-ml-md row"> 
+            <show-html class="col bord1 q-mr-lg" :texte="nSt.note.texte" zoom maxh="4rem" />
+            <btn-cond :disable="rec!==0" class="col-auto self-start" round icon="edit" @ok="ui.oD('NE', idc)"/>
           </div>
-          <btn-cond class="col-auto self-start" round icon="edit" @ok="ovHT"/>
-        </div>
 
-        <div v-if="selected && nSt.note && !rec" class="q-my-sm row justify-between">  
-          <div class="col titre-sm">
-            <span :class="!nSt.note.mfa.size ? 'text-italic': ''">
-              {{$t('PNOnf', nSt.note.mfa.size, {count: nSt.note.mfa.size})}}
-            </span>
-            <span class="q-ml-xs">{{nSt.note.mfa.size ? (edvol(nSt.note.vf) + '.') : ''}}</span>
+          <liste-auts v-if="selected && nSt.note && nSt.estGr"/>
+
+          <div v-if="selected && nSt.note && !rec" class="q-my-sm row justify-between"> 
+            <div class="col row q-gutter-xs">
+              <span class="text-italic">{{$t('hashtags')}} : </span>
+              <span v-for="ht of nSt.note.tousHt" :key="ht">{{ht}}</span>
+            </div>
+            <btn-cond class="col-auto self-start" round icon="edit" @ok="ovHT"/>
           </div>
-          <btn-cond class="col-auto self-start" round icon="attach_file" @ok="ui.oD('NF', idc)">
-            <q-tooltip>{{$t('PNOattach')}}</q-tooltip>
-          </btn-cond>
+
+          <div v-if="selected && nSt.note && !rec" class="q-my-sm row justify-between">  
+            <div class="col titre-sm">
+              <span :class="!nSt.note.mfa.size ? 'text-italic': ''">
+                {{$t('PNOnf', nSt.note.mfa.size, {count: nSt.note.mfa.size})}}
+              </span>
+              <span class="q-ml-xs">{{nSt.note.mfa.size ? (edvol(nSt.note.vf) + '.') : ''}}</span>
+            </div>
+            <btn-cond class="col-auto self-start" round icon="attach_file" @ok="ui.oD('NF', idc)">
+              <q-tooltip>{{$t('PNOattach')}}</q-tooltip>
+            </btn-cond>
+          </div>
+
+          <div v-if="selected && nSt.note && !rec && nSt.estGr" class="q-mt-xs q-mb-sm row">  
+            <div v-if="nSt.mbExclu" class="col titre-sm">{{$t('PNOexclu', [nSt.mbExclu.cv.nomC])}}</div>
+            <div v-else class="col text-italic titre-sm">{{$t('PNOnoexclu')}}</div>
+            <btn-cond class="col-auto self-start" round icon="person" @ok="ui.oD('NX', idc)">
+              <q-tooltip>{{$t('PNOexclu3')}}</q-tooltip>
+            </btn-cond>
+          </div>
+
+          <div v-if="selected && nSt.note && rec" class="rec shadow-10">
+            <q-toolbar class="tbs">
+              <btn-cond icon="undo" color="warning"
+                :label="setRatt.size ? $t('renoncer') : $t('jailu')"
+                @ok="anrattacher"/>
+              <q-toolbar-title class="titre-lg text-center">{{$t('PNOrattpos', setRatt.size, {count: setRatt.size})}}</q-toolbar-title>
+            </q-toolbar>
+            <div v-if="setRatt.size && rec===1" class="q-pa-md column items-center q-gutter-md">
+              <div class="titre-lg">{{$t('PNOrattinfo')}}</div>
+              <btn-cond v-if="setRatt.size > maxRatt" icon="unfold_more" :label="$t('PNOdepratt')"
+                @ok="depRatt"/>
+            </div>
+            <div v-if="rec===2" class="q-pa-md column items-center q-gutter-md">
+              <div v-if="!nodeDiag">
+                <span class="text-italic titre-md q-mr-md">{{$t('PNOratta')}}</span>
+                <span class="msg">{{lib(noderatt)}}</span>
+              </div>
+              <div v-if="nodeDiag" class="msg">{{nodeDiag}}</div>
+              <btn-cond v-if="!nodeDiag" icon="check" :label="$t('PNOcfratt')" color="warning" 
+                @ok="okrattacher" cond="cEdit"/>
+              <btn-cond icon="account_tree" :label="$t('PNOratt2')" @ok="rattacher"/>
+            </div>
+          </div>
         </div>
 
-        <div v-if="selected && nSt.note && !rec && nSt.estGr" class="q-mt-xs q-mb-sm row">  
-          <div v-if="nSt.mbExclu" class="col titre-sm">{{$t('PNOexclu', [nSt.mbExclu.cv.nomC])}}</div>
-          <div v-else class="col text-italic titre-sm">{{$t('PNOnoexclu')}}</div>
-          <btn-cond class="col-auto self-start" round icon="person" @ok="ui.oD('NX', idc)">
-            <q-tooltip>{{$t('PNOexclu3')}}</q-tooltip>
-          </btn-cond>
-        </div>
-
-        <div v-if="selected && !rec" class="q-my-xs row q-gutter-xs justify-start items-center">
+        <div v-if="selected && !rec" class="q-my-xs row q-gutter-sm justify-center items-center">
           <note-plus/>
           <btn-cond v-if="nSt.note" color="warning" icon="delete" 
             :label="$t('PNOsupp')" @ok="op='suppr';ui.oD('NC', idc)"/>
           <btn-cond v-if="rattaut" icon="account_tree" :label="$t('PNOratt')" 
             cond="cEdit" @ok="rattacher"/>
-        </div>
-
-        <div v-if="selected && nSt.note && rec===1" class="q-ma-sm">
-          <q-separator color="orange" size="2px" class="q-mb-xs"/>
-          <div class="titre-md text-italic">{{$t('PNOrattpos', nSt.nbRatt, {count: nSt.nbRatt})}}</div>
-          <div v-if="nSt.nbRatt" class="msg">{{$t('PNOrattinfo')}}</div>
-          <div class="q-mt-sm row">
-            <btn-cond icon="undo" :label="$t('PNOanratt')" @ok="anrattacher"/>
-          </div>
-        </div>
-
-        <div v-if="selected && nSt.note && rec===2" class="q-ma-sm">
-          <q-separator color="orange" size="2px" class="q-mb-xs"/>
-          <div v-if="!nodeDiag">
-            <span class="q-pa-xs text-italic titre-md q-mr-md">{{$t('PNOratta')}}</span>
-            <span class="msg">{{lib(noderatt)}}</span>
-          </div>
-          <div v-if="nodeDiag" class="msg">{{nodeDiag}}</div>
-          <div class="q-mt-sm row q-gutter-sm">
-            <btn-cond v-if="!nodeDiag" icon="check" :label="$t('PNOcfratt')" color="warning" 
-              @ok="okrattacher" cond="cEdit"/>
-            <btn-cond icon="account_tree" :label="$t('PNOratt2')" @ok="rattacher"/>
-            <btn-cond icon="undo" :label="$t('PNOanratt')" @ok="anrattacher"/>
-          </div>
         </div>
       </div>
           
@@ -282,6 +284,8 @@ const styles = [
   'fs-md text-italic'
   ]
 
+const maxRatt = 20
+
 const enc = new TextEncoder()
 const dec = new TextDecoder()
 
@@ -296,8 +300,10 @@ const nSt = stores.note
 nSt.resetRatt(false) // tous KO
 nSt.calculNfnt()
 
+const tree = ref(null)
 const selected = ref('')
 const expanded = ref([])
+const setRatt = ref(new Set())
 const nodeDiag = ref('')
 const ht = ref(new Set())
 const htg = ref(new Set ())
@@ -474,7 +480,13 @@ function rattacher () {
   rec.value = 1
   noderatt.value = null
   nSt.resetRatt(false) // tous KO
-  nSt.scanTop()
+  setRatt.value = nSt.scanTop()
+  if (setRatt.value.size < maxRatt)
+    expanded.value = Array.from(setRatt.value)
+}
+
+function depRatt () {
+  expanded.value = Array.from(setRatt.value)
 }
 
 function anrattacher () { 
@@ -668,4 +680,9 @@ $hb2: 17rem
   border-top: 3px solid var(--q-warning)
 .cl3
   border-top: 3px solid $grey-5
+.rec
+  margin: 0 2rem
+  border: 2px solid var(--q-warning)
+  border-radius: 1rem
+  overflow: hidden
 </style>

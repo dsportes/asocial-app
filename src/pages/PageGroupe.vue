@@ -1,5 +1,7 @@
 <template>
 <q-page>
+  <div v-if="!gSt.egrC" class="q-pa-sm text-center text-italic titre-lg">{{$t('PGnoex')}}</div>
+
   <!-- Tab "groupe" -------------------------------------------------->
   <div v-if="ui.pagetab==='groupe' && gSt.egrC" class="q-pa-sm spmd column justify-center">
     <div v-if="amb" class="row q-mt-lg q-mb-md justify-around">
@@ -289,7 +291,7 @@ const pgLmFT = computed(() => {
   const c = session.compte
   const r = []
   let n = 0
-  const g = gSt.egrC.groupe
+  const g = gSt.egrC ? gSt.egrC.groupe : null
   if (g) for (let im = 1; im < g.st.length; im++) {
     const stm = g.st[im]
     if (!stm) continue

@@ -1024,8 +1024,8 @@ export default {
   PNOratt: 'Rattacher',
   PNOratta: 'Rattacher à:',
   PNOratt2: 'Choisir un autre rattachement',
-  PNOrattpos: 'Aucun rattachement possible. | Un ratachement possible. | {count} ratachements possibles.',
-  PNOrattinfo: 'Cliquer ci-dessous sur l\'icône "étoile verte" du groupe, avatar ou note à laquelle vous voulez rattacher la note courante.',
+  PNOrattpos: 'Aucun rattachement possible | Un ratachement possible | {count} ratachements possibles',
+  PNOrattinfo: 'Cliquer dans l\'arbre sur "l\'étoile verte" de la note, avatar ou groupe à laquelle vous voulez rattacher la note courante.',
   PNOcfratt: 'Confirmer ce rattachement',
   PNOanratt: 'Renoncer au rattachement',
   PNOauts: ' Pas d\'auteur. | Auteur: | Auteurs: ',
@@ -1103,6 +1103,7 @@ export default {
   PNOex: 'Choisir pour "auteur exclusif"',
   PNOlex: 'Membres du groupe pouvant recevoir l\'exclusivité d\'écriture',
   PNOpeut: 'Pour attribuer l\'exclusité d\'écriture d\'une note, il faut, a) soit être animateur, b) soit l\'avoir soi-même, c) soit que personne ne l\'ait déjà.',
+  PNOdepratt: 'Les voir toutes ?',
 
   // MenuFichier
   DFavion: 'ACCESSIBILTÉ en mode AVION...',
@@ -1296,6 +1297,7 @@ export default {
   PGvg: 'Voir le groupe',
   PGmesav: 'Ma participation au groupe | Ma participation au groupe | Mes participations au groupe',
   PGchat: 'Ouvrir le chat',
+  PGnoex: 'Ce groupe n\'existe plus',
 
   // Aperçu Membre
   AMdpc: 'Date du premier contact:',

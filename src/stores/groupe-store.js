@@ -240,6 +240,7 @@ export const useGroupeStore = defineStore('groupe', {
       this.delNote(idg) // toutes
       this.nSt.delGroupe(idg)
       this.map.delete(idg)
+      if (this.session.groupeId === idg) this.session.setGroupeId(null)
     },
 
     setInvit (invit) { // invits:[ {idg, ida, invpar (Set), msg} ]

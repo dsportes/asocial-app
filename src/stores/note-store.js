@@ -120,12 +120,6 @@ export const useNoteStore = defineStore('note', {
 
     nodeP: (state) => { return state.map.get(state.node.pids || state.node.pid) },
 
-    nbRatt: (state) => {
-      let nb = 0
-      for (const [,n] of state.map) { if (n.ratt) nb++ }
-      return nb
-    },
-
     // retourne { avc: true/false, ida, im, cv } ou null s'il n'y a pas d'exclusivité
     mbExclu: (state) => {
       const n = state.note
@@ -286,6 +280,7 @@ export const useNoteStore = defineStore('note', {
     // Fixe le booléen ratt sur tous les nodes auxquels le node courant
     // peut être rattaché. Si le node courant est une racine (???), rien à faire
     scanTop () {
+      const sx = new Set()
       if (this.node.type < 4) return
       const nc = this.node
       const g = this.estGroupe
@@ -294,9 +289,10 @@ export const useNoteStore = defineStore('note', {
         // sous-arbre groupe: OK si pas note de groupe ou du même groupe que la note courante
         if (n.type < 3) {
           const ok = n.type === 1 ? !g && nc.id === n.id : !g || (g && nc.id === n.id)
-          if (ok) this.scanST(n, nc, g)
+          if (ok) this.scanST(n, nc, g, sx)
         }
       }
+      return sx
     },
 
     /* Scan un sous-arbre: 
@@ -304,13 +300,13 @@ export const useNoteStore = defineStore('note', {
     - nc: note courante
     - g: la note courante est une note de groupe
     */
-    scanST (x, nc, g) {
-      if (nc.ids !== x.ids) x.ratt = true
+    scanST (x, nc, g, sx) {
+      if (nc.ids !== x.ids) { x.ratt = true; sx.add(x.ids) }
       for (const c of x.children) {
         if (c.ids === nc.ids || c.ids === nc.pids) continue // pas rattachable dans son propre sous-arbre
-        const okst = (g && (c.id === nc.id)) || (!g && ((c.id === nc.id) || ID.estNoteGr(c.id)))
-        if (okst && (x.type === 4 || x.type === 5)) c.ratt = true 
-        if (okst) this.scanST(c, nc, g)
+        const okst = (g && (c.id === nc.id)) || (!g && ((c.id === nc.id) || ID.estNoteGr(c.ids)))
+        if (okst && (x.type === 4 || x.type === 5)) { c.ratt = true; sx.add(c.ids) } 
+        if (okst) this.scanST(c, nc, g, sx)
       }
     },
 
