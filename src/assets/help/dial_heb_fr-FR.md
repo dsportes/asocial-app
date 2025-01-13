@@ -1,4 +1,4 @@
-Lire dans la documentation générale, lire <a href="$$/appli/groupes.html" target="_blank">Les comptes et leurs avatars</a>
+Lire dans la documentation générale, lire <a href="$$/appli/groupes.html" target="_blank">Les groupes et leurs notes</a>
 
 ## Gérer l'hébergement d'un groupe
 

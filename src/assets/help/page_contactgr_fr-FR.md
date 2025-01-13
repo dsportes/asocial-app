@@ -1,4 +1,4 @@
-Lire dans la documentation générale, lire <a href="$$/appli/groupes.html" target="_blank">Les comptes et leurs avatars</a>
+Lire dans la documentation générale, lire <a href="$$/appli/groupes.html" target="_blank">Les groupes et leurs notes</a>
 
 ## Page d'ajout d'un contact à un groupe
 Sur la page de détail d'un groupe, si le compte a _droit d'accès aux membres_, un bouton en haut de la page ouvre la page _d'ajout_ d'un contact au groupe.

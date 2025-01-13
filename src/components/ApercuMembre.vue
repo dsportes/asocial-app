@@ -39,7 +39,7 @@ a accès aux membres (donc dans l'onglet "membres").
           <btn-cond v-if="stm >= 4" 
             icon="check" cond="cEdit" stop flat
             :label="$t('AMinvitbtn3')" @ok="gererDroits"/>
-          <btn-cond v-if="stm > 0" 
+          <btn-cond v-if="stm === 1 || stm >= 4" 
             icon="close" cond="cEdit" stop flat
             :label="$t('AMinvitbtn4')" @ok="radiation"/>
         </div>
