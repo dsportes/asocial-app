@@ -5,7 +5,6 @@
     <q-toolbar-title class="titre-lg full-width text-center">
       {{$t('NCF' + op)}}
     </q-toolbar-title>
-    <bouton-help :page="'CF' + op"/>
   </q-toolbar>
 
   <div v-if="session.editDiag" class="q-ma-sm q-pa-xs text-center text-bold titre-md bg-yellow-5 text-warning">
@@ -18,7 +17,7 @@
   </div>
 
   <div class="q-my-md row justify-center items-center q-gutter-md">
-    <btn-cond class="q-pa-xs btn" :label="$t('renoncer')" @ok="ui.fD"/>
+    <btn-cond icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
     <bouton-confirm v-if="!session.dialog && !msg" actif :confirmer="noteSuppr"/>
   </div>
 
@@ -41,7 +40,7 @@ const aSt = stores.avatar
 const nSt = stores.note
 
 const props = defineProps({ 
-  op: String // suppr arch react
+  op: String // suppr
 })
 
 const msg = ref('')

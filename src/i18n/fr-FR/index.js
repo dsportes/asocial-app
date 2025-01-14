@@ -1124,7 +1124,8 @@ export default {
   NCFm0: 'Droits insuffisants pour exécuter cette opération', 
   NCFm1: 'C\'est une note de groupe: au moins un des avatars du compte doit avoir le droit d\'écriture sur les notes du groupe.',
   NCFm2: 'Cette note de groupe a une exclusivité d\'écriture pour {0} qui n\'est pas un des avatars du compte. Pour cette opération, il faudrait que un de vos avatars ait pouvoir d\'animateur.',
-
+  NCFsuppr: 'Confirmer la suppression de la note',
+  
   // NotePlus
   NPLnote: 'Note {0}',
 

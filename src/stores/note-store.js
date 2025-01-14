@@ -349,7 +349,7 @@ export const useNoteStore = defineStore('note', {
       this.calculNfnt()
     },
 
-    delNote (ids) {
+    delNote (id, ids) {
       const n = this.map.get(ids)
       if (!n || (n.type > 5)) return // node inexistant ou était déjà fake
       

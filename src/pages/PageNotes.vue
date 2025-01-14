@@ -272,7 +272,7 @@ import { Note } from '../app/modele.mjs'
 import { putData, getData } from '../app/net.mjs'
 
 const icons = ['','person','group','group','description','article','description','article']
-const colors = ['','primary','orange','grey-5','primary','orange','grey-5','grey-5']
+const colors = ['','primary','secondary','grey-5','primary','secondary','grey-5','grey-5']
 const styles = [
   '',
   'titre-md text-bold', 
@@ -307,7 +307,7 @@ const setRatt = ref(new Set())
 const nodeDiag = ref('')
 const ht = ref(new Set())
 const htg = ref(new Set ())
-const op = ref('') // suppr arch react
+const op = ref('') // suppr
 const expandAll = ref(false)
 const rec = ref(0) // rattachement en cours
 const noderatt = ref(null)
@@ -672,14 +672,14 @@ $hb2: 17rem
   border: 1px solid $grey-5
   border-radius: 5px
 .cl1,.cl2,.cl3
-  margin-top: 15px
+  margin-top: 5px
   width: 100%
 .cl1
-  border-top: 3px solid var(--q-primary)
+  border-top: 1px solid var(--q-primary)
 .cl2
-  border-top: 3px solid var(--q-warning)
+  border-top: 1px solid var(--q-secondary)
 .cl3
-  border-top: 3px solid $grey-5
+  border-top: 1px solid $grey-5
 .rec
   margin: 0 2rem
   border: 2px solid var(--q-warning)
