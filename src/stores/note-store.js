@@ -143,13 +143,26 @@ export const useNoteStore = defineStore('note', {
       if (!n) return lx
       const egr = state.gSt.egr(n.id)
       if (!egr) return lx
-      const gr = state.egr.groupe
+      const gr = egr.groupe
+      /*
+      let aExclu = false     
+      if (n.im) for (const ida of mav) {
+        const im = gr.mmb.get(ida)
+        if (im === n.im) aExclu = true
+      }
+      */
+      const nbAutsAvc = state.nbAuts ? state.nbAuts.avc : false
+      const mbExcluAvc = state.mbExclu ? state.mbExclu.avc : false
       for (let im = 1; im < gr.tid.length; im++) {
         const ida = gr.tid[im]
-        if (!ida || gr.st[im] < 4 || im === n.im || gr.accesNote2(im) !== 2) continue
-        // actifs, pas celui actuel, accès aux notes en écriture
-        const nom = state.pSt.getCV(ida).nomC
-        lx.push({ida, nom, im, avc: mav.has(ida)})
+        // actifs, pas celui actuel et accès aux notes en écriture
+        if (!ida || n.im === im || gr.st[im] < 4 || gr.accesNote2(im) !== 2) continue
+        // si compte anim ou a exclu ou (mon compte seul auteur et de mon compte)
+        const avc = mav.has(ida)
+        if (egr.estAnim || mbExcluAvc || (nbAutsAvc && avc)) {
+          const nom = state.pSt.getCV(ida).nomC
+          lx.push({ida, nom, im, avc})
+        }
       }
       lx.sort((a,b) => {
         if (a.avc && b.avc) return (a.nom < b.nom ? -1 : 1)
@@ -162,7 +175,22 @@ export const useNoteStore = defineStore('note', {
 
     egr: (state) => {
       if (!state.estGr) return null
-      return this.gSt.egr(state.node.note.id)
+      return state.gSt.egr(state.node.note.id)
+    },
+
+    groupe: (state) => state.egr ? state.egr.groupe : null,
+
+    // { nb: nombre d'auteurs, avc: true si tous du compte }
+    nbAuts: (state) => {
+      const r = { nb: state.note && state.note.l ? state.note.l.length : 0, avc: false }
+      const g = state.groupe
+      if (g && state.note) {
+        const mav = state.session.compte.mav
+        let n = 0
+        state.note.l.forEach(im => { if (mav.has(g.tid[im])) n++ })
+        r.avc = n === r.nb
+      }
+      return r
     },
 
     // get de la note ids
@@ -313,7 +341,7 @@ export const useNoteStore = defineStore('note', {
     // Tri des nodes enfants d'un node
     sort1 (a, b) { // les fake à la fin
       const x = a.note ? '1' + a.note.titre : (a.type > 5 ? '3' + a.ids : '2' + a.ids)
-      const y = b.note ? '1' + a.note.titre : (b.type > 5 ? '3' + b.ids : '2' + b.ids)
+      const y = b.note ? '1' + b.note.titre : (b.type > 5 ? '3' + b.ids : '2' + b.ids)
       return x < y ? -1 : (x === y ? 0 : 1)
     },
 

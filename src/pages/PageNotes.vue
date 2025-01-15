@@ -32,15 +32,15 @@
       </template>
     </q-tree>
 
-    <q-dialog v-model="ui.d[idc].NE" persistent full-height position="left">
+    <q-dialog v-model="ui.d[idc].NE" position="left" persistent>
       <note-edit/>
     </q-dialog>
 
-    <q-dialog v-model="ui.d[idc].NX" full-height position="left" persistent>
+    <q-dialog v-model="ui.d[idc].NX" position="left" persistent>
       <note-exclu/>
     </q-dialog>
 
-    <q-dialog v-model="ui.d[idc].NF" full-height position="left" persistent>
+    <q-dialog v-model="ui.d[idc].NF" position="left" persistent>
       <note-fichier/>
     </q-dialog>
 

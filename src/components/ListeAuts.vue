@@ -1,14 +1,14 @@
 <template>
-  <div v-if="nb" class='row q-gutter-xs titre-sm'>
-    <div>{{$t('PNOauts', nb)}}</div>
+  <div v-if="nb" class='row q-gutter-xs titre-md items-center'>
+    <div>{{$t('PNOauts', nbAuts.nb)}}</div>
     <div class="row items-center q-gutter-xs">
-      <div v-for="im in nSt.note.l" :key="im">
+      <div v-for="im in (nSt.note.l || [])" :key="im">
         <span class="bord cursor-pointer q-pa-xs">
           <span v-if="ida(im)" class="cursor-pointer" @click="openCv(im)">{{nomC(im)}}</span>
           <span v-else>#{{im}}</span>
         </span>
       </div>
-      <div v-if="autAvc" class="msg">{{$t('PNOauts2')}}</div>
+      <div v-if="nbAuts.avc" class="msg">{{$t('PNOauts2')}}</div>
     </div>
 
     <q-dialog v-model="ui.d[idc].ACVouvrir" persistent>
@@ -31,31 +31,22 @@ const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 
 const session = stores.session
 const nSt = stores.note
-const gSt = stores.groupe
-const autAvc = ref(false)
-const groupe = ref(null)
-
-const egr = gSt.egr(nSt.note.id)
-if (egr) {
-  let b = false
-  groupe.value = egr.groupe
-  nSt.note.l.forEach(im => { if (session.compte.mav.has(egr.groupe.tid[im])) b = true })
-  autAvc.value = b
-}
+const nbAuts = ref(nSt.nbAuts)
+const groupe = ref(nSt.groupe)
 
 const nb = computed(() => nSt.note.l.length)
 
-const ida = (im) => groupe.value ? groupe.value.tid[im] : 0
+const ida = (im) => groupe.value ? groupe.value.tid[im] : ''
 
 const getCV = (im) => { 
   const id = ida(im)
-  return id ? session.getCV(id) : null
+  return id ? session.getCV(id) : { nomC: '?' }
 }
 
 const nomC = (im) => getCV(im).nomC
 
 function openCv (im) {
-  cv.value = getCv(im)
+  cv.value = getCV(im)
   ui.oD('ACVouvrir', idc)
 }
 

@@ -6,55 +6,60 @@
       <q-toolbar-title class="titre-lg full-width text-center">
         {{$t(nSt.note.deGroupe ? 'PNOngr' : 'PNOnper', [nom])}}
       </q-toolbar-title>
-      <btn-cond icon="check" :label="$t('valider')" cond="cEdit"
-        :disable="!xap"  @ok="valider"/>
-      <bouton-help page="page1"/>
+      <bouton-help page="note-exclu"/>
     </q-toolbar>
     <q-toolbar v-if="session.cEdit" inset class="full-width msg">{{session.cEdit}}</q-toolbar>
   </q-header>
 
   <q-page-container >
-    <q-page class="q-pa-xs">
-      <node-parent />
+    <q-page class="q-pa-xs spsm">
+      <node-parent class="q-my-md"/>
 
-      <q-separator class="q-my-sm" color="orange"/>
+      <liste-auts class="q-my-md"/>
 
-      <liste-auts class="q-my-sm"/>
+      <div v-if="xav">
+        <div class="text-italic titre-lg text-bold q-my-md">{{$t('PNOext2')}}</div>
+        <apercu-genx class="q-my-md" :id="xav.ida" :im="xav.im"/>
+      </div>
+      <div v-else class="text-italic titre-lg text-bold q-my-md">{{$t('PNOext1')}}</div>
 
-      <div class="spsm"> <!-- Bloc "perdre" -->
-        <div v-if="xav">
-          <div class="text-italic titre-md text-bold">{{$t('PNOext2')}}</div>
-          <apercu-genx class="q-my-md" :id="xav.ida" :im="xav.im"/>
+      <div v-if="peutSuppr" class="q-my-md"> <!-- Bloc "perdre" -->
+        <div class="row items-center q-mt-md q-gutter-sm justify-end items-center">
+          <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
           <btn-cond v-if="xav.avc" icon="close" cond="cEdit"
             :label="$t('PNOperdre1')" @ok="perdre"/>
           <btn-cond v-if="!xav.avc && anim" icon="close" cond="cEdit"
             :label="$t('PNOperdre2')" @ok="perdre"/>
         </div>
-        <div v-else class="text-italic titre-md text-bold">{{$t('PNOext1')}}</div>
       </div>
 
       <div v-if="!amb" class="q-my-md msg">{{$t('PNOamb')}}</div>
 
-      <div :class="'q-my-md ' + (peutTr ? '' : 'msg')">{{$t('PNOpeut')}}</div>
-
-      <div class="q-mt-md">
-        <span class="titre-lg text-italic text-center">{{$t('PNOlex')}}</span>
+      <div class="q-my-sm row q-gutter-sm">
+        <span class="titre-md text-italic">{{$t('plusinfo')}}</span>
         <bouton-bulle idtext="BULLEexclu"/>
       </div>
 
-      <div class="spsm q-mt-sm" style="max-height:40vh;overflow-y:auto">
-        <div v-for="(e, idx) in lst" :key="idx" 
-          :class="dkli(idx) + ' q-mt-xs row cursor-pointer bord' + (xap && (e.im === xap.im) ? '2' : '1')"
-          @click="selmb(e)">
-          <div class="col-2 text-center">#{{e.im}}</div>
-          <div class="col-10">{{e.nom}}</div>
+      <div v-if="lst && lst.length" class="q-my-sm">
+        <div class="titre-lg text-italic text-center">{{$t('PNOlex')}}</div>
+
+        <div class="q-mt-sm bordt">
+          <div v-for="(e, idx) in lst" :key="idx" 
+            :class="dkli(idx) + ' q-mt-xs row cursor-pointer hov bord' + (xap && (e.im === xap.im) ? '2' : '1')"
+            @click="selmb(e)">
+            <div class="col-2 text-center">#{{e.im}}</div>
+            <div class="col-10">{{e.nom}}</div>
+          </div>
+        </div>
+
+        <apercu-genx v-if="xap" class="q-my-md" :id="xap.ida" :im="xap.im"/>
+
+        <div v-if="xap" class="row items-center q-mt-md q-gutter-sm justify-end items-center">
+          <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
+          <btn-cond icon="check" :label="$t('PNOattr')" cond="cEdit" @ok="valider"/>
         </div>
       </div>
-
-      <q-separator color="orange" class="q-my-sm"/>
-
-      <apercu-genx v-if="xap" class="q-my-md" :id="xap.ida" :im="xap.im"/>
-
+      <div v-else class="titre-lg text-italic q-my-sm">{{$t('PNOnlex' + (xav ? '2' : '1'))}}</div>
     </q-page>
   </q-page-container>
 </q-layout>
@@ -87,11 +92,19 @@ const mav = computed(() => session.compte.mav)
 
 const egr = computed(() => gSt.egr(nSt.note.id))
 const groupe = computed(() => egr.value.groupe)
+
 const amb = computed(() => session.compte.ambano(groupe.value)[0])
 const anim = computed(() => egr.value.estAnim)
-const xav = computed(() => nSt.mbExclu) // retourne { avc: true/false, ida, im, cv } ou null s'il n'y a pas d'exclusivité
+const nbAuts = computed(() => nSt.nbAuts)
+// retourne { avc: true/false, ida, im, cv } ou null s'il n'y a pas d'exclusivité
+const xav = computed(() => nSt.mbExclu) 
 
-const peutTr = computed(() => !xav.value || anim.value || (xav.value && mav.value.has(xav.value.ida)))
+const peutSuppr = computed(() => xav.value && (anim.value || mav.value.has(xav.value.ida)))
+
+/*
+const peutPrendre = computed(() => anim.value || (!xav.value && nbAuts.value.avc))
+const peutDonner = computed(() => anim.value || (xav.value && mav.value.has(xav.value.ida)))
+*/
 
 /* Pour une note de groupe, liste des {im, na, nom} des membres 
 aptes à recevoir l'exclusivité, sauf celui actuel */
@@ -117,8 +130,21 @@ async function perdre () {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
+.hov:hover
+  background: var(--q-primary) !important
 .bord1
-  border: 2px solid transparent
+  border: 1px solid transparent
 .bord2
-  border: 2px solid var(--q-warning)
+  border: 1px solid var(--q-warning)
+.bordt
+  height: 20vh
+  overflow-y: auto
+  padding: 5px
+  border: 1px solid $grey-5
+  border-radius: 8px
+.info
+  margin: 5px
+  padding: 5px
+  border: 1px solid var(--q-warning)
+  border-radius: 8px
 </style>

@@ -23,6 +23,7 @@ export default {
   ok: 'OK',
   moi: 'moi', // ...
   jailu: 'J\'ai lu',
+  plusinfo: 'En savoir plus ...',
   vu: 'vu',
   continuer: 'Continuer',
   supprimer: 'Supprimer',
@@ -380,7 +381,7 @@ export default {
   EX9311: '(BUG) Volume maximum autorisé pour le groupe dépassé.',
   EX9312: '(BUG) Groupe sans hébergeur, le volume de fichiers ne peut pas croître.',
   EX9313: '(BUG) L\'auteur de l\'édition (texte / fichiers) de la note n\'a pas droit d\'écriture.',
-  EX9314: '(BUG) La note a un auteur exclusif et ce n\'est pas l\'auteur de l\'édition (texte / fichiers).',
+  EX9314: '(BUG) Le compte n\'est pas animateur du groupe et la note a un auteur exclusif et ce n\'est pas l\'auteur de l\'édition (texte / fichiers).',
   EX9315: '(BUG) Le compte n\'a pas d\'avatar, animateur ou ayant droit d\'écriture et ayant l\'exclusivité (s\'il y en a une).',
   EX9316: '(BUG) Le Comptable a déjà créé son compte, phrase de sponsoring sans utilité.',
   EX9317: '(BUG) La mutation d\'un compte "A" en "O" ou "O" en "A" ne peut être demandée qu\'en ayant eu l\'accord du compte à muter en donnant sa phrase de contact.',
@@ -1078,10 +1079,10 @@ export default {
   PNOer3: 'Le groupe n\'a plus de compte hébergeur: l\'ajout de notes est bloqué.',
   PNOer10: 'La nouvelle taille de la note ferait dépasser le quota attribué au compte.',
   PNOer11: 'La nouvelle taille de la note ferait dépasser le volume maximal attribué par le compte hébergeur du groupe aux textes des notes du groupe.',
-  PNOrav: 'Rattachée à la note de {0}',
-  PNOrav2: 'Attachée directement à l\'avatar {0}',
+  PNOrav: 'Rattachée à la note "{0}"',
+  PNOrav2: 'Rattachée directement à l\'avatar {0}',
   PNOrgr: 'Rattachée à la note du groupe "{0}"',
-  PNOrgr2: 'Aattachée directement au groupe "{0}"',
+  PNOrgr2: 'Rattachée directement au groupe "{0}"',
   PNOaut1: 'Note écrite par {0}',
   PNOaut1a: 'Fichier ajouté par {0}',
   PNOaut1m: 'Fichier modifié par {0}',
@@ -1097,12 +1098,14 @@ export default {
   PNOht1: 'Hashtags privés du compte',
   PNOht2: 'Hashtags publics au groupe des animateurs',
   PNOht3: 'Les anaimateurs n\'ont pas déclaré de hashtags publics.',
-  PNOperdre1: 'Perdre mon exclusivité sans la transmettre',
-  PNOperdre2: 'Retirer cette exclusivité sans la transmettre',
+  PNOattr: 'Attribuer l\'exclusivité',
+  PNOperdre1: 'Perdre mon exclusivité',
+  PNOperdre2: 'Retirer l\'exclusivité',
   PNOamb: 'Gérer / transmettre l\'exclusivité d\'écriture sur la note, SANS avoir accès aux membres du groupe, restreint les possibilités.',
   PNOex: 'Choisir pour "auteur exclusif"',
-  PNOlex: 'Membres du groupe pouvant recevoir l\'exclusivité d\'écriture',
-  PNOpeut: 'Pour attribuer l\'exclusité d\'écriture d\'une note, il faut, a) soit être animateur, b) soit l\'avoir soi-même, c) soit que personne ne l\'ait déjà.',
+  PNOlex: 'Membres pouvant recevoir l\'exclusivité d\'écriture',
+  PNOnlex1: 'Aucun membre ne peut recevoir l\'exclusivité d\'écriture.',
+  PNOnlex2: 'Aucun autre membre ne peut recevoir l\'exclusivité d\'écriture.',
   PNOdepratt: 'Les voir toutes ?',
 
   // MenuFichier
@@ -1802,10 +1805,15 @@ export default {
 - je serai inconnu dans le groupe, en particulier vis à vis des notes que j'aurais pu écrire dans le passé et dans lesquelles je n'apparaîtrai plus comme auteur.
 - je serai inscrit en liste noire, personne ne pourra plus m'ajouter comme contact de ce groupe.`,
 
-  BULLEexclu: `Pour attribuer l\'exclusivité d\'écriture d\'une note, un compte doit:
-- soit avoir lui-même l\'excluvité d\'écriture sur la note,
-- soit avoir un pouvoir d\'animateur dans le groupe,
-- soit, quand aucune exclusivité n\'est attribuée, avoir été le seul compte à écrire dans cette note.`,
+  BULLEexclu: `
+Pour transférer / attribuer l\'exclusité d\'écriture d\'une note, il faut, 
+- soit être animateur, 
+- soit avoir soi-même l\'exclusité de la note.
+
+Pour prendre l\'exclusité d\'écriture d\'une note, il faut,
+- soit être animateur,
+- soit que personne n'ait l\'exclusité de la note ET en être SEUL auteur.
+`,
 
   BULLErl1: `Mais ça ne marche pas avec tous les navigateurs.
 - si l'installation n'a pas eu lieu, utiliser l'option 2 ou l'option 3.
