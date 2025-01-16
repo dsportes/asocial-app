@@ -381,8 +381,7 @@ export default {
   EX9311: '(BUG) Volume maximum autorisé pour le groupe dépassé.',
   EX9312: '(BUG) Groupe sans hébergeur, le volume de fichiers ne peut pas croître.',
   EX9313: '(BUG) L\'auteur de l\'édition (texte / fichiers) de la note n\'a pas droit d\'écriture.',
-  EX9314: '(BUG) Le compte n\'est pas animateur du groupe et la note a un auteur exclusif et ce n\'est pas l\'auteur de l\'édition (texte / fichiers).',
-  EX9315: '(BUG) Le compte n\'a pas d\'avatar, animateur ou ayant droit d\'écriture et ayant l\'exclusivité (s\'il y en a une).',
+
   EX9316: '(BUG) Le Comptable a déjà créé son compte, phrase de sponsoring sans utilité.',
   EX9317: '(BUG) La mutation d\'un compte "A" en "O" ou "O" en "A" ne peut être demandée qu\'en ayant eu l\'accord du compte à muter en donnant sa phrase de contact.',
   EX9318: '(BUG) Taille maximale du groupe atteinte',
@@ -412,6 +411,13 @@ export default {
   EX9344: '(BUG) Organisation inconnue {0}',
   EX9345: '(BUG) NaN dans calcul compteurs. Mois {0}, cpt {1}',
   EX9346: '(BUG) Un animateur {0} d\'un groupe {1} doit avoir droit d\'accès aux membres',
+  EX9347: '(BUG) Prise d\'exclusivité par un compte non animateur et pas seul auteur de la note',
+  EX9348: '(BUG) Attribution d\'exclusivité à un avatar externe au compte par un compte non animateur',
+  EX9349: '(BUG) Suppression d\'exclusivité par un compte n\'ayant pas l\'exclusivité actelle',
+  EX9350: '(BUG) Transfert d\'exclusivité par un compte n\'ayant pas l\'exclusivité actelle',
+
+  EX9314: '(BUG) Le compte n\'est pas l\'auteur exclusif de la note, écriture interdite.',
+  EX9315: '(BUG) Le compte n\'a pas d\'avatar, animateur ou ayant droit d\'écriture et ayant l\'exclusivité (s\'il y en a une).',
 
   // EX9100: 'Erreur de cryptage AES: {0}',
   // EX9101: 'Erreur de cryptage RSA: {0}',
@@ -1107,6 +1113,8 @@ export default {
   PNOnlex1: 'Aucun membre ne peut recevoir l\'exclusivité d\'écriture.',
   PNOnlex2: 'Aucun autre membre ne peut recevoir l\'exclusivité d\'écriture.',
   PNOdepratt: 'Les voir toutes ?',
+  PNOmsg1: 'IMPOSSIBLE D\'ATTRIBUER L\'EXCLUSIVITE à un avatar: la note n\'a pas d\'auteur exclusif, mais le compte n\'est pas animateur du groupe et la note a été écrite par d\'autres avatars que ceux du groupe.',
+  PNOmsg2: 'IMPOSSIBLE D\'ATTRIBUER L\'EXCLUSIVITE à un autre avatar: la note a un auteur exclusif D\'UN AUTRE COMPTE.',
 
   // MenuFichier
   DFavion: 'ACCESSIBILTÉ en mode AVION...',
@@ -1806,13 +1814,14 @@ export default {
 - je serai inscrit en liste noire, personne ne pourra plus m'ajouter comme contact de ce groupe.`,
 
   BULLEexclu: `
-Pour transférer / attribuer l\'exclusité d\'écriture d\'une note, il faut, 
-- soit être animateur, 
-- soit avoir soi-même l\'exclusité de la note.
+Seul un avatar ayant droit d'écriture dans le groupe peut avoir l'exclusivité d'écriture d'une note.
 
-Pour prendre l\'exclusité d\'écriture d\'une note, il faut,
-- soit être animateur,
-- soit que personne n'ait l\'exclusité de la note ET en être SEUL auteur.
+Si une note a une exclusité d\'écriture pour un avatar ayant droit d'écriture sur le groupe, 
+- seul le compte de cet avatar peut la transférer ou la supprimer.
+
+Sinon,
+- un compte ayant un avatar animateur du groupe peut donner cette exclusivité à n'importe quel avatar,
+- un compte n'ayant pas d'avatar animateur du groupe peut donner cette exclusivité à un de ses avatars à condition d'avoir été le seul à écrire cette note.
 `,
 
   BULLErl1: `Mais ça ne marche pas avec tous les navigateurs.
@@ -1888,7 +1897,7 @@ La "consommation mensuelle" de calcul est en centimes et est la somme des coûts
   A_dial_una: 'Invitation à un groupe: modes SIMPLE / UNANIME',
   A_dial_heb: 'Gérer l\'hébergement d\'un groupe',
   A_dial_invit: 'Invitation à un groupe',
-  A_dial_invitack: 'Acceptation / refus d{une invitation à un groupe',
+  A_dial_invitack: 'Acceptation / refus d\'une invitation à un groupe',
   A_dial_droits: 'Gérer les droits d\'un membre dans un groupe',
   A_dial_radiation: 'Radier un membre d\'un groupe',
 

@@ -59,7 +59,11 @@
           <btn-cond icon="check" :label="$t('PNOattr')" cond="cEdit" @ok="valider"/>
         </div>
       </div>
-      <div v-else class="titre-lg text-italic q-my-sm">{{$t('PNOnlex' + (xav ? '2' : '1'))}}</div>
+      <div v-else>
+        <div class="titre-lg text-italic q-my-sm">{{$t('PNOnlex' + (xav ? '2' : '1'))}}</div>
+        <div v-if="msg1" class="titre-md text-italic msg q-my-sm">{{$t('PNOmsg1')}}</div>
+        <div v-if="msg2" class="titre-md text-italic msg q-my-sm">{{$t('PNOmsg2')}}</div>
+      </div>
     </q-page>
   </q-page-container>
 </q-layout>
@@ -99,12 +103,10 @@ const nbAuts = computed(() => nSt.nbAuts)
 // retourne { avc: true/false, ida, im, cv } ou null s'il n'y a pas d'exclusivité
 const xav = computed(() => nSt.mbExclu) 
 
-const peutSuppr = computed(() => xav.value && (anim.value || mav.value.has(xav.value.ida)))
+const msg1 = computed(() => nSt.imEX === 0 && (!anim.value || !xav.value.avc))
+const msg2 = computed(() => nSt.imEX !== 0 && !mav.value.has(groupe.value.tid[nSt.imEX]))
 
-/*
-const peutPrendre = computed(() => anim.value || (!xav.value && nbAuts.value.avc))
-const peutDonner = computed(() => anim.value || (xav.value && mav.value.has(xav.value.ida)))
-*/
+const peutSuppr = computed(() => xav.value && mav.value.has(xav.value.ida))
 
 /* Pour une note de groupe, liste des {im, na, nom} des membres 
 aptes à recevoir l'exclusivité, sauf celui actuel */

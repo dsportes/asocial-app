@@ -2225,7 +2225,7 @@ export class DownloadFichier extends Operation {
 export class NouveauFichier extends Operation {
   constructor () { super('NouveauFichier') }
 
-  async run (note, aut, fic, lidf) {
+  async run (note, ida, fic, lidf) {
     // lidf : liste des idf des fichiers à supprimer
     try {
       const id = note.id
@@ -2240,14 +2240,14 @@ export class NouveauFichier extends Operation {
       /* PutUrlNf : retourne l'URL de put d'un fichier d'une note ******
       id: { t: 'idag' }, // id de la note (avatar ou groupe)
       ids: { t: 'ids' }, // ids de la note
-      aut: { t: 'ida', n: null } // pour une note de groupe, id de l'auteur de l'enregistrement
+      ida: { t: 'ida', n: null } // pour une note de groupe, id de l'auteur de l'enregistrement
       Retour:
       - idf : identifiant du fichier
       - url : url à passer sur le PUT de son contenu
       Remarque: l'excès de volume pour un groupe et un compte, ainsi que le volume 
       descendant seront décomptés à la validation de l'upload
       */
-      const args = { token: session.authToken, id, ids, aut, lg: fic.lg, lidf }
+      const args = { token: session.authToken, id, ids, ida, lg: fic.lg, lidf }
       const ret = await post(this, 'PutUrlNf', args)
       const url = ret.url
       fic.idf = ret.idf
@@ -2267,7 +2267,7 @@ export class NouveauFichier extends Operation {
       const ficN = await crypter(note.cle, new Uint8Array(encode(fic)))
       const args2 = { token: session.authToken, id, ids,
         fic: { idf: fic.idf, lg: fic.lg, ficN },
-        lidf, aut }
+        lidf, ida }
       await post(this, 'ValiderUpload', args2)
       if (session.synchro) faSt.putDataEnCache(fic.idf, buf)
       ui.setEtf(4)

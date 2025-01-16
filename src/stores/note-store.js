@@ -120,14 +120,25 @@ export const useNoteStore = defineStore('note', {
 
     nodeP: (state) => { return state.map.get(state.node.pids || state.node.pid) },
 
+    // { nb: nombre d'auteurs, avc: true si tous du compte }
+    nbAuts: (state) => {
+      const r = { nb: state.note && state.note.l ? state.note.l.length : 0, avc: true }
+      const g = state.groupe
+      if (g && state.note) {
+        const mav = state.session.compte.mav
+        let n = 0
+        state.note.l.forEach(im => { if (mav.has(g.tid[im])) n++ })
+        r.avc = n === r.nb
+      }
+      return r
+    },
+
     // retourne { avc: true/false, ida, im, cv } ou null s'il n'y a pas d'exclusivité
     mbExclu: (state) => {
+      if (!state.imEX) return null
       const n = state.note
       let avc = false
-      if (!n || !n.im) return null
-      const egr = state.gSt.egr(n.id)
-      if (!egr) return null
-      const gr = egr.groupe
+      const gr = state.gSt.egr(n.id).groupe // le groupe existe du fait de state.imEx
       const ida = gr.tid[n.im]
       avc = state.session.compte.mav.has(ida)
       const cv = state.session.getCV(ida)
@@ -144,22 +155,33 @@ export const useNoteStore = defineStore('note', {
       const egr = state.gSt.egr(n.id)
       if (!egr) return lx
       const gr = egr.groupe
-      /*
-      let aExclu = false     
-      if (n.im) for (const ida of mav) {
-        const im = gr.mmb.get(ida)
-        if (im === n.im) aExclu = true
-      }
-      */
-      const nbAutsAvc = state.nbAuts ? state.nbAuts.avc : false
-      const mbExcluAvc = state.mbExclu ? state.mbExclu.avc : false
+      const imEx = state.imEX
+      // tous les auteurs sont de mon compte
+      const autsAvc = state.nbAuts.avc
+
       for (let im = 1; im < gr.tid.length; im++) {
         const ida = gr.tid[im]
-        // actifs, pas celui actuel et accès aux notes en écriture
+        // seulement ceux actifs, pas l'actuel et ayant accès aux notes en écriture
         if (!ida || n.im === im || gr.st[im] < 4 || gr.accesNote2(im) !== 2) continue
-        // si compte anim ou a exclu ou (mon compte seul auteur et de mon compte)
         const avc = mav.has(ida)
-        if (egr.estAnim || mbExcluAvc || (nbAutsAvc && avc)) {
+
+        let ok
+        if (imEx) { // il y a une VRAIE exclu
+          if (mav.has(gr.tid[n.im])) ok = true // mon compte a l'exclu: tous membres possibles
+          else ok = false // aucun membre
+        } else { // pas d'exclu
+          if (egr.estAnim) { // compte est animateur
+            ok = true // tous possibles
+          } else {
+            if (autsAvc) { // les auteurs sont tous avatar de mon compte
+              // les avatars de mon compte sont possibles
+              if (mav.has(ida)) ok = true
+              else ok = false // pas les autres
+            } else ok = false // aucun n'est possible
+          }
+        }
+        
+        if (ok) {
           const nom = state.pSt.getCV(ida).nomC
           lx.push({ida, nom, im, avc})
         }
@@ -180,18 +202,8 @@ export const useNoteStore = defineStore('note', {
 
     groupe: (state) => state.egr ? state.egr.groupe : null,
 
-    // { nb: nombre d'auteurs, avc: true si tous du compte }
-    nbAuts: (state) => {
-      const r = { nb: state.note && state.note.l ? state.note.l.length : 0, avc: false }
-      const g = state.groupe
-      if (g && state.note) {
-        const mav = state.session.compte.mav
-        let n = 0
-        state.note.l.forEach(im => { if (mav.has(g.tid[im])) n++ })
-        r.avc = n === r.nb
-      }
-      return r
-    },
+    // im de l'avatar exclusif encore actif et AYANT TOUJOURS droits d'écriture, sinon 0
+    imEX: (state) => state.note && state.groupe && state.note.im && state.groupe.accesEcrNote(state.note.im) ? state.note.im : 0,
 
     // get de la note ids
     getNote: (state) => { return (ids) => {
