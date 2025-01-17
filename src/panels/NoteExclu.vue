@@ -8,7 +8,7 @@
       </q-toolbar-title>
       <bouton-help page="note-exclu"/>
     </q-toolbar>
-    <q-toolbar v-if="session.cEdit" inset class="full-width msg">{{session.cEdit}}</q-toolbar>
+    <q-toolbar v-if="session.cEdit" inset class="full-width msg">{{$t(session.cEdit + 'N')}}</q-toolbar>
   </q-header>
 
   <q-page-container >
@@ -63,6 +63,7 @@
         <div class="titre-lg text-italic q-my-sm">{{$t('PNOnlex' + (xav ? '2' : '1'))}}</div>
         <div v-if="msg1" class="titre-md text-italic msg q-my-sm">{{$t('PNOmsg1')}}</div>
         <div v-if="msg2" class="titre-md text-italic msg q-my-sm">{{$t('PNOmsg2')}}</div>
+        <div v-if="msg3" class="titre-md text-italic msg q-my-sm">{{$t('PNOmsg3')}}</div>
       </div>
     </q-page>
   </q-page-container>
@@ -104,7 +105,8 @@ const nbAuts = computed(() => nSt.nbAuts)
 const xav = computed(() => nSt.mbExclu) 
 
 const msg1 = computed(() => nSt.imEX === 0 && (!anim.value || !xav.value.avc))
-const msg2 = computed(() => nSt.imEX !== 0 && !mav.value.has(groupe.value.tid[nSt.imEX]))
+const msg2 = computed(() => !nSt.imEXestC && !anim.value)
+const msg3 = computed(() => !nSt.imEXestC && anim.value && nSt.imEXanim)
 
 const peutSuppr = computed(() => xav.value && mav.value.has(xav.value.ida))
 

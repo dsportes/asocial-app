@@ -32,7 +32,7 @@
           <bouton-help page="htcomm_maj"/>
         </q-toolbar>
         <q-toolbar inset v-if="diag" class='q-ma-sm bg-yellow-5 text-warning text-bold'>
-          {{$t('MMCnomaj', [diag])}}
+          {{$t('MMCnomaj', [$t(diag)])}}
         </q-toolbar>
 
         <q-card-section class="q-py-sm">

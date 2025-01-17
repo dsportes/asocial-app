@@ -1058,14 +1058,6 @@ export class Groupe extends GenDoc {
     return s
   }
 
-  get cptOkExclu () {
-    if (!this.im) return true
-    const session = stores.session
-    for(const ida of session.compte.mav) 
-      if (this.im === this.mmb.get(ida)) return true
-    return false
-  }
-
   accesMembre (im) {
     const f = this.flags[im] || 0;
     return im && this.estActif(im) && (f & FLAGS.AM) && (f & FLAGS.DM) 
@@ -1093,6 +1085,11 @@ export class Groupe extends GenDoc {
   accesEcrNote (im) {
     const f = this.flags[im] || 0;
     return im && this.estActif(im) && (f & FLAGS.AN) && (f & FLAGS.DN) && (f & FLAGS.DE) 
+  }
+  get aUnAccesEcrNote () {
+    let b = false
+    this.cptSetIm.forEach(im => { if (this.accesEcrNote(im)) b = true })
+    return b
   }
   accesNote2 (im) {
     const f = this.flags[im] || 0;

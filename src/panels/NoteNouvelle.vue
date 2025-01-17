@@ -10,7 +10,7 @@
         :disable="err || (estgr && !naAut) || !texte" @ok="valider"/>
       <bouton-help page="page1"/>
     </q-toolbar>
-    <q-toolbar v-if="session.cEdit" inset class="msg">{{session.cEdit}}</q-toolbar>
+    <q-toolbar v-if="session.cEdit" inset class="msg">{{$t(session.cEdit)}}</q-toolbar>
   </q-header>
 
   <q-page-container>

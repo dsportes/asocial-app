@@ -121,6 +121,11 @@ export default {
   condL: 'Action impossible, le compte a une restriction de "lecture seulement".',
   condM: 'Action impossible, le compte est restreint aux seules actions d\'urgence.',
 
+  condAN: 'Note en LECTURE SEULEMENT, l\'application est en mode "avion".',
+  condFN: 'Note en LECTURE SEULEMENT, l\'application est figée.',
+  condLN: 'Note en LECTURE SEULEMENT, le compte a une restriction de "lecture seulement".',
+  condMN: 'Note en LECTURE SEULEMENT, le compte est restreint aux seules actions d\'urgence.',
+
   // Filtre notif
   gravite0: '(ignorer)',
   gravite1: 'normale ou importante',
@@ -1041,13 +1046,8 @@ export default {
   PNOtype3: 'Le compte a été actif dans ce groupe, MAIS NE L\'EST PLUS. Le groupe "peut" avoir disparu.',
   PNOtype67: 'Cette note "n\'existe plus" mais des notes existantes lui ayant été rattachées, elle subsite juste pour permettre de voir ces dernières.',
   PNOro: 'CONSULTATION SEULEMENT',
-  PNOro1: 'Aucune mise à jour possible : la session est en mode "avion".',
-  PNOro2: 'Aucune mise à jour possible : l\'administyrateur technique a figé le serveur pour maintenance.',
-  PNOro3: 'Aucune mise à jour possible : le compte a une restriction d\'accès minimale.',
-  PNOro4: 'Aucune mise à jour possible : le compte est bloqué en lecture seulement.',
-  PNOro5: 'La note est "archivée", aucune mise à jour / suppression n\'est autorisée.',
-  PNOro6: 'Aucun des avatars du compte n\'a de droit d\'écriture sur les notes du groupe.',
-  PNOro7: 'Un autre membre du groupe a le droit exclusif de mise à jour de la note, édition impossible pour les autres.',
+  PNOroEcr: 'Note en LECTURE SEULEMENT: aucun des avatars du compte n\'a de droit d\'écriture sur les notes du groupe.',
+  PNOroEx: 'Note en LECTURE SEULEMENT: un autre membre du groupe a le droit exclusif de mise à jour de la note, édition impossible pour les autres.',
   PNOred: 'RÉDUCTION DE VOLUME DES FICHIERS REQUISE',
   PNOpasheb: 'Le groupe n\'a pas de compte hébergeur.',
   PNOvgr2: 'Le volume occupé par les fichiers des notes du groupe dépasse le maximum déclaré par l\'hébergeur du groupe.',
@@ -1114,7 +1114,8 @@ export default {
   PNOnlex2: 'Aucun autre membre ne peut recevoir l\'exclusivité d\'écriture.',
   PNOdepratt: 'Les voir toutes ?',
   PNOmsg1: 'IMPOSSIBLE D\'ATTRIBUER L\'EXCLUSIVITE à un avatar: la note n\'a pas d\'auteur exclusif, mais le compte n\'est pas animateur du groupe et la note a été écrite par d\'autres avatars que ceux du groupe.',
-  PNOmsg2: 'IMPOSSIBLE D\'ATTRIBUER L\'EXCLUSIVITE à un autre avatar: la note a un auteur exclusif D\'UN AUTRE COMPTE.',
+  PNOmsg2: 'IMPOSSIBLE D\'ATTRIBUER L\'EXCLUSIVITE à un autre avatar: la note a un auteur exclusif D\'UN AUTRE COMPTE et votre compte N\'EST PAS animateur du groupe.',
+  PNOmsg3: 'IMPOSSIBLE D\'ATTRIBUER L\'EXCLUSIVITE à un autre avatar: la note a un auteur exclusif D\'UN AUTRE COMPTE ANIMATEUR du groupe.',
 
   // MenuFichier
   DFavion: 'ACCESSIBILTÉ en mode AVION...',
@@ -1817,7 +1818,8 @@ export default {
 Seul un avatar ayant droit d'écriture dans le groupe peut avoir l'exclusivité d'écriture d'une note.
 
 Si une note a une exclusité d\'écriture pour un avatar ayant droit d'écriture sur le groupe, 
-- seul le compte de cet avatar peut la transférer ou la supprimer.
+- le compte de cet avatar peut la transférer ou la supprimer.
+- un compte animateur du groupe peut aussi la transférer SAUF si l'avatar ayant l'exclusivité est lui-même animateur du groupe.
 
 Sinon,
 - un compte ayant un avatar animateur du groupe peut donner cette exclusivité à n'importe quel avatar,

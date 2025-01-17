@@ -162,22 +162,22 @@ export const useSessionStore = defineStore('session', {
 
     cEdit (state) {
       if (state.estAdmin) return ''
-      if (state.avion) return $t('condA')
-      if (state.estFige) return $t('condF')
-      if (!state.estComptable && state.hasLS) return $t('condL')
+      if (state.avion) return 'condA'
+      if (state.estFige) return 'condF'
+      if (!state.estComptable && state.hasLS) return 'condL'
       return ''
     },
 
     cUrgence (state) {
       if (state.estAdmin) return ''
-      if (state.avion) return $t('condA')
-      if (state.estFige) return $t('condF')
+      if (state.avion) return 'condA'
+      if (state.estFige) return 'condF'
       return ''
     },
 
     cVisu (state) {
       if (state.estAdmin) return ''
-      if (!state.estComptable && state.hasAR) return $t('condM')
+      if (!state.estComptable && state.hasAR) return 'condM'
       return ''
     },
 

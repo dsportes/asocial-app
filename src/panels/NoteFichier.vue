@@ -8,7 +8,7 @@
       </q-toolbar-title>      
       <bouton-help page="page1"/>
     </q-toolbar>
-    <q-toolbar v-if="ro" inset class="full-width msg">{{$t('PNOro')}} - {{ro}}</q-toolbar>
+    <q-toolbar v-if="ro" inset class="full-width msg">{{$t('PNOro')}} - {{$t(ro)}}</q-toolbar>
     <q-toolbar v-if="red" inset class="full-width msg">{{$t('PNOred')}} - {{red}}</q-toolbar>
     <q-toolbar v-if="!ro && vcpt === 1" inset class="full-width">{{$t('PNOcpt1')}}</q-toolbar>
     <q-toolbar v-if="!ro && vgr === 1" inset class="full-width">{{$t('PNOcpt1')}}</q-toolbar>
@@ -119,13 +119,11 @@ const vcpt = computed(() => !groupe.value || (groupe.value && !groupe.value.cptE
 
 const pasHeb = computed(() => groupe.value && !groupe.value.imh)
 
-const cptOkExclu = computed(() => !groupe.value || groupe.value.cptOkExclu)
-
-const editn = computed(() => Note.idasEdit(nSt.node).size > 0)
-
-const ro = computed(() => session.cEdit ? session.cEdit : 
-  (!cptOkExclu.value ? $t('PNOexclu') : (!editn.value ? $t('PNOnoedit') : ''))
-)
+const ro = computed(() => {
+  if (session.cEdit) return session.cEdit + 'N'
+  if (nSt.diagEd) return nSt.diagEd
+  return ''
+})
 
 const red = computed(() => !ro.value && (pasHeb.value ? $t('PNOpasheb') :
   (vcpt.value === 2 ? $t('PNOvcpt2') : (vgr.value === 2 ? $t('PNOvgr2') : false))))

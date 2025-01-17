@@ -171,7 +171,7 @@
 
           <div v-if="selected && nSt.note" class="q-ml-md row"> 
             <show-html class="col bord1 q-mr-lg" :texte="nSt.note.texte" zoom maxh="4rem" />
-            <btn-cond :disable="rec!==0" class="col-auto self-start" round icon="edit" @ok="ui.oD('NE', idc)"/>
+            <btn-cond :disable="rec!==0" class="col-auto self-start" round icon="edit" @ok="ovNE"/>
           </div>
 
           <liste-auts v-if="selected && nSt.note && nSt.estGr"/>
@@ -191,7 +191,7 @@
               </span>
               <span class="q-ml-xs">{{nSt.note.mfa.size ? (edvol(nSt.note.vf) + '.') : ''}}</span>
             </div>
-            <btn-cond class="col-auto self-start" round icon="attach_file" @ok="ui.oD('NF', idc)">
+            <btn-cond class="col-auto self-start" round icon="attach_file" @ok="ovNF">
               <q-tooltip>{{$t('PNOattach')}}</q-tooltip>
             </btn-cond>
           </div>
@@ -199,7 +199,7 @@
           <div v-if="selected && nSt.note && !rec && nSt.estGr" class="q-mt-xs q-mb-sm row">  
             <div v-if="nSt.mbExclu" class="col titre-sm">{{$t('PNOexclu', [nSt.mbExclu.cv.nomC])}}</div>
             <div v-else class="col text-italic titre-sm">{{$t('PNOnoexclu')}}</div>
-            <btn-cond class="col-auto self-start" round icon="person" @ok="ui.oD('NX', idc)">
+            <btn-cond class="col-auto self-start" round icon="person" @ok="ovNX">
               <q-tooltip>{{$t('PNOexclu3')}}</q-tooltip>
             </btn-cond>
           </div>
@@ -324,6 +324,31 @@ const dlv2f = ref(0)
 const portupload = ref(cfg.portupload)
 const dirloc = ref('./temp')
 
+const estAnim = computed(() => { const e = nSt.note ? gSt.egr(nSt.note.id) : null; return e && e.estAnim })
+
+async function ovNE () {
+  if (session.cEdit) { await afficherDiag($t(session.cEdit)); return }
+  if (nSt.diagEd) { await afficherDiag($t(nSt.diagEd)); return }
+  ui.oD('NE', idc)
+}
+
+async function ovNX () {
+  if (session.cEdit) { await afficherDiag($t(session.cEdit)); return }
+  ui.oD('NX', idc)
+}
+
+async function ovNF () {
+  ui.oD('NF', idc)
+}
+
+async function ovHT () {
+  if (session.cEdit) { await afficherDiag($t(session.cEdit)); return }
+  ht.value.clear()
+  nSt.note.ht.forEach(t => { ht.value.add(t)})
+  nSt.note.htg.forEach(t => { htg.value.add(t)})
+  ui.oD('NM', idc)
+}
+
 const nodesTries = computed(() => {
   const t = nSt.nodes
   t.sort((a, b) => {
@@ -332,12 +357,6 @@ const nodesTries = computed(() => {
     return noma > nomb ? 1 : (noma < nomb ? -1 : 0)
   })
   return t
-})
-
-const estAnim = computed(() => {
-  if (nSt.node.type !== 5) return false
-  const e = gSt.egr(nSt.note.id)
-  return e && e.estAnim
 })
 
 const presel = computed(() => nSt.presel)
@@ -377,13 +396,6 @@ const styn = (n) => {
 function fermer () { if (modifie.value) ui.oD('confirmFerm', idc); else ui.fD() }
 
 const s2Str = (s) => Array.from(s).sort().join(' ')
-
-function ovHT () {
-  ht.value.clear()
-  nSt.note.ht.forEach(t => { ht.value.add(t)})
-  nSt.note.htg.forEach(t => { htg.value.add(t)})
-  ui.oD('NM', idc)
-}
 
 async function validerHt () {
   await new HTNote().run(nSt.note, s2Str(ht.value), 

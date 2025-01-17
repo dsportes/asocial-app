@@ -10,7 +10,6 @@
         :disable="(note.deGroupe && !aut) || !modifie"  @ok="valider"/>
       <bouton-help page="note_edit"/>
     </q-toolbar>
-    <q-toolbar v-if="session.cEdit" inset class="full-width msg">{{session.cEdit}}</q-toolbar>
   </q-header>
 
   <q-page-container>
@@ -33,9 +32,7 @@
       </div>
 
       <editeur-md class="col" :texte="note.texte" mh="50vh"
-        :lgmax="cfg.maxlgtextesecret" 
-        :editable="editable"
-        modetxt v-model="texte"/>
+        :lgmax="cfg.maxlgtextesecret" editable modetxt v-model="texte"/>
 
     </q-page>
   </q-page-container>
@@ -68,7 +65,6 @@ const note = ref(nSt.note)
 const texte = ref(note.value.texte)
 const aut = ref(null)
 
-const editable = computed(() => (!note.value.estGroupe || (note.value.estGroupe && aut.value)) && !session.cEdit)
 const modifie = computed(() => note.value.texte !== texte.value)
 const idas = computed(() => Note.idasEdit(node.value))
 const nom = computed(() => pSt.nom(note.value.id))

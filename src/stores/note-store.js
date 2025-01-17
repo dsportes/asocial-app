@@ -168,7 +168,11 @@ export const useNoteStore = defineStore('note', {
         let ok
         if (imEx) { // il y a une VRAIE exclu
           if (mav.has(gr.tid[n.im])) ok = true // mon compte a l'exclu: tous membres possibles
-          else ok = false // aucun membre
+          else {
+            // si compte animateur et auteur exclusif pas animateur, tous
+            if (egr.estAnim && gr.st[n.im] !== 5) ok = true
+            else ok = false // aucun membre
+          }
         } else { // pas d'exclu
           if (egr.estAnim) { // compte est animateur
             ok = true // tous possibles
@@ -204,6 +208,27 @@ export const useNoteStore = defineStore('note', {
 
     // im de l'avatar exclusif encore actif et AYANT TOUJOURS droits d'écriture, sinon 0
     imEX: (state) => state.note && state.groupe && state.note.im && state.groupe.accesEcrNote(state.note.im) ? state.note.im : 0,
+
+    // l'avatar exclusif de la note courante est avatar du compte
+    imEXestC: (state) => {
+      if (state.imEX) {
+        const ida = state.groupe.tid[state.imEX]
+        return state.session.compte.mav.has(ida)
+      } else return true
+    },
+
+    aUnAccesEcrNote: (state) => !state.groupe || state.groupe.aUnAccesEcrNote, 
+
+    diagEd: (state) => {
+      if (!state.aUnAccesEcrNote) return 'PNOroEcr'
+      const im = state.imEX
+      if (!im) return ''
+      if (!state.imEXestC) return 'PNOroEx'
+      return ''
+    },
+
+    // l'avatar exclusif est animateur du groupe de la note courante
+    imEXanim: (state) => state.imEX !== 0 && state.groupe.value.st[state.imEX] === 5,
 
     // get de la note ids
     getNote: (state) => { return (ids) => {
