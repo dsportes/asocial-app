@@ -8,7 +8,7 @@
       </q-toolbar-title>
       <btn-cond icon="check" :label="$t('valider')" cond="cEdit"
         :disable="(note.deGroupe && !aut) || !modifie"  @ok="valider"/>
-      <bouton-help page="note_edit"/>
+      <bouton-help page="dial_notemaj"/>
     </q-toolbar>
   </q-header>
 

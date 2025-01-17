@@ -474,7 +474,9 @@ export const useNoteStore = defineStore('note', {
     detachNote (n) { // détachement d'une note de son parent actuel
       const p = this.map.get(n.pids || n.pid)
       if (!p) return
-      const a = []; p.children.forEach(c => { if (c.ids !== n.ids) a.push(c)}); p.children = a
+      const a = []
+      p.children.forEach(c => { if (c.ids !== n.ids) a.push(c)})
+      p.children = a
       if (p.children.length) return
     
       // le node parent n'a plus d'enfants: nettoyages éventels
@@ -488,7 +490,9 @@ export const useNoteStore = defineStore('note', {
       if (p.type > 5) { // était attachée à une note fake désormais vide
         // On enleve la note fake de la liste des nodes de sa racine
         const rac = this.map.get(p.pid) // racine de la note fake
-        const b = []; rac.children.forEach(c => { if (c.ids !== p.ids) b.push(c)}); rac.children = b
+        const b = []
+        rac.children.forEach(c => { if (c.ids !== p.ids) b.push(c)})
+        rac.children = b
         this.map.delete(p.ids)
         if (rac.type === 3 && !rac.children.length) { // la racine elle-même était vide
           // la supprimer aussi

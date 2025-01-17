@@ -6,7 +6,7 @@
       <q-toolbar-title class="titre-lg full-width text-center">
         {{$t(nSt.note.deGroupe ? 'PNOngr' : 'PNOnper', [nom])}}
       </q-toolbar-title>      
-      <bouton-help page="page1"/>
+      <bouton-help page="dial_notefic"/>
     </q-toolbar>
     <q-toolbar v-if="ro" inset class="full-width msg">{{$t('PNOro')}} - {{$t(ro)}}</q-toolbar>
     <q-toolbar v-if="red" inset class="full-width msg">{{$t('PNOred')}} - {{red}}</q-toolbar>

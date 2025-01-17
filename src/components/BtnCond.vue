@@ -39,7 +39,7 @@
 import { ref, computed } from 'vue'
 
 import stores from '../stores/stores.mjs'
-import { afficherDiag } from '../app/util.mjs'
+import { afficherDiag, $t } from '../app/util.mjs'
 
 const session = stores.session
 
@@ -75,7 +75,7 @@ const clr = computed(() => {
   return x
 })
 
-const diag = computed(() => props.cond ? session[props.cond] : '')
+const diag = computed(() => props.cond && session[props.cond] ? $t(session[props.cond]) : '')
 
 async function ok () {
   if (!diag.value) { 

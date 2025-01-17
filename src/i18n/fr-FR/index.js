@@ -1113,6 +1113,7 @@ export default {
   PNOnlex1: 'Aucun membre ne peut recevoir l\'exclusivité d\'écriture.',
   PNOnlex2: 'Aucun autre membre ne peut recevoir l\'exclusivité d\'écriture.',
   PNOdepratt: 'Les voir toutes ?',
+  PNOmsg0: 'IMPOSSIBLE D\'ATTRIBUER L\'EXCLUSIVITE à un avatar: le compte n\'a pas d\'avatar ayant droit d\'écriture sur les notes du groupe.',
   PNOmsg1: 'IMPOSSIBLE D\'ATTRIBUER L\'EXCLUSIVITE à un avatar: la note n\'a pas d\'auteur exclusif, mais le compte n\'est pas animateur du groupe et la note a été écrite par d\'autres avatars que ceux du groupe.',
   PNOmsg2: 'IMPOSSIBLE D\'ATTRIBUER L\'EXCLUSIVITE à un autre avatar: la note a un auteur exclusif D\'UN AUTRE COMPTE et votre compte N\'EST PAS animateur du groupe.',
   PNOmsg3: 'IMPOSSIBLE D\'ATTRIBUER L\'EXCLUSIVITE à un autre avatar: la note a un auteur exclusif D\'UN AUTRE COMPTE ANIMATEUR du groupe.',
@@ -1943,6 +1944,11 @@ La "consommation mensuelle" de calcul est en centimes et est la somme des coûts
   A_compta_synth: 'Synthèse de la situation comptable',
   A_compta_detail: 'Détail des 12 derniers mois',
   A_compta_tarifs: 'Tarifs appliqués',
+
+  A_dial_notenv: 'Création d\'une nouvelle note',
+  A_dial_notemaj: 'Mise à jour d\'une note',
+  A_dial_noteex: 'Gestion de l\'exclusité d\'écriture d\'une note',
+  A_dial_notefic: 'Fichiers attachés à une note',
 
   A_how_to: 'Comment faire pour ...',
   A_ht_sponsoriser: '...sponsoriser des comptes',

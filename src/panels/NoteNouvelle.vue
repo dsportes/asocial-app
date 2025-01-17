@@ -6,11 +6,10 @@
       <q-toolbar-title class="titre-lg full-width text-center">
         {{$t(estgr ? 'PNOnvtit2' : 'PNOnvtit1', [nom])}}
       </q-toolbar-title>
-      <btn-cond icon="check" :label="$t('valider')" cond="cEdit"
-        :disable="err || (estgr && !naAut) || !texte" @ok="valider"/>
-      <bouton-help page="page1"/>
+      <btn-cond icon="check" :label="$t('valider')"
+        :disable="err || (estgr && !infoAut) || !texte" @ok="valider"/>
+      <bouton-help page="dial_notenv"/>
     </q-toolbar>
-    <q-toolbar v-if="session.cEdit" inset class="msg">{{$t(session.cEdit)}}</q-toolbar>
   </q-header>
 
   <q-page-container>
@@ -32,9 +31,9 @@
 
       <div v-if="err" class="msg">{{$t('PNOer' + err)}}</div>
 
-      <note-ecritepar2 v-if="estgr" :groupe="groupe" @ok="selNa"/>
+      <note-ecritepar2 v-if="estgr" :groupe="groupe" @ok="selaut"/>
 
-      <div v-if="!err && !session.cEdit && (!estgr || (estgr && naAut))" class="column spmd">
+      <div v-if="!err && !session.cEdit && (!estgr || (estgr && infoAut))" class="column spmd">
         <editeur-md mh="50vh" class="col" texte="" :placeholder="$t('PNOdeft')"
           :lgmax="cfg.maxlgtextesecret" editable modetxt v-model="texte"/>
         <q-separator color="orange" class="q-mt-sm"/>
@@ -76,7 +75,7 @@ const props = defineProps({
   notep: Object // si sous-note, la note "parent" (en fait celle courante)
 })
 
-const naAut = ref(null) // {nom, i, im, ida, ko} ko: 1 pas auteur, 2: n'a pas exclusiité (edition seulement) 
+const infoAut = ref(null) // {nom, i, im, ida, ko} ko: 1 pas auteur, 2: n'a pas exclusiité (edition seulement) 
 const texte = ref('')
 const exclu = ref(false)
 
@@ -98,11 +97,11 @@ const err = computed(() => {
 
 function fermer () { if (modifie.value) ui.oD('confirmFerm', 'a'); else ui.fD() }
 
-function selNa (elt) { naAut.value = elt }
+function selaut (elt) { infoAut.value = elt }
 
 async function valider () {
   let pid = null, pids = null
-  const aut = props.estgr ? naAut.value.id : null
+  const aut = props.estgr ? infoAut.value.id : null
 
   // note rattachée à une autre note OU note avatar rattachée à une racine de groupe
   if (!props.estgr) { // Note avatar

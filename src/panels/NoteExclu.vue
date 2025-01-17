@@ -6,7 +6,7 @@
       <q-toolbar-title class="titre-lg full-width text-center">
         {{$t(nSt.note.deGroupe ? 'PNOngr' : 'PNOnper', [nom])}}
       </q-toolbar-title>
-      <bouton-help page="note-exclu"/>
+      <bouton-help page="dial_noteex"/>
     </q-toolbar>
     <q-toolbar v-if="session.cEdit" inset class="full-width msg">{{$t(session.cEdit + 'N')}}</q-toolbar>
   </q-header>
@@ -61,9 +61,12 @@
       </div>
       <div v-else>
         <div class="titre-lg text-italic q-my-sm">{{$t('PNOnlex' + (xav ? '2' : '1'))}}</div>
-        <div v-if="msg1" class="titre-md text-italic msg q-my-sm">{{$t('PNOmsg1')}}</div>
-        <div v-if="msg2" class="titre-md text-italic msg q-my-sm">{{$t('PNOmsg2')}}</div>
-        <div v-if="msg3" class="titre-md text-italic msg q-my-sm">{{$t('PNOmsg3')}}</div>
+        <div v-if="msg0" class="titre-md text-italic msg q-my-sm">{{$t('PNOmsg0')}}</div>
+        <div v-else>
+          <div v-if="msg1" class="titre-md text-italic msg q-my-sm">{{$t('PNOmsg1')}}</div>
+          <div v-if="msg2" class="titre-md text-italic msg q-my-sm">{{$t('PNOmsg2')}}</div>
+          <div v-if="msg3" class="titre-md text-italic msg q-my-sm">{{$t('PNOmsg3')}}</div>
+        </div>
       </div>
     </q-page>
   </q-page-container>
@@ -104,6 +107,7 @@ const nbAuts = computed(() => nSt.nbAuts)
 // retourne { avc: true/false, ida, im, cv } ou null s'il n'y a pas d'exclusivité
 const xav = computed(() => nSt.mbExclu) 
 
+const msg0 = computed(() => !groupe.value.aUnAccesEcrNote)
 const msg1 = computed(() => nSt.imEX === 0 && (!anim.value || !xav.value.avc))
 const msg2 = computed(() => !nSt.imEXestC && !anim.value)
 const msg3 = computed(() => !nSt.imEXestC && anim.value && nSt.imEXanim)
