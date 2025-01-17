@@ -44,8 +44,19 @@
       <note-fichier/>
     </q-dialog>
 
-    <q-dialog v-model="ui.d[idc].NC" persistent>
-      <note-confirme :op="op"/>
+    <q-dialog v-model="ui.d[idc].confirmSuppr" persistent>
+      <q-card :class="styp('sm')">
+        <q-toolbar class="tbs">
+          <btn-cond color="warning" icon="close" @ok="ui.fD"/>
+          <q-toolbar-title class="titre-lg full-width text-center">
+            {{$t('NCFsuppr')}}
+          </q-toolbar-title>
+        </q-toolbar>
+        <div class="q-my-md row justify-center items-center q-gutter-md">
+          <btn-cond icon="undo" flat :label="$t('renoncer')" @ok="ui.fD"/>
+          <bouton-confirm actif :confirmer="noteSuppr"/>
+        </div>
+      </q-card>
     </q-dialog>
 
     <!-- Download des notes sélectionnées -->
@@ -232,7 +243,7 @@
         <div v-if="selected && !rec" class="q-my-xs row q-gutter-sm justify-center items-center">
           <note-plus/>
           <btn-cond v-if="nSt.note" color="warning" icon="delete" 
-            :label="$t('PNOsupp')" @ok="op='suppr';ui.oD('NC', idc)"/>
+            :label="$t('PNOsupp')" @ok="ovSuppr"/>
           <btn-cond v-if="rattaut" icon="account_tree" :label="$t('PNOratt')" 
             cond="cEdit" @ok="rattacher"/>
         </div>
@@ -258,7 +269,6 @@ import { dkli, sty, styp, $t, u8ToB64, dhcool, edvol, afficherDiag,
   sleep, egalite, normNomFichier } from '../app/util.mjs'
 import ShowHtml from '../components/ShowHtml.vue'
 import { ID, appexc, AppExc } from '../app/api.mjs'
-import NoteConfirme from '../dialogues/NoteConfirme.vue'
 import NoteEdit from '../panels/NoteEdit.vue'
 import NoteExclu from '../panels/NoteExclu.vue'
 import NoteFichier from '../panels/NoteFichier.vue'
@@ -267,7 +277,8 @@ import BtnCond from '../components/BtnCond.vue'
 import ListeAuts from '../components/ListeAuts.vue'
 import NotePlus from '../components/NotePlus.vue'
 import HashTags from '../components/HashTags.vue'
-import { RattNote, HTNote } from '../app/operations4.mjs'
+import BoutonConfirm from '../components/BoutonConfirm.vue'
+import { RattNote, HTNote, SupprNote } from '../app/operations4.mjs'
 import { Note } from '../app/modele.mjs'
 import { putData, getData } from '../app/net.mjs'
 
@@ -332,6 +343,17 @@ async function ovNE () {
   ui.oD('NE', idc)
 }
 
+async function ovSuppr () {
+  if (session.cEdit) { await afficherDiag($t(session.cEdit)); return }
+  if (nSt.diagEd) { await afficherDiag($t(nSt.diagEd)); return }
+  ui.oD('confirmSuppr', idc)
+}
+
+async function noteSuppr () {
+  ui.fD()
+  await new SupprNote().run()
+}
+
 async function ovNX () {
   if (session.cEdit) { await afficherDiag($t(session.cEdit)); return }
   ui.oD('NX', idc)
@@ -393,7 +415,10 @@ const styn = (n) => {
   return s1 + (n && nSt.node && (n.ids === nSt.node.ids) ? ' msg' : '')
 }
 
-function fermer () { if (modifie.value) ui.oD('confirmFerm', idc); else ui.fD() }
+function fermer () { 
+  if (modifie.value) ui.oD('confirmFerm', idc)
+  else ui.fD() 
+}
 
 const s2Str = (s) => Array.from(s).sort().join(' ')
 

@@ -1116,6 +1116,7 @@ export default {
   PNOmsg1: 'IMPOSSIBLE D\'ATTRIBUER L\'EXCLUSIVITE à un avatar: la note n\'a pas d\'auteur exclusif, mais le compte n\'est pas animateur du groupe et la note a été écrite par d\'autres avatars que ceux du groupe.',
   PNOmsg2: 'IMPOSSIBLE D\'ATTRIBUER L\'EXCLUSIVITE à un autre avatar: la note a un auteur exclusif D\'UN AUTRE COMPTE et votre compte N\'EST PAS animateur du groupe.',
   PNOmsg3: 'IMPOSSIBLE D\'ATTRIBUER L\'EXCLUSIVITE à un autre avatar: la note a un auteur exclusif D\'UN AUTRE COMPTE ANIMATEUR du groupe.',
+  PNOsuppr: 'Confirmer la suppression de la note',
 
   // MenuFichier
   DFavion: 'ACCESSIBILTÉ en mode AVION...',
