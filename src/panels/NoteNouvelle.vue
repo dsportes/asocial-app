@@ -107,9 +107,14 @@ async function valider () {
   if (!props.estgr) { // Note avatar
     const nd = nSt.node
     if (nd.type === 2) pid = nd.id // rattachée à une racine de groupe
-    else if (props.notep) { pid = props.notep.id; pids = props.notep.ids } // rattachée à une note d'un groupe ou de l'avatar
-  } else if (props.notep) { pid = props.notep.id; pids = props.notep.ids } // Note de groupe rattachée
-
+    else {
+      if (props.notep) { pid = props.notep.id; pids = props.notep.ids } // rattachée à une note d'un groupe ou de l'avatar
+      else { pid = id.value; pids = null }
+    }
+  } else {
+    if (props.notep) { pid = props.notep.id; pids = props.notep.ids } // Note de groupe rattachée
+    else { pid = id.value; pids = null }
+  }
   await new NouvelleNote().run(id.value, texte.value, aut, exclu.value, pid, pids)
   ui.fD()
 }

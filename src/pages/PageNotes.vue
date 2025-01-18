@@ -467,8 +467,9 @@ const lib = (n) => {
       return $t('groupe1', [nom, nfnt.nf, nfnt.nt])
     }
     case 3 : {
-      const nom = pSt.nom(n.ids, 24)
-      return $t('groupe1', [nom, nfnt.nf, nfnt.nt])
+      // const nom = pSt.nom(n.ids, 24)
+      const s1 = (nfnt.nt ? ('[' + nfnt.nf + ' / ' + nfnt.nt + '] ') : '') 
+      return $t('ghost', [s1 + '#' + n.ids])
     }
     case 4 : 
     case 5 : {

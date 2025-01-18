@@ -59,6 +59,7 @@ export default {
   sponsor: 'sponsor',
   readme: 'LISEZMOI',
   cv: 'Carte de visite de {0}',
+  ghost: 'Groupe fantôme {0}',
 
   avatar: 'Avatar {0}', // FiltreAvgr
   groupe: 'Groupe {0}', // FiltreAvgr

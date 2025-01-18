@@ -107,7 +107,9 @@ export const useAvatarStore = defineStore('avatar', {
       return l
     },
 
-    getElt: (state) => { return (id) => { return state.map.get(id) } },
+    getElt: (state) => { return (id) => { 
+      return state.map.get(id)
+    } },
 
     estAvatar: (state) => { return (id) => { 
         return state.map.has(id)

@@ -236,11 +236,13 @@ export const useGroupeStore = defineStore('groupe', {
     },
 
     delGroupe (idg) {
-      this.delMembre(idg) // tous
-      this.delNote(idg) // toutes
-      this.nSt.delGroupe(idg)
-      this.map.delete(idg)
-      if (this.session.groupeId === idg) this.session.setGroupeId(null)
+      if (this.map.has(idg)) {
+        this.delMembre(idg) // tous
+        this.delNote(idg) // toutes
+        this.nSt.delGroupe(idg)
+        this.map.delete(idg)
+        if (this.session.groupeId === idg) this.session.setGroupeId(null)
+      }
     },
 
     setInvit (invit) { // invits:[ {idg, ida, invpar (Set), msg} ]
@@ -285,8 +287,6 @@ export const useGroupeStore = defineStore('groupe', {
       if (!note) return
       const e = this.map.get(note.id)
       if (e) e.notes.set(note.ids, note.vf)
-      const nSt = stores.note
-      nSt.setNote(note)
     },
 
     delNote (id, ids) {
@@ -297,9 +297,7 @@ export const useGroupeStore = defineStore('groupe', {
         if (e) e.notes.delete(ids)
         nSt.delNote(id, ids)
       } else {
-        e.notes.forEach((n, ids) => {
-          nSt.delNote(id, ids)
-        })
+        // e.notes.forEach((n, ids) => { nSt.delNote(id, ids) })
         e.notes.clear()
       }
     },
