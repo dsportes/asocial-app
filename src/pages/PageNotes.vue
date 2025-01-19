@@ -481,7 +481,7 @@ const lib = (n) => {
     case 6 : 
     case 7 : {
       const s1 = (nfnt.nt ? ('[' + nfnt.nf + ' / ' + nfnt.nt + '] ') : '') 
-      return s1 + '#' + n.ids
+      return $t('ghostn', [s1 + '#' + n.ids])
     }
   }
 }

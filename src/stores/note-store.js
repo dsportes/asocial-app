@@ -39,7 +39,7 @@ A la racine (3) d'un groupe NON actif pour le compte de key: gr3, on peut trouve
 - des notes fake (7) key: gr3/ids8, pkey: gr3 - cas #4b
 
 */
-const dbl = true
+const dbl = false
 
 export const useNoteStore = defineStore('note', {
   state: () => ({
@@ -48,16 +48,21 @@ export const useNoteStore = defineStore('note', {
       type
       id: pour une racine égal à ids. Pour une note, id de la note
       ids: clé de map. ids de la note, id du groupe / avatar pour une racine
-      pid // id du parent - existe toujours, sauf racines
-      pids // ids de la note parent - existe si rattaché à une note, sinon null
-      ratt // true si le node courant peut être rattaché à ce node
+      pid: id du parent - existe toujours, sauf racines
+      pids: ids de la note parent - existe si rattaché à une note, sinon null
+      ratt: true si le node courant peut être rattaché à ce node
       children : [] nodes fils
-      note : absent pour une racine et une note fake
+      note: absent pour une racine et une note fake
 
+    Pourquoi enregistrer pid ?
+    - pids est suffisant pour identifier la note / racine parente
+    - mais quand on a une note qui devient fantôme on ne sait pas à quelle racine
+      la rattacher. Avoir gardé pid permet de le savoi
+    
     type:
       1 : racine avatar
       2 : racine groupe
-      3 : racine groupe zombi
+      3 : racine groupe fantôme
       4 5 : note avatar / groupe
       6 7 : note fake avatar / groupe
     */
@@ -384,6 +389,14 @@ export const useNoteStore = defineStore('note', {
       return x < y ? -1 : (x === y ? 0 : 1)
     },
 
+    majNotes (notes) {
+      for(const [,n] of notes) { 
+        if (n._zombi) this.delNote(n.id, n.ids, true)
+        else this.setNote(n, true)
+      }
+      this.calculNfnt()
+    },
+
     setNote (note, nocalc){
       if (!note || !note.pid) 
         return
@@ -418,7 +431,7 @@ export const useNoteStore = defineStore('note', {
       if (!nocalc) this.calculNfnt()
     },
 
-    delNote (id, ids) {
+    delNote (id, ids, nocalc) {
       const n = this.map.get(ids)
       if (!n || (n.type > 5)) return // node inexistant ou était déjà fake
       
@@ -440,7 +453,7 @@ export const useNoteStore = defineStore('note', {
         this.setPreSelect(n.ids) 
       }
 
-      this.calculNfnt()
+      if (!nocalc) this.calculNfnt()
     },
 
     rattachNote (n) { // n est une note, a toujours un pid
@@ -486,30 +499,28 @@ export const useNoteStore = defineStore('note', {
       p.children = a
       if (p.children.length) return
     
-      // le node parent n'a plus d'enfants: nettoyages éventels
-      /*
+      // le node parent n'a plus d'enfants: 
+      // nettoyage éventel si "groupe fantôme" ou "note fantôme"
+
       if (p.type === 3) { // le parent était une racine groupe fake désormais vide
         // On l'enleve de la liste des nodes racines
-        this.delRacine(p.id)
-        this.map.delete(p.id)
+        this.delRacine(p.ids)
+        this.map.delete(p.ids)
         return
       }
-      */
       
-      if (p.type > 5) { // était attachée à une note fake désormais vide
+      if (p.type > 5) { // le parent était une note fake désormais vide
         // On enleve la note fake de la liste des nodes de sa racine
         const rac = this.map.get(p.pid) // racine de la note fake
         const b = []
         rac.children.forEach(c => { if (c.ids !== p.ids) b.push(c)})
         rac.children = b
         this.map.delete(p.ids)
-        /*
         if (rac.type === 3 && !rac.children.length) { // la racine elle-même était vide
           // la supprimer aussi
-          this.delRacine(p.ids)
+          this.delRacine(rac.ids)
           this.map.delete(rac.ids)
         }
-        */
       }
     },
 
@@ -518,9 +529,12 @@ export const useNoteStore = defineStore('note', {
       if (!n) { 
         n = { type, id, ids: id, children: [] }
         this.map.set(id, n)
-        const l = []; this.nodes.forEach(x => { l.push(x)})
-        l.push(n)
-        this.nodes = l
+        /* Problèmes aléatoires / mal identifiés avec la réactivité:
+        c'est pour ça que "nodes" est recopié en totalité
+        plutôt qu'un simple ajout à la liste existante */
+        const a = []; this.nodes.forEach(x => { a.push(x)})
+        a.push(n)
+        this.nodes = a
       } 
       else { n.type = type } // re-création d'un groupe 3 devenant 2
       return n

@@ -186,17 +186,18 @@ class SB {
 
     if (this.chatgrs.size) for(const [,ch] of this.chatgrs) this.g.setChatgr(ch) 
 
-    if (this.notes.size) for(const [,n] of this.notes) { 
-      const st = ID.estGroupe(n.id) ? this.g : this.a
-      if (n._zombi) {
-        this.n.delNote(n.id, n.ids)
-        st.delNote(n.id, n.ids)
-        this.faSt.delNote(n.id, n.ids, buf)
-      } else {
-        this.n.setNote(n)
-        st.setNote(n)
-        this.faSt.setNote(n, buf)
+    if (this.notes.size) {
+      for(const [,n] of this.notes) { 
+        const st = ID.estGroupe(n.id) ? this.g : this.a
+        if (n._zombi) {
+          st.delNote(n.id, n.ids)
+          this.faSt.delNote(n.id, n.ids, buf)
+        } else {
+          st.setNote(n)
+          this.faSt.setNote(n, buf)
+        }
       }
+      this.n.majNotes(this.notes)
     }
     
     if (this.chats.size) for(const [,ch] of this.chats) {

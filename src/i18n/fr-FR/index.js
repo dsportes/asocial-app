@@ -60,6 +60,7 @@ export default {
   readme: 'LISEZMOI',
   cv: 'Carte de visite de {0}',
   ghost: 'Groupe fantôme {0}',
+  ghostn: 'Note fantôme {0}',
 
   avatar: 'Avatar {0}', // FiltreAvgr
   groupe: 'Groupe {0}', // FiltreAvgr
