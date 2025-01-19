@@ -1951,6 +1951,7 @@ La "consommation mensuelle" de calcul est en centimes et est la somme des coûts
   A_dial_notemaj: 'Mise à jour d\'une note',
   A_dial_noteex: 'Gestion de l\'exclusité d\'écriture d\'une note',
   A_dial_notefic: 'Fichiers attachés à une note',
+  A_dial_notedl: 'Téléchargement des notes et leurs fichiers',
 
   A_how_to: 'Comment faire pour ...',
   A_ht_sponsoriser: '...sponsoriser des comptes',

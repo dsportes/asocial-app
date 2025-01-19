@@ -180,6 +180,8 @@
               {{$t('PNOtype67')}}</div>
           </div>
 
+          <apercu-genx v-if="selected && nSt.node.type <= 3" :id="nSt.node.id" />
+
           <div v-if="selected && nSt.note" class="q-ml-md row"> 
             <show-html class="col bord1 q-mr-lg" :texte="nSt.note.texte" zoom maxh="4rem" />
             <btn-cond :disable="rec!==0" class="col-auto self-start" round icon="edit" @ok="ovNE"/>
@@ -278,6 +280,7 @@ import ListeAuts from '../components/ListeAuts.vue'
 import NotePlus from '../components/NotePlus.vue'
 import HashTags from '../components/HashTags.vue'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
+import ApercuGenx from '../components/ApercuGenx.vue'
 import { RattNote, HTNote, SupprNote } from '../app/operations4.mjs'
 import { Note } from '../app/modele.mjs'
 import { putData, getData } from '../app/net.mjs'
