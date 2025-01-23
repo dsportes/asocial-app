@@ -80,7 +80,7 @@
           </div>
         </div>
 
-        <div v-if="!fa.fake" class="q-my-md bord1"> <!-- Etat du téléchargement -->
+        <div v-if="!fa.fake" class="q-pa-sm q-my-md bord1"> <!-- Etat du téléchargement -->
           <div v-if="fa.dhdc === 0" class="titre-md">{{$t('DFchgdl')}}</div>
           <div v-else>
             <div class="titre-md">
@@ -110,7 +110,7 @@
           </div>
         </div>
 
-        <div v-if="faSt.getDataDeCache(f)" class="titre-md text-italic q-y-my-sm">
+        <div v-if="faSt.getDataDeCache(f)" class="titre-md text-italic q-my-sm">
           {{$t('DFdispm')}}
         </div>
 
