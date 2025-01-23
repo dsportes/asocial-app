@@ -22,19 +22,19 @@
             <div v-if="fic.lg" class="font-mono fs-sm">{{fic.nom}} - {{fic.type}} - {{fic.lg}}o</div>
           </div>
           <q-stepper-navigation class="row q-gutter-md justify-end">
-            <btn-cond flat @ok="ui.fD" color="warning" :label="$t('renoncer')" class="q-ml-sm" />
-            <btn-cond flat @ok="step=2" :disable="!fic.lg" :label="$t('continuer')" class="q-ml-sm" />
+            <btn-cond flat icon="undo" @ok="ui.fD" color="warning" :label="$t('renoncer')" class="q-ml-sm" />
+            <btn-cond flat icon="arrow_downward" @ok="step=2" :disable="!fic.lg" :label="$t('continuer')" class="q-ml-sm" />
           </q-stepper-navigation>
         </q-step>
 
         <q-step :name="2" :title="$t('PNFnv4')" icon="mode_edit" :done="step > 2">
           <div class="q-my-sm font-mono fs-md">{{fic.type}} - {{fic.lg}}o</div>
-          <nom-generique v-model="nfic" :label="$t('PNFnv7')" />
-          <nom-generique v-model="info" :label="$t('PNFnv8')"/>
+          <nom-generique v-model="nfic" :label="$t('PNFnv7')" :lgmax="50"/>
+          <nom-generique v-model="info" :label="$t('PNFnv8')" :lgmax="50"/>
           <q-stepper-navigation class="row q-gutter-md justify-end">
-            <btn-cond flat @ok="ui.fD" color="warning" :label="$t('renoncer')" class="q-ml-sm" />
-            <btn-cond flat @ok="step=1" :label="$t('precedent')" class="q-ml-sm" />
-            <btn-cond flat @ok="step=3" :disable="!nfic" :label="$t('continuer')" class="q-ml-sm" />
+            <btn-cond flat icon="undo" @ok="ui.fD" color="warning" :label="$t('renoncer')" class="q-ml-sm" />
+            <btn-cond flat icon="arrow_upward" @ok="step=1" :label="$t('precedent')" class="q-ml-sm" />
+            <btn-cond flat icon="arrow_downward" @ok="step=3" :disable="!nfic" :label="$t('continuer')" class="q-ml-sm" />
           </q-stepper-navigation>
         </q-step>
 
@@ -49,8 +49,8 @@
             <div class="lst q-mt-xs full-width">
               <div v-for="(f, idx) in lstfic" :key="f.idf">
                 <div v-if="!revx || f.nom === nom" 
-                  :class="'row cursor-pointer items-center ' + sty(idx)" @click="clickFic(f)">
-                  <q-checkbox class="col-1" v-model="f.sel" dense disable/>
+                  :class="'row items-center ' + sty(idx)">
+                  <q-checkbox class="col-1" v-model="f.sel" dense/>
                   <div class="col-4">{{f.nom}}</div>
                   <div class="col-2">{{f.info}}</div>
                   <div class="col-2 font-mono text-center">{{edvol(f.lg)}}</div>
@@ -75,8 +75,8 @@
           </div>
 
           <q-stepper-navigation class="row q-gutter-md justify-end">
-            <btn-cond flat @ok="ui.fD" color="warning" :label="$t('renoncer')" class="q-ml-sm" />
-            <btn-cond flat @ok="step=2" color="primary" :label="$t('precedent')" class="q-ml-sm" />
+            <btn-cond flat icon="undo" @ok="ui.fD" color="warning" :label="$t('renoncer')" class="q-ml-sm" />
+            <btn-cond flat icon="arrow_upward" @ok="step=2" color="primary" :label="$t('precedent')" class="q-ml-sm" />
             <btn-cond :disable="!valide || alRed || ui.etf !== 0" icon="check" :label="$t('valider')" 
               color="warning" @ok="valider" />
           </q-stepper-navigation>
@@ -129,9 +129,12 @@ const step = ref(1)
 const etapes = ref([$t('PNFnvs0'), $t('PNFnvs1'), $t('PNFnvs2')])
 const fileList = ref(null)
 const idf = ref(null)
-const sidf = ref(null)
 const lstfic = ref([])
-const volsupp = ref(0)
+const volsupp = computed(() => {
+  let v = 0
+  if (lstfic.value && lstfic.value.length) lstfic.value.forEach(f => {if (f.sel) v += f.lg })
+  return v
+})
 const info = ref('')
 
 const estGr = computed(() =>  ID.estGroupe(props.note.id) )
@@ -144,7 +147,7 @@ const vx = computed(() =>  (fic.value.lg || 0) - volsupp.value)
 // volume fichier du compte (si hébergeur pour un groupe)
 const vcpt = computed(() =>  !groupe.value || (groupe.value && !groupe.value.cptEstHeb) ? 0 : session.compte.alVol(vx.value))
 const vgr = computed(() =>  !groupe.value ? 0 : groupe.value.alVol(vx.value))
-const alRed = computed(() =>  (volsupp.value || 0) < (fic.value.lg || 0)
+const alRed = computed(() =>  volsupp.value < (fic.value.lg || 0)
   && (vcpt.value === 2 || vgr.value === 2 || props.pasheb))
 
 
@@ -171,8 +174,6 @@ watch(step, (s) => {
   }
   if (s === 3) {
     revx.value = true
-    sidf.value = new Set()
-    volsupp.value = 0
     getLstfic()
     ui.setEtf(0)
   }
@@ -199,11 +200,11 @@ async function valider () {
     fic.value.type, 
     fic.value.u8
   )
-
+  const sidf = []
+  if (lstfic.value && lstfic.value.length) lstfic.value.forEach(f => {if (f.sel) sidf.push(f.idf)})
   ui.etf = 1
   const ida = props.aut <= '1' ? null : props.aut
-  const res = await new NouveauFichier()
-    .run(props.note, ida, nf, Array.from(sidf.value))
+  const res = await new NouveauFichier().run(props.note, ida, nf, sidf)
   if (!isAppExc(res))
     ui.setFichiercree(nf.nom)
   else {
@@ -212,16 +213,11 @@ async function valider () {
 }
 
 function getLstfic () {
-  lstfic.value = []
+  lstfic.value.length = 0
   for (const [idf, f] of props.note.mfa)
     lstfic.value.push({ sel: false, idf, nom: f.nom, info: f.info, lg: f.lg, dh: f.dh })
   lstfic.value.sort((a, b) => { return a.nom < b.nom ? -1 : (a.nom > b.nom ? 1 :
     (a.dh < b.dh ? 1 : (a.dh === b.dh ? 0 : -1)))})
-}
-
-function clickFic (f) {
-  if (f.sel) { f.sel = false; sidf.value.delete(f.idf); volsupp.value -= f.lg }
-  else { f.sel = true; sidf.value.add(f.idf); volsupp.value += f.lg }
 }
 
 function resetFic () { 

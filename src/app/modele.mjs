@@ -1384,8 +1384,8 @@ export class Note extends GenDoc {
   }
 
   nomFichier (f) {
-    const n1 = normNomFichier(f.nom)
-    const n2 = f.info ? '#' + normNomFichier(f.info) : ''
+    const n1 = f.nom.trim().normNomFichier(f.nom)
+    const n2 = f.info ? '#' + f.info.trim().normNomFichier(f.info) : ''
     const ext = mime2ext(f.type) || 'bin'
     return n1 + n2 + '#' + f.idf + '.' + ext
   }
@@ -1484,8 +1484,8 @@ export class FichierLocal {
   }
 
   get nomFichier () {
-    const n1 = normNomFichier(this.nom)
-    const n2 = this.info ? '#' + normNomFichier(this.info) : ''
+    const n1 = this.nom.trim().normNomFichier(this.nom)
+    const n2 = this.info ? '#' + this.info.trim().normNomFichier(this.info) : ''
     const ext = mime2ext(this.type) || 'bin'
     return n1 + n2 + '#' + this.idf + '.' + ext
   }

@@ -44,8 +44,8 @@
     </q-header>
 
     <q-page-container >
-      <q-page class="q-pa-xs">
-        <div class="row q-gutter-sm q-my-sm">
+      <q-page class="q-pa-sm">
+        <div class="row q-gutter-sm q-mt-md">
           <span v-if="f.info" class="font-mono text-bold">{{f.info}}</span>
           <span class="font-mono">#{{f.idf || '?'}}</span>
           <span>{{f.type || '?'}}</span>
@@ -53,30 +53,34 @@
           <span v-if="f.dh">{{dhcool(f.dh, true)}}</span>
         </div>
 
-        <div v-if="session.accesIdb" class="q-mx-xs q-my-sm q-pa-xs bord1 items-center">
-          <div class="titre-lg">{{$t('DFavion')}}</div>
-          <div class="row items-center">
+        <div v-if="session.accesIdb" class="column items-center">
+          <q-separator color="orange" class="full-width q-my-md"/>
+
+          <div class="row full-width justify-between items-center">
+            <div class="titre-lg">{{$t('DFavion')}}</div>
+            <div class="row items-center">
+              <bouton-undo class="q-mr-sm text-center" :cond="modifAv" 
+                @click="xavn = '?'; xav = '?'"/>
+              <btn-cond :disable="!modifAv" icon="check" @ok="validerAv"/>
+            </div>
+          </div>
+          <div class="row full-width items-center">
             <div class="col-7 text-right">{{$t('DFavn')}}</div>
             <div :class="'col-1 text-center ' + (avn ? 'msg' : '')">{{$t(avn ? 'oui1' : 'non')}}</div>
             <div class="q-pl-xs">
               <q-toggle :class="'col-4 ' + clr1" indeterminate-value="?" color="grey-5" v-model="xavn" :label="oxn1" />
             </div>
           </div>
-          <div class="row items-center">
+          <div class="row full-width items-center">
             <div class="col-7 text-right">{{$t('DFav')}}</div>
             <div :class="'col-1 text-center ' + (av ? 'msg' : '')">{{$t(av ? 'oui1' : 'non')}}</div>
             <div class="q-pl-xs">
               <q-toggle :class="'col-4 ' + clr2" indeterminate-value="?" color="grey-5" v-model="xav" :label="oxn2" />
             </div>
           </div>
-          <div class="row q-my-sm justify-end q-gutter-sm items-center">
-            <bouton-undo class="col-1 text-center" :cond="modifAv" 
-              @click="xavn = '?'; xav = '?'"/>
-            <btn-cond :label="$t('valider')" :disable="!modifAv" icon="check" @ok="validerAv"/>
-          </div>
         </div>
 
-        <div v-if="!fa.fake" class="q-my-sm bord1"> <!-- Etat du téléchargement -->
+        <div v-if="!fa.fake" class="q-my-md bord1"> <!-- Etat du téléchargement -->
           <div v-if="fa.dhdc === 0" class="titre-md">{{$t('DFchgdl')}}</div>
           <div v-else>
             <div class="titre-md">

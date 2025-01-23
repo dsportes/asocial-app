@@ -412,15 +412,14 @@ export function suffixe (int) {
 /************************************************************************/
 export function normNomFichier (v) {
   if (!v) return ''
-  const v2 = v.trim()
-  const i = v2.lastIndexOf('.')
-  const v3 = i === -1 ? v2 : v2.substring(0, i)
+  const i = v.lastIndexOf('.')
+  const v3 = i === -1 ? v : v.substring(0, i)
   return v3.replace(regIntg, '_').replace(regInt2g, '')
 }
 
 export function normNom (v, max) {
   if (!v) return ''
-  const s = v.trim().replace(regIntg, '').replace(regInt2g, '')
+  const s = v.replace(regIntg, '').replace(regInt2g, '')
   return s.length > max ? s.substring(0, max) : s
 }
 
