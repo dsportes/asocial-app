@@ -51,6 +51,7 @@
           <span>{{f.type || '?'}}</span>
           <span v-if="f.lg">{{edvol(f.lg)}}</span>
           <span v-if="f.dh">{{dhcool(f.dh, true)}}</span>
+          <span v-if="dispoLoc" class="text-italic" >{{$t('DFloc')}}</span>
         </div>
 
         <div v-if="session.accesIdb" class="column items-center">
@@ -60,22 +61,20 @@
             <div class="titre-lg">{{$t('DFavion')}}</div>
             <div class="row items-center">
               <bouton-undo class="q-mr-sm text-center" :cond="modifAv" 
-                @click="xavn = '?'; xav = '?'"/>
+                @click="xavn = xav; xav = av"/>
               <btn-cond :disable="!modifAv" icon="check" @ok="validerAv"/>
             </div>
           </div>
           <div class="row full-width items-center">
             <div class="col-7 text-right">{{$t('DFavn')}}</div>
-            <div :class="'col-1 text-center ' + (avn ? 'msg' : '')">{{$t(avn ? 'oui1' : 'non')}}</div>
             <div class="q-pl-xs">
-              <q-toggle :class="'col-4 ' + clr1" indeterminate-value="?" color="grey-5" v-model="xavn" :label="oxn1" />
+              <q-toggle :class="'col-5 ' + clr1" color="grey-5" v-model="xavn" :label="$t(xavn ? 'oui1' : 'non1')"/>
             </div>
           </div>
           <div class="row full-width items-center">
             <div class="col-7 text-right">{{$t('DFav')}}</div>
-            <div :class="'col-1 text-center ' + (av ? 'msg' : '')">{{$t(av ? 'oui1' : 'non')}}</div>
             <div class="q-pl-xs">
-              <q-toggle :class="'col-4 ' + clr2" indeterminate-value="?" color="grey-5" v-model="xav" :label="oxn2" />
+              <q-toggle :class="'col-5 ' + clr2" color="grey-5" v-model="xav" :label="$t(xav ? 'oui1' : 'non1')" />
             </div>
           </div>
         </div>
@@ -110,8 +109,9 @@
           </div>
         </div>
 
-        <div v-if="faSt.getDataDeCache(f)" class="titre-md text-italic q-my-sm">
-          {{$t('DFdispm')}}
+        <div class="titre-md text-italic q-my-sm">
+          <span>{{$t(dispoLoc ? 'DFloc' : 'DFlocn')}}</span>
+          <span v-if="faSt.getDataDeCache(f)" class="q-ml-md">{{$t('DFdispm')}}</span>
         </div>
 
       </q-page>
@@ -167,26 +167,31 @@ const faSt = stores.ficav
 const ppSt = stores.pp
 const session = stores.session
 
-const xavn = ref('?')
-const xav = ref('?')
-
 const f = computed(() => props.note.mfa.get(props.idf) || { fake: true })
 const fa = computed(() => faSt.map.get(props.idf) || { fake: true })
 const fpr = computed(() => f.value.fake ?  { fake: true } : props.note.fnom.get(f.value.nom)[0])
-const avn = computed(() => { const fax = f.value.pr ? faSt.map.get(f.value.pr.idf) : null; return fax ? fax.avn : false })
+const avn = computed(() => { const fax = fpr.value && !fpr.value.fake ? faSt.map.get(fpr.value.idf) : null; return fax ? fax.avn : false })
 const av = computed(() => fa.value.av || false )
 const modifAv = computed(() => !(i1.value && i2.value))
-const i1 = computed(() => avn.value === xavn.value || xavn.value === '?')
-const i2 = computed(() => av.value === xav.value || xav.value === '?' )
-const oxn1 = computed(() => i1.value ? $t('inchange') : $t(xavn.value ? 'oui' : 'non2'))
-const oxn2 = computed(() => i2.value ? $t('inchange') : $t(xav.value ? 'oui' : 'non2'))
+const i1 = computed(() => avn.value === xavn.value)
+const i2 = computed(() => av.value === xav.value )
+/*
+const oxn1 = computed(() => i1.value ? $t('inchange') : $t(xavn.value ? 'oui' : 'non1'))
+const oxn2 = computed(() => i2.value ? $t('inchange') : $t(xav.value ? 'oui' : 'non1'))
+*/
 const clr1 = computed(() => i1.value ? '' : 'bg-warning')
 const clr2 = computed(() => i2.value ? '' : 'bg-warning')
 
+const xav = ref()
+const xavn = ref()
+/*
+watch(av, (x) => { 
+  xav.value = x || false})
+watch(avn, (x) => { 
+  xavn.value = x || false})
+*/
 
-watch(av, () => { xav.value = '?' })
-
-watch(avn, () => { xavn.value = '?' })
+const dispoLoc = computed(() => av.value || (avn.value && fpr.value.idf === fa.value.id))
 
 function voirNote () {
   ui.setPage('notes')
@@ -194,15 +199,18 @@ function voirNote () {
 }
 
 function ouvrirDF () {
-  xav.value = '?'
-  xavn.value = '?'
+  xav.value = av.value
+  xavn.value = avn.value
   ui.oD('DFouvrir', idc)
 }
 
 async function validerAv () {
-  const b1 = xavn.value === '?' || xavn.value === avn.value ? avn.value : xavn.value
-  if (xav.value !== '?' && xav.value !== av.value) await faSt.setAV (props.note, f.value.nom, b1, f.value.idf, xav.value)
-  else await faSt.setAV(props.note, f.value.nom, b1)
+  if (!i2.value) 
+    await faSt.setAV (props.note, f.value.nom, xavn.value, f.value.idf, xav.value)
+  else 
+    await faSt.setAV(props.note, f.value.nom, xavn.value)
+  xav.value = av.value
+  xavn.value = avn.value
 }
 
 async function retry () {
@@ -225,10 +233,20 @@ async function blobde (b) {
   const buf = await props.note.getFichier(f.value)
   if (!buf || !buf.length) return null
   const blob = new Blob([buf], { type: f.value.type })
+  if (blob) console.log('blob',  f.value.type, buf.length)
   return b ? blob : URL.createObjectURL(blob)
 }
 
+async function checkLoc () {
+  if (session.avion && !dispoLoc.value) {
+    await afficherDiag($t('PNFnotloc'))
+    return false
+  }
+  return true
+}
+
 async function copierFic () {
+  if (!await checkLoc()) return
   const u8 = await props.note.getFichier(f.value)
   if (!u8) {
     await afficherDiag($t('PNFgetEr'))
@@ -244,6 +262,7 @@ async function copierFic () {
 }
 
 async function affFic () {
+  if (!await checkLoc()) return
   const url = await blobde()
   if (url) {
     setTimeout(() => { window.open(url, '_blank') }, 100)
@@ -254,6 +273,7 @@ async function affFic () {
 }
 
 async function enregFic () {
+  if (!await checkLoc()) return
   const blob = await blobde(true)
   if (blob) {
     saveAs(blob, props.note.nomFichier(f.value))

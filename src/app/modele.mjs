@@ -1331,8 +1331,9 @@ export class Note extends GenDoc {
     return s
   }
 
+  /*
   get key () { return this.id + '/' + this.ids }
-  /* clé du parent:
+   clé du parent:
     - si elle n'est pas rattachée, c'est la racine (avatar ou groupe) de son id
     - sinon, c'est,
       - si ref[1] = 0 elle est rattachée à une autre racine (un groupe pour une note d'avatar): ref[0]

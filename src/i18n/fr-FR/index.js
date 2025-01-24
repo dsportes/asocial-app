@@ -1123,6 +1123,8 @@ export default {
 
   // MenuFichier
   DFavion: 'ACCESSIBILTÉ en mode AVION...',
+  DFloc: 'Disponible sur le poste',
+  DFlocn: 'Non disponible sur le poste',
   DFavn: 'de la révision la plus récente pour ce nom de fichier :',
   DFav: 'de cette révision spécifiquement :',
   DFchgdl: 'Contenu disponible localement.',
@@ -1134,7 +1136,7 @@ export default {
   DFretaut: 'Une nouvelle tentative sera automatiquement effectuée très bientôt (environ 1 minute).',
   DFerr: 'La dernière tentative s\'est terminée en erreur : {0}',
   DFerr2: 'Détail de l\'erreur: {0}.',
-  DFdispm: 'Pour information: le contenu est déjà en mémoire.',
+  DFdispm: '(déjà en mémoire)',
 
   // NoteConfirme
   NCFm0: 'Droits insuffisants pour exécuter cette opération', 
@@ -1200,7 +1202,8 @@ export default {
   PNFnvs0: 'Compression éventuelle et cryptage', 
   PNFnvs1: 'Transfert vers le serveur de fichiers',
   PNFnvs2: 'Validation',
-  PNFgetEr: 'Contenu du fichier non disponible (corrompu ? effacé ?)',
+  PNFgetEr: 'Contenu du fichier non disponible (corrompu ? effacé ?).',
+  PNFnotloc: 'Contenu du fichier non disponible en avion.',
   PNFsf: 'Confirmer ou infirmer la suppression du fichier',
   PNFcpp: 'Fichier copié dans le presse-papier',
   PNFrevx: 'ne voir que les révisions pour ce nom',
