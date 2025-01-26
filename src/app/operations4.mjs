@@ -2313,10 +2313,10 @@ Retour: aucun
 export class SupprFichier extends Operation {
   constructor () { super('SupprFichier') }
 
-  async run (note, idf, aut) { 
+  async run (note, idf, ida) { 
     try {
       const session = stores.session
-      const args = { token: session.authToken, id: note.id, ids: note.ids, idf, aut }
+      const args = { token: session.authToken, id: note.id, ids: note.ids, idf, ida }
       await post(this, 'SupprFichier', args)
       this.finOK()
     } catch (e) {

@@ -222,9 +222,10 @@ function ovSuppr () {
 }
 
 async function cfSuppr() {
+  const ida = props.note.deGroupe ? props.aut : null
   const f = props.note.mfa.get(props.idf)
   const nom = f ? f.nom : ''
-  await new SupprFichier().run(props.note, props.idf, props.aut)
+  await new SupprFichier().run(props.note, props.idf, ida)
   await faSt.delFic(props.note, nom, props.idf)
   ui.fD()
 }
@@ -253,7 +254,7 @@ async function copierFic () {
     return
   }
   try {
-    await idb.FLset(f.value.nom, f.value.info, f.value.type, u8) // throw AppExc
+    await idb.FLset(f.value.idf, f.value.nom, f.value.info, f.value.type, u8) // throw AppExc
   } catch (e) { await trapex (e, 2) } // ferme le dialogue
   ui.afficherMessage($t('PNFcpp'))
   ppSt.modecc = false

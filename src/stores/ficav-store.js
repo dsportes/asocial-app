@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 
 import stores from './stores.mjs'
-import { dhcool } from '../app/util.mjs'
+import { dhcool, sleep } from '../app/util.mjs'
 import { getData, post } from '../app/net.mjs'
 import { appexc } from '../app/api.mjs'
 import { IDBbuffer, idb } from '../app/db.mjs'
@@ -410,6 +410,7 @@ export const useFicavStore = defineStore('ficav', {
               this.idfdl = 0
               continue
             }
+            await sleep(10000)
             const args = { 
               token: this.session.authToken, 
               id: fa.noteId, 
