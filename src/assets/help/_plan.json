@@ -32,7 +32,8 @@
     "page_people", 
     "page_chats", 
     "page_ficav",
-    ["page_notes", "dial_notenv", "dial_notemaj", "dial_noteex", "dial_notefic", "dial_notedl"],
+    ["page_notes", "dial_notenv", "dial_notemaj", "dial_noteht",
+      "dial_noteex", "dial_notefic", "dial_notedl"],
     ["page_sponsoring",
       "sponsoring_d", "sponsoring_a"
     ],
