@@ -1898,6 +1898,7 @@ La "consommation mensuelle" de calcul est en centimes et est la somme des coûts
   A_page_compta: 'Page des alertes et de la comptabilité',
   A_page_espace: 'Page de gestion de l\'espace',
   A_page_ficav: 'Page des fichiers accessibles en mode avion',
+  A_page_pp: 'Presse-papier local de notes et fichiers',
 
   A_page_groupes: 'Page des participations aux groupes',
   A_page_groupe: 'Page de détail d\'un groupe',
