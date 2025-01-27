@@ -1824,7 +1824,7 @@ export default {
   BULLEexclu: `
 Seul un avatar ayant droit d'écriture dans le groupe peut avoir l'exclusivité d'écriture d'une note.
 
-Si une note a une exclusité d\'écriture pour un avatar ayant droit d'écriture sur le groupe, 
+Si une note a une exclusivité d\'écriture pour un avatar ayant droit d'écriture sur le groupe, 
 - le compte de cet avatar peut la transférer ou la supprimer.
 - un compte animateur du groupe peut aussi la transférer SAUF si l'avatar ayant l'exclusivité est lui-même animateur du groupe.
 
@@ -1954,7 +1954,7 @@ La "consommation mensuelle" de calcul est en centimes et est la somme des coûts
   A_dial_notemaj: 'Mise à jour d\'une note',
   A_dial_noteex: 'Gérer l\'exclusité d\'écriture d\'une note de groupe',
   A_dial_notefic: 'Fichiers attachés à une note',
-  A_dial_noteht: 'Commentaire / hashtags attachés à une note',
+  A_dial_noteht: 'Hashtags à propos d\'une note',
   A_dial_notedl: 'Téléchargement des notes et leurs fichiers',
 
   A_how_to: 'Comment faire pour ...',

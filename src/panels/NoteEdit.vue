@@ -7,7 +7,8 @@
         {{$t(note.deGroupe ? 'PNOngr' : 'PNOnper', [nom])}}
       </q-toolbar-title>
       <btn-cond icon="check" :label="$t('valider')" cond="cEdit"
-        :disable="(note.deGroupe && !aut) || !modifie"  @ok="valider"/>
+        :disable="(note.deGroupe && !aut) || !modifie || !texte.length" 
+        @ok="valider"/>
       <bouton-help page="dial_notemaj"/>
     </q-toolbar>
   </q-header>

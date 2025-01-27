@@ -145,7 +145,7 @@
           </q-toolbar-title>
           <btn-cond icon="check" :label="$t('valider')" cond="cEdit"
             :disable="!modifie"  @ok="validerHt"/>
-          <bouton-help page="page1"/>
+          <bouton-help page="dial_noteht"/>
         </q-toolbar>
       
         <hash-tags v-model="ht" :src="nSt.note.ht" :titre="$t('PNOht1')"/>
@@ -243,7 +243,7 @@
         </div>
 
         <div v-if="selected && !rec" class="q-my-xs row q-gutter-sm justify-center items-center">
-          <note-plus/>
+          <note-plus v-if="!nSt.estFake"/>
           <btn-cond v-if="nSt.note" color="warning" icon="delete" 
             :label="$t('PNOsupp')" @ok="ovSuppr"/>
           <btn-cond v-if="rattaut" icon="account_tree" :label="$t('PNOratt')" 

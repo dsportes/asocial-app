@@ -112,6 +112,11 @@ export const useNoteStore = defineStore('note', {
       return t === 2 || t === 3 || t === 5 || t === 7
     },
 
+    estFake (state) {
+      const t = state.node ? state.node.type : 0
+      return t === 3 || t > 5
+    },
+
     // Si la note du node courant existe et est une note de groupe
     estGr: (state) => { 
       return state.node && state.node.note && ID.estGroupe(state.node.note.id)

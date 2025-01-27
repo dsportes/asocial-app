@@ -55,18 +55,13 @@ const nSt = stores.note
 const avatarx = ref(null)
 const estgr = ref(false)
 
-const n = computed(() => 
-  nSt.node)
+const n = computed(() => nSt.node)
 const t = computed(() => n.value.type)
-const estAv = computed(() => 
-  t.value === 1 || t.value === 4 )
+const estAv = computed(() => t.value === 1 || t.value === 4 )
 const id = computed(() => n.value.id )
-const groupe = computed(() => 
-  estAv.value ? null : gSt.egr(id.value).groupe )
-const avatar = computed(() => 
-  estAv.value ? aSt.getElt(id.value).avatar : null )
-const lav = computed(() => 
-  session.compte.lstAvatars )
+const groupe = computed(() => estAv.value ? null : gSt.egr(id.value).groupe )
+const avatar = computed(() => estAv.value ? aSt.getElt(id.value).avatar : null )
+const lav = computed(() => session.compte.lstAvatars )
 const nom = computed(() => { const cv = session.getCV(id.value); return estAv.value ? cv.nom : cv.nomC })
 
 const diagGr = computed(() => groupe.value && !groupe.value.aUnAccesEcrNote ? 'PNOroEcr' : '')
