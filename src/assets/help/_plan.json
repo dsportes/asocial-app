@@ -8,7 +8,7 @@
       "menu_navigation"
     ],
     ["page_login", 
-      "page_login_m", "page_login_fa", "page_login_pp", "nouvelle_version" 
+      "page_login_m", "page_ficavion", "page_login_pp", "nouvelle_version" 
     ],
     "page_espace",
     "page_partition",
@@ -30,9 +30,7 @@
       "dial_droits", "dial_radiation", "chatgr"
     ],
     "page_people", 
-    "page_chats", 
-    "page_ficav",
-    "page_pp",
+    "page_chats",
     ["page_notes", "dial_notenv", "dial_notemaj", "dial_noteht",
       "dial_noteex", "dial_notefic", "dial_notedl"],
     ["page_sponsoring",

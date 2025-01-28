@@ -1485,8 +1485,8 @@ export class FichierLocal {
   }
 
   get nomFichier () {
-    const n1 = this.nom.trim().normNomFichier(this.nom)
-    const n2 = this.info ? '#' + this.info.trim().normNomFichier(this.info) : ''
+    const n1 = normNomFichier(this.nom.trim())
+    const n2 = this.info ? '#' + normNomFichier(this.info.trim()) : ''
     const ext = mime2ext(this.type) || 'bin'
     return n1 + n2 + '#' + this.idf + '.' + ext
   }

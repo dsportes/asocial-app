@@ -44,14 +44,14 @@ Lorsqu'une nouvelle révision d'un fichier est créée, ces volumes maximum cour
 
 > Quand aucune de ces limites n'est menacée la création d'une nouvelle révision peut augmenter le volume total.
 
-# Liste des fichiers de la note | page_pp
+# Liste des fichiers de la note | page_login_pp
 Cette liste affiche tous les _fichiers_ attachés à la note.
 
 Pour chaque fichier il apparaît la liste de ses révisions en ordre chronologique de leur création (les plus récentes en tête) avec:
-- le commentaire de la révision
-- son identifiant interne `#8...`
-- son type MIME comme `image/jpeg`
-- sa taille _source_ (non cryptée, non gzippé)
+- le commentaire de la révision.
+- son identifiant interne `#8...`.
+- son type MIME comme `image/jpeg`.
+- sa taille _source_ (non cryptée, non gzippé).
 - sa date-heure de création
 - un bouton de **Menu** qui propose les actions listées ci-après.
 
@@ -73,9 +73,9 @@ La révision est supprimée: si c'était la dernière existante pour le fichier,
 Voir la rubrique dédiée ci-après.
 
 # Ajout d'un fichier ou d'une révision de fichier
-Le bouton "+ FICHIER" ouvre le dialogue de création de la première révision d'un nouveau fichier.
+Le bouton "+FICHIER" ouvre le dialogue de création de la première révision d'un nouveau fichier.
 
-Le bouton "+ REVISION" ouvre le dialogue, similaire, d'ajout d'une révision.
+Le bouton "+REVISION" ouvre le dialogue, similaire, d'ajout d'une révision.
 
 ### Étape #1 : choix du contenu
 Il est possible de choisir:
@@ -100,7 +100,7 @@ Puis la révision _uploadée_ est validée dans la liste des révisions attaché
 
 Quand l'opération est complète l'appui sur le bouton "VU" ramène à la liste des fichiers de la note où la nouvelle révision apparaît et celles supprimées à cette occasion n'apparaissent plus.
 
-# Accessibilité en mode _avion_ | page_ficav
+# Accessibilité en mode _avion_ | page_login_fa
 Cette option de menu n'apparaît pas en mode _incognito_ qui ne dispose pas de stockage locale dans le browser pour le compte.
 
 ### Option: révision la plus récente toujours accessible en mode _avion_

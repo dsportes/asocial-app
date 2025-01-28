@@ -791,6 +791,7 @@ export default {
   PPsuppn: 'Supprimer vraiment la note ci-dessous ?',
   PPsuppf: 'Supprimer vraiment le fichier ci-dessous ?',
   PPerrb: 'Contenu du fichier non disponible (corrompu ? effacé ?)',
+  PPsavas: 'Fichier sauvegardé dans les Téléchargements sous le nom [{0}].',
   PPndf: 'Nom du fichier',
   PPapf: 'A propos du fichier (facultatif)',
   PPphf: 'monfic.jpg',
@@ -890,7 +891,7 @@ export default {
   ACmesgr: 'Groupe: pas de participation | Groupe: une participation ( | Groupes: {count} participations (',
   ACmesgra: 'actif',
   ACmesgri: 'invité',
-  ACmesgrc: 'simple contact',
+  ACmesgrc: 'contact',
   ACmesctc: 'Tous les contacts',
   ACgpart: 'Gestion de ma partition',
   ACpartitions: 'Partitions de l\'espace',
@@ -1897,8 +1898,6 @@ La "consommation mensuelle" de calcul est en centimes et est la somme des coûts
   A_page_compte: 'Page du compte',
   A_page_compta: 'Page des alertes et de la comptabilité',
   A_page_espace: 'Page de gestion de l\'espace',
-  A_page_ficav: 'Page des fichiers accessibles en mode avion',
-  A_page_pp: 'Presse-papier local de notes et fichiers',
 
   A_page_groupes: 'Page des participations aux groupes',
   A_page_groupe: 'Page de détail d\'un groupe',
@@ -1921,7 +1920,7 @@ La "consommation mensuelle" de calcul est en centimes et est la somme des coûts
 
   A_page_login: 'Se connecter / créer son compte',
   A_page_login_m: 'Modes synchronisé / incognito / avion',
-  A_page_login_fa: 'Fichiers accessibles en mode avion',
+  A_page_ficavion: 'Fichiers accessibles en mode avion',
   A_page_login_pp: 'Le "presse-papier" de notes et fichiers',
   A_nouvelle_version: '"Nouvelle version disponible"',
 

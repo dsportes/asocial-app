@@ -5,6 +5,7 @@
       <q-toolbar>
         <btn-cond icon="chevron_left" color="warning" @ok="ui.fD"/>
         <q-toolbar-title class="titre-lg">{{$t('MLApp')}}</q-toolbar-title>
+        <bouton-help page="page_login_pp"/>
       </q-toolbar>
       <q-tabs class="titre-md" v-model="ppSt.tab" inline-label align="center" no-caps dense>
         <q-tab name="notes" :label="$t('PPnotes')" />
@@ -144,6 +145,7 @@ import EditeurMd from '../components/EditeurMd.vue'
 import { idb } from '../app/db.mjs'
 import NomGenerique from '../components/NomGenerique.vue'
 import BtnCond from '../components/BtnCond.vue'
+import BoutonHelp from '../components/BoutonHelp.vue'
 
 const session = stores.session
 const ui = stores.ui
@@ -268,6 +270,7 @@ async function enregFic (f) {
   const blob = await blobde(f, true)
   if (blob) {
     saveAs(blob, f.nomFichier)
+    await afficherDiag($t('PPsavas', [f.nomFichier]))
   } else {
     afficherDiag($t('PPerrb'))
   }
