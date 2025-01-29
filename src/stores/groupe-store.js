@@ -206,8 +206,8 @@ export const useGroupeStore = defineStore('groupe', {
       let e = this.map.get(id)
       if (!e) {
         e = { 
-          groupe: null, 
-          chatgr: null,
+          groupe: null,
+          dhLectChat: 0,
           notes: new Map(),
           membres: new Map(), // tous membres
           estAnim: false, // un des avatars du compte est animateur du groupe
@@ -274,7 +274,17 @@ export const useGroupeStore = defineStore('groupe', {
       if (!e) return
       const im = parseInt(membre.ids)
       if (membre._zombi) e.membres.delete(im)
-      else e.membres.set(im, membre)
+      else {
+        e.membres.set(im, membre)
+        if (this.session.compte.mav.has(membre.id)) {
+          // membre est du compte
+          const t = membre.dhLectChat || 0
+          if (t && e.chatgr) {
+            const tc = e.chatgr.dhLectChat || 0
+            if (t > tc) e.chatgr.dhLectChat = t
+          }
+        }
+      }
     },
 
     delMembre (id, ids) {

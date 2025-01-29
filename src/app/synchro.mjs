@@ -452,15 +452,14 @@ export class OperationS extends Operation {
 
     /* A chaque itération il y a un commit IDB / store résultant (y compris le DataSync)*/
     while (!fini) {
+      const hb = stores.hb
       const args =  { 
         token: session.authToken, 
         dataSync: ds ? ds.serial() : null, 
+        nhb: hb.nhb
       }
-      if ((!ds1 || full) && nbIter === 0) { // Cas de login / relogin
-        const hb = stores.hb
+      if ((!ds1 || full) && nbIter === 0) // Cas de login / relogin
         args.subJSON = config.subJSON
-        args.nhb = hb.nhb
-      }
       if (!nbIter) {
         if (full) args.full = true
         else args.lids = lids || []

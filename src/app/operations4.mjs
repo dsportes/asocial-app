@@ -730,7 +730,7 @@ export class NouveauChat extends Operation {
   mut: { t: 'int', min: 0, max: 2 } // type de demande - 1 muter en O, 2 muter en A
 */
 export class MutChat extends Operation {
-  constructor () { super('MajChat') }
+  constructor () { super('MutChat') }
 
   async run (chat, mut) {
     try {
@@ -774,6 +774,29 @@ export class MajChat extends Operation {
       }
       const ret = await post(this, 'MajChat', args)
       return this.finOK(ret.disp)
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/*  OP_MajLectChat: 'Mise à jour de la date-heure de lecture d\'un "chat".'
+- `token` : éléments d'authentification du compte.
+- id, ids: id du chat
+*/
+export class MajLectChat extends Operation {
+  constructor () { super('MajChat') }
+
+  async run (chat) {
+    try {
+      const session = stores.session
+      const args = { 
+        token: session.authToken, 
+        id: chat.id, 
+        ids: chat.ids
+      }
+      await post(this, 'MajLectChat', args)
+      this.finOK()
     } catch (e) {
       await this.finKO(e)
     }

@@ -2,7 +2,10 @@
 <div>
   <div class="relative-position">
     <div v-if="chatx" class="row justify-between items-center">
-      <div class="titre-md text-bold">{{$t('CHentre', [nomI, nomE])}}</div>
+      <div>
+        <q-icon v-if="chatx.nonlu" color="negative" rounded name="flag" size="md"/>
+        <span class="titre-md text-bold">{{$t('CHentre', [nomI, nomE])}}</span>
+      </div>
       <btn-cond icon="chat" stop @ok="ouvrirChat()" round
         :cond="ui.urgence ? 'cUrgence' : 'cVisu'" />
     </div>

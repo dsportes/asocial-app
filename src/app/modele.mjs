@@ -936,6 +936,7 @@ export class Chat extends GenDoc {
     this.vcv = cvE.v
     const cvI = session.getCV(this.id)
 
+    this.dhLectChat = row.dhLectChat || 0
     this.items = []
     const a = []
     this.tit = ''

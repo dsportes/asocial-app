@@ -245,13 +245,13 @@
   import { useI18n } from 'vue-i18n'
   const $t = useI18n().t
 
-  import { ref, computed, onUnmounted } from 'vue'
+  import { ref, computed, onUnmounted, onMounted } from 'vue'
 
   import stores from '../stores/stores.mjs'
 
   import { styp, sty, dhcool, dkli, afficherDiag, $q } from '../app/util.mjs'
   import { GetPartition, GetSynthese, GetCompta, MajChat, PassifChat, 
-    MutChat, StatutChatE, MuterCompteO, MuterCompteA } from '../app/operations4.mjs'
+    MutChat, StatutChatE, MuterCompteO, MuterCompteA, MajLectChat } from '../app/operations4.mjs'
   import { ID } from '../app/api.mjs'
 
   import SdBlanc from '../components/SdBlanc.vue'
@@ -302,13 +302,16 @@
   const texte = ref('')
   const quotas = ref()
 
+  if (session.accesNet && chatX.value.dh > (chatX.value.dhLectChat || 0)) onMounted(async () => {
+    await new MajLectChat().run(chatX.value)
+  })
+
   async function getStE () {
     stE.value = await new StatutChatE().run(chatX.value.ids)
   }
 
   async function effacer (dh) {
     dheff.value = dh
-    nbci.value--
     ui.oD('ACconfirmeff', idc)
   }
 
