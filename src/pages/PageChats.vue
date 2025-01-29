@@ -161,7 +161,7 @@ async function rafCvs () {
       const [x, y] = r
       nc += x; nv += y
     }
-  ui.afficherMessage($t('CVraf2', [nc, nv]), false)
+  ui.afficherMessage($t('CVraf2', [nc, nv]))
 }
 
 function creerChat () {
@@ -180,10 +180,10 @@ async function exp () { // export des chats
   for (const c of fusion.value) {
     const cv = session.getCV(ID.estGroupe(c.id) ? c.id : c.idE)
     if (ID.estGroupe(c.id)) {
-      res.push('## ' + $t('CHoch2', [cv.nomc]) + '\n\n')
+      res.push('## ' + $t('CHoch2', [cv.nomC]) + '\n\n')
     } else {
       const cvI = session.getCV(c.id)
-      res.push('## ' + $t('CHoch3', [cvI.nom, cv.nomc]) + '\n\n')
+      res.push('## ' + $t('CHoch3', [cvI.nom, cv.nomC]) + '\n\n')
     }
     if (cv.ph) {
       const [mime, bin] = photoToBin(cv.photo)

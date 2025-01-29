@@ -55,7 +55,6 @@ export class Operation {
     if (!this.modeSync) {
       const session = stores.session
       session.finOp()
-      // if (!silence) stores.ui.afficherMessage($t('OPok', [this.label]), false)
     }
     return res
   }
@@ -73,7 +72,6 @@ export class Operation {
 
     session.finOp()
     const ui = stores.ui
-    ui.afficherMessage($t('OPko', [this.label]), true)
     await ui.afficherExc(exc)
     throw exc
   }

@@ -99,7 +99,7 @@ async function rafCvs () {
     const [x, y] = r
     nc += x; nv += y
   }
-  ui.afficherMessage($t('CVraf2', [nc, nv]), false)
+  ui.afficherMessage($t('CVraf2', [nc, nv]))
 }
 
 </script>

@@ -58,8 +58,7 @@ export const useUiStore = defineStore('ui', {
     // à la déconnexion (en fait au reset du store ui)
     reLogin: true,
     dialogStack: [],
-    d: { a: {} }
-
+    d: { a: {}, messages: [], aunmessage: false },
   }),
 
   getters: {
@@ -192,18 +191,25 @@ export const useUiStore = defineStore('ui', {
       this.menug = false
     },
     
-    afficherMessage (texte, important) {
-      if (this.messageto) clearTimeout(this.messageto)
-      this.message = { texte, important: important || false }
-      this.d.aunmessage = true
-      this.messageto = setTimeout(() => { 
-        this.effacermessage()
-      }, important ? 10000 : 2000)
+    afficherMessage (texte, type) {
+      if (texte) 
+        this.d.messages.push({ texte, type: type || 0 })
+      else 
+        this.d.messages.shift()
+      clearTimeout(this.messageto)
+      this.messageto = null
+      this.d.aunmessage = this.d.messages.length ? true : false
+      if (this.d.aunmessage) {
+        this.messageto = setTimeout(() => { 
+          this.afficherMessage() 
+        }, 2000)
+      }
     },
 
-    effacermessage () {
-      this.message = null
+    clearMessages () {
+      this.d.messages.length = 0
       this.d.aunmessage = false
+      clearTimeout(this.messageto)
     },
 
     async afficherExc (exc) {

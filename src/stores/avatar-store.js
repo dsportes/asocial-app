@@ -221,6 +221,11 @@ export const useAvatarStore = defineStore('avatar', {
     setChat (chat) {
       const e = this.map.get(chat.id)
       if (e) e.chats.set(chat.ids, chat)
+      if (this.session.ok) {
+        const nom = this.pSt.getCV(chat.idE).nom
+        const m = nom + ' => ' + chat.tit
+        this.ui.afficherMessage(m, 1)
+      }
     },
     
     delChat (id, ids) {

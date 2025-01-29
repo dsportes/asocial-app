@@ -108,14 +108,13 @@
       </btn-cond>
 
       <q-toolbar-title class="row justify-end items-center titre-md text-right q-mx-xs">
+        <span v-if="session.org" class="q-mr-sm titre-sm text-italic">{{session.org}}</span>
         <icon-mode class="cursor-none"/>
         <img v-if="session.ok" :src="people.getCV(session.compteId).photo" 
           height="28" width="28" class="q-pa-none q-mr-sm img"/>
-        <btn-cond v-if="session.oad" round padding="none sm" 
-          class="q-mr-xs" :label="session.oad"/>
-        <span v-if="session.ok" class="titre-lg">{{people.getCV(session.compteId).nom}}</span>
+        <span v-if="session.ok" class="titre-lg text-bold">{{people.getCV(session.compteId).nom}}</span>
         <span v-else class="titre-md text-italic cursor-none">{{$t('MLAsfer')}}</span>
-        <span v-if="session.org" class="q-ml-md titre-md">[{{session.org}}]</span>
+        <span v-if="session.ok" class="fs-sm font-mono q-ml-sm">{{$t('MLAoad' + session.oad)}}</span>
       </q-toolbar-title>
 
     </q-toolbar>
@@ -230,10 +229,21 @@
   </q-page-container>
 
   <!-- Gestion d'un message s'affichant en bas -->
-  <q-dialog v-model="ui.d.a.aunmessage" seamless position="bottom">
-    <div :class="'msgb q-pa-sm cursor-pointer text-center titre-sm text-bold bg-yellow-5 ' + (ui.message.important ? 'text-negative' : 'text-black')"  
-      @click="ui.effacermessage">
-      {{ ui.message.texte }}
+  <q-dialog v-model="ui.d.aunmessage" seamless position="bottom" full-width>
+    <div class="row justify-end">
+    <q-toolbar class="tbmsg bg-grey-9 text-white">
+      <q-icon :name="iconMsg[ui.d.messages[0].type || 0]" size="sm" 
+        :class="'q-ml-xs ' + msgClass"/>
+      <q-toolbar-title class="q-mr-md titre-sm">{{ui.d.messages[0].texte}}</q-toolbar-title>
+      <q-btn v-if="ui.d.messages.length > 1" round icon="arrow_downward" dense color="primary"
+        @click="ui.afficherMessage(null)" size="sm">
+        <q-badge v-if="ui.d.messages.length > 1" color="warning" rounded
+          style="position:relative;top:-8px;left:3px">
+          {{'' + ui.d.messages.length}}
+        </q-badge>
+      </q-btn>
+      <q-btn class="q-mx-xs" icon="close" size="sm" round dense color="primary" @click="ui.clearMessages"/>
+    </q-toolbar>
     </div>
   </q-dialog>
 
@@ -483,6 +493,8 @@ import PageGroupes from './pages/PageGroupes.vue'
 import PageGroupe from './pages/PageGroupe.vue'
 import PageContactgr from './pages/PageContactgr.vue'
 
+const iconMsg = ['info', 'chat']
+
 const $t = useI18n().t
 const $q = useQuasar()
 
@@ -493,6 +505,8 @@ const people = stores.people
 const config = stores.config
 const ui = stores.ui
 const hb = stores.hb
+
+const msgClass = computed(() => ui.d.aunmessage && ui.d.messages[0].type ? 'bg-warning' : 'bg-primary')
 
 function setCss() {
   const d = $q.dark.isActive ? 0 : 1
@@ -653,4 +667,9 @@ un élément qui apparaît quand le drawer est caché*/
   color: black
   background-color: $yellow5
   padding: 1px
+.tbmsg
+  width: 30rem
+  height: 2.5rem
+  border-radius: 8px
+  overflow: hidden
 </style>

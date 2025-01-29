@@ -89,10 +89,10 @@ export const useSessionStore = defineStore('session', {
     estAdmin (state) { return !state.compteId }, // OU page login !!!
     estDelegue (state) { return state.compte && state.compte.del },
     oad (state) { 
-      if (!state.compte || state.estComptable) return ''
-      if (state.compte.estA) return 'A'
-      if (state.compte.del) return 'D'
-      return 'O'
+      if (!state.compte || state.estComptable) return 0
+      if (state.compte.estA) return 3
+      if (state.compte.del) return 2
+      return 1
     },
     estA (state) { return state.compte && state.compte.estA },
     estAvc: (state) => { return (id) => { return state.compte && state.compte.mav.has(id) } },

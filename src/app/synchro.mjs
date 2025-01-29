@@ -322,12 +322,9 @@ export async function connexion(phrase, razdb) {
   try { 
     const op = new ConnexionSynchroIncognito()
     await op.run()
-    /*
-    setTimeout(async () => {
-      await hb.pingHB()
-      await hb.connex()
-    }, 50)
-    */
+
+    // const ui = stores.ui; for(let i = 0; i < 5; i++) ui.afficherMessage('message #' + i, i % 2)
+
   } catch (e) { 
     throw e
   }

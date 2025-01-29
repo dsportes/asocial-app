@@ -104,7 +104,7 @@ export const useGroupeStore = defineStore('groupe', {
         const id = e.groupe.id
         l.push({id, nom: state.pSt.getCV(id).nom }) 
       })
-      l.sort((a,b) => { return a.nomc < b.nomc ? -1 : (a.nomc === b.nomc ? 0 : 1)})
+      l.sort((a,b) => { return a.nomC < b.nomC ? -1 : (a.nomC === b.nomC ? 0 : 1)})
       return l
     },
 
@@ -259,6 +259,11 @@ export const useGroupeStore = defineStore('groupe', {
       if (!chatgr) return
       const e = this.setE(chatgr.id)
       if (!e.chatgr || e.chatgr.v < chatgr.v) e.chatgr = chatgr
+      if (this.session.ok) {
+        const nom = this.pSt.getCV(chatgr.id).nom
+        const m = nom + ' => ' + chatgr.tit
+        this.ui.afficherMessage(m, 1)
+      }
     },
 
     getChatgr (idg) { return this.map.has(idg) ? this.map.get(idg).chatgr : null },

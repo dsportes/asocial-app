@@ -153,7 +153,7 @@ const ptLcF = computed(() => {
   const r = []
   for (const c of ptLc.value) {
     if (f.avecsp && !c.del) continue
-    if (f.nomc && !c.cv.nom.startsWith(f.nomc)) continue
+    if (f.nomC && !c.cv.nom.startsWith(f.nomC)) continue
     /* 
     - `mcpt` : map (object) des comptes attachés à la partition. 
       - _clé_: id du compte.

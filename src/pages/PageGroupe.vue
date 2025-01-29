@@ -344,7 +344,7 @@ async function rafCvs () {
   else {
     const [x, y] = r
     nc += x; nv += y
-    stores.ui.afficherMessage($t('CVraf2', [nc, nv]), false)
+    stores.ui.afficherMessage($t('CVraf2', [nc, nv]))
   }
 }
 
