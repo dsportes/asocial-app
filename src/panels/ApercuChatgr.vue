@@ -55,7 +55,7 @@
 
 <script setup>
 
-import { ref, computed, onUnmounted } from 'vue'
+import { ref, computed, onUnmounted, onMounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import SdBlanc from '../components/SdBlanc.vue'
@@ -66,7 +66,7 @@ import SelAvmbr from '../components/SelAvmbr.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import BtnCond from '../components/BtnCond.vue'
 import DialStd1 from '../dialogues/DialStd1.vue'
-import { ItemChatgr } from '../app/operations4.mjs'
+import { ItemChatgr, MajLectChatgr } from '../app/operations4.mjs'
 
 const session = stores.session
 const ui = stores.ui
@@ -99,6 +99,11 @@ const moi = (im) => {
   const id = gr.value.tid[im]
   return id === session.avatarId
 }
+
+if (session.accesNet && gSt.nonluC) onMounted(async () => {
+  const lst = gr.value.lstImAM
+  if (lst.length) await new MajLectChatgr().run(gr.value.id, lst)
+})
 
 async function effacer (imx, dhx) {
   im.value = imx

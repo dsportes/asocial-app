@@ -302,7 +302,7 @@
   const texte = ref('')
   const quotas = ref()
 
-  if (session.accesNet && chatX.value.dh > (chatX.value.dhLectChat || 0)) onMounted(async () => {
+  if (session.accesNet && chatX.value.nonlu) onMounted(async () => {
     await new MajLectChat().run(chatX.value)
   })
 

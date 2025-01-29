@@ -108,6 +108,26 @@ export const useGroupeStore = defineStore('groupe', {
       return l
     },
 
+    nonluC: (state) => {
+      const e = state.egrC
+      const dh = e.chatgr ? e.chatgr.dh || 0 : 0
+      return dh > e.dhLectChat
+    },
+
+    chatsNonlus: (state) => {
+      for(const [id, e] of state.map) {
+        const dh = e.chatgr ? e.chatgr.dh || 0 : 0
+        if (dh > e.dhLectChat) return true
+      }
+      return false
+    },
+
+    nbchats: (state) => {
+      let n = 0
+      for(const [id, e] of state.map) if (e.chatgr) n++
+      return n
+    },
+
     getMembre: (state) => { return (id, idaIm) => { 
         const e = state.map.get(id)
         if (!e) return null
@@ -276,12 +296,13 @@ export const useGroupeStore = defineStore('groupe', {
       if (membre._zombi) e.membres.delete(im)
       else {
         e.membres.set(im, membre)
-        if (this.session.compte.mav.has(membre.id)) {
-          // membre est du compte
-          const t = membre.dhLectChat || 0
-          if (t && e.chatgr) {
-            const tc = e.chatgr.dhLectChat || 0
-            if (t > tc) e.chatgr.dhLectChat = t
+        const gr = e.groupe
+        if (gr) {
+          const idm = gr.tid[im]
+          if (this.session.compte.mav.has(idm)) {
+            // membre est du compte
+            const t = membre.dhLectChat || 0
+            if (t > e.dhLectChat) e.dhLectChat = t
           }
         }
       }

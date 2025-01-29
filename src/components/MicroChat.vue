@@ -3,7 +3,7 @@
   <div class="relative-position">
     <div v-if="chatx" class="row justify-between items-center">
       <div>
-        <q-icon v-if="chatx.nonlu" color="negative" rounded name="flag" size="md"/>
+        <q-icon v-if="chatx.nonlu" color="warning" rounded name="flag" size="md"/>
         <span class="titre-md text-bold">{{$t('CHentre', [nomI, nomE])}}</span>
       </div>
       <btn-cond icon="chat" stop @ok="ouvrirChat()" round
@@ -90,7 +90,9 @@ const nomI = computed(() => session.getCV(chatx.value.id).nom)
 const nomE = computed(() => session.getCV(chatx.value.idE).nom)
 const nomG = computed(() => session.getCV(mode.value).nom)
 
-function ouvrirChat () { ui.oD('MCACouvrir', idc) }
+function ouvrirChat () { 
+  ui.oD('MCACouvrir', idc) 
+}
 function creerChat () { ui.oD('CCouvrir', idc)}
 
 </script>

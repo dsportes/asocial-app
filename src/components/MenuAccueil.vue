@@ -76,9 +76,13 @@
 
     <q-item clickable @click="tousChats">
       <q-item-section>
-        <q-item-label lines="1">{{$t('ACchats')}}
-          <q-badge color="primary" rounded>{{nbchats}}</q-badge>
-        </q-item-label>
+        <div class="row items-center">
+          <q-icon v-if="aSt.chatsNonlus || gSt.chatsNonlus" 
+            name="flag" color="warning" size="sm"/>
+          <q-item-label lines="1">{{$t('ACchats')}}
+            <q-badge color="primary" rounded>{{nbchats}}</q-badge>
+          </q-item-label>
+        </div>
       </q-item-section>
     </q-item>
 
@@ -107,9 +111,13 @@
 
     <q-item clickable class="q-ml-lg" @click="chatsAv">
       <q-item-section>
-        <q-item-label lines="1">{{$t('ACchats')}}
-          <q-badge color="primary" rounded>{{nbchatsAv}}</q-badge>
-        </q-item-label>
+        <div class="row items-center">
+          <q-icon v-if="aSt.chatsNonlusAC" 
+            name="flag" color="warning" size="sm"/>
+          <q-item-label lines="1">{{$t('ACchats')}}
+            <q-badge color="primary" rounded>{{nbchatsAv}}</q-badge>
+          </q-item-label>
+        </div>
       </q-item-section>
     </q-item>
 
@@ -168,7 +176,7 @@ const ui = stores.ui
 const fSt = stores.filtre
 
 const nbav = computed(() => session.compte.mav.size)
-const nbchats = computed(() => aSt.nbchats )
+const nbchats = computed(() => aSt.nbchats + gSt.nbchats)
 const nbchatsAv = computed(() => { const x = aSt.eavC; return x ? x.chats.size : 0 })
 const nbpeople = computed(() => pSt.visiblePeople.size )
 const nbspons = computed(() => { const x = aSt.eavC; return x ? x.sponsorings.size : 0 })

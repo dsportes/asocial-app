@@ -518,6 +518,8 @@ export default {
   OP_DelTache: 'Suppression d\'une tâche différée',
   OP_GoTache: 'Lancement immédiat d\'une tâche différée',
   OP_SetQuotasA: 'Mise à jour des quotas pour les comptes A',
+  OP_MajLectChatgr: 'Mise à jour de la date-heure de lecture d\'un "chat de groupe".',
+  OP_MajLectChat: 'Mise à jour de la date-heure de lecture d\'un "chat".',
 
   // Login
   LOGpubsub: 'Autoriser les "notifications" afin d\'avoir des données à jour en continu même suite aux actions des autres sessions',
@@ -769,6 +771,7 @@ export default {
 
   FIjours: 'Modifiés dans les N jours',
   FIinvits: 'Groupes ayant des invitations en cours',
+  FInonlus: 'Chats NON lus seulement',
   FIavecsp: 'Seulement les délégués',
   FIavecmut: 'Chats avec MUTATIONS seulement',
   FIavecgr: 'Membre d\'un groupe',

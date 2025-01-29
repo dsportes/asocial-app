@@ -135,13 +135,14 @@
           <div class="titre-lg">{{$t('MLArech')}}</div>
         </div>
         <div v-if="ui.page === 'chats'" class="column justify-start">
-          <filtre-rac nom="chats" prop='rac' :idx="0"/>
-          <filtre-nbj nom="chats" prop='nbj' :idx="1"/>
-          <filtre-nom nom="chats" prop='nom' :idx="0"/>
-          <filtre-nom nom="chats" prop='txt' :idx="1"/>
-          <filtre-mc nom="chats" attr="mcp" :idx="0"/>
-          <filtre-mc nom="chats" attr="mcn" :idx="1"/>
-          <filtre-avecmut nom="chats" attr="avecmut" :idx="0"/>
+          <filtre-nonlus nom="chats" prop='nonlus' :idx="0"/>
+          <filtre-rac nom="chats" prop='rac' :idx="1"/>
+          <filtre-nbj nom="chats" prop='nbj' :idx="0"/>
+          <filtre-nom nom="chats" prop='nom' :idx="1"/>
+          <filtre-nom nom="chats" prop='txt' :idx="0"/>
+          <filtre-mc nom="chats" attr="mcp" :idx="1"/>
+          <filtre-mc nom="chats" attr="mcn" :idx="0"/>
+          <filtre-avecmut nom="chats" attr="avecmut" :idx="1"/>
         </div>
         <div v-if="ui.page === 'admin'" class="column justify-start">
           <filtre-nom nom="admin" prop='org' :idx="0"/>
@@ -435,6 +436,7 @@ import BoutonBulle from './components/BoutonBulle.vue'
 import IconAlerte from './components/IconAlerte.vue'
 import QueueIcon from './components/QueueIcon.vue'
 import FiltreNs from './components/FiltreNs.vue'
+import FiltreNonlus from './components/FiltreNonlus.vue'
 import FiltreNom from './components/FiltreNom.vue'
 import FiltreMc from './components/FiltreMc.vue'
 import FiltreNbj from './components/FiltreNbj.vue'

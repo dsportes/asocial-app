@@ -957,6 +957,7 @@ export class Chat extends GenDoc {
       if (!this.tit && t) this.tit = titre(t)
     }
     this.txt = a.join('\n')
+    this.nonlu = this.dhLectChat < this.dh
   }
 
 }
@@ -1026,6 +1027,15 @@ export class Groupe extends GenDoc {
     let n = 0
     this.st.forEach(st => { if (st > 1) n++})
     return n
+  }
+
+  get lstImAM () {
+    const lst = []
+    const session = stores.session
+    const mav = session.compte.mav
+    for(let im = 1; im < this.st.length; im++)
+      if (mav.has(this.tid[im]) && this.accesMembre(im)) lst.push(im)
+    return lst
   }
 
   get pcv () { return !this.qv ? 0 : Math.ceil(this.vf * 100 / this.qv * UNITEV) }
@@ -1158,6 +1168,7 @@ export class Membre extends GenDoc {
     this.fen = row.fen || 0    
     this.dam = row.dam || 0
     this.fam = row.fam || 0
+    this.dhLectChat = row.dhLectChat || 0
     const cleg = RegCles.get(this.id)
     const clea = await decrypter(cleg, row.cleAG)
     RegCles.set(clea)

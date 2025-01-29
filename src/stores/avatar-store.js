@@ -49,6 +49,19 @@ export const useAvatarStore = defineStore('avatar', {
       }
     },
 
+    chatsNonlus: (state) => {
+      for(const [, e] of state.map) {
+        for(const [,c] of e.chats) if (c.nonlu) return true
+      }
+      return false
+    },
+
+    chatsNonlusAC: (state) => {
+      const e = state.map.get(state.session.avatarId)
+      for(const [,c] of e.chats) if (c.nonlu) return true
+      return false
+    },
+
     // chats des avatars du compte avec idE
     // si n'en a pas, e.cr est true si on peut en créer un (idE est people ou comptable)
     chatsDuCompte: (state) => { return (idE) => {

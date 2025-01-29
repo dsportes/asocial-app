@@ -780,14 +780,14 @@ export class MajChat extends Operation {
   }
 }
 
-/*  OP_MajLectChat: 'Mise à jour de la date-heure de lecture d\'un "chat".'
+/* OP_MajLectChat: 'Mise à jour de la date-heure de lecture d\'un "chat".'
 - `token` : éléments d'authentification du compte.
 - id, ids: id du chat
 */
 export class MajLectChat extends Operation {
-  constructor () { super('MajChat') }
+  constructor () { super('MajLectChat') }
 
-  async run (chat) {
+  async run (chat, lstIm) {
     try {
       const session = stores.session
       const args = { 
@@ -795,7 +795,28 @@ export class MajLectChat extends Operation {
         id: chat.id, 
         ids: chat.ids
       }
+      if (lstIm) args.lstIm = lstIm
       await post(this, 'MajLectChat', args)
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* OP_MajLectChatgr: 'Mise à jour de la date-heure de lecture d\'un "chat".'
+- `token` : éléments d'authentification du compte.
+- idg: id du groupe
+- lstIm: liste des im des membres du groupe du compte ayant lu le chat
+*/
+export class MajLectChatgr extends Operation {
+  constructor () { super('MajLectChatgr') }
+
+  async run (idg, lstIm) {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, idg, lstIm }
+      await post(this, 'MajLectChatgr', args)
       this.finOK()
     } catch (e) {
       await this.finKO(e)

@@ -2,7 +2,10 @@
 <div>
   <div class="relative-position">
     <div class="row justify-between items-center">
-      <div class="titre-md text-bold">{{$t('CHgrp', [nomg])}}</div>
+      <div>
+        <q-icon v-if="nonlu" color="warning" rounded name="flag" size="md"/>
+        <span class="titre-md text-bold">{{$t('CHgrp', [nomg])}}</span>
+      </div>
       <btn-cond icon="chat" stop @ok="ouvrirChat()" round
         :cond="ui.urgence ? 'cUrgence' : 'cVisu'" />
     </div>
@@ -34,7 +37,7 @@ const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 const m1 = computed(() => ui.d[idc].MCACGouvrir)
 
-const aSt = stores.avatar
+const gSt = stores.groupe
 const session = stores.session
 
 const props = defineProps({ 
@@ -42,6 +45,12 @@ const props = defineProps({
 })
 
 const nomg = computed(() => session.getCV(props.chat.id).nomC )
+
+const nonlu = computed(() => {
+  const e = gSt.egr(props.chat.id)
+  const dh = e && e.chatgr ? e.chatgr.dh : 0
+  return e.dhLectChat < dh
+})
 
 function ouvrirChat () {
   session.setGroupeId(props.chat.id)
