@@ -11,27 +11,39 @@ La page des contacts liste,
 - les "chats des avatars" ouverts avec un des avatars du compte.
 - et les "chats des groupes" auquel le compte participe.
 
-### Chat _actif_ et _passif / raccroché_
+### Chat _non lu_, items _non lus_
+Un chat apparaît **non lu** pour un compte quand un nouvel item a été ajouté au chat (ou a été supprimé) **après** la dernière fermeture de la page du chat par le compte.
+
+Un item apparaît **non lu** pour un compte quand il a été créé ou supprimé **après** la dernière fermeture de la page du chat par le compte.
+
+> Un _flag orange_ apparaît devant le nom du chat pour signaler qu'il est _non lu_, qu'il a des items que le compte n'a jamais vu.
+
+> Un _flag orange_ apparaît devant un item d'un chat pour signaler que le compte ne l'a jamais vu.
+
+# Chat d'un avatar _actif_ et _passif / raccroché_
 L'état _normal_ du **chat d'un avatar** est _actif_:
-- votre avatar a écrit des lignes sur le _chat_ et voit les lignes écrites par le contact.
+- l'avatar du compte a écrit des lignes sur le _chat_ et voit les lignes écrites par le contact.
 - le chat est décompté pour 1 dans le nombre de _documents_ dont le quota QN attaché au compte limite l'inflation.
 
-Mais un _chat_ peut avoir été ouvert par le contact sans que vous ayez eu votre mot à dire. Il se peut aussi que le chat ait perdu de son intérêt pour une raison quelconque.
+Mais un _chat d'un avatar_ peut avoir été **ouvert par le contact**. Il se peut aussi que le chat ait perdu de son intérêt pour une raison quelconque.
 
-Dans ce cas vous pouvez **raccrocher** le chat qui va devenir _passif_:
-- les lignes du chat sont effacées (pour vous, pas pour votre contact).
+Dans ce cas le compte peut **raccrocher** le chat qui va devenir _passif / raccroché_:
+- les lignes du chat sont effacées (pour le compte, pas pour son contact).
 - le chat N'EST PLUS décompté pour 1 dans le nombre de _documents_ dont le quota QN attaché au compte limite l'inflation.
 
-Toutefois, si le contact continue d'écrire des lignes, tout en connaissant votre désintérêt pour le chat (qui lui apparaît _passif / raccroché_), elles vont apparaître dans le chat qui reste _passif_. Ce n'est que si vous écrivez vous-même une ligne que le chat redevient actif pour vous.
+Toutefois, si le contact continue d'écrire des lignes sur le chat (qui lui apparaît _passif / raccroché_), elles vont apparaître dans le chat du compte qui reste _passif_. Ce n'est que quand le compte écrira lu-même une ligne que le chat redeviendra actif pour vous.
 
-### Filtre
+# Filtre des chats
 Le filtre de la page (obtenu en appuyant sur l'icône de _loupe_ en haut à droite), permet de raccourcir la liste des chats.
 
-Le compte peut attacher à tout contact,
-- un _alias_ attribué personnellement (connu seulement de lui-même),
+Rappel: Le compte peut attacher à tout contact,
+- un _alias / commentaire_ attribué personnellement (connu seulement de lui-même),
 - des _hashtags_ attribués personnellement (connu seulement de lui-même), le qualifiant pour des filtres de recherche.
 
-#### tous / actifs / raccrochés
+### Chats NON LUS seulement
+Si cette cas est cochée et que le chat a été lu, le compte en a vu l'état le pls récent, il n'apparaît pas dans la liste.
+
+### tous / actifs / raccrochés
 - avec l'option _tous_ les chats des avatars sont listés qu'ils soient raccrochés ou non.
 - avec l'option _actifs_, seuls les chats _actifs_ des avatars (ayant a priori de l'intérêt) sont listés (les passifs ne le sont pas).
 - avec l'option _raccrochés_, seuls les chats _raccrochés_ des avatars, a priori SANS intérêt, sont visibles (les actifs ne le sont pas). Ceci permet de lire des chats pouvant être porteurs d'un message important.
@@ -39,19 +51,19 @@ Le compte peut attacher à tout contact,
 ### Modifiés dans les N jours
 Ce filtre permet de ne sélectionner que les chats modifiés _récemment_ (un jour, une semaine, un mois, un trimestre, une année). Un moyen simple pour voir ce qu'il y a de nouveau depuis la visite (approximativement). 
 
-#### Début du nom du contact ou du groupe
+### Début du nom du contact ou du groupe
 Frapper un ou plusieurs caractères: seuls les chats émis par des contacts ou des groupes dont, soit **le nom dans la _carte de visite_**, soit **l'alias donné personnellement** commence ainsi seront listés.
 
-#### Texte cherché dans les chats
+### Texte cherché dans les chats
 Seuls les chats dont le texte contient (n'importe où) le texte saisi sont listés.
 
-#### AYANT AU MOINS UN DES HASHTAGS
+### AYANT AU MOINS UN DES HASHTAGS
 Le chat n'est retenu dans la liste résultat **que si le compte a attaché UN DES hashtags cités au contact ou au groupe**.
 
-#### N'AYANT AUCUN DES HASHTAGS
+### N'AYANT AUCUN DES HASHTAGS
 Le chat n'est retenu dans la liste résultat **que si le compte n'a attaché au contact ou au groupe AUCUN DES hashtags cités**.
 
-#### Chats avec MUTATIONS seulement
+### Chats avec MUTATIONS seulement
 Dans la documentation générale, lire <a href="$$/appli/mutations_oa.html" target="_blank">Mutations de compte "O" en "A" et de "A" en "O"</a>
 
 C'est par un _chat_ avec le Comptable ou un de ses délégués qu'un compte peut demander sa mutation en compte "O" ou "A".
@@ -60,10 +72,11 @@ En cochant cette case, seuls les chats impliqués dans une demande mutation sont
 - demandes faites et en attente,
 - demandes à traiter pour le Comptable ou un de ses délégués.
 
-# Détail d'un chat listé | chat_maj
+# Détail d'un chat listé | chat_maj chatgr
 Deux niveaux de détails sont disponibles:
 - **_en dépliant_ un des chats** on fait apparaître:
   - **un résumé succinct du chat:**
+    - un _flag orange_ s'il na pas été lu,
     - son état _actif / passif_,
     - le nombre d'échanges qu'il comporte,
     - la date-heure de dernière mise à jour,

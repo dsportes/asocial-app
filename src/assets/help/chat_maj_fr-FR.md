@@ -7,6 +7,8 @@ Si le contact du chat a disparu, ceci apparaît en haut.
 
 Dans le cas normal, une petite fiche d'identité du contact apparaît: sa carte de visite, les commentaires et hashtags que le compte y a attaché.
 
+Un item d'un chat est considéré comme **non lu** s'il a été ajouté ou supprimé **après** l'affichage de sa page par le compte.
+
 ### Chat _actif_ ou _passif / raccroché_
 Le chat peut être _passif / raccroché_, 
 - quand le compte n'y a jamais rien écrit,
@@ -29,6 +31,11 @@ Le bouton **NOUVEL ÉCHANGE** ouvre un dialogue de saisie d'un texte: une fois v
 Le compte peut supprimer les échanges qu'il a écrits (pas ceux de son contact) en cliquant sur la petite croix au-dessus de l'échange.
 
 Le texte n'apparaîtra plus mais seulement la date de l'échange supprimé et sa date de suppression.
+
+### Remarque: les items qui viennent d'être écrits apparaissent comme _non lus_
+C'est un peu paradoxal: on vient d'ajouter un item au chat et il apparaît avec un _flag orange_ **non lu**.
+
+Par économie de calcul un chat (et ses items) est marqué comme _lu_ à la fermeture de sa page: un nouvel item est en conséquence marqué _non lu_ jusqu'à fermeture de la page mais apparaîtra bien _lu_ à sa réouverture.
 
 ## Faire un don depuis un chat
 Au lieu d'ouvrir un nouvel échange par le bouton **NOUVEL ÉCHANGE** il faut l'ouvrir par le bouton **FAIRE UN DON**: le dialogue qui s'ouvre est légèrement différent:

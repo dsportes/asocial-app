@@ -45,7 +45,10 @@
             </div>
             <template v-slot:name>
               <div class="full-width row justify-between items-center">
-                <span>{{it.a===0 ? $t('moi') : cvE.nom}}</span>
+                <div class="row items-center q-gutter-xs">
+                  <q-icon v-if="nonlu(it)" name="flag" color="warning" size="sm"/>
+                  <span>{{it.a===0 ? $t('moi') : cvE.nom}}</span>
+                </div>
                 <btn-cond v-if="it.a===0 && !it.dhx" size="sm" icon="clear" color="warning"
                   @ok="effacer(it.dh)" 
                   :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
@@ -245,7 +248,7 @@
   import { useI18n } from 'vue-i18n'
   const $t = useI18n().t
 
-  import { ref, computed, onUnmounted, onMounted } from 'vue'
+  import { ref, computed, onUnmounted } from 'vue'
 
   import stores from '../stores/stores.mjs'
 
@@ -270,7 +273,7 @@
   })
 
   const ui = stores.ui
-  const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
+  const idc = ui.getIdc() // ; onUnmounted(() => ui.closeVue(idc))
   const aSt = stores.avatar
   const session = stores.session
   const cfg = stores.config
@@ -290,6 +293,7 @@
   const racI = computed(() => chatX.value.stI === 0)
   const racE = computed(() => chatX.value.stE === 0)
   const dispE = computed(() => chatX.value.stE === 2)
+  const nonlu = (it) => (it.dhx ? it.dhx : it.dh) > chatX.value.dhLectChat
 
   const dconf = ref(false)
   const txt = ref('')
@@ -302,8 +306,10 @@
   const texte = ref('')
   const quotas = ref()
 
-  if (session.accesNet && chatX.value.nonlu) onMounted(async () => {
-    await new MajLectChat().run(chatX.value)
+  onUnmounted(async () => {
+    if (session.accesNet && chatX.value.nonlu)
+      await new MajLectChat().run(chatX.value)
+    ui.closeVue(idc)
   })
 
   async function getStE () {

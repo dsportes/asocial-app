@@ -13,7 +13,10 @@
         </div>
         <template v-slot:name>
           <div class="full-width row justify-between items-center">
-            <span>{{cvm(it.im).nomC }}</span>
+            <div class="row items-center q-gutter-xs">
+              <q-icon v-if="nonlu(it)" name="flag" color="warning" size="sm"/>
+              <span>{{cvm(it.im).nomC }}</span>
+            </div>
             <btn-cond cond="cEdit" v-if="(egr.estAnim || moi(it.im)) && !it.dhx" size="sm" 
               icon="clear" color="warning" round
               @ok="effacer(it.im, it.dh)"/>
@@ -55,7 +58,7 @@
 
 <script setup>
 
-import { ref, computed, onUnmounted, onMounted } from 'vue'
+import { ref, computed, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import SdBlanc from '../components/SdBlanc.vue'
@@ -70,7 +73,7 @@ import { ItemChatgr, MajLectChatgr } from '../app/operations4.mjs'
 
 const session = stores.session
 const ui = stores.ui
-const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
+const idc = ui.getIdc() // ; onUnmounted(() => ui.closeVue(idc))
 const m1 = computed(() => ui.d[idc].ACGconfirmeff)
 const m2 = computed(() => ui.d[idc].ACGchatedit)
 
@@ -90,19 +93,24 @@ function selAut(elt) {
 }
 
 const egr = computed(() => gSt.egrC)
+const dhLectChat = computed(() => egr.value.dhLectChat || 0)
 const cvg = computed(() => session.getCV(session.groupeId))
 const gr = computed(() => egr.value.groupe )
 const items = computed(() => gSt.chatgr && gSt.chatgr.items ? gSt.chatgr.items : [])
 
+const nonlu = (it) => (it.dhx ? it.dhx : it.dh) > dhLectChat.value
 const cvm = (im) => session.getCV(gr.value.tid[im])
 const moi = (im) => {
   const id = gr.value.tid[im]
   return id === session.avatarId
 }
 
-if (session.accesNet && gSt.nonluC) onMounted(async () => {
-  const lst = gr.value.lstImAM
-  if (lst.length) await new MajLectChatgr().run(gr.value.id, lst)
+onUnmounted(async () => {
+  if (session.accesNet && gSt.nonluC) {
+    const lst = gr.value.lstImAM
+    if (lst.length) await new MajLectChatgr().run(gr.value.id, lst)
+  }
+  ui.closeVue(idc)
 })
 
 async function effacer (imx, dhx) {
