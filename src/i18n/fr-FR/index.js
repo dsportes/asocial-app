@@ -1079,6 +1079,7 @@ export default {
   PNOpause2: 'Téléchargement mis en pause. Attente de reprise.',
   PNOcffin: 'Téléchargement interrompu: si souhaité en demander un autre.',
   PNOdlpath: 'Path: {0}',
+  PNOdirloc: 'mon_folder_local',
   PNOdlr: 'Reprendre le téléchargement',
   PNOdlnbr: '{0} notes restantes sur {1}',
   PNOdlok1: 'Chargement local terminé avec succès:',

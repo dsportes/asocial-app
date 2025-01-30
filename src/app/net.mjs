@@ -190,6 +190,6 @@ export async function putData (url, data) {
     })
     return r.status === 200 ? null : 'Status:' + r.statusText
   } catch (e) {
-    return e.message
+    return e.message + (e.response ? '\n' + (e.response.data || '') : '')
   }
 }

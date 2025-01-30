@@ -278,7 +278,7 @@ import stores from '../stores/stores.mjs'
 import { dkli, sty, styp, $t, u8ToB64, dhcool, edvol, afficherDiag, 
   sleep, egalite, normNomFichier } from '../app/util.mjs'
 import ShowHtml from '../components/ShowHtml.vue'
-import { ID, appexc, AppExc } from '../app/api.mjs'
+import { ID, appexc, AppExc, E_WS } from '../app/api.mjs'
 import NoteEdit from '../panels/NoteEdit.vue'
 import NoteExclu from '../panels/NoteExclu.vue'
 import NoteFichier from '../panels/NoteFichier.vue'
@@ -293,7 +293,7 @@ import { RattNote, HTNote, SupprNote } from '../app/operations4.mjs'
 import { Note } from '../app/modele.mjs'
 import { putData, getData } from '../app/net.mjs'
 
-const ralentissement = 2000
+const ralentissement = 200
 
 const icons = ['','person','group','group','description','article','description','article']
 const colors = ['','primary','secondary','grey-5','primary','secondary','grey-5','grey-5']
@@ -348,7 +348,7 @@ const dlnbf = ref(0)
 const dlv2f = ref(0)
 const dlvx = ref(0)
 const portupload = ref(cfg.portupload)
-const dirloc = ref('./temp')
+const dirloc = ref($t('PNOdirloc'))
 
 const estAnim = computed(() => { const e = nSt.note ? gSt.egr(nSt.note.id) : null; return e && e.estAnim })
 
@@ -648,7 +648,8 @@ async function dlnote (n, avecf) {
   const buf = enc.encode(n.n.texte)
   const u = url(n.p + '/_.md')
   const er = await putData(u, buf)
-  if (er) throw new AppExc(E_WS, 6, [er])
+  if (er) 
+    throw new AppExc(E_WS, 6, [er])
   if (ralentissement) await sleep(ralentissement)
   if (avecf) {
     for (const [, f] of n.n.mfa) {
@@ -659,7 +660,8 @@ async function dlnote (n, avecf) {
       if (buf) {
         const u = url(n.p + '/' + nf)
         const er = await putData(u, buf)
-        if (er) throw new AppExc(E_WS, 6, [er])
+        if (er) 
+          throw new AppExc(E_WS, 6, [er])
         else {
           dlnbf.value++
           dlv2f.value += buf.length
