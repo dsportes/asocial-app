@@ -1397,8 +1397,8 @@ export class Note extends GenDoc {
   }
 
   nomFichier (f) {
-    const n1 = f.nom.trim().normNomFichier(f.nom)
-    const n2 = f.info ? '#' + f.info.trim().normNomFichier(f.info) : ''
+    const n1 = normNomFichier(f.nom.trim())
+    const n2 = f.info ? '#' + normNomFichier(f.info.trim()) : ''
     const ext = mime2ext(f.type) || 'bin'
     return n1 + n2 + '#' + f.idf + '.' + ext
   }

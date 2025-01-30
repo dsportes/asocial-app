@@ -67,7 +67,7 @@
           <q-toolbar-title class="titre-lg full-width text-center">
             {{$t('PNOdlc')}}
           </q-toolbar-title>
-          <bouton-help page="page1"/>
+          <bouton-help page="dial_notedl"/>
         </q-toolbar>
 
         <q-card-section class="q-pa-xs" style="height:30vh;overflow-y:auto">
@@ -94,11 +94,14 @@
             <div class="q-mt-md q-mb-sm titre-lg text-italic">
               {{$t('PNOdlc' + (dlst===2 ? '2' : '1'))}}
             </div>
-            <div class="q-ml-md q-mb-sm">
-              <span class="titre-md text-italic">{{$t('PNOdlpath')}}</span>
-              <span class="q-ml-xs fs-md font-mono">{{dlnc.p}}</span>
-              <span class="q-ml-md titre-md text-italic">{{$t('PNOdlv12')}}</span>
-              <span class="q-ml-xs fs-md font-mono">{{edvol(dlnc.n.v2)}}</span>
+            <div class="q-ml-md q-mb-sm spsm">
+              <div class="titre-md text-italic ncp">{{$t('PNOdlpath', [dlnc.p])}}</div>
+              <div class="row">
+                <span class="col-6 titre-md text-italic">{{$t('PNOdlv12')}}</span>
+                <span class="col-2 fs-md font-mono">{{dlvx}}B</span>
+                <span class="col-2 fs-md font-mono">{{dlnc.n.vf}}B</span>
+                <span class="col-2 fs-md font-mono">{{pc(dlnc.n.vf, dlvx)}}</span>
+              </div>
             </div>
           </div>
         </q-card-section>
@@ -121,13 +124,18 @@
           <btn-cond icon="start" :label="$t('PNOdlst2')" @ok="dlgo(false)"/>
         </q-card-actions>
 
-        <q-card-actions v-if="dlst=== 2 && dlst === 3" vertical align="right" class="q-gutter-sm">
+        <q-card-actions v-if="dlst === 2" vertical align="center" class="q-gutter-sm">
           <btn-cond color="warning" icon="stop_circle" :label="$t('PNOdls')" @ok="dlfin"/>
           <btn-cond v-if="dlst===2" icon="pause_circle" :label="$t('PNOdlp')" @ok="dlpause"/>
+        </q-card-actions>
+
+        <q-card-actions v-if="dlst === 3" vertical align="center" class="q-gutter-sm">
+          <div class="titre-md msg q-my-sm full-width">{{$t('PNOpause' + dlstp)}}</div>
+          <btn-cond color="warning" icon="stop_circle" :label="$t('PNOdls')" @ok="dlfin"/>
           <btn-cond v-if="dlst===3" icon="play_circle" :label="$t('PNOdlr')" @ok="dlreprise"/>
         </q-card-actions>
 
-        <div v-if="dlst===4" class="column q-gutter-sm">
+        <div v-if="dlst === 4" class="column q-gutter-sm">
           <div class="self-center titre-lg text-bold text-italic">{{$t('PNOdlok1')}}</div>
           <div class="self-center titre-lg text-bold">{{$t('PNOdlok2', [dlnbn, dlnbf, dlv2f])}}</div>
           <div class="self-center titre-md text-italic">{{$t('PNOdlok3')}}</div>
@@ -285,6 +293,8 @@ import { RattNote, HTNote, SupprNote } from '../app/operations4.mjs'
 import { Note } from '../app/modele.mjs'
 import { putData, getData } from '../app/net.mjs'
 
+const ralentissement = 2000
+
 const icons = ['','person','group','group','description','article','description','article']
 const colors = ['','primary','secondary','grey-5','primary','secondary','grey-5','grey-5']
 const styles = [
@@ -331,10 +341,12 @@ const dlnbnc = ref(0) // nombre restant de notes à télécharger
 const lstr = ref([]) // liste des racines
 const lstrm = ref(new Map()) // donne l'indice d'une racine depuis son nom
 const dlst = ref(0) // statut du dl
+const dlstp = ref(0) // sous-statut en pause
 const dlnc = ref(null) // note en cours de dl
 const dlnbn = ref(0)
 const dlnbf = ref(0)
 const dlv2f = ref(0)
+const dlvx = ref(0)
 const portupload = ref(cfg.portupload)
 const dirloc = ref('./temp')
 
@@ -436,7 +448,7 @@ const nbf = (node) => {
   return n && n.mfa ? n.mfa.size : 0
 }
 
-const pc = (i, j) => !i ? '' : Math.round((j * 100) / i) + '%'
+const pc = (i, j) => !i ? '-' : Math.round((j * 100) / i) + '%'
 
 function clicknode (n) {
   nodeDiag.value = ''
@@ -627,16 +639,22 @@ const url = (u) => {
 }
 
 async function dlnote (n, avecf) {
-  // console.log(n.p)
-  // await sleep(2000)
+  dlvx.value = 0
+  const ir = lstrm.value.get(n.r)
+  const r = lstr.value[ir]
+  if (ralentissement) console.log(n.p)
+  r.nbnd++
   dlnbn.value++
   const buf = enc.encode(n.n.texte)
   const u = url(n.p + '/_.md')
   const er = await putData(u, buf)
   if (er) throw new AppExc(E_WS, 6, [er])
+  if (ralentissement) await sleep(ralentissement)
   if (avecf) {
     for (const [, f] of n.n.mfa) {
+      if (dlst.value === 0) return
       const nf = n.n.nomFichier(f)
+      if (ralentissement) console.log(nf)
       const buf = await n.n.getFichier(f)
       if (buf) {
         const u = url(n.p + '/' + nf)
@@ -645,10 +663,14 @@ async function dlnote (n, avecf) {
         else {
           dlnbf.value++
           dlv2f.value += buf.length
+          r.v2d += buf.length
+          dlvx.value += buf.length
         }
       }
+      if (ralentissement) await sleep(ralentissement)
     }
   }
+  if (dlstp.value === 1) dlstp.value = 2
 }
 
 function dlgo (avecf) {
@@ -667,10 +689,6 @@ function dlgo (avecf) {
         const n = lstn.value[0]
         dlnc.value = n
         await dlnote(n, avecf)
-        const ir = lstrm.value.get(n.r)
-        const r = lstr.value[ir]
-        r.v2d += n.n.v2
-        r.nbnd++
         lstn.value.shift()
       }
       dlst.value = 4
@@ -682,14 +700,16 @@ function dlgo (avecf) {
 
 function dlpause () {
   dlst.value = 3
+  dlstp.value = 1
 }
 
 function dlreprise () {
   dlst.value = 2
 }
 
-function dlfin () {
+async function dlfin () {
   dlst.value = 0
+  await afficherDiag($t('PNOcffin'))
   ui.fD()
 }
 
@@ -725,5 +745,8 @@ $hb2: 17rem
   margin: 0 2rem
   border: 2px solid var(--q-warning)
   border-radius: 1rem
+  overflow: hidden
+.ncp
+  height: 2.5rem
   overflow: hidden
 </style>
