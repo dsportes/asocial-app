@@ -144,7 +144,7 @@
         </q-toolbar>
 
         <choix-quotas v-model="quotas"/>
-        <div v-if="quotas.err" class="bg-yellow-5 text-bold text-black q-pa-xs">
+        <div v-if="quotas.err !== ''" class="bg-yellow-5 text-bold text-black q-pa-xs">
           {{$t('PPquot')}}
         </div>
 

@@ -72,11 +72,15 @@ const qci = model.value.qc
 
 const pcn = computed(() => model.value.qn ? Math.floor(model.value.n * 100 / (model.value.qn * UNITEN)) : 999)
 const pcv = computed(() => model.value.qv ? Math.floor(model.value.v * 100 / (model.value.qv * UNITEV)) : 999)
-const err = computed(() =>
-  (model.value.qn < model.value.minn) || (model.value.qn > model.value.maxn) ||
-  (model.value.qv < model.value.minv) || (model.value.qv > model.value.maxv) ||
-  (model.value.qc < model.value.minc) || (model.value.qc > model.value.maxc)
-)
+const err = computed(() => {
+  if (model.value.qn < model.value.minn) return 'minn'
+  if (model.value.qn > model.value.maxn) return 'maxn'
+  if (model.value.qv < model.value.minv) return 'minv'
+  if (model.value.qv > model.value.maxv) return 'maxv'
+  if (model.value.qc < model.value.minc) return 'minc'
+  if (model.value.qc > model.value.maxc) return 'maxc'
+  return ''
+})
 model.value.err = err.value
 const chg = computed(() => model.value.qn !== qni || model.value.qv !== qvi || model.value.qc !== qci )
 

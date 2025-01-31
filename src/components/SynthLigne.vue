@@ -72,7 +72,7 @@
       <choix-quotas class="q-mt-sm" v-model="quotasP"/>
       <q-card-actions align="right" class="q-gutter-sm">
         <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
-        <btn-cond :disable="quotasP.err || !quotasP.chg" icon="check" cond="cUrgence"
+        <btn-cond :disable="quotasP.err !== '' || !quotasP.chg" icon="check" cond="cUrgence"
           :label="$t('ok')" @ok="validerqP"/>
       </q-card-actions>
     </q-card>

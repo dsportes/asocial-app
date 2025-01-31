@@ -158,7 +158,7 @@
     v-if: pour se protéger de l'absence de quotas avant ouverture du dialogue 
     -->
     <dial-std1 v-if="m1" v-model="m1" :titre="$t('ESchg')"
-      :disable="quotas.err || !quotas.chg" okwarn :okfn="valider">
+      :disable="quotas.err !== '' || !quotas.chg" okwarn :okfn="valider">
       <choix-quotas v-model="quotas"/>
     </dial-std1>
 

@@ -929,6 +929,7 @@ export default {
   ESdlvat: 'Connexions des comptes acceptés jusqu\'à :',
   ESchg: 'Changer les quotas globaux de l\'espace',
   ESdlc: 'Rapport du mois :',
+  ESexpc: 'Tarif du mois :',
   ESnbmi: 'Comptes supprimés après N mois sans connexion',
   ESnbmi2: 'Comptes supprimés après {0} mois sans connexion',
   ESorg: 'Organisation',
@@ -1452,6 +1453,7 @@ export default {
   AGstm: 'Statuts des membres:',
   AGheb: 'Hébergeur du groupe: ',
   AGhebvol: 'Quotas et volumes',
+  AGnnvf: 'Nombre de notes: {0} - Volume des ficiers: {1}',
   AGnheb: 'N\'est PLUS hébergé depuis le {0} - Auto-disparition 3 mois après',
   AGfond: 'Fondateur: {0}',
   AGheb1: 'Groupe hébergé',
@@ -1718,6 +1720,7 @@ export default {
   PEedn: 'Editer le nom',
   PEabo: 'Abon. & max conso.',
   PEstm1: 'Statistiques CSV d\'abonnement / consommation',
+  PEexpc: 'Export CSV des coûts par partition',
   PEstm: 'Téléchargement du mois:',
   PEoptg: 'Options de gestion des comptes',
   PEquotas: 'Quotas de l\'espace',
@@ -1737,6 +1740,7 @@ export default {
   PEdetpart: 'Décomposition de l\'espace en partitions',
   PEabom: 'Abonnement mensuel: {0}c (QN: {1}c + QV: {2}c)',
   PEdlvat: 'Connexions jusqu\'à {0}',
+  PEfdisp: 'Fichier disponible dans le répertoire des Téléchargements sous le nom [{0}].',
 
   // PanelCredits
   TKrefp: 'Référence à joindre au paiemnet: "{0} {1}"',

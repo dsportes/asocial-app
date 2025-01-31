@@ -74,7 +74,7 @@
         <choix-quotas v-model="quotas"/>
         <q-stepper-navigation>
           <btn-cond flat @ok="step = 4" icon="arrow_upward" class="q-mr-md" :label="$t('precedent')" />
-          <btn-cond flat @ok="step = 6" icon="arrow_downward" :disable="quotas.err"
+          <btn-cond flat @ok="step = 6" icon="arrow_downward" :disable="quotas.err !== ''"
             :label="$t('suivant')" class="q-ml-sm" />
         </q-stepper-navigation>
       </q-step>

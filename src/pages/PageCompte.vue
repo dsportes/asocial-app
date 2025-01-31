@@ -63,7 +63,7 @@
       confok warning :disable="quotas.err !== ''" cond="cUrgence" :okfn="mutA">
       <q-card-section>
         <choix-quotas v-model="quotas"/>
-        <div v-if="quotas.err" class="msg">{{$t('PPquot')}}</div>
+        <div v-if="quotas.err !== ''" class="msg">{{$t('PPquot')}}</div>
       </q-card-section>
     </dial-std1>
 

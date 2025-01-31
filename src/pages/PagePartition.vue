@@ -77,7 +77,7 @@
     
     <!-- Dialogue de mise à jour des quotas du compte -->
     <dial-std1 v-if="m1" v-model="m1" :titre="$t('PTqu')"
-      warning :disable="quotas.err || !quotas.chg" cond="cEdit" :okfn="validerq">
+      warning :disable="quotas.err !== '' || !quotas.chg" cond="cEdit" :okfn="validerq">
       <choix-quotas class="q-pa-sm" v-model="quotas"/>
     </dial-std1>
     
@@ -221,13 +221,6 @@ async function selCpt (c) {
   session.setPeopleId(c.id)
 }
 
-/*
-function voirpage (c) { 
-  session.setPeopleId(c.id)
-  ui.oD('detailspeople', 'a')
-}
-*/
-
 async function editerq (c) {
   quotas.value = await session.getQuotasP(c.q)
   ui.oD('PTedq', idc)
@@ -238,6 +231,7 @@ async function validerq () {
   await reload()
   ui.fD()
 }
+
 </script>
 
 <style lang="sass" scoped>

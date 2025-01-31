@@ -95,7 +95,14 @@
             @ok="dlstat2" icon="download" :label="$t('ESdlc')"/>
         </div>
       </q-expansion-item>
-      
+
+      <q-expansion-item switch-toggle-side dense group="somegroup"
+        header-class="tbp titre-lg" :label="$t('PEexpc')">
+        <div class="q-ml-lg q-my-sm">
+          <saisie-mois v-model="moisexpc"
+            @ok="exportCSV" icon="download" :label="$t('ESexpc')"/>
+        </div>
+      </q-expansion-item>
     </div>
 
     <div class="row justify-between items-center titre-lg q-pa-xs q-mt-md q-mb-sm tbs">
@@ -117,13 +124,13 @@
 
     <!-- Dialogue de mise à jour des quotas des comptes A -->
     <dial-std1 v-if="m1" v-model="m1" :titre="$t('PTquta')"
-      warning :disable="quotasA.err || !quotasA.chg" cond="cUrgence" :okfn="validerqA">
+      warning :disable="quotasA.err !== '' || !quotasA.chg" cond="cUrgence" :okfn="validerqA">
       <choix-quotas class="q-mt-sm" v-model="quotasA"/>
     </dial-std1>
 
     <!-- Dialogue de création d'une nouvelle partition -->
     <dial-std1 v-if="m2" v-model="m2" :titre="$t('PTinfoph')"
-      warning :disable="!nom || quotasP.err !== ''" okic="add" cond="cUrgence" :okfn="creer">
+      warning :disable="disnp" okic="add" cond="cUrgence" :okfn="creer">
       <div class="q-pa-sm">
         <q-input v-model="nom" clearable :placeholder="$t('PTinfoph')">
           <template v-slot:hint>{{$t('PTinfoh')}}</template>
@@ -153,6 +160,9 @@ import { Synthese } from '../app/modele.mjs'
 import { GetSynthese, GetPartition, SetEspaceOptionA, NouvellePartition, SetQuotasA,
   DownloadStatC, DownloadStatC2 } from '../app/operations4.mjs'
 
+const encoder = new TextEncoder('utf-8')
+const sep = ','
+
 const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 const m1 = computed(() => ui.d[idc].PEedqA)
@@ -176,6 +186,7 @@ const cfg = stores.config
 
 const igp = ref(0)
 const mois = ref(Math.floor(session.auj / 100))
+const moisexpc = ref(Math.floor(session.auj / 100))
 const nom = ref('')
 const quotasP = ref(null)
 const quotasA = ref(null)
@@ -184,6 +195,7 @@ const nbmi = ref(session.espace ? session.espace.nbmi : 12)
 const optionA = ref(session.espace ? (session.espace.opt ? true : false) : false)
 const crTri = ref('code')
 const asc = ref(true)
+const disnp = computed(() => !nom.value || quotasP.value.err ? true : false)
 
 const aboE = computed(() => Tarif.abo(session.espace.quotas))
 const aboA = computed(() => Tarif.abo(session.synthese.qA))
@@ -295,6 +307,73 @@ const synth = computed(() => {
   })
   return l
 })
+
+/* Export CSV des coûts / partition
+4 * 3 colonnes
+- 4 quotas: QN, QV, QC et Total (QN + QV + QC)
+- 3 compteurs: coût du quota attribué, coût des quotas distribués, coût des quota utilisés
+Lignes: id, code, nbc, nbd, et 12 compteurs - 1 ligne de total général
+*/
+const cols = [
+  'abna', 'abnd', 'abnu',
+  'abva', 'abvd', 'abvu', 
+  'abca', 'abcd', 'abcu',
+  'abta', 'abtd', 'abtu',
+]
+
+async function exportCSV () {
+  const tit = ['id', 'code', 'nbc', 'nbd']
+  cols.forEach(c => { tit.push(c)})
+  const lignes = [tit.join(sep), '']
+  const a = Math.floor(moisexpc.value / 100)
+  const m = moisexpc.value % 100
+  const cu = Tarif.cu(a, m)
+  const cqn = cu[0]
+  const cqv = cu[1]
+
+  const tg = { nbc: 0, nbd: 0 }
+  cols.forEach(c => { tg[c] = 0})
+  const tsp = session.synthese.tsp
+  for (const id in tsp) {
+    if (id === '0') continue
+    const lg = tsp[id]
+    const x = {
+      id: id,
+      code: Synthese.pval(lg, 'code', session.compte),
+      nbc: lg.nbc,
+      nbd: lg.nbd,
+      abna: lg.q.qn * cqn,
+      abva: lg.q.qv * cqv,
+      abca: lg.q.qc,
+      abnd: lg.qt.qn * cqn,
+      abvd: lg.qt.qv * cqv,
+      abcd: lg.qt.qc,
+      abnu: (lg.qt.nc + lg.qt.nn + lg.qt.ng) * cqn / UNITEN,
+      abvu: lg.qt.v * cqv / UNITEV,
+      abcu: lg.qt.cjm * 30
+    }
+    x.abta = x.abna + x.abva + x.abca
+    x.abtd = x.abnd + x.abvd + x.abcd
+    x.abtu = x.abnu + x.abvu + x.abcu
+    cols.forEach(c => { tg[c] += x[c]})
+    tg.nbc += x.nbc
+    tg.nbd += x.nbd
+    const y = [x.id, x.code, x.nbc, x.nbd]
+    cols.forEach(c => { y.push(Math.round(x[c] * 10000)) })
+    lignes.push(y.join(sep))
+  }
+
+  const l0 = ['total ' + a + '/' + m, '', tg.nbc, tg.nbd ]
+  cols.forEach(c => { l0.push(Math.round(tg[c] * 10000))})
+  lignes[1] = l0.join(sep)
+  const csv = lignes.join('\n')
+  const buf = encoder.encode(csv)
+  const blob = new Blob([buf], { type: 'text/csv' })
+  if (blob) console.log('blob', 'text/csv', buf.length)
+  const nf = moisexpc.value + '.csv'
+  saveAs(blob, '' + nf )
+  await afficherDiag($t('PEfdisp', [nf]))
+}
 
 const optesp = computed(() => session.espace ? (session.espace.opt ? true : false) : false)
 

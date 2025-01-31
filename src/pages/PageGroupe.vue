@@ -33,7 +33,7 @@
         :header-class="'titre-lg ' + (gr.dfh ? 'tbw' : 'tbp')"
         :label="$t('AGheb' + (gr.dfh ? '2' : '1'))">
         <div class="q-ma-sm">
-          <div class="row justify-between">
+          <div class="q-ml-md row justify-between">
             <div v-if="!gr.dfh" class="row">
               <span class="titre-md q-mr-sm">{{$t('AGheb')}}</span>
               <span class="fs-md">{{nom(gr.imh)}}</span>
@@ -43,6 +43,7 @@
             <btn-cond class="col-auto q-ml-sm self-start" size="md" cond="cEdit"
               icon="settings" @ok="gererheb"/>
           </div>
+          <div class="q-ml-md q-my-sm titre-md">{{$t(('AGnnvf'), [gr.nn, edvol(gr.vf)])}}</div>
           <quotas-vols class="q-mt-xs q-ml-md" :vols="vols" groupe/>
         </div>
       </q-expansion-item>
@@ -176,7 +177,7 @@
 
         <div v-if="action !== 0 && action !== 2" class="q-my-md">
           <choix-quotas class="q-my-sm" v-model="q" groupe/>
-          <div v-if="q.err" class="q-ma-sm q-pa-xs msg titre-md">{{$t('AGmx')}}</div>
+          <div v-if="q.err !== ''" class="q-ma-sm q-pa-xs msg titre-md">{{$t('AGmx')}}</div>
           <div v-else>
             <div v-if="aln || alv">
               <q-separator color="orange" class="q-my-xs"/>

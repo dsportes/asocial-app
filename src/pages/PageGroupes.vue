@@ -89,7 +89,7 @@
 
   <!-- Nouveau groupe ------------------------------------------------>
   <dial-std1 v-if="m1" v-model="m1" :titre="$t('PGcrea')"
-    :disable="quotas.err || !nom" okic="add" oklbl="creer" cond="cEdit" :okfn="okCreation">
+    :disable="quotas.err !== '' || !nom" okic="add" oklbl="creer" cond="cEdit" :okfn="okCreation">
     <div class="q-pa-sm column">
       <sel-avid class="self-center"/>
       <nom-avatar class="titre-md q-my-sm" verif groupe @ok-nom="oknom"/>
