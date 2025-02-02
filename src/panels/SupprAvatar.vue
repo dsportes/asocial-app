@@ -10,7 +10,7 @@
       <q-checkbox class="col-auto cb" size="sm" v-model="checks._notes" :label="$t('vu')" />
       <div class="col">
         <div class="titre-md">{{$t('SAVnotes', nbn, { count: nbn })}}</div>
-        <div v-if="nbn" class="q-my-sm q-ml-md">{{$t('SAVvlib', [edvol(v2n)])}}</div>
+        <div v-if="nbn" class="q-my-sm q-ml-md">{{$t('SAVvlib', [edvol(vfn)])}}</div>
       </div>
     </div>
 
@@ -42,7 +42,7 @@
         <div class="q-ml-md q-my-sm" v-for="x in s.gr1" :key="x.id">
           <span class="b1 q-mr-lg">{{x.nomC}}</span>
           <span>{{$t('SAVvlib1', x.nn, {count: x.nn})}}</span>
-          <span class="q-ml-sm">{{$t('SAVvlib', [edvol(x.v2)])}}</span>
+          <span class="q-ml-sm">{{$t('SAVvlib', [edvol(x.vf)])}}</span>
         </div>
       </div>
     </div>
@@ -54,7 +54,7 @@
         <div class="q-ml-md q-my-sm" v-for="x in s.gr2" :key="x.id">
           <span class="b1 q-mr-lg">{{x.nomC}}</span>
           <span>{{$t('SAVvlib2', x.nn, {count: x.nn})}}</span>
-          <span class="q-ml-sm">{{$t('SAVvlib3m', [edvol(x.v2)])}}</span>
+          <span class="q-ml-sm">{{$t('SAVvlib3m', [edvol(x.vf)])}}</span>
         </div>
       </div>
     </div>
@@ -85,13 +85,13 @@
       <q-checkbox class="col-auto cb" size="sm" v-model="checks._vol" :label="$t('vu')" />
       <div class="col">
         <div v-if="nbn" class="titre-md">{{$t('SAVvol')}}</div>        
-        <div v-if="s.nna" class="q-ml-lg q-my-sm">{{$t('SAVvola', [s.nna, edvol(s.v2a)])}}</div>
-        <div v-if="s.nng" lass="q-ml-lg q-my-sm">{{$t('SAVvolg', [s.nng, edvol(s.v2g)])}}</div>
+        <div v-if="s.nna" class="q-ml-lg q-my-sm">{{$t('SAVvola', [s.nna, edvol(s.vfa)])}}</div>
+        <div v-if="s.nnh" lass="q-ml-lg q-my-sm">{{$t('SAVvolg', [s.nnh, edvol(s.vfh)])}}</div>
         <div class="titre-md">{{$t('SAVabo')}}</div>        
         <div class="q-ml-md q-my-sm">
           {{$t('SAVabo1', [nbn, s.ch.length, s.ng, nbtot])}}</div>
-        <div v-if="s.v2a" class="q-ml-md q-my-sm">
-          {{$t('SAVabo2', [edvol(s.v2a)])}}</div>
+        <div v-if="s.vfa" class="q-ml-md q-my-sm">
+          {{$t('SAVabo2', [edvol(s.vfa)])}}</div>
       </div>
     </div>
 
@@ -150,7 +150,7 @@ const checksOK = computed(() => {
 })
 const nbn = computed(() => s.value.nna + s.value.nng)
 const nbtot = computed(() => nbn.value + s.value.ch.length + s.value.ng)
-const v2n = computed(() => s.value.v2a + s.value.v2g)
+const vfn = computed(() => s.value.vfa + s.value.vfg)
 
 const s = computed(() => { 
   const s = {
@@ -158,11 +158,11 @@ const s = computed(() => {
       _notes: false, _chats: false, _spons: false, _ddel: false, _vol: false,
       _gr0: false, _gr1: false, _gr2: false, _gr3: false 
     },
-    stats: {}, // map des nbn notes, v1 v2 par avatar et groupe
+    stats: {}, // map des nbn notes, nn vf par avatar et groupe
     /* gri : { 
       heb, dan, dac : est hébergeur, dernier actif, dernier animateur
-      nnh, v2h : si hébergeur, nombre de notes et volume des fichiers hébergés
-      nn, v2 : nombre de notes et volume des fichiers
+      nnh, vfh : si hébergeur, nombre de notes et volume des fichiers hébergés
+      nn, vf : nombre de notes et volume des fichiers
       gr, im : groupe, indice membre  
     }
     */
@@ -176,21 +176,24 @@ const s = computed(() => {
     ch: [], // liste des chats
 
     nng: 0, // nombre total de notes des groupes disparaissant
-    v2g: 0, // v2 total des fichiers des notes des groupes disparaissant
+    vfg: 0, // vf total des fichiers des notes des groupes disparaissant
+
+    nnh: 0, // nombre total de notes des groupes HEBERGES disparaissant
+    vfh: 0, // vf total des fichiers des notes des groupes HEBERGES disparaissant
 
     nna: 0, // nombre total des notes de l'avatar
-    v2a: 0, // v2 total des fichiers des notes de l'avatar
+    vfa: 0, // vf total des fichiers des notes de l'avatar
 
     // résiliation compte
     ddel: false // dernier délégué de sa partition
   }
 
   const id = props.avid || session.compteId
-  s.nng = 0; s.v2g = 0; s.ng = 0
+  s.nng = 0; s.vfg = 0; s.ng = 0
   s.stats = nSt.statsParRacine
 
   const a = s.stats[id]
-  s.nna = a.nn; s.v2a = a.v2
+  s.nna = a.nn; s.vfa = a.vf
 
   const e = aSt.getElt(id)
 
@@ -208,25 +211,33 @@ const s = computed(() => {
     const x = {
       nomC: session.getCV(gr.id).nomC,
       nn: gr.nn,
-      v2: gr.vf,
+      vf: gr.vf,
       heb: false,
       nnh: 0,
-      v2h: 0
+      vfh: 0
     }
-    if (gr.imh === im) { x.heb = true; x.nnh = x.nn; x.v2h = x.v2 } 
+    if (gr.imh === im) { 
+      x.heb = true
+      x.nnh = x.nn
+      x.vfh = x.vf
+    } 
     
     let nan = 0, nac = 0, estAn = false, estAc = false
     for (let i = 1; i < gr.st.length; i++) {
       const s = gr.st[i]
-      if (s === 5) { nan++; if (i === x.im) estAn = true }
-      if (s >= 4) { nac++; if (i === x.im) estAc = true }
+      if (s === 5) { nan++; if (i === im) estAn = true }
+      if (s >= 4) { nac++; if (i === im) estAc = true }
     }
     x.dan = nan === 1 && estAn
     x.dac = nac === 1 && estAc
     if (x.dac) {
       s.nng += x.nn
-      s.v2g += x.v2
+      s.vfg += x.vf
     }
+    if (x.heb) { 
+      s.nnh += x.nn
+      s.vfh += x.vf 
+    } 
     
     x.st = x.dac ? 1 : (x.heb ? 2 : (x.dan ? 3 : 0))
     s['gr' + x.st] = x

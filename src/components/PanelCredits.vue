@@ -2,21 +2,24 @@
 <div class="spmd q-pa-sm">
   <div v-if="session.estComptable" class="q-mb-sm">
     <div class="titre-md">{{$t('PEsttk')}}</div>
-    <div class="row q-gutter-sm q-mb-sm">
-      <btn-cond class="self-start b1" label="M" @ok="dlstat(0)"/>
-      <btn-cond class="self-start b1" label="M-1" @ok="dlstat(1)"/>
-      <btn-cond class="self-start b1" label="M-2" @ok="dlstat(2)"/>
-      <btn-cond class="self-start b1" label="M-3" @ok="dlstat(3)"/>
+    <div class="row justify-between">
+      <div class="row q-gutter-sm items-center">
+        <span class="bg-primary text-white b1" @click="dlstat(0)">M</span>
+        <span class="bg-primary text-white b1" @click="dlstat(1)">M-1</span>
+        <span class="bg-primary text-white b1" @click="dlstat(2)">M-2</span>
+        <span class="bg-primary text-white b1" @click="dlstat(3)">M-3</span>
+      </div>
       <saisie-mois v-model="mois" :dmax="maxdl" :dmin="mindl" :dinit="maxdl"
         @ok="dlstat2" icon="download" :label="$t('ESdlc')"/>
     </div>
   </div>
 
-  <btn-cond class="q-my-xs" cond="cUrgence" icon="add" :label="$t('TKnv')" 
-    @ok="nvtk"/>
+  <div class="q-my-md text-center">
+    <btn-cond cond="cUrgence" icon="add" :label="$t('TKnv')" @ok="nvtk"/>
+  </div>
 
   <div v-if="session.compta">
-    <q-expansion-item switch-toggle-side dense group="tkdon"
+    <q-expansion-item class="q-my-xs" switch-toggle-side dense group="tkdon"
       header-class="titre-md text-bold tbp"
       :label="$t('TK' + (session.estComptable ? '1' : '2') + att)">
       <div class="row justify-center">
@@ -175,5 +178,10 @@ async function generer ({m, ref}) {
 .w10
   width: 10rem
 .b1
-  width: 4rem
+  min-width: 3rem
+  border-radius: 8px
+  cursor: pointer
+  text-align: center
+  font-weight: bold
+  padding: 5px
 </style>

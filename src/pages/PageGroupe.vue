@@ -188,7 +188,7 @@
           </div>
         </div>
 
-        <div v-if="action !== 0 && action !== 2 && !q.err">
+        <div v-if="action !== 0 && action !== 2 && q.err !== ''">
           <div v-if="aln" class="q-pa-xs q-ma-sm msg titre-md">{{$t('AGaln')}}</div>
           <div v-if="alv" class="q-pa-xs q-ma-sm msg titre-md">{{$t('AGalv')}}</div>
           <div v-if="!aln" :class="'q-pa-xs titre-md q-ma-sm ' + (arn ? 'msg' : '')">{{$t('AGdisp1', [rstn])}}</div>
@@ -256,8 +256,6 @@ const rstn = ref(0)
 const rstv = ref(0)
 const lstVotes = ref()
 const cas = ref()
-const restqn = ref(0)
-const restqv = ref(0)
 
 const nomg = computed(() => session.getCV(session.groupeId).nom)
 const mesav = computed(() => { 
@@ -399,31 +397,35 @@ function setCas () {
 async function gererheb () {
   setCas()
   const cpt = session.compte.qv
-  const cptn = cpt.nn + cpt.nc + cpt.ng
-  restqn.value = Math.floor(((cpt.qn * UNITEN) - cptn) / UNITEN) + (dejaHeb.value ? gr.value.qn : 0)
-  restqv.value =  Math.floor(((cpt.qv * UNITEV) - cpt.v) / UNITEV) + (dejaHeb.value ? gr.value.qv : 0)
-  q.value.qn = gr.value.qn || 0
-  q.value.qv = gr.value.qv || 0
-  q.value.minn = 0
-  q.value.minv = 0
-  q.value.maxn = cpt.qn // restqn.value
-  q.value.maxv = cpt.qv // restqv.value
-  q.value.err = false
-  onChgQ()
+  const qx = {
+    n: gr.value.nn,
+    v: gr.value.vf,
+    qn: gr.value.qn || 0,
+    qv: gr.value.qv || 0,
+    minn: 0,
+    minv: 0,
+    maxn: cpt.qn,
+    maxv: cpt.qv,
+    err: ''
+  }
+  q.value = qx
   ui.oD('AGgererheb', idc)
 }
 
-function onChgQ () {
+watch(q, (ap) => { 
   const cpt = session.compte.qv
-  aln.value = gr.value.nn > (q.value.qn * UNITEN)
-  alv.value = gr.value.vf > (q.value.qv * UNITEV)
-  const rn = (restqn.value - q.value.qn) * UNITEN
-  const rv = (restqv.value - q.value.qv) * UNITEV
+  const cptn = cpt.nn + cpt.nc + cpt.ng
+  const restqn = Math.floor(((cpt.qn * UNITEN) - cptn) / UNITEN) + (dejaHeb.value ? gr.value.qn : 0)
+  const restqv =  Math.floor(((cpt.qv * UNITEV) - cpt.v) / UNITEV) + (dejaHeb.value ? gr.value.qv : 0)
+  aln.value = gr.value.nn > (ap.qn * UNITEN)
+  alv.value = gr.value.vf > (ap.qv * UNITEV)
+  const rn = (restqn - ap.qn) * UNITEN
+  const rv = (restqv - ap.qv) * UNITEV
   rstn.value = rn >= 0 ? rn : 0
-  rstv.value = edvol(rv >=0 ? rv : 0)
+  rstv.value = edvol(rv >= 0 ? rv : 0)
   arn.value = rn < (cpt.qn * UNITEN * 0.1)
   arv.value = rv < (cpt.qv * UNITEV * 0.1)
-}
+})
 
 async function chgQ () {
   if (action.value === 5) action.value = 1
