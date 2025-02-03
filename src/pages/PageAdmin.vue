@@ -29,21 +29,33 @@
         </div>
       </div>
       <q-separator class="q-my-xs" color="orange"/>
+        <div :class="dkli(1) + ' row q-mb-md full-with text-italic titre-md'">
+          <div class="col-1 text-center">{{$t('EScol0')}}</div>
+          <div class="col-1 text-center">{{$t('EScol1')}}</div>
+          <div class="col-4 text-center">{{$t('EScol2')}}</div>
+          <div class="col-4 text-center">{{$t('EScol3')}}</div>
+          <div class="col-1 text-center">{{$t('EScol4')}}</div>
+          <div class="col-1"></div>
+        </div>
+
       <div v-for="(t, idx) in taches" :key="idx">
         <div :class="dkli(idx) + ' q-my-sm full-with'">
           <div class="row font-mono">
             <div class="col-1 text-center">{{OPNOMS[t.op]}}</div>
             <div class="col-1 text-center">{{t.ns}}</div>
             <div class="col-4 text-center">{{dhstring(t.dh, true)}}</div>
-            <div class="col-2 text-center">{{t.id}}</div>
-            <div class="col-2 text-center">{{t.ids}}</div>
-            <btn-cond class="col-1 text-right" icon="delete" @ok="tacheDel(t)"/>
-            <btn-cond class="col-1 text-right" icon="refresh" @ok="tacheGo(t)"/>
+            <div v-if="!t.ns" class="col-4 text-center">
+              <span v-if="!t.exc">{{t.dhf ? dhstring(t.dhf, true) : '?'}}</span>
+            </div>
+            <div v-else class="col-4 text-center">{{t.id}} / {{t.ids}}</div>
+            <div class="col-1 text-center">{{t.nb}}</div>
+            <div class="col-1 row items-center justify-end q-gutter-xs">
+              <btn-cond icon="delete" @ok="tacheDel(t)"/>
+              <btn-cond icon="refresh" @ok="tacheGo(t)"/>
+            </div>
           </div>
-          <q-input v-if="t.exc" type="textarea" autogrow v-model="t.exc" class="q-pa-xs stackclass font-mono"/>
-          <div v-if="!t.id && !t.exc" class="q-ml-xl">
-            {{t.dhf ? dhstring(t.dhf, true) : '?'}} - n={{t.nb || 0}}
-          </div>
+          <q-input v-if="t.exc" type="textarea" autogrow 
+            v-model="t.exc" class="q-ml-lg q-pa-xs stackclass font-mono"/>
         </div>     
       </div>
     </div>

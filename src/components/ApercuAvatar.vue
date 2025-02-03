@@ -1,6 +1,6 @@
 <template>
   <q-card v-if="avatar" :class="dkli(idx)">
-    <apercu-genx :id="idav" :idx="idx"/>
+    <apercu-genx :id="idav" :idx="idx" affid/>
 
     <div class="q-mt-sm" v-if="avatar.pc">
       <div class="row justify-between">

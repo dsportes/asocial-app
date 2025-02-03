@@ -91,7 +91,7 @@ export default {
   actif: 'actif', // MicroChat
   disparu: 'disparu', // App ApercuChat
   plustard: 'Plus Tard', // App
-  compteKO: 'Le compte #{0} nommé "{1}" vient d\'être supprimé ou a changé de phrase secrète.', // PageClos
+  compteKO: 'Le compte a été supprimé ou a changé de phrase secrète.', // PageClos
   sessionKO: 'Incident technique nécessitant l\'interruption immédiate de la session. Tenter de se reconnecter plus tard.', // PageClos
   inconnu: '(inconnu)', // PageGroupe
   hashtags: 'Hashtags', // PageNotes
@@ -944,6 +944,11 @@ export default {
   ESorg4: 'Nom d\'organisation déjà attribué',
   EStabe: 'Espaces',
   EStabt: 'Tâches',
+  EScol0: 'OP',
+  EScol1: 'NS',
+  EScol2: 'DH prochain start',
+  EScol3: 'DH dernière fin OU id/ids',
+  EScol4: 'NB',
 
   // Page people et ApercuPeople
   APnb0: 'Aucun contact.',
@@ -1698,8 +1703,8 @@ export default {
   SAVdspt:  'Ce compte est le dernier délégué de sa partition.',
   SAVspons: 'Aucun "sponsoring" en attente ne sera annulé | Un "sponsoring" en attente sera annulé | {count} "sponsorings" en attente seront annulés',
   SAVvol: 'Volumes rendus disponibles pour le compte par la suppression de l\'avatar :',
-  SAVvola: '{0} note(s) supprimées de l\'avatar. {1} de fichiers',
-  SAVvolg: '{0} note(s) des groupes détruits. {1} de fichiers',
+  SAVvola: '{0} note(s) supprimée(s) de l\'avatar. {1} de fichiers',
+  SAVvolg: '{0} note(s) du ou des groupes détruits. {1} de fichiers',
   SAVabo: 'Baisse des ressources occupées dans l\'abonnement:',
   SAVabo1: '{4} document(s): {0} note(s) + {1} chat(s) + {2} participation(s) à des groupes',
   SAVabo2: 'Volume des fichiers: {0}',

@@ -84,14 +84,18 @@
     <div v-if="avid !== 0" class="row q-my-md items-start">
       <q-checkbox class="col-auto cb" size="sm" v-model="checks._vol" :label="$t('vu')" />
       <div class="col">
-        <div v-if="nbn" class="titre-md">{{$t('SAVvol')}}</div>        
-        <div v-if="s.nna" class="q-ml-lg q-my-sm">{{$t('SAVvola', [s.nna, edvol(s.vfa)])}}</div>
-        <div v-if="s.nnh" lass="q-ml-lg q-my-sm">{{$t('SAVvolg', [s.nnh, edvol(s.vfh)])}}</div>
-        <div class="titre-md">{{$t('SAVabo')}}</div>        
-        <div class="q-ml-md q-my-sm">
-          {{$t('SAVabo1', [nbn, s.ch.length, s.ng, nbtot])}}</div>
-        <div v-if="s.vfa" class="q-ml-md q-my-sm">
-          {{$t('SAVabo2', [edvol(s.vfa)])}}</div>
+        <div v-if="nbn" class="titre-md q-mb-sm">
+          <div>{{$t('SAVvol')}}</div>        
+          <div v-if="s.nna" class="q-ml-md">{{$t('SAVvola', [s.nna, edvol(s.vfa)])}}</div>
+          <div v-if="s.nnh" class="q-ml-md">{{$t('SAVvolg', [s.nnh, edvol(s.vfh)])}}</div>
+        </div>
+        <div class="titre-md">
+          <div>{{$t('SAVabo')}}</div>        
+          <div class="q-ml-md">
+            {{$t('SAVabo1', [nbn, s.ch.length, s.ng, nbtot])}}</div>
+          <div v-if="s.vfa" class="q-ml-md">
+            {{$t('SAVabo2', [edvol(s.vfa)])}}</div>
+        </div>
       </div>
     </div>
 

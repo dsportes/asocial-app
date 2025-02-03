@@ -8,9 +8,10 @@
       <div class="row justify-between items-center">
         <div class="row q-gutter-sm">
           <span class="text-bold titre-lg">{{cv.nom}}</span> 
-          <span v-if="estAvc" class="fs-md">[{{$t('moi')}}]</span> 
+          <span v-if="estAvc && !affid" class="fs-md">[{{$t('moi')}}]</span> 
           <span v-if="del && !estComptable" class="fs-md">[{{$t('delegue')}}]</span> 
-          <span v-if="estGroupe || estPeople" class="fs-sm font-mono">{{'#' + id}}</span> 
+          <span v-if="estGroupe || estPeople || affid" 
+            class="fs-sm font-mono">{{'#' + id}}</span> 
         </div>
         <div v-if="estGroupe" class="col-auto row q-gutter-xs">
           <btn-cond v-if="estAnim" icon="badge" round stop @ok="edcv"/>
@@ -79,7 +80,8 @@ const props = defineProps({
   del: Boolean, // true si délégué, pour l'afficher
   nochgr: Boolean, // true ne pas afficher chats et groupes
   idx: Number,
-  urgence: Boolean // true si invoqué depuis tab URGENCE
+  urgence: Boolean, // true si invoqué depuis tab URGENCE
+  affid: Boolean
 })
 
 const ui = stores.ui

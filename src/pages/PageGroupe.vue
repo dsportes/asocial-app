@@ -178,14 +178,6 @@
         <div v-if="action !== 0 && action !== 2" class="q-my-md">
           <choix-quotas class="q-my-sm" v-model="q" groupe @change="onChg"/>
           <div v-if="q.err !== ''" class="q-ma-sm q-pa-xs msg titre-md">{{$t('AGmx')}}</div>
-          <!--div v-else>
-            <div v-if="aln || alv">
-              <q-separator color="orange" class="q-my-xs"/>
-              <div v-if="aln && gr.imh" class="msg q-pa-xs">{{$t('AGaln')}}</div>
-              <div v-if="alv" class="msg q-pa-xs">{{$t('AGalv')}}</div>
-              <q-separator color="orange" class="q-my-xs"/>
-            </div>
-          </div-->
         </div>
 
         <div v-if="action !== 0 && action !== 2 && q.err === ''">

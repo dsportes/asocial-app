@@ -596,7 +596,6 @@ export class SyncStd extends OperationS {
   }
 }
 
-
 /* Synchronisation standard *********************************/
 export class SyncFull extends OperationS {
   constructor() { super('SyncStd') }

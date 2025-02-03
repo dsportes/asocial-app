@@ -27,7 +27,8 @@
     </q-card>
 
     <!-- Toute exception survenue en synchronisation -->
-    <q-card v-if="session.excKO && session.excKO.code < 9900" class="q-mt-lg spsm column justify-center">
+    <q-card v-if="session.excKO && session.excKO.code < 9900 && session.excKO.code !== 8998" 
+      class="q-mt-lg spsm column justify-center">
       <div class="text-center titre-lg titre-italic">{{$t('sessionKO')}}</div>
       <div class="text-center titre-sm q-my-md q-mx-md" v-html="html(session.excKO)"/>
       <div v-if="session.excKO.stack">
