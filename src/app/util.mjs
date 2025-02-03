@@ -260,7 +260,7 @@ export function normpath (s, dot) { return s.replace(dot ? regexdot : regex, '_'
 
 export function edvol (vol) {
   const v = vol || 0
-  if (v === 0) return '0'
+  if (v === 0) return '0B'
   if (v < 1000) return v + 'B'
   if (v < 1000000) return (v / 1000).toPrecision(3) + 'KB'
   if (v < 1000000000) return (v / 1000000).toPrecision(3) + 'MB'

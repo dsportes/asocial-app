@@ -1,15 +1,15 @@
 <template>
-  <div class="q-pa-xs">
+  <div class="q-pa-xs spsm">
     <div class="row items-center" style="position:relative">
       <bouton-bulle idtext="BULLEquotas" class="bb"/>
-      <div class="col-5 row items-center">
+      <div class="col-7 row items-center">
         <div class="titre-md mh">{{$t('CQnbdocs', qn * UNITEN)}}</div>
         <div v-if="model.n" :class="'font-mono q-ml-sm ' + st(pcn)">[{{model.n}} {{pcn}}%]</div>
       </div>
 
-      <q-input class="col-3 text-center" dense v-model.number="qn" type="number" :disable="lecture"/>
+      <q-input class="col-2 text-center" dense v-model.number="qn" type="number" :disable="lecture"/>
 
-      <div class="col-4 row items-center justify-start q-pl-sm">
+      <div class="col-3 row items-center justify-start q-pl-sm">
         <btn-cond v-if="!lecture" :disable="qn === qni" 
           class="q-ml-sm" icon="undo" size="sm" color="warning" @ok="undo1"/>
         <div :class="'q-px-xs ' + stmx(qn, model.minn || 0, model.maxn || mx)">
@@ -18,14 +18,14 @@
     </div>
 
     <div class="row items-center">
-      <div class="col-5 row items-center">
+      <div class="col-7 row items-center">
         <div class="titre-md mh">{{ed2(qv) + ' ' + $t('CQvolfics')}}</div>
         <div v-if="model.v" :class="'font-mono q-ml-sm ' + st(pcv)">[{{edvol(model.v)}} {{pcv}}%]</div>
       </div>
 
-      <q-input class="col-3 text-center" dense v-model.number="qv" type="number" :disable="lecture"/>
+      <q-input class="col-2 text-center" dense v-model.number="qv" type="number" :disable="lecture"/>
 
-      <div class="col-4 row items-center justify-start q-pl-sm">
+      <div class="col-3 row items-center justify-start q-pl-sm">
         <btn-cond v-if="!lecture" :disable="qv === qvi" 
           class="q-ml-sm" icon="undo" size="sm" color="warning" @ok="undo2"/>
         <div :class="'q-px-xs ' + stmx(qv, model.minv || 0, model.maxv || mx)">
@@ -34,13 +34,13 @@
     </div>
 
     <div v-if="!groupe" class="row items-center">
-      <div class="col-5 row items-center">
+      <div class="col-7 row items-center">
         <div class="titre-md mh">{{edc(qc) + ' ' + $t('CQconsocalc')}}</div>
       </div>
 
-      <q-input class="col-3 text-center" dense v-model.number="qc" type="number" :disable="lecture"/>
+      <q-input class="col-2 text-center" dense v-model.number="qc" type="number" :disable="lecture"/>
 
-      <div class="col-4 row items-center justify-start q-pl-sm">
+      <div class="col-3 row items-center justify-start q-pl-sm">
         <btn-cond v-if="!lecture" :disable="qc === qci" 
           class="q-ml-sm" icon="undo" size="sm" color="warning" @ok="undoc"/>
         <div :class="'q-px-xs ' + stmx(qc, model.minc || 0, model.maxc || mx)">
@@ -66,6 +66,9 @@ const props = defineProps({
   lecture: Boolean,
   groupe: Boolean // Ne présente pas de qc (groupe et quotas des comptes A)
 })
+
+const emit = defineEmits(['change' ])
+
 const mx = 999999
 
 const model = defineModel({ type: Object }) // quotas
@@ -99,18 +102,15 @@ const err = computed(() => {
 const chg = computed(() => qn.value !== qni || qv.value !== qvi || qc.value !== qci )
 
 const setModel = () => {
-  const m = { ...model.value }
-  m.qn = qn.value
-  m.qv = qv.value
-  m.qc = qc.value
-  m.err = err.value
-  m.chg = chg.value
-  model.value = m
+  model.value.qn = qn.value || 0
+  model.value.qv = qv.value || 0
+  model.value.qc = qc.value || 0
+  model.value.err = err.value
+  model.value.chg = chg.value
+  emit('change')
 }
 
-if (err.value) setModel()
-
-watch(qn, (ap, av) => { setModel() })
+watch(qn, () => { setModel() })
 watch(qv, () => { setModel() })
 watch(qc, () => { setModel() })
 
@@ -123,6 +123,8 @@ const edc = (v) => mon(v)
 function undo1 () { qn.value = qni }
 function undo2 () { qv.value = qvi }
 function undoc () { qc.value = qci }
+
+setModel()
 
 </script>
 

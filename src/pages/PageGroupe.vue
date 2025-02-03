@@ -176,32 +176,32 @@
         </div>
 
         <div v-if="action !== 0 && action !== 2" class="q-my-md">
-          <choix-quotas class="q-my-sm" v-model="q" groupe/>
+          <choix-quotas class="q-my-sm" v-model="q" groupe @change="onChg"/>
           <div v-if="q.err !== ''" class="q-ma-sm q-pa-xs msg titre-md">{{$t('AGmx')}}</div>
-          <div v-else>
+          <!--div v-else>
             <div v-if="aln || alv">
               <q-separator color="orange" class="q-my-xs"/>
               <div v-if="aln && gr.imh" class="msg q-pa-xs">{{$t('AGaln')}}</div>
               <div v-if="alv" class="msg q-pa-xs">{{$t('AGalv')}}</div>
               <q-separator color="orange" class="q-my-xs"/>
             </div>
-          </div>
+          </div-->
         </div>
 
-        <div v-if="action !== 0 && action !== 2 && q.err !== ''">
+        <div v-if="action !== 0 && action !== 2 && q.err === ''">
           <div v-if="aln" class="q-pa-xs q-ma-sm msg titre-md">{{$t('AGaln')}}</div>
           <div v-if="alv" class="q-pa-xs q-ma-sm msg titre-md">{{$t('AGalv')}}</div>
-          <div v-if="!aln" :class="'q-pa-xs titre-md q-ma-sm ' + (arn ? 'msg' : '')">{{$t('AGdisp1', [rstn])}}</div>
-          <div v-if="!alv" :class="'q-pa-xs titre-md q-ma-sm ' + (arv ? 'msg' : '')">{{$t('AGdisp2', [rstv])}}</div>
+          <div v-if="!aln" :class="'q-pa-xs titre-md q-ma-sm ' + (!rn ? 'msg' : '')">{{$t('AGdisp1', [rn])}}</div>
+          <div v-if="!alv" :class="'q-pa-xs titre-md q-ma-sm ' + (!rv ? 'msg' : '')">{{$t('AGdisp2', [edvol(rv)])}}</div>
         </div>
 
         <div class="q-mt-md row justify-center items-center q-gutter-md">
           <btn-cond size="md" :label="$t('renoncer')" flat icon="undo" @ok="ui.fD"/>
           <bouton-confirm v-if="action === 2" actif :confirmer="chgQ"/>
           <bouton-confirm v-if="action === 4" 
-            :actif="!q.err && !aln && !alv && (q.qn !== gr.qn || q.qv !== gr.qv)" :confirmer="chgQ"/>
+            :actif="q.err === '' && (q.qn !== gr.qn || q.qv !== gr.qv)" :confirmer="chgQ"/>
           <bouton-confirm v-if="action === 1 || action === 3" 
-            :actif="!q.err && !aln && !alv" :confirmer="chgQ"/>
+            :actif="q.err === ''" :confirmer="chgQ"/>
         </div>
       </div>
     </div>
@@ -254,6 +254,8 @@ const arn = ref(false)
 const arv = ref(false) 
 const rstn = ref(0) 
 const rstv = ref(0)
+const rn = ref(0) 
+const rv = ref(0)
 const lstVotes = ref()
 const cas = ref()
 
@@ -280,9 +282,6 @@ const nb = computed(() => pgLmFT.value.n)
 const vols = computed(() => { return { qn: gr.value.qn, qv: gr.value.qv, nn: gr.value.nn, v: gr.value.vf }})
 const estAnim1 = computed(() => gSt.estAnim(session.groupeId))
 const estAnim = computed(() => gr.value.estAnim(gr.value.mmb.get(session.avatarId)) )
-
-const restn = computed(() => { const cpt = session.compte.qv; return (cpt.qn * (100 - cpt.pcn) / 100) })
-const restv = computed(() => { const cpt = session.compte.qv; return (cpt.qv * (100 - cpt.pcv) / 100) })
 
 /* PageGroupe - membres people **************************************************/
 const pgLmFT = computed(() => {
@@ -353,7 +352,6 @@ async function chgU () {
   ui.fD()
 }
 
-
 function setCas () {
   /* Pour être / devenir hébergeur, il faut:
   - a) que le nn et vf actuels du groupe ne fasse pas excéder les quotas du compte
@@ -382,7 +380,7 @@ function setCas () {
   if (options.value.length) nvHeb.value = options.value[0]
 
   if (dejaHeb.value) {
-    // 2: 'Je PEUX cesse d\'héberger ce groupe',
+    // 2: 'Je PEUX cesser d\'héberger ce groupe',
     cas.value.add(2)
     // 3: 'Je PEUX transmettre l\'hébergement à un autre de mes avatars',
     if (options.value.length) cas.value.add(3) 
@@ -412,20 +410,22 @@ async function gererheb () {
   ui.oD('AGgererheb', idc)
 }
 
-watch(q, (ap) => { 
+const onChg = (ap) => { 
+  // Insuffisance pour couvrir le volume actuel
+  aln.value = gr.value.nn > (q.value.qn * UNITEN)
+  alv.value = gr.value.vf > (q.value.qv * UNITEV)
+
   const cpt = session.compte.qv
   const cptn = cpt.nn + cpt.nc + cpt.ng
-  const restqn = Math.floor(((cpt.qn * UNITEN) - cptn) / UNITEN) + (dejaHeb.value ? gr.value.qn : 0)
-  const restqv =  Math.floor(((cpt.qv * UNITEV) - cpt.v) / UNITEV) + (dejaHeb.value ? gr.value.qv : 0)
-  aln.value = gr.value.nn > (ap.qn * UNITEN)
-  alv.value = gr.value.vf > (ap.qv * UNITEV)
-  const rn = (restqn - ap.qn) * UNITEN
-  const rv = (restqv - ap.qv) * UNITEV
-  rstn.value = rn >= 0 ? rn : 0
-  rstv.value = edvol(rv >= 0 ? rv : 0)
-  arn.value = rn < (cpt.qn * UNITEN * 0.1)
-  arv.value = rv < (cpt.qv * UNITEV * 0.1)
-})
+  // Non utilisé (libre)
+  const nutn = Math.floor(((cpt.qn * UNITEN) - cptn))
+  const nutv =  Math.floor(((cpt.qv * UNITEV) - cpt.v))
+  // ce qui resterait de libre si le nouveau quota était totalement employé
+  rn.value = nutn - (q.value.qn * UNITEN)
+  if (rn.value < 0) rn.value = 0
+  rv.value = nutv - (q.value.qv * UNITEV)
+  if (rv.value < 0) rv.value = 0
+}
 
 async function chgQ () {
   if (action.value === 5) action.value = 1

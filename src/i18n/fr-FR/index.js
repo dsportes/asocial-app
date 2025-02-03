@@ -1487,8 +1487,8 @@ export default {
   AGac3: 'Transmettre l\'hébergement à un autre de mes avatars',
   AGac4: 'Seulement mettre à jour les nombres de notes et volumes de fichiers maximum du groupe',
 
-  AGaln: 'Nombre de notes excédant le maximum autorisé par l\'hébergeur: création de notes impossible, leur nombre ne peut être QUE réduit.',
-  AGalv: 'Volume de fichiers des notes excédant le maximum autorisé par l\'hébergeur: l\'ajout de fichiers à des notes est impossible, le remplacement ne peut s\'effectuer qu\'à volume inférieur.',
+  AGaln: 'Le nombre de notes actuel excède le maximum autorisé par l\'hébergeur: la création de notes sera impossible, leur nombre ne peut être QUE réduit.',
+  AGalv: 'Le volume de fichiers des notes actuel excède le maximum autorisé par l\'hébergeur: l\'ajout de fichiers à des notes sera impossible, le remplacement ne pourra s\'effectuer qu\'à volume inférieur.',
   AGdisp1: 'SI le nombre de notes du groupe atteint le maximum autorisé, il restera au compte {0} notes / chats / groupes disponibles.',
   AGdisp2: 'SI le volume des fichiers attachés aux notes du groupe atteint le maximum autorisé, il restera au compte {0} disponibles pour les fichiers attachés.',
 
