@@ -1069,6 +1069,26 @@ export class Groupe extends GenDoc {
     return s
   }
 
+  /* Stats des avatars du compte ayant accès: 
+    - set des im ayant accès aux notes, 
+    - set des im ayant aux membres, 
+    - set des ids des contacts
+  */
+  get amanAvc () {
+    const s = this.cptSetIm
+    const an = new Set()
+    const am = new Set()
+    let ctc = new Set()
+    for (const im of s) {
+      if (this.accesMembre(im)) am.add(im)
+      if (this.accesNote(im)) an.add(im)
+    }
+    this.st.forEach((x, im) => {
+      if (x > 0 && !s.has(im)) ctc.add(this.tid[im])
+    })
+    return { an, am, ctc}
+  }
+
   accesMembre (im) {
     const f = this.flags[im] || 0;
     return im && this.estActif(im) && (f & FLAGS.AM) && (f & FLAGS.DM) 

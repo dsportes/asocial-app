@@ -152,7 +152,7 @@ const quotas = ref(null)
 const step4 = ref(null)
 const step2 = ref(null)
 const step3 = ref(null)
-const step = ref(0)
+const step = ref(session.estA ? 1 : 0)
 const optOSA = ref(optionsOSA[0].value)
 
 const optionsDon = ref([ { label: $t('pasdon'), value: 0}])
