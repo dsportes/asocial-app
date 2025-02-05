@@ -1696,7 +1696,7 @@ export default {
   SAVnna: 'Suppression définitive de toutes les note(s) personnelle(s) de l\'avatar',
   SAVnnac: 'Suppression définitive de toutes les note(s) personnelle(s) du compte',
   SAVnbvf: '{0} note(s) - {1} de fichiers',
-  SAVchats: ' x | Un "chat" va être fermé : | {count} "chats" vont être fermé : ',
+  SAVchats: ' x | Un "chat" va être fermé : | {count} "chats" vont être fermés : ',
   SAVspons: ' x | Un "sponsoring" en attente sera annulé | {count} "sponsorings" en attente seront annulés',
   SAVgr0: ' x | Le compte n\'aura plus accès aux notes du groupe suivant: | Le compte n\'aura plus accès aux notes des {count} groupes suivants :',
   SAVnnp: 'Nom du groupe, nombre de notes qui ne seront plus accessibles, volume de leur fichiers',
@@ -1709,7 +1709,7 @@ export default {
   SAVabo1: 'QN [{4}] - {3} document(s): {0} note(s) + {1} chat(s) + {2} participation(s) à des groupes',
   SAVabo2: 'QV [{1}] - Volume des fichiers: {0}',
   SAVquotas1: 'Quotas rendus à la partition {0}:',
-  SAVquotas2: 'Quotas rendus disponibles pour les compte "A" (autonomes):',
+  SAVquotas2: 'Quotas rendus disponibles pour les autres comptes "A" (autonomes):',
 
   // TuileNotif
   TUntfp: 'Alertes partition',
