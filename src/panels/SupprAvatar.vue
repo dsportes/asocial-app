@@ -1,23 +1,23 @@
 <template>
   <div v-if="s" class="q-pa-xs">
 
-    <div v-if="s.ddel" class="row q-my-md items-start">
-      <q-checkbox class="col-auto cb" size="sm" v-model="checks.ddel"/>
-      <div class="col titre-md">{{$t('SAVddel')}}</div>
+    <div v-if="ddel" class="row q-my-md items-center">
+      <q-checkbox class="col-auto q-mr-md" size="sm" v-model="ddelCheck"/>
+      <div class="col titre-md">{{$t('SAVddel' + ddel)}}</div>
     </div>
 
     <div v-if="s.nna" class="q-my-md">
       <div class="row items-center">
-        <q-checkbox class="col-auto cb" size="sm" v-model="checks.nna"/>
-        <div class="col titre-md">{{$t('SAVnna')}}</div>
+        <q-checkbox class="col-auto q-mr-md" size="sm" v-model="checks.nna"/>
+        <div class="col titre-md">{{$t('SAVnna' + (resilC ? 'c' : ''))}}</div>
       </div>
       <div class="q-ml-xl font-mono">{{$t('SAVnbvf', [s.nna, edvol(s.vfa)])}}</div>
     </div>
 
     <div v-if="s.ch.length" class="q-my-md">
       <div class="row items-center">
-        <q-checkbox class="col-auto cb" v-model="checks.chats"/>
-        <div class="titre-md">{{$t('SAVchats', s.ch.length, { count: s.ch.length })}}</div>
+        <q-checkbox class="col-auto q-mr-md" v-model="checks.chats"/>
+        <div class="col titre-md">{{$t('SAVchats', s.ch.length, { count: s.ch.length })}}</div>
       </div>
       <div class="q-ml-xl row q-gutter-sm">
         <div v-for="c in s.ch" :key="c.pk" class="b1">{{session.getCV(c.idE).nomC}}</div>
@@ -26,8 +26,8 @@
 
     <div v-if="s.sp.length" class="q-my-md">
       <div class="row items-center">
-        <q-checkbox class="col-auto cb" v-model="checks.spons"/>
-        <div class="titre-md">{{$t('SAVspons', s.sp.length, { count: s.sp.length })}}</div>
+        <q-checkbox class="col-auto q-mr-md" v-model="checks.spons"/>
+        <div class="col titre-md">{{$t('SAVspons', s.sp.length, { count: s.sp.length })}}</div>
       </div>
       <div class="q-ml-xl">
         <div class="b1 column">
@@ -36,10 +36,10 @@
       </div>
     </div>
 
-    <div v-if="s.gr0.length" class="q-my-md">
+    <div v-if="!resilC && s.gr0.length" class="q-my-md">
       <div class="row items-center">
-        <q-checkbox class="col-auto cb" size="sm" v-model="checks.gr0"/>
-        <div class="titre-md">{{$t('SAVgr0', s.gr0.length, { count: s.gr0.length })}}</div>
+        <q-checkbox class="col-auto q-mr-md" size="sm" v-model="checks.gr0"/>
+        <div class="col titre-md">{{$t('SAVgr0', s.gr0.length, { count: s.gr0.length })}}</div>
       </div>
       <div class="q-ml-xl">
         <div class="text-italic titre-sm q-mb-sm">{{$t('SAVnnp')}}</div>
@@ -55,38 +55,38 @@
 
     <div v-if="s.gr1.length" class="q-my-md">
       <div class="row items-center">
-        <q-checkbox class="col-auto cb" size="sm" v-model="checks.gr1"/>
-        <div class="titre-md">{{$t('SAVgr1', s.gr1.length, { count: s.gr1.length })}}</div>
+        <q-checkbox class="col-auto q-mr-md" size="sm" v-model="checks.gr1"/>
+        <div class="col titre-md">{{$t('SAVgr1', s.gr1.length, { count: s.gr1.length })}}</div>
       </div>
       <div class="q-ml-xl">
-        <div class="row g-gutter-sm" v-for="x in s.gr1" :key="x.id">{{x.nomC}}</div>
+        <div class="row g-gutter-sm" v-for="nomC in s.gr1" :key="nomC">{{nomC}}</div>
       </div>
     </div>
 
     <div v-if="s.gr2.length" class="q-my-md">
       <div class="row items-center">
-        <q-checkbox class="col-auto cb" size="sm" v-model="checks.gr2"/>
-        <div class="titre-md">{{$t('SAVgr2', s.gr2.length, { count: s.gr2.length })}}</div>
+        <q-checkbox class="col-auto q-mr-md" size="sm" v-model="checks.gr2"/>
+        <div class="col titre-md">{{$t('SAVgr2', s.gr2.length, { count: s.gr2.length })}}</div>
       </div>
       <div class="q-ml-xl">
-        <div class="row g-gutter-sm" v-for="x in s.gr2" :key="x.id">{{x.nomC}}</div>
+        <div class="row g-gutter-sm" v-for="nomC in s.gr2" :key="nomC">{{nomC}}</div>
       </div>
     </div>
 
     <div v-if="s.gr3.length" class="q-my-md">
       <div class="row items-center">
-        <q-checkbox class="col-auto cb" size="sm" v-model="checks.gr3"/>
-        <div class="titre-md">{{$t('SAVgr3', s.gr3.length, { count: s.gr3.length })}}</div>
+        <q-checkbox class="col-auto q-mr-md" size="sm" v-model="checks.gr3"/>
+        <div class="col titre-md">{{$t('SAVgr3', s.gr3.length, { count: s.gr3.length })}}</div>
       </div>
       <div class="q-ml-xl">
-        <div class="row g-gutter-sm" v-for="x in s.gr3" :key="x.id">{{x.nomC}}</div>
+        <div class="row g-gutter-sm" v-for="nomC in s.gr3" :key="nomC">{{nomC}}</div>
       </div>
     </div>
 
-    <div v-if="avid !== '' && s.crp.length" class="q-my-md">
+    <div v-if="!resilC && s.crp.length" class="q-my-md">
       <div class="row items-center">
-        <q-checkbox class="col-auto cb" size="sm" v-model="checks.ctc"/>
-        <div class="titre-md">{{$t('SAVctc', s.crp.length, { count: s.crp.length })}}</div>
+        <q-checkbox class="col-auto q-mr-md" size="sm" v-model="checks.ctc"/>
+        <div class="col titre-md">{{$t('SAVctc', s.crp.length, { count: s.crp.length })}}</div>
       </div>
       <div class="q-ml-xl">
         <div class="b2">
@@ -97,19 +97,24 @@
       </div>
     </div>
 
-    <div v-if="avid !== '' && nbn" class="q-my-md">
+    <div v-if="!resilC && (nbn || s.ch.length || s.ng)" class="q-my-md">
       <div class="row items-center">
-        <q-checkbox class="col-auto cb" size="sm" v-model="checks.vol"/>
-        <div class="titre-md">{{$t('SAVvol')}}</div>        
+        <q-checkbox class="col-auto q-mr-md" size="sm" v-model="checks.vol"/>
+        <div class="col titre-md">{{$t('SAVvol')}}</div>        
       </div>
       <div class="q-ml-xl">
-        <div v-if="s.nna" class="q-ml-md">{{$t('SAVvola', [s.nna, edvol(s.vfa)])}}</div>
-        <div v-if="s.nnh" class="q-ml-md">{{$t('SAVvolg', [s.nnh, edvol(s.vfh)])}}</div>
-        <div class="q-my-md">
-          <div class="titre-md">{{$t('SAVabo')}}</div>
-          <div class="q-mt-sm">{{$t('SAVabo1', [nbn, s.ch.length, s.ng, nbtot])}}</div>
-          <div v-if="s.vftot" class="q-mt-sm">{{$t('SAVabo2', [edvol(vftot)])}}</div>
-        </div>
+        <div class="q-mt-sm">{{$t('SAVabo1', [nbn, s.ch.length, s.ng, nbtot, qn])}}</div>
+        <div v-if="s.vftot" class="q-mt-sm">{{$t('SAVabo2', [edvol(vftot), qv])}}</div>
+      </div>
+    </div>
+
+    <div v-if="resilC" class="q-my-md">
+      <div class="row items-center">
+        <q-checkbox class="col-auto q-mr-md" size="sm" v-model="checks.quotas"/>
+        <div class="col titre-md">{{$t('SAVquotas' + (session.estA ? '2' : '1'), [session.compte.idp])}}</div>        
+      </div>
+      <div class="q-ml-xl">
+        <quotas-vols :vols="session.compte.qv"/>
       </div>
     </div>
 
@@ -130,10 +135,12 @@
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
+import { UNITEN, UNITEV } from '../app/api.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import { styp, edvol, sleep, dkli } from '../app/util.mjs'
 import BtnCond from '../components/BtnCond.vue'
+import QuotasVols from '../components/QuotasVols.vue'
 import { GetPartition, SupprAvatar, SupprCompte } from '../app/operations4.mjs'
 import { deconnexion } from '../app/synchro.mjs'
 
@@ -150,31 +157,48 @@ const props = defineProps({
   avid: String
 })
 
-if (!props.avid && session.compte.idp)
-  onMounted(async () => { await new GetPartition().run(session.compte.idp) })
-
 const actif = ref(false)
+const resilC = computed(() => props.avid === '')
+const ddel = ref(0)
+const ddelCheck = ref(false)
 
-const cv = computed(() => session.getCV(props.avid || session.compteId))
+const checks = ref({ nna: false, chats: false, spons: false,
+  gr0: false, gr1: false, gr2: false, gr3:false, vol: false, ctc: false, 
+  quotas: false
+})
 
 const checksOK = computed(() => { 
-  for (const x in checks.value) {
+  if (ddel.value && !ddelCheck.value) return false
+  for (const x in checks.value)
     if (checks.value[x] === false && s.value.toCheck.has(x)) return false
-  }
   return true 
 })
+
+if (resilC.value && session.compte.idp)
+  onMounted(async () => { 
+    await new GetPartition().run(session.compte.idp)
+    const synth = session.partition.synth
+    if (synth.nbc === 1) ddel.value = 1
+    else if (synth.nbd === 1 && session.compte.del) ddel.value = 2
+  })
+
+const cv = computed(() => session.getCV(props.avid || session.compteId))
 
 const nbn = computed(() => s.value.nna + s.value.nnh)
 const nbtot = computed(() => nbn.value + s.value.ch.length + s.value.ng)
 const vftot = computed(() => s.value.vfa + s.value.vfh)
-
-const checks = ref({ ddel: false, nna: false, chats: false, spons: false,
-  gr0: false, gr1: false, gr2: false, gr3:false, vol: false, ctc: false })
+const qn = computed(() => {
+  const n = Math.floor(nbtot.value / UNITEN)
+  return n === 0 ? '0' : '-' + n
+})
+const qv = computed(() => {
+  const n = Math.floor(vftot.value / UNITEV)
+  return n === 0 ? '0' : '-' + n
+})
 
 const s = computed(() => { 
   const s = {
     toCheck: new Set(),
-
     stats: {}, // map des nbn notes, nn vf par avatar et groupe
 
     gr1: [], // liste des groupes où l'avatar est le dernier actif
@@ -196,7 +220,7 @@ const s = computed(() => {
     vfa: 0, // vf total des fichiers des notes de l'avatar
 
     // résiliation compte
-    ddel: false // dernier délégué de sa partition
+    ddel: 0 // 1: dernier compte de sa partition 2: dernier délégué
   }
 
   const id = props.avid || session.compteId
@@ -221,85 +245,71 @@ const s = computed(() => {
 
   for (const [idg, sav] of session.compte.mpg) {
     if (!sav.has(id)) continue
+    s.ng++
     const gr = gSt.egr(idg).groupe
     const im = gr.mmb.get(id)
-    const { am, an, ctc } = gr.amanAvc
-    const x = {
-      nomC: session.getCV(gr.id).nomC,
-      heb: (gr.imh === im),
-      nnp: 0, // nombre de notes perdues
-      vfp: 0  // vol. des fichiers des notes perdues
+    const nomC = session.getCV(gr.id).nomC
+    const heb = (gr.imh === im)
+
+    if (!resilC.value) {
+      // pertes d'avccès à des notes et de contacts
+      const { am, an, ctc } = gr.amanAvc
+
+      // seul AVC ayant accès aux notes : nbr / vol. fic. des notes perdues
+      if (an.has(im) && an.size === 1)
+        s.gr0.push({ id: gr.id, nomC, nnp: gr.nn, vfp: gr.vf })
+
+      // contacts qui POURRAIENT être perdus
+      if (am.has(im) && am.size === 1) { // seul AVC ayant accès aux membres
+        grmbp.add(gr.id)
+        ctc.forEach(id => { ctcp.add(id) })
+      }
     }
-    s.gr0.push(x)
-    // contacts qui POURRAIENT être perdus
-    if (am.has(im) && am.size === 1) {
-      // seul AVC ayant accès aux membres
-      grmbp.add(gr.id)
-      ctc.forEach(id => { ctcp.add(id) })
-    }
-    // seul AVC ayant accès aux notes : nbr / vol. fic. des notes perdues
-    if (an.has(im) && an.size === 1) { 
-      x.nnp = gr.nn
-      x.vfp = gr.vf 
-    }
-    
+
+    // Groupes en disparition (gr1), groupe sans hébergeur (gr2), groupe sans animateur (gr3)
     let nan = 0, nac = 0, estAn = false, estAc = false
     for (let i = 1; i < gr.st.length; i++) {
       const s = gr.st[i]
       if (s === 5) { nan++; if (i === im) estAn = true }
       if (s >= 4) { nac++; if (i === im) estAc = true }
     }
-    x.dan = nan === 1 && estAn
-    x.dac = nac === 1 && estAc
-    if (x.dac) {
-      s.ng++
-      if (x.heb) {
-        s.nnh += gr.nn
-        s.vfh += gr.vf
-      }
+    const dan = nan === 1 && estAn
+    const dac = nac === 1 && estAc
+    if (dac && heb) {
+      s.nnh += gr.nn
+      s.vfh += gr.vf
     }
-
-    if (props.avid && (s.nnh || s.ng || s.nna)) s.toCheck.add('vol')
-
-    if (x.dac) s.gr1.push(x)
+    if (dac) s.gr1.push(nomC)
     else {
-      if (x.heb) s.gr2.push(x)
-      if (x.dan) s.gr3.push(x)
+      if (heb) s.gr2.push(nomC)
+      if (dan) s.gr3.push(nomC)
     }
   }
+
+  if (!resilC.value && (s.nnh || s.ng || s.nna)) s.toCheck.add('vol')
   if (s.gr0.length) s.toCheck.add('gr0')
   if (s.gr1.length) s.toCheck.add('gr1')
   if (s.gr2.length) s.toCheck.add('gr2')
   if (s.gr3.length) s.toCheck.add('gr3')
 
   // contacts réellement perdus
-  for (const idc of ctcp) {
-    const ep = pSt.map.get(idc)
-    if (!ep || ep.del) continue // délégué: pas perdu
-    // a un chat avec un autre avatar
-    if (ep.sch.size > 1 || (ep.sch.size === 1 && !ep.sch.has(idc))) continue 
-    let mgd = false// membre d'un groupe autre que ceux en disparition
-    for(const idg of ep.sgr) if (!grmbp.has(idg)) { mgd = true; break }
-    if (mgd) continue
-    s.crp.push(session.getCV(idc).nomC)
-  }
-  if (s.crp.length) s.toCheck.add('ctc')
-
-  if (props.avid === 0 && session.compte.idp) {
-    const ndel = session.partition.nbDels
-    if (ndel === 1 && session.compte.del) { 
-      s.ddel = true
-      s.toCheck.add('ddel')
+  if (!resilC.value) {
+    for (const idc of ctcp) {
+      const ep = pSt.map.get(idc)
+      if (!ep || ep.del) continue // délégué: pas perdu
+      // a un chat avec un autre avatar
+      if (ep.sch.size > 1 || (ep.sch.size === 1 && !ep.sch.has(idc))) continue 
+      let mgd = false// membre d'un groupe autre que ceux en disparition
+      for(const idg of ep.sgr) if (!grmbp.has(idg)) { mgd = true; break }
+      if (mgd) continue
+      s.crp.push(session.getCV(idc).nomC)
     }
+    if (s.crp.length) s.toCheck.add('ctc')
   }
+
+  if (resilC.value) s.toCheck.add('quotas')
   return s
 })
-
-/*
-watch(s, (ap) => { 
-  for (const x in ap.toCheck) checks.value[x] = false 
-})
-*/
 
 async function valider () {
   ui.fD() // Dialogue de suppression
@@ -317,11 +327,6 @@ async function valider () {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.q-btn
-  padding: 0 !important
-.cb
-  font-style: italic
-  margin-right: 1rem
 .b1, .b2
   border: 1px solid $grey-5
   border-radius: 5px
