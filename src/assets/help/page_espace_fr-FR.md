@@ -59,9 +59,9 @@ Dans la documentation générale, lire <a href="$$/appli/stats.html" target="_bl
 
 La statistique **Abonnement / consommation** porte sur UN mois.
 
-Pour le mois courant elle est différente à chaque exportation, les comptes vivent.
+_Pour le mois courant_ elle est différente à chaque exportation, les comptes vivent.
 
-Pour les mois antérieurs, la statistique d'un mois est toujours la même: elle a été calculée et stockée après la fin du mois et est donc stable.
+**Pour les mois antérieurs, la statistique d'un mois est toujours la même**: elle a été calculée et stockée après la fin du mois et est donc stable.
 
 # Décomposition de l'espace en partitions | page_partition dial_majalerte1
 Il existe toujours au moins une partition **Primitive**,
@@ -134,3 +134,49 @@ On passe d'un groupe à l'autre en cliquant sur les flèches encadrant le nom du
 - pourcentage de ce quota attribué aux comptes.
 - pourcentage de ce quota **effectivement** utilisé par les comptes.
 - somme des coûts moyens de calcul des comptes établis sur M et M-1 (ramenés à 30 jours).
+
+# Export CSV des coûts par partition
+Cet export est calculé localement sur demande en cours de session du Comptable et donne une image à l'instant de l'export des **coûts** d'abonnement des partitions (donc pour les seuls comptes "O").
+
+### Objectifs
+Les objectifs de cet export est de permettre au Comptable:
+- de comparer les _coûts_ des partitions entre elles.
+- de comparer les valeurs des quotas _attribués_, _effectivement distribués aux comptes_ et _réellement utilisés_. Pour certains prestataires d'hébergement technique, le coût facturé est le coût réellement utilisé mais pour d'autres c'est un coût forfaitaire maximal.
+- si le Comptable souhaite répartir les coûts d'hébergement des comptes "0" aux responsables des partitions, cet export lui donne les compteurs de base d'abonnement et de consommation totalisés par partition. 
+
+### Quotas / coûts
+Les quotas et nombre de documents sont connus en nombre de documents: dans cet export **ils sont _valorisés_ en 10000 ième de c** en utilisant le tarif d'un mois choisi dans le dialogue.
+
+Les quotas et volumes de fichiers sont connus en _octet (byte)_: dans cet export **ils sont _valorisés_ en 10000 ième de c** en utilisant le tarif d'un mois choisi dans le dialogue.
+
+### Les coûts sont ceux:
+- N : du nombre de documents (notes + chats + participations aux groupes).
+- V : du volume des fichiers attachés aux notes.
+- C : de consommation de calcul (valorisation des lectures / écritures de documents, downloads / uploads de fichier).
+- T : total des coûts N + V + C
+
+### "Attribué" versus "Distribué" versus "Utilisé"
+Chaque compteur est _triple_. Par exemple pour N, le nombre de documents:
+- A : attribué. Le coût est la valorisation du _quota_ (abonnement mensuel) que le Comptable a **attribué globalement à la partition**.
+- D : distribué. Le coût est la valorisation de la somme des _quotas_ (abonnements mensuels) **distribués aux comptes de la partition**.
+- U : utilisé. Le coût est la valorisation (au tarif de l'abonnement mensuel) de la somme des nombres exacts des documents à l'instant t.
+
+> Concernant le coût de _calcul_: à tout instant il est estimé un coût de calcul moyen mensuel basé sur les coûts réels sur le mois courant et le précédent: c'est ce coût _mensualisé (sur 30 jours)_ qui est considéré comme "utilisé".
+
+## Fichier CSV
+Ce fichier se retrouve dans le répertoire des Téléchargements du browser.
+- le _séparateur_ est la virgule.
+- la première ligne donne les titres des colonnes.
+- la seconde ligne est la totalisation de toutes les partitions.
+- chaque partition a une ligne.
+
+#### Colonnes
+- `id` : id de la partition.
+- `code` : code de la partition attribué par le Comptable.
+- `nbc` : nombre de comptes de la partition.
+- `nbd` : nombre de comptes _délégués du Comptable_ de la partition.
+
+- `abna abnd abnu` : coûts _attribués / distribués / utilisés_ des nombres de documents.
+- `abva abvd abvu` : coûts _attribués / distribués / utilisés_ des volumes de fichiers.
+- `abca abcd abcu` : coûts _attribués / distribués / utilisés_ des calculs.
+- `abta abtd abtu` : coûts _attribués / distribués / utilisés_ totaux (N + V + C).
