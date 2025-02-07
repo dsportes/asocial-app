@@ -328,7 +328,7 @@ async function initGC () {
 
 async function startDemon () {
   try {
-    const res = await get('StartDemon', { code: gccode.value })
+    const res = await get('ProchTache', { code: gccode.value })
     await afficherDiag(new TextDecoder().decode(res))
   } catch (ex) {
     const s = ex.code === 7012 ? $t('EX7012') : ex.toString()
