@@ -23,7 +23,8 @@ export const usePeopleStore = defineStore('people', {
   getters: { 
     ns: () => stores.session.ns,
     gSt: () => stores.groupe,
-    session: () => stores.session, 
+    session: () => stores.session,
+    aSt: () => stores.avatar,
 
     /* Retourne la CV la plus récente pour une id */
     getCV: (state) => { return (id) => { 
@@ -83,6 +84,12 @@ export const usePeopleStore = defineStore('people', {
       }
     },
 
+    estDelegue: (state) => { return (id) => { 
+        const e = state.map.has(id)
+        return e && e.del
+      }
+    },
+
     /* Retourne le set des avatars du compte avec qui le people a un chat ouvert */
     getAvChats: (state) => { return (id) => { 
         const e = state.map.get(id)
@@ -126,6 +133,33 @@ export const usePeopleStore = defineStore('people', {
         if (sel) r.set(id, p)
       } 
       return r
+    },
+
+    /* A quel titre le people idp est contact du compte ?
+    { del: true } : parce que idp est délégué
+    { id, ids } : parce qu'il a un chat id / ids avec l'avatar id du compte
+    { idg, imp, ida, ima} : parce qu'il est membre d'indice imp du groupe idg
+      dont le compte a un avatar ida / ima ayant accès aux membres
+    */
+    whyPeople: (state) => { return (idp) => {
+        const p = state.map.get(idp)
+        if (!p) return null
+        if (p.del) return { del : true }
+        if (p.sch.size) {
+          const id = Array.from(p.sch)[0] 
+          const ch = state.aSt.chatDeAvec(id, idp)
+          if (ch) return { id, ids: ch.ids}
+        }
+        for (const idg of p.sgr) {
+          const egr = state.gSt.egr(idg)
+          const g = egr ? egr.groupe : null
+          if (!g) continue
+          const imp = g.mmb.get(idp)
+          const { ida, ima } = g.idaImaAM
+          if (imp && ida && ima) return { idg, imp, ida, ima }
+        }
+        return null
+      }
     }
   },
   

@@ -322,7 +322,7 @@ export default {
   EX9240: '(BUG) Ticket inconnu',
   EX9241: '(BUG) Ticket déjà réceptionné',
   EX9242: '(BUG) Mise à jour d\'une CV d\'un avatar qui n\'est du compte.',
-  EX9243: '(BUG) Le compte n\'a pas d\'avatar membre actif animateur du groupe dont la CV est à mettre à jour',
+  EX9243: '(BUG) Le compte n\'a pas d\'avatar membre animateur du groupe dont la CV est à mettre à jour',
   EX9244: '(BUG) Le compte n\'a de chat avec le titulaire de la carte de visite',
   EX9245: '(BUG) Conflit d\'id d\'avatar.',
   EX9246: '(BUG) Groupe déjà créé.',
@@ -388,7 +388,8 @@ export default {
   EX9311: '(BUG) Volume maximum autorisé pour le groupe dépassé.',
   EX9312: '(BUG) Groupe sans hébergeur, le volume de fichiers ne peut pas croître.',
   EX9313: '(BUG) L\'auteur de l\'édition (texte / fichiers) de la note n\'a pas droit d\'écriture.',
-
+  EX9314: '(BUG) Le compte n\'est pas l\'auteur exclusif de la note, écriture interdite.',
+  EX9315: '(BUG) Le compte n\'a pas d\'avatar, animateur ou ayant droit d\'écriture et ayant l\'exclusivité (s\'il y en a une).',
   EX9316: '(BUG) Le Comptable a déjà créé son compte, phrase de sponsoring sans utilité.',
   EX9317: '(BUG) La mutation d\'un compte "A" en "O" ou "O" en "A" ne peut être demandée qu\'en ayant eu l\'accord du compte à muter en donnant sa phrase de contact.',
   EX9318: '(BUG) Taille maximale du groupe atteinte',
@@ -423,8 +424,8 @@ export default {
   EX9349: '(BUG) Suppression d\'exclusivité par un compte n\'ayant pas l\'exclusivité actelle',
   EX9350: '(BUG) Transfert d\'exclusivité par un compte n\'ayant pas l\'exclusivité actelle',
 
-  EX9314: '(BUG) Le compte n\'est pas l\'auteur exclusif de la note, écriture interdite.',
-  EX9315: '(BUG) Le compte n\'a pas d\'avatar, animateur ou ayant droit d\'écriture et ayant l\'exclusivité (s\'il y en a une).',
+  EX9351: '(BUG) Le compte n\'a pas d\'avatar membre du groupe pour consulter sa CV',
+  EX9352: '(BUG) Demande d\'automutation en compte A d\'un compte qui n\'est pas O.',
 
   // EX9100: 'Erreur de cryptage AES: {0}',
   // EX9101: 'Erreur de cryptage RSA: {0}',
@@ -520,6 +521,7 @@ export default {
   OP_SetQuotasA: 'Mise à jour des quotas pour les comptes A',
   OP_MajLectChatgr: 'Mise à jour de la date-heure de lecture d\'un "chat de groupe".',
   OP_MajLectChat: 'Mise à jour de la date-heure de lecture d\'un "chat".',
+  OP_GetCv: 'Obtention de la carte de visite d\'un avatar ou d\'un groupe.',
 
   // Login
   LOGpubsub: 'Autoriser les "notifications" afin d\'avoir des données à jour en continu même suite aux actions des autres sessions',

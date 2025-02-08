@@ -1506,28 +1506,46 @@ export class MajCv extends Operation {
   }
 }
 
-/* OP_GetCv : Obtention de la carte de visite d\'un avatar ******************************************
+/* OP_GetCv : 'Obtention de la carte de visite d\'un avatar ou d\'un groupe.',
 - token : jeton d'authentification du compte
 - id : id du people
-- ch: [id, ids] id d'un chat d'un des avatars du compte avec le people
+- r : A quel titre le PEOPLE id est contact du compte ?
+  { del: true } : parce que idp est délégué
+  { avch } : parce qu'il a un chat avec l'avatar avch du compte
+  { idg, imp, ida, ima } : parce qu'il est membre d'indice imp du groupe idg
+    dont le compte a un avatar ida / ima ayant accès aux membres
+- r : A quel titre le GROUPE id est visible du compte ?
+  { ida, ima }:  parce que l'avatar ida indice ima dans le groupe id a accès aux membres
 Retour:
 - cv: si trouvée
 */
 export class GetCv extends Operation {
-  constructor () { super('MajCv') }
+  constructor () { super('GetCv') }
 
   async run (id) {
     try {
-      const session = stores.session
-      const aSt = stores.avatar
-      const lch = aSt.chatsAvec(id)
-      const ch = lch.length ? [lch[0].id, lch[0].ids] : null
-      const args = { token: session.authToken, id, ch }
-      const ret = await post(this, 'GetCv', args)
       let cv = null
-      if (ret.cv) {
-        const cle = RegCles.get(id)
-        cv = (await CV.set(ret.cv, cle)).store()
+      const session = stores.session
+      const args = { token: session.authToken, id }
+      const gSt = stores.groupe
+      const pSt = stores.people
+
+      if (ID.estGroupe(id)) {
+        const egr = gSt.egr(id)
+        if (egr) {
+          const r = egr.groupe ? egr.groupe.idaImaAM : { ida: 0, ima: 0 }
+          if (r.ida && r.ima) args.r = r
+        }
+      } else {
+        args.r = pSt.whyPeople(id)
+      }
+
+      if (args.r) {
+        const ret = await post(this, 'GetCv', args)
+        if (ret.cv) {
+          const cle = RegCles.get(id)
+          cv = (await CV.set(ret.cv, cle)).store()
+        }
       }
       return this.finOK(cv)
     } catch (e) {

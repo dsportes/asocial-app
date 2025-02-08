@@ -1069,6 +1069,16 @@ export class Groupe extends GenDoc {
     return s
   }
 
+  /* retourne { ida, ima } d'UN avatar du compte ayant
+  accès aux membres du groupe */
+  get idaImaAM () {
+    const s = this.cptSetIm
+    for (const ima of s)
+      if (this.accesMembre(ima))
+        return { ima, ida: this.tid[ima] }
+    return { ima: 0, ida: '' }
+  }
+
   /* Stats des avatars du compte ayant accès: 
     - set des im ayant accès aux notes, 
     - set des im ayant aux membres, 
