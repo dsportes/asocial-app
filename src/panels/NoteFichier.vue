@@ -112,10 +112,10 @@ const egr = computed(() => estGr.value ? gSt.egr(note.value.id) : null)
 const groupe = computed(() => egr.value ? egr.value.groupe : null)
 
 // % quota de vf groupe - 0 = ok 1 =90% 2 =>100% (RED)
-const vgr = computed(() => !groupe.value ? 0 : groupe.value.alVol(0))
+const vgr = computed(() => !groupe.value ? 0 : groupe.value.Gr(0))
 
 // volume fichier du compte (si hébergeur pour un groupe)
-const vcpt = computed(() => !groupe.value || (groupe.value && !groupe.value.cptEstHeb) ? 0 : session.compte.alVol(0))
+const vcpt = computed(() => !groupe.value || (groupe.value && !groupe.value.cptEstHeb) ? 0 : session.session.alVolCpt(0))
 
 const pasHeb = computed(() => groupe.value && !groupe.value.imh)
 

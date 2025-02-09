@@ -29,6 +29,7 @@ export const useSessionStore = defineStore('session', {
     dhConnx: 0, // dh de début de la session
     dh: 0, // dh de la dernière opération
     consocumul: { nl: 0, ne: 0, vm: 0, vd: 0}, // nombres de lectures, écritures, volume montant / descendant sur les POST
+    qv: { version: 0, qc: 0, qn: 0, qv: 0, nn: 0, nc: 0, ng: 0, cjm: 0, v: 0 },
 
     lsk: '', // nom de la variable localStorage contenant le nom de la base
     nombase: '', // nom de la base locale
@@ -116,7 +117,7 @@ export const useSessionStore = defineStore('session', {
     flags (state) { return state.compte && state.compte.flags ? state.compte.flags : 0},
     // Taux de ralentissement
     RAL: (state) => {
-      const x = !state.compte ? 0 : AL.txRal(state.compte.qv)
+      const x = !state.compte ? 0 : AL.txRal(state.qv)
       return x
     },
     hasAR (state) {
@@ -230,6 +231,15 @@ export const useSessionStore = defineStore('session', {
   },
 
   actions: {
+    alVolCpt (v) {
+      const qv = this.qv
+      if (qv.qv === 0) return 2
+      const voc = qv.v + v
+      const vq = qv.qv * UNITEV
+      const px = voc / vq
+      return px > 1 ? 2 : (px > 0.9 ? 1 : 0)
+    },
+
     setMode (mode) { this.mode = mode },
 
     setOrg (org) { this.org = org || '' },
@@ -301,6 +311,10 @@ export const useSessionStore = defineStore('session', {
         if (c.vm) this.consocumul.vm += c.vm
         if (c.vd) this.consocumul.vd += c.vd
       }
+      if (c.qv.version > this.qv.version) {
+        for(const f in c.qv) this.qv[f] = c.qv[f]
+      }
+      console.log('cjm ' + this.sessionId, c.qv.cjm)
     },
 
     setStatus (s) { this.status = s },

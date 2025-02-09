@@ -535,7 +535,8 @@ export class Compte extends GenDoc {
     if (row.cleEK) this.cleE = await decrypter(clek, row.cleEK)
     this.priv = await RegCc.setPriv(this.id, row.privK)
     this.dhvu = row.dhvuK ? parseInt(await decrypterStr(clek, row.dhvuK)) : 0
-    this.qv = row.qv
+    
+    // this.qv = row.qv - get sur session
 
     this.dlv = row.dlv
     this.dharF = row.dharF || 0
@@ -587,6 +588,10 @@ export class Compte extends GenDoc {
   
   }
 
+  get qv () { 
+    return stores.session.qv
+  }
+
   get lstAvatars () {
     const session = stores.session
     const l = []
@@ -595,12 +600,6 @@ export class Compte extends GenDoc {
       return a.id === this.id ? -1 : (a.id === this.id ? 1 : (a.nom < b.nom ? -1 : (a.nom > b.nom ? 1 : 0))) 
     })
     return l
-  }
-
-  alVol (v) {
-    const voc = (this.pcv * this.qv * UNITEV / 100) + v
-    const px = voc / UNITEV / this.qv
-    return px > 1 ? 2 : (px > 0.9 ? 1 : 0)
   }
 
   // Retourne [amb, amo] - un avatar au moins accède aux membres / notes du groupe
@@ -1040,7 +1039,7 @@ export class Groupe extends GenDoc {
 
   get pcv () { return !this.qv ? 0 : Math.ceil(this.vf * 100 / this.qv * UNITEV) }
 
-  alVol (v) {
+  alVolGr (v) {
     const px = (this.vf + v) / UNITEV / this.qv
     return px > 1 ? 2 : (px > 0.9 ? 1 : 0)
   }
