@@ -52,7 +52,6 @@ class Queue {
     const session = stores.session
     const ok = session.ok
     if (this.EnCours || !ok) return
-    // console.log('réveil')
 
     const ds = syncQueue.dataSync
     let doCpt = false, doEsp = false
@@ -78,6 +77,8 @@ class Queue {
       } else nvm.set(id, [vn, vt]) // pas de changement
     }
     this.avgrs = nvm // liste d'attente mise à jour
+
+    console.log('Réveil: ', session.sessionId, doCpt, doEsp, lids.length)
 
     if (doCpt || doEsp || lids.length) {
       // Lancement de l'opération de Sync
