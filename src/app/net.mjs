@@ -126,8 +126,7 @@ export async function post (op, fonction, args) {
   try {
     const resp = decode(buf)
     if (resp) {
-      if (resp.dh) session.setDh(resp.dh)
-      if (resp.conso) session.setConso(resp.conso)
+      if (resp.adq) session.setAdq(resp.adq)
       if (resp.trlog) 
         syncQueue.synchro(resp.trlog)
       if (resp.nhb !== undefined) hb.retOP(resp.nhb) // { sessionId, nhb, nomop }

@@ -27,9 +27,15 @@ export const useSessionStore = defineStore('session', {
     phrase: null,
     auj: 0,
     dhConnx: 0, // dh de début de la session
+
     dh: 0, // dh de la dernière opération
+    dlv: AMJ.max,
+    acqv: 0,
+    flags: 0,
     consocumul: { nl: 0, ne: 0, vm: 0, vd: 0}, // nombres de lectures, écritures, volume montant / descendant sur les POST
     qv: { version: 0, qc: 0, qn: 0, qv: 0, nn: 0, nc: 0, ng: 0, cjm: 0, v: 0 },
+    alire: false, // Il y a des notifications à lire
+    dhvu: 0, // Dernière validation de lecture des alertes
 
     lsk: '', // nom de la variable localStorage contenant le nom de la base
     nombase: '', // nom de la base locale
@@ -60,9 +66,6 @@ export const useSessionStore = defineStore('session', {
     opTimer2: null,
     signalOp: false,
 
-    alire: false, // Il y a des notifications à lire
-    dhvu: 0, // Dernière validation de lecture des alertes
-
     /* Exception insurmontable:exc.code ...
     - 9998 : compte clos
     - 9999 : application fermée par l'administrateur
@@ -83,7 +86,6 @@ export const useSessionStore = defineStore('session', {
 
     nomGrC (state) { if (!state.groupeId) return ''; return state.getCV(state.groupeId).nomC },
     
-    dlv: (state) => state.ok && state.compte ? state.compte.dlv : AMJ.max,
     dlvat: (state) => state.espace && state.espace.dlvat ? state.espace.dlvat : AMJ.max,
 
     estComptable (state) { return ID.estComptable(state.compteId) },
@@ -112,27 +114,14 @@ export const useSessionStore = defineStore('session', {
     ntfP (state) { return state.notifP && state.notifP.nr ? state.notifP : null },
     ntfC (state) { return state.compte && state.compte.notif && state.compte.notif.nr ? state.compte.notif : null },
 
-    estFige (state) { const n = state.ntfE; return n && (n.nr === 2) },
+    estFige: (state) => AL.has(state.flags, AL.FIGE),
     estClos (state) { const n = state.ntfE; return n && (n.nr === 3) },
-    flags (state) { return state.compte && state.compte.flags ? state.compte.flags : 0},
-    // Taux de ralentissement
-    RAL: (state) => {
-      const x = !state.compte ? 0 : AL.txRal(state.qv)
-      return x
-    },
-    hasAR (state) {
-      if (state.ntfP && state.ntfP.nr === 3) return true
-      if (state.ntfC && state.ntfC.nr === 3) return true
-      if (AL.has(state.flags, AL.ARSN)) return true
-      return false
-    },
-    hasLS (state) {
-      if (state.ntfP && state.ntfP.nr === 2) return true
-      if (state.ntfC && state.ntfC.nr === 2) return true
-      return false
-    },
-    hasNRED (state) { return AL.has(state.flags, AL.NRED) },
-    hasVRED (state) { return AL.has(state.flags, AL.VRED) },
+    
+    RAL: (state) => AL.txRal(state.qv), // Taux de ralentissement
+    hasAR: (state) => AL.has(state.flags, AL.ARSN) || AL.has(state.flags, AL.ARSN),
+    hasLS: (state) => AL.has(state.flags, AL.ARSN),
+    hasNRED: (state) => AL.has(state.flags, AL.NRED),
+    hasVRED: (state) => AL.has(state.flags, AL.VRED),
     nbjAt: (state) => AMJ.diff(state.dlvat, state.auj),
     nbjDlv: (state) => AMJ.diff(state.dlv, state.auj),
 
@@ -231,6 +220,23 @@ export const useSessionStore = defineStore('session', {
   },
 
   actions: {
+    setDhvu () {
+      this.dhvu = Date.now()
+    },
+    
+    setAdq (c) {
+      if (!c || c.v < this.acqv) return
+      if (c.nl) this.consocumul.nl += c.nl
+      if (c.ne) this.consocumul.ne += c.ne
+      if (c.vm) this.consocumul.vm += c.vm
+      if (c.vd) this.consocumul.vd += c.vd
+      this.flags = c.flags || 0
+      this.dlv = c.dlv || 0
+      this.dh = c.dh || 0
+      for(const f in c.qv) this.qv[f] = c.qv[f]
+      console.log('cjm ' + this.sessionId, c.qv.cjm)
+    },
+
     alVolCpt (v) {
       const qv = this.qv
       if (qv.qv === 0) return 2
@@ -304,28 +310,11 @@ export const useSessionStore = defineStore('session', {
     /* Le compte a disparu OU l'administrateur a fermé l'application ***********/
     setExcKO (exc) { this.excKO = exc },
 
-    setConso (c) {
-      if (c) {
-        if (c.nl) this.consocumul.nl += c.nl
-        if (c.ne) this.consocumul.ne += c.ne
-        if (c.vm) this.consocumul.vm += c.vm
-        if (c.vd) this.consocumul.vd += c.vd
-      }
-      if (c.qv.version > this.qv.version) {
-        for(const f in c.qv) this.qv[f] = c.qv[f]
-      }
-      console.log('cjm ' + this.sessionId, c.qv.cjm)
-    },
-
     setStatus (s) { this.status = s },
 
     setCompte (compte) { 
       if (compte) {
-        if (compte.dhvu && compte.dhvu !== this.dhvu) { this.dhvu = compte.dhvu; this.alire = false }
-        const ral = this.ral, quotn = this.quotn, quotv = this.quotv
         this.compte = compte
-        if (ral !== this.ral || quotn !== this.quotn || quotv !== this.quotv) this.alire = true
-        if (compte.notif && compte.notif.dh > this.dhvu) this.alire = true
       } else {
         this.compte = null
         this.compteId = ''

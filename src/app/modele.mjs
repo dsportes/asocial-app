@@ -472,9 +472,6 @@ _data_ :
 - `id` : ID du compte = ID de son avatar principal.
 - `v` : 1..N.
 - `hk` : `hXR`, hash du PBKFD d'un extrait de la phrase secrète (en base précédé de `ns`).
-- `dlv` : dernier jour de validité du compte.
-
-- `dharF dhopf dharC dhopC dharS dhopS`: dh des ACCES RESTREINT (F, C, S).
 
 - `vpe` : version du périmètre
 - `vci` : version de `comptis`
@@ -484,22 +481,6 @@ _data_ :
 - `cleKXC` : clé K cryptée par XC (PBKFD de la phrase secrète complète).
 - `cleEK` : pour le Comptable, clé de l'espace cryptée par sa clé K à la création de l'espace pour le Comptable. Permet au comptable de lire les reports créés sur le serveur et cryptés par cette clé E.
 - `privK` : clé privée RSA de son avatar principal cryptée par la clé K du compte.
-
-- `dhvuK` : date-heure de dernière vue des notifications par le titulaire du compte, cryptée par la clé K.
-- `qv` : `{ qc, qn, qv, nn, nc, ng, v, cjm }`. Recopiés de `compta.compteurs.qv` en fin d'opération quand l'un d'eux passe un seuil de 5% (sans seuil pour `qc, qn, qv`), à la montée ou à la descente.
-  - `qc`: limite de consommation
-  - `qn`: quota du nombre total de notes / chats / groupes.
-  - `qv`: quota du volume des fichiers.
-  - `nn`: nombre de notes existantes.
-  - `nc`: nombre de chats existants.
-  - `ng` : nombre de participations aux groupes existantes.
-  - `v`: volume effectif total des fichiers
-  - `cjm`: coût journalier moyen de calcul sur M et M-1.
-- `flags` : flags courants. Recopiés de `compta.compteurs.flags` en fin d'opération en cas de changement.
-  - `RAL` : ralentissement (excès de calcul / quota)
-  - `NRED` : documents en réduction (excès de nombre de documents / quota)
-  - `VRED` : volume de fichiers en réduction (excès de volume / quota)
-  - `ARSN` : accès restreint pour solde négatif
 
 - `lmut` : liste des `ids` des chats pour lesquels le compte (son avatar principal) a une demande de mutation (`mutI` != 0)
 
@@ -533,19 +514,7 @@ export class Compte extends GenDoc {
     const session = stores.session
     const clek = session.clek || await session.setIdClek(this.id, row.cleKXC)
     if (row.cleEK) this.cleE = await decrypter(clek, row.cleEK)
-    this.priv = await RegCc.setPriv(this.id, row.privK)
-    this.dhvu = row.dhvuK ? parseInt(await decrypterStr(clek, row.dhvuK)) : 0
-    
-    // this.qv = row.qv - get sur session
-
-    this.dlv = row.dlv
-    this.dharF = row.dharF || 0
-    this.dharC = row.dharC || 0
-    this.dharS = row.dharS || 0
-    this.dhopF = row.dhopF || 0
-    this.dhopC = row.dhopC || 0
-    this.dhopS = row.dhopS || 0
-    this.flags = row.flags || 0
+    this.priv = await RegCc.setPriv(this.id, row.privK)    
 
     if (this.estComptable) {
       this.mcode = new Map()
@@ -585,11 +554,6 @@ export class Compte extends GenDoc {
     }
 
     this.perimetre.sort((a,b) => { return a < b ? -1 : (a > b ? 1 : 0)})
-  
-  }
-
-  get qv () { 
-    return stores.session.qv
   }
 
   get lstAvatars () {
@@ -640,11 +604,20 @@ export class Compte extends GenDoc {
 _data_:
 - `id` : ID du compte = ID de son avatar principal.
 - `v` : 1..N.
-- `compteurs` sérialisation des quotas, volumes et coûts.
-- `tickets`: map des tickets / dons:
+- dhdc: dh de la dernière connexion
+- dharc: date-heure de la notification d'accès restreint par compte ou partition
+- dharp: date-heure de la notification d'accès restreint par partition
+- dlv: date limite de validité du compte
+- flags: lors de la dernière opération
+- adq: dernières valeurs transmise en adq
+  - dlv
+  - flags
+  - qv
+- serialCompteurs: sérialisation des quotas, volumes et coûts.
+- tickets: map des tickets / dons:
   - _clé_: `ids`
   - _valeur_: `{dg, dr, ma, mc, refa, refc}`
-- `dons` : liste des dons effectués / reçus `[{ dh, m, iddb }]`
+- dons: liste des dons effectués / reçus `[{ dh, m, iddb }]`
   - `dh`: date-heure du don
   - `m`: montant du don (positif ou négatif)
   - `iddb`: id du donateur / bénéficiaire (selon le signe de `m`).
@@ -652,6 +625,13 @@ _data_:
 export class Compta extends GenDoc {
 
   async compile (row) {
+    const qv0 = { qc: 0, qn: 0, qv: 0, nn: 0, nc: 0, ng: 0, v: 0, cjm: 0 }
+    this.dhdc = row.dhdc || 0
+    this.dharc = row.dharc || 0
+    this.dharp = row.dharp || 0
+    // this.dlv = row.dlv || 0
+    // this.flags = row.flags || 0
+    // this.adq = row.adq || { dlv: 0, flags: 0, qv: qv0 }
     this.compteurs = new Compteurs(row.serialCompteurs)
     this.tickets = row.tickets || {}
     this.dons = row.dons || []

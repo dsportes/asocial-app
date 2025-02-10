@@ -20,15 +20,21 @@ class Queue {
     /* Evénnements à traiter. [version en attente, version traitée] */
     this.vcpt = [0, 0]
     this.vesp = [0, 0]
+    this.vadq = [0, 0]
     this.avgrs = new Map() /* clé: id, valeur: [vn, vt] */
   }
 
   /* Enregistrement de l'arrivée d'un ou plusieurs row versions sur écoute / WS */
-  synchro (trLog) { // trlog : { vcpt, vesp, lag }
+  synchro (trLog) { // trlog : { vcpt, vesp, vadq, lag }
     let rev = false
 
     if (trLog.vesp && (trLog.vesp > this.vesp[0])) { 
       this.vesp[0] = trLog.vesp
+      rev = true
+    }
+
+    if (trLog.vadq && (trLog.vadq > this.vadq[0])) { 
+      this.vadq[0] = trLog.vadq
       rev = true
     }
 
@@ -54,7 +60,7 @@ class Queue {
     if (this.EnCours || !ok) return
 
     const ds = syncQueue.dataSync
-    let doCpt = false, doEsp = false
+    let doCpt = false, doEsp = false, doAdq = false
 
     if (this.vcpt[0] > this.vcpt[1]) {
       const vx = this.vcpt[0]
@@ -66,6 +72,12 @@ class Queue {
       const vx = this.vesp[0]
       this.vesp = [vx, vx] // retrait de la tâche en attente
       if (session.espace && vx > session.espace.v) doEsp = true
+    }
+
+    if (this.vadq[0] > this.vadq[1]) {
+      const vx = this.vadq[0]
+      this.vadq = [vx, vx] // retrait de la tâche en attente
+      if (vx > session.adq.v) doAdq = true
     }
 
     const lids = []
@@ -80,12 +92,14 @@ class Queue {
 
     console.log('Réveil: ', session.sessionId, doCpt, doEsp, lids.length)
 
-    if (doCpt || doEsp || lids.length) {
+    if (doCpt || doEsp || doAdq || lids.length) {
       // Lancement de l'opération de Sync
       this.EnCours = true
       setTimeout(async () => { 
         if (doEsp)
           await new GetEspace().run()
+        if (doAdq)
+          await new Adq().run()
         if (doCpt|| lids.length)
           await new SyncStd().run(lids)
         this.EnCours = false

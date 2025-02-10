@@ -456,7 +456,7 @@ export default {
   OP_DeleguePartition: 'Changement de statut délégué d\'un compte dans sa partition',
   OP_SetQuotas: 'Fixation des quotas d\'ùn compte dans sa partition',
   OP_ChangerPartition: 'Transfert d\'un compte O dans une autre partition',
-  OP_SetDhvuCompte: 'Mise à jour de la date-heure de "vu" des Alertes d\'un compte',
+  OP_Adq: 'Récupération des compteurs majeurs de comptabilité',
   OP_GetEspace: 'Obtention de l\'espace du compte',
   OP_SetEspaceQuotas : 'Déclaration des quotas globaux de l\'espace par l\'administrateur technique',
   OP_NouveauGroupe: 'Création d\'un nouveau groupe',

@@ -426,7 +426,6 @@ import stores from './stores/stores.mjs'
 import { set$t, hms, dkli, styp } from './app/util.mjs'
 import { deconnexion, SyncFull } from './app/synchro.mjs'
 import { CV } from './app/modele.mjs'
-import { SetDhvuCompte } from './app/operations4.mjs'
 
 import BtnCond from './components/BtnCond.vue'
 import IconMode from './components/IconMode.vue'
@@ -600,7 +599,7 @@ function fermerqm () {
   ui.fD()
   setTimeout(() => { ui.fD() }, 50)
 }
-async function jailu () { if (session.accesNetNf) await new SetDhvuCompte().run() }
+async function jailu () { session.setDhvu() }
 </script>
 
 <style lang="css">

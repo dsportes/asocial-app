@@ -114,7 +114,7 @@ const nbdoc = computed(() => qv.value.nn + qv.value.nc + qv.value.ng)
 const dlvatt = computed(() => AMJ.tDeAmjUtc(session.dlvat))
 const nbjat = computed(() => AMJ.diff(session.dlvatt, session.auj))
 
-const dlvt = computed(() => AMJ.tDeAmjUtc(session.compte.dlv))
+const dlvt = computed(() => AMJ.tDeAmjUtc(session.dlv))
 const oa = computed(() => session.estA ? 'A' : 'O')
 
 const p3 = (x) => x === 0 ? '0' : (x < 0.01 ? '<0,01' : x.toPrecision(3))

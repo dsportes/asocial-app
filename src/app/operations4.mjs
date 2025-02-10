@@ -61,6 +61,21 @@ export class PingDB extends Operation {
   }
 }
 
+/* OP_Adq: 'Récupération des compteurs majeurs de comptabilité' *********
+*/
+export class Adq extends Operation {
+  constructor() { super('Adq') }
+
+  async run() {
+    try {
+      await post(this, 'Adq', {})
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
 /** Get Sponsoring ****************************************************
 args.token: éléments d'authentification du compte.
 args.org : organisation
@@ -927,27 +942,6 @@ export class SetNotifC extends Operation {
       const session = stores.session
       const args = { token: session.authToken, idc, notif }
       await post(this, 'SetNotifC', args)
-      this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
-/* OP_SetDhvuCompte: 'Mise à jour de la date-heure de "vu" des notifications d\'un compte'
-args.token: éléments d'authentification du compte.
-args.dhvu : dhvu cryptée par la clé K
-Retour:
-*/
-export class SetDhvuCompte extends Operation {
-  constructor () { super('SetDhvuCompte') }
-
-  async run () {
-    try {
-      const session = stores.session
-      const dhvu = await crypter(session.clek, '' + (Date.now()))
-      const args = { token: session.authToken, dhvu }
-      await post(this, 'SetDhvuCompte', args)
       this.finOK()
     } catch (e) {
       await this.finKO(e)
