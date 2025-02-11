@@ -269,7 +269,11 @@ const maxdl = computed(() => {
   return Math.floor(m / 100)
 })
 
-const abot = (idx) => lstEsp.value[idx].abot
+const abot = (idx) => {
+  const y = []
+  lstEsp.value[idx].abot.forEach(x => { y.push(x.toFixed(2))})
+  return y
+}
 const limc = (idx) => {
   const dlvat = lstEsp.value[idx].dlvat
   return !dlvat || dlvat === AMJ.max ? '' : Math.floor(dlvat / 100)
