@@ -252,7 +252,7 @@ export default {
   EX8065: 'Maximum de notes du groupe dépassé (attribué par le compte hébergeur du groupe). Demande:{0} - Maximum:{1}',
   EX8066: 'Maximum de volume de fichiers pour les notes du groupe dépassé (attribué par le compte hébergeur du groupe). Demande:{0} - Maximum:{1}',
 
-  EX8101: 'L\'administrateur technique a restreint l\'application à la lecture seulement : {0}\nL\'opération ayant tenté une écriture, elle a échoué.',
+  EX8101: 'L\'administrateur technique a restreint l\'application à la lecture seulement. L\'opération "{0}" a tenté une écriture et a échoué.',
   EX8102: 'Le code de l\`organisation n\'est pas reconnu.\nCorriger la saisie.',
   EX8104: 'Cette phrase secrète de correspond pas celle du Comptable.',
   EX8105: 'Le compte du Comptable a déjà été créé.',

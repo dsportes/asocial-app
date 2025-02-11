@@ -34,8 +34,8 @@ export const useSessionStore = defineStore('session', {
     flags: 0,
     consocumul: { nl: 0, ne: 0, vm: 0, vd: 0}, // nombres de lectures, écritures, volume montant / descendant sur les POST
     qv: { version: 0, qc: 0, qn: 0, qv: 0, nn: 0, nc: 0, ng: 0, cjm: 0, v: 0 },
-    alire: false, // Il y a des notifications à lire
     dhvu: 0, // Dernière validation de lecture des alertes
+    aldh: new Array(AL.libs.length),
 
     lsk: '', // nom de la variable localStorage contenant le nom de la base
     nombase: '', // nom de la base locale
@@ -150,6 +150,12 @@ export const useSessionStore = defineStore('session', {
       return 0
     },
 
+    alire: (state) => {
+      for(let i = 0; i < state.aldh.length; i++) 
+        if (state.aldh[i] && (state.aldh[i] > state.dhvu)) return true
+      return false
+    },
+
     cEdit (state) {
       if (state.estAdmin) return ''
       if (state.avion) return 'condA'
@@ -226,13 +232,23 @@ export const useSessionStore = defineStore('session', {
     
     setAdq (c) {
       if (!c || c.v < this.acqv) return
+      this.acqv = c.v
+      this.dh = c.dh || 0
+
       if (c.nl) this.consocumul.nl += c.nl
       if (c.ne) this.consocumul.ne += c.ne
       if (c.vm) this.consocumul.vm += c.vm
       if (c.vd) this.consocumul.vd += c.vd
+
       this.flags = c.flags || 0
+      const afl = AL.fl2array(this.flags)
+      afl.forEach(i => { 
+        if (this.aldh[i] && !afl[i]) this.aldh[i] = 0
+        if (!this.aldh[i] && afl[i]) this.aldh[i] = this.dh
+      })
+
       this.dlv = c.dlv || 0
-      this.dh = c.dh || 0
+      
       for(const f in c.qv) this.qv[f] = c.qv[f]
       console.log('cjm ' + this.sessionId, c.qv.cjm)
     },
@@ -342,7 +358,6 @@ export const useSessionStore = defineStore('session', {
       this.espace = espace
       this.tnotifP = espace.tnotifP
       setTimeout(async () => { await this.setNotifP()}, 1)
-      if (espace.notifE && espace.notifE.dh > this.dhvu) this.alire = true
     },
 
     setPartition (partition) { 
@@ -416,7 +431,6 @@ export const useSessionStore = defineStore('session', {
       }
       this.mnotifP = mnotifP
       this.notifP = this.compte.idp ? mnotifP.get(this.compte.idp) : null
-      if (this.notifP && this.notifP.dh > this.dhvu) this.alire = true
     },
 
     setHT (s) { if (s && s.size) s.forEach(t => { if (!this.defHT.has(t)) this.hashtags.add(t) }) },
