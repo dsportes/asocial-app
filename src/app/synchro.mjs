@@ -71,13 +71,13 @@ class Queue {
     if (this.vesp[0] > this.vesp[1]) {
       const vx = this.vesp[0]
       this.vesp = [vx, vx] // retrait de la tâche en attente
-      if (session.espace && vx > session.espace.v) doEsp = true
+      if (!session.espace || (vx > session.espace.v)) doEsp = true
     }
 
     if (this.vadq[0] > this.vadq[1]) {
       const vx = this.vadq[0]
       this.vadq = [vx, vx] // retrait de la tâche en attente
-      if (vx > session.adq.v) doAdq = true
+      if (!session.adq || (vx > session.adq.v)) doAdq = true
     }
 
     const lids = []
@@ -756,6 +756,23 @@ export class GetEspace extends Operation {
       session.setEspace(s)
       idb.storeEspace(ret.rowEspace)
       return this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* OP_Adq: 'Récupération des compteurs majeurs de comptabilité' *********
+*/
+export class Adq extends Operation {
+  constructor() { super('Adq') }
+
+  async run() {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken }
+      await post(this, 'Adq', args)
+      this.finOK()
     } catch (e) {
       await this.finKO(e)
     }

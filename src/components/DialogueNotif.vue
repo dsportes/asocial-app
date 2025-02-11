@@ -23,9 +23,9 @@
     </q-card-section>
     <q-card-actions align="right">
       <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
-      <btn-cond color="warning" icon="delete" cond="cUrgence"
+      <btn-cond class="q-ml-sm" color="warning" icon="delete" cond="cUrgence"
         :label="$t('supprimer')" :disable="!ntf.texte" @ok="valider(true)"/>
-      <btn-cond class="q-ml-md" icon="check" cond="cUrgence"
+      <btn-cond class="q-ml-sm" icon="check" cond="cUrgence"
         :label="$t('valider')" :disable="!n.texte" @ok="valider(false)"/>
     </q-card-actions>
   </q-card>

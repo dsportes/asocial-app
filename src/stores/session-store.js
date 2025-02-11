@@ -242,15 +242,15 @@ export const useSessionStore = defineStore('session', {
 
       this.flags = c.flags || 0
       const afl = AL.fl2array(this.flags)
-      afl.forEach(i => { 
+      for(let i = 0; i < 5; i++) { 
         if (this.aldh[i] && !afl[i]) this.aldh[i] = 0
         if (!this.aldh[i] && afl[i]) this.aldh[i] = this.dh
-      })
+      }
 
       this.dlv = c.dlv || 0
       
       for(const f in c.qv) this.qv[f] = c.qv[f]
-      console.log('cjm ' + this.sessionId, c.qv.cjm)
+      console.log('cjm ' + this.sessionId, c.qv.cjm, this.dhvu)
     },
 
     alVolCpt (v) {
@@ -348,7 +348,7 @@ export const useSessionStore = defineStore('session', {
         this.compta = compta
     },
 
-    setEspace (espace, estAdmin) {
+    setEspace (espace) {
       const ntf = espace.notifE
       if (this.pow !== 1 && ntf && ntf.nr === 3) {
         this.setExcKO(new AppExc(A_SRV, 999, [ntf.texte, ntf.dh]))
@@ -356,6 +356,7 @@ export const useSessionStore = defineStore('session', {
         return
       }
       this.espace = espace
+      this.aldh[6] = ntf && ntf.nr === 2 ? ntf.dh : 0
       this.tnotifP = espace.tnotifP
       setTimeout(async () => { await this.setNotifP()}, 1)
     },
@@ -373,8 +374,6 @@ export const useSessionStore = defineStore('session', {
     setPeopleId (id) { this.peopleId = id },
 
     setGroupeId (id) { this.groupeId = id },
-
-    // setMembreId (id) { this.membreId = id },
 
     opCount () {
       const self = this
@@ -431,6 +430,15 @@ export const useSessionStore = defineStore('session', {
       }
       this.mnotifP = mnotifP
       this.notifP = this.compte.idp ? mnotifP.get(this.compte.idp) : null
+      
+      const np = this.notifP
+      const nc = this.compte.notif
+      const dh4 = np && np.nr === 2 ? np.dh : 0
+      if (nc && nc.nr === 2 && nc.dh > dh4) dh4 = nc.dh
+      const dh5 = np && np.nr === 3 ? np.dh : 0
+      if (nc && nc.nr === 3 && nc.dh > dh5) dh5 = nc.dh
+      this.aldh[4] = dh4
+      this.aldh[5] = dh5
     },
 
     setHT (s) { if (s && s.size) s.forEach(t => { if (!this.defHT.has(t)) this.hashtags.add(t) }) },

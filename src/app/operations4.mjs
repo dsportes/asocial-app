@@ -61,21 +61,6 @@ export class PingDB extends Operation {
   }
 }
 
-/* OP_Adq: 'Récupération des compteurs majeurs de comptabilité' *********
-*/
-export class Adq extends Operation {
-  constructor() { super('Adq') }
-
-  async run() {
-    try {
-      await post(this, 'Adq', {})
-      this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
 /** Get Sponsoring ****************************************************
 args.token: éléments d'authentification du compte.
 args.org : organisation
