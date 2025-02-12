@@ -1140,6 +1140,7 @@ export default {
   PNOmsg2: 'IMPOSSIBLE D\'ATTRIBUER L\'EXCLUSIVITE à un autre avatar: la note a un auteur exclusif D\'UN AUTRE COMPTE et votre compte N\'EST PAS animateur du groupe.',
   PNOmsg3: 'IMPOSSIBLE D\'ATTRIBUER L\'EXCLUSIVITE à un autre avatar: la note a un auteur exclusif D\'UN AUTRE COMPTE ANIMATEUR du groupe.',
   PNOsuppr: 'Confirmer la suppression de la note',
+  PNOerrtrf: 'Révision NON enregistrée (suite à incident technique).',
 
   // MenuFichier
   DFavion: 'ACCESSIBILTÉ en mode AVION...',

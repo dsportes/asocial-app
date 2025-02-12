@@ -83,12 +83,13 @@
         </q-step>
 
         <q-step :name="4" :title="$t('PNFnv15')" icon="check" :done="step > 4">
-          <div v-for="(item, idx) in etapes" :key="idx" class="row no-wrap items-start">
+          <div v-if="errTrf" class="q-ma-md titre-lg msg text-center text-bold">{{$t('PNOerrtrf')}}</div>
+          <div v-else v-for="(item, idx) in etapes" :key="idx" class="row no-wrap items-start">
             <q-icon class="col-1" size="sm" :name="ui.etf > idx + 1 ? 'done' : 'arrow_right'"/>
             <div class="col-11">{{item}}</div>
           </div>
           <q-stepper-navigation>
-            <btn-cond flat @ok="ui.fD" color="primary" label="Vu" class="q-ml-sm" />
+            <btn-cond flat @ok="ui.fD" color="primary" size="lg" label="Vu" class="q-ml-sm" />
           </q-stepper-navigation>
         </q-step>
       </q-stepper>
@@ -136,6 +137,8 @@ const volsupp = computed(() => {
   return v
 })
 const info = ref('')
+
+const errTrf = ref(false)
 
 const estGr = computed(() =>  ID.estGroupe(props.note.id) )
 const egr = computed(() =>  estGr.value ? gSt.egr(props.note.id) : null )
@@ -192,6 +195,7 @@ watch(ccFic, ([modecc, f], av) => {
 
 async function valider () {
   step.value = 4
+  errTrf.value = false
   ui.setEtf(0)
   const nf = await props.note.nouvFic(
     nfic.value, 
@@ -204,11 +208,8 @@ async function valider () {
   if (lstfic.value && lstfic.value.length) lstfic.value.forEach(f => {if (f.sel) sidf.push(f.idf)})
   ui.etf = 1
   const ida = props.aut <= '1' ? null : props.aut
-  const res = await new NouveauFichier().run(props.note, ida, nf, sidf)
-  if (!isAppExc(res))
-    ui.setFichiercree(nf.nom)
-  else {
-    step.value = 1
+  if (!await new NouveauFichier().run(props.note, ida, nf, sidf)) {
+    errTrf.value = true
   }
 }
 

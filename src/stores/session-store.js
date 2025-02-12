@@ -9,7 +9,7 @@ import { } from '../app/net.mjs'
 
 import { crypter, decrypter } from '../app/webcrypto.mjs'
 import { u8ToB64, $t } from '../app/util.mjs'
-import { AMJ, ID, AppExc, A_SRV, AL } from '../app/api.mjs'
+import { AMJ, ID, AppExc, A_SRV, AL, UNITEN, UNITEV } from '../app/api.mjs'
 import { RegCles, Notification as MaNotification } from '../app/modele.mjs'
 import { GetPartition, GetCompta, GetSynthese } from '../app/operations4.mjs'
 
@@ -232,6 +232,12 @@ export const useSessionStore = defineStore('session', {
     
     setAdq (c) {
       if (!c || c.v < this.acqv) return
+
+      function pc (n, q, u) {
+        if (n && !q) return 999
+        if (!n) return 0
+        return Math.round((n / (q * u)) *100)
+      }
       this.acqv = c.v
       this.dh = c.dh || 0
 
@@ -250,7 +256,10 @@ export const useSessionStore = defineStore('session', {
       this.dlv = c.dlv || 0
       
       for(const f in c.qv) this.qv[f] = c.qv[f]
-      console.log('cjm ' + this.sessionId, c.qv.cjm, this.dhvu)
+      this.qv.pcn = pc(this.qv.nn + this.qv.nc + this.qv.ng, this.qv.qn, UNITEN)
+      this.qv.pcv = pc(this.qv.v, this.qv.qv, UNITEV)
+      this.qv.pcn = pc(this.qv.cjm * 30, this.qv.qc, 1)
+      // console.log('cjm ' + this.sessionId, c.qv.cjm, this.dhvu)
     },
 
     alVolCpt (v) {

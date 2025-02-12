@@ -2313,10 +2313,13 @@ export class NouveauFichier extends Operation {
       if (session.synchro) faSt.putDataEnCache(fic.idf, buf)
       ui.setEtf(4)
       // await sleep(1000)
-      this.finOK()
-
+      return this.finOK(true)
     } catch (e) {
-      await this.finKO(e)
+      try {
+        await this.finKO(e)
+      } catch(e2) {
+        return false
+      }
     }
   }
 }

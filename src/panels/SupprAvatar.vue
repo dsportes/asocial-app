@@ -114,7 +114,7 @@
         <div class="col titre-md">{{$t('SAVquotas' + (session.estA ? '2' : '1'), [session.compte.idp])}}</div>        
       </div>
       <div class="q-ml-xl">
-        <quotas-vols :vols="session.compte.qv"/>
+        <quotas-vols :vols="session.qv"/>
       </div>
     </div>
 

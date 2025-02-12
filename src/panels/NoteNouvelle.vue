@@ -87,7 +87,7 @@ const nomp = computed(() => { if (!props.notep) return ''
 })
 const err = computed(() => {
   if (!props.estgr) {
-    if (session.compte.qv.pcn >= 100) return 1 // excédent nn + nc + ng / q1
+    if (session.qv.pcn >= 100) return 1 // excédent nn + nc + ng / q1
   } else {
     if (!props.groupe.imh) return 3 // pas d'hébergeur
     else if (props.groupe.nn >= (props.groupe.qn * UNITEN)) return 2 // nb max se notes du groupe dépassé

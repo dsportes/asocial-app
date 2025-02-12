@@ -386,7 +386,7 @@ function setCas () {
 
 async function gererheb () {
   setCas()
-  const cpt = session.compte.qv
+  const cpt = session.qv
   const qx = {
     n: gr.value.nn,
     v: gr.value.vf,
@@ -407,7 +407,7 @@ const onChg = (ap) => {
   aln.value = gr.value.nn > (q.value.qn * UNITEN)
   alv.value = gr.value.vf > (q.value.qv * UNITEV)
 
-  const cpt = session.compte.qv
+  const cpt = session.qv
   const cptn = cpt.nn + cpt.nc + cpt.ng
   // Non utilisé (libre)
   const nutn = Math.floor(((cpt.qn * UNITEN) - cptn))

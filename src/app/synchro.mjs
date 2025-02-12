@@ -77,7 +77,7 @@ class Queue {
     if (this.vadq[0] > this.vadq[1]) {
       const vx = this.vadq[0]
       this.vadq = [vx, vx] // retrait de la tâche en attente
-      if (!session.adq || (vx > session.adq.v)) doAdq = true
+      if (!session.adq || (vx > session.acqv)) doAdq = true
     }
 
     const lids = []

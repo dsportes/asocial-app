@@ -233,7 +233,7 @@ async function chat (elt) {
 }
 
 async function nvGr () {
-  const cpt = session.compte.qv // { qc, qn, qv, pcc, pcn, pcv, nbj }
+  const cpt = session.qv // { qc, qn, qv, pcc, pcn, pcv, nbj }
   quotas.value = { qn: 0, qv: 0, qc: 0, minn: 0, minv: 0, maxn: cpt.qn, maxv: cpt.qv, err: ''}
   nom.value = ''
   una.value = false
