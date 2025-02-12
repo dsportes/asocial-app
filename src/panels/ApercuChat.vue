@@ -371,7 +371,6 @@
     cfI.value = false
     cfA.value = false
     cfO.value = false
-    // console.log('ovMut', session.compte.del, chatX.value.mutE)
     this.ui.oD('mutation', idc)
   }
 

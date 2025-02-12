@@ -5,10 +5,13 @@
       <q-toolbar class="tbs">
         <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
         <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('OTtit')}}</q-toolbar-title>
+        <btn-cond flat class="q-mr-xs" size="sm" icon="bug_report"
+          :color="config.mondebug ? 'warning' : 'primary'"
+          @ok="toggleDebug"/>
         <bouton-help page="panel_outils"/>
       </q-toolbar>
       <q-toolbar inset class="tbp">
-        <q-tabs v-model="tab" inline-label outside-arrows mobile-arrows no-caps class="full-width">
+        <q-tabs v-model="tab" class="full-width" inline-label outside-arrows mobile-arrows no-caps>
           <q-tab name="cpt" class="titre-md text-bold" :label="$t('OTcpt')" @click="ouvCpt()"/>
           <q-tab name="ps" class="titre-md text-bold" :label="$t('OTps')" @click="tab='ps'"/>
           <q-tab name="tst" class="titre-md text-bold" :label="$t('OTtst')" @click="tab='tst'"/>
@@ -293,6 +296,9 @@ const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 const bases = ref()
 const nbbases = ref(0)
 
+const toggleDebug = () => { 
+  config.mondebug = !config.mondebug
+}
 const styd = (c) => {
   const x = 'background:' + config.theme[c][0]
   return x
@@ -349,7 +355,7 @@ async function delIDB (it) {
     localStorage.setItem(pfx + 'trigrammes', buf)
     console.log('RAZ db ' + it.nb + ' trig:' + it.trig)
   } catch (e) {
-    console.log(e.toString())
+    console.log('delIDB: ' + e.toString())
   }
 }
 
@@ -384,7 +390,7 @@ async function testErr () {
   try {
     await new ErreurFonc().run($t('OTer'), 1)
   } catch (e) {
-    console.log(e.toString())
+    console.log('testErr: ' + e.toString())
   }
 }
 

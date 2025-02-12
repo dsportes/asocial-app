@@ -219,7 +219,7 @@ async function crypterphrase (p) {
       raz()        
     }
   } catch (e) {
-    console.log(e)
+    console.log('crypterphrase: ' + e)
     raz()
   }
 }

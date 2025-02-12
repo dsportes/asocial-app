@@ -231,10 +231,11 @@ async function cfSuppr() {
 }
 
 async function blobde (b) {
+  const config = stores.config
   const buf = await props.note.getFichier(f.value)
   if (!buf || !buf.length) return null
   const blob = new Blob([buf], { type: f.value.type })
-  if (blob) console.log('blob',  f.value.type, buf.length)
+  if (blob) if (config.mondebug) console.log('blob',  f.value.type, buf.length)
   return b ? blob : URL.createObjectURL(blob)
 }
 
@@ -264,10 +265,11 @@ async function copierFic () {
 
 async function affFic () {
   if (!await checkLoc()) return
+  const config = stores.config
   const url = await blobde()
   if (url) {
     setTimeout(() => { window.open(url, '_blank') }, 100)
-    console.log(url)
+    if (config.mondebug) console.log(url)
   } else {
     await afficherDiag($t('PNFgetEr'))
   }

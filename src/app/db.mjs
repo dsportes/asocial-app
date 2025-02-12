@@ -47,12 +47,13 @@ export async function vuIDB (nb) {
 
 // Pour la gestion des bases locales : destruction d'une base sans l'avoir ouverte
 export async function deleteIDB (nb) {
+  const config = stores.config
   try {
     await Dexie.delete(nb)
     await sleep(100)
-    console.log('RAZ db')
+    if (config.mondebug) console.log('RAZ db')
   } catch (e) {
-    console.log(e.toString())
+    if (config.mondebug) console.log(e.toString())
   }
 }
 
@@ -69,8 +70,9 @@ class IDB {
 
   async open() {
     const nb = stores.session.nombase
+    const config = stores.config
     try {
-      console.log('Open: [' + nb + ']')
+      if (config.mondebug) console.log('Open: [' + nb + ']')
       idb.db = new Dexie(nb, { autoOpen: true })
       idb.db.version(1).stores(STORES)
       await idb.db.open()
@@ -87,12 +89,13 @@ class IDB {
   }
 
   async delete () {
+    const config = stores.config
     try {
       await Dexie.delete(stores.session.nombase)
       await sleep(100)
-      console.log('RAZ db')
+      if (config.mondebug) console.log('RAZ db')
     } catch (e) {
-      console.log(e.toString())
+      if (config.mondebug) console.log(e.toString())
     }
     idb.db = null
   }

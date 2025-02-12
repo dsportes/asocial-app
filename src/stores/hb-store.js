@@ -1,15 +1,12 @@
-import { ref, watch, computed } from 'vue'
+import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 
 import stores from './stores.mjs'
 import { pubsub } from '../app/net.mjs'
-// import { HBINSECONDS } from '../app/api.mjs'
 import { SyncFull } from '../app/synchro.mjs'
-// import { sleep } from '../app/util.mjs'
 
-const court = 3000
-const long = 10000
-const trace = false
+const normal = 120 * 1000
+const court = 10 * 1000
 
 export const useHbStore = defineStore('hb', () => {
   const session = stores.session
@@ -28,7 +25,9 @@ export const useHbStore = defineStore('hb', () => {
   // session NON prête
   // ou avec accès au serveur bloqué / avion
   // ou absence de droit à web push
-  const KO = computed(() => !session.ok || session.estAdmin  || !session.accesNetNf || !config.permission)
+  const KO = computed(() => 
+    !session.ok || session.estAdmin  || !session.accesNetNf || !config.permission
+  )
 
   /* Principe général
   - le HB tourne tout le temps, se relance en permanence depuis le boot
@@ -39,7 +38,7 @@ export const useHbStore = defineStore('hb', () => {
     // évite un éventuel doublon de démon
     if (iterTO.value) clearTimeout(iterTO.value)
     iterTO.value = setTimeout(doHB, 
-      boot ? 1 : (nbRetry.value ? nbRetry.value === 1 ? 1 : court : long))
+      boot ? 1 : (nbRetry.value > 0 ? court : normal))
   }
 
   async function doHB () {
@@ -52,7 +51,7 @@ export const useHbStore = defineStore('hb', () => {
         if (await pingHB()) {
           nbRetry.value = 0
           await new SyncFull().run()
-          if (trace) console.log('statusHB ', statusHB.value, ' nhb=' + nhb.value, ' retry=' + nbRetry.value, new Date(dhhb.value).toISOString())
+          if (config.mondebug) console.log('Après SyncFull - statusHB ', statusHB.value, ' nhb=' + nhb.value, ' retry=' + nbRetry.value, new Date(dhhb.value).toISOString())
         } else nbRetry.value++
         nextHB()
         return
@@ -74,7 +73,7 @@ export const useHbStore = defineStore('hb', () => {
     // cas "erreur" : perte de hb, pas en séquence
     if (statusHB.value) nbRetry.value = 0
     else nbRetry.value++
-    if (trace) console.log('heartbeat ', statusHB.value, ' nhb=' + nhb.value, ' retry=' + nbRetry.value, new Date(dhhb.value).toTimeString())
+    if (config.mondebug) console.log('heartbeat ', statusHB.value, ' nhb=' + nhb.value, ' retry=' + nbRetry.value, new Date(dhhb.value).toTimeString())
     nextHB()
   }
 
@@ -86,7 +85,7 @@ export const useHbStore = defineStore('hb', () => {
       nbRetry.value++
       nextHB()
     }
-    if (trace) console.log('retOP ' + arg.op, statusHB.value, ' nhb=' + nhb.value, ' retry=' + nbRetry.value, new Date(dhhb.value).toTimeString())
+    if (config.mondebug) console.log('retOP ' + arg.op, statusHB.value, ' nhb=' + nhb.value, ' retry=' + nbRetry.value, new Date(dhhb.value).toTimeString())
   }
 
   // Connexion
@@ -102,7 +101,7 @@ export const useHbStore = defineStore('hb', () => {
     statusHB.value = false
     sessionId.value = null
     nhb.value = 0
-    if (trace) console.log('stopHB ', statusHB.value, ' nhb=' + nhb.value, ' retry=' + nbRetry.value, new Date(Date.now()).toTimeString())
+    if (config.mondebug) console.log('stopHB ', statusHB.value, ' nhb=' + nhb.value, ' retry=' + nbRetry.value, new Date(Date.now()).toTimeString())
   }
 
   async function pingHB () {
@@ -114,59 +113,10 @@ export const useHbStore = defineStore('hb', () => {
       statusHB.value = false
       nbRetry.value++
     }
-    if (trace) console.log('pingHB ', statusHB.value, ' nhb=' + nhb.value, ' retry=' + nbRetry.value, new Date(Date.now()).toTimeString())
+    if (config.mondebug) console.log('pingHB ', statusHB.value, ' nhb=' + nhb.value, ' retry=' + nbRetry.value, new Date(Date.now()).toTimeString())
     nextHB()
     return statusHB.value
   }
-
-  /*
-  function reset () {
-    nhb.value = 0
-    dhhb.value = 0
-    statusHB.value = false
-  }
-
-  async function startHB () {
-    if (session.avion) return
-    if (pubsubTO.value) clearTimeout(pubsubTO.value)
-    if (config.permission) {
-      nhb.value++
-      const ret = await pubsub('heartbeat', { org: session.org, sid: session.sessionId, nhb: nhb.value })
-      if (ret === nhb.value - 1) {
-        statusHB.value = true
-        pubsubTO.value = setTimeout(async () => {
-          await startHB()
-        }, HBINSECONDS * 1000)
-      } else {
-        statusHB.value = false
-        nhb.value = 0
-      }
-    }
-  }
-
-  async function retry () {
-    nbRetry.value = 1
-    while(!statusHB.value && session.ok && !session.avion) {
-      if (await pingHB()) {
-        await new SyncFull().run()
-        setTimeout(async () => {
-          await startHB()
-        }, 500)
-        break
-      }
-      await sleep(2000)
-      nbRetry.value++
-    }
-    nbRetry.value = 0
-  }
-
-  watch(statusHB, (ap) => {
-    if (ap || !session.ok || session.avion) { nbRetry.value = 0; return }
-    setTimeout(async () => {
-      await retry()
-    }, 5)
-  })
-  */
 
   return { nhb, statusHB, nbRetry, connex, retOP, nextHB, stopHB, pingHB }
 })

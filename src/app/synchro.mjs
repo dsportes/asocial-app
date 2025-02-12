@@ -56,6 +56,7 @@ class Queue {
 
   reveil () {
     const session = stores.session
+    const config = stores.config
     const ok = session.ok
     if (this.EnCours || !ok) return
 
@@ -90,7 +91,7 @@ class Queue {
     }
     this.avgrs = nvm // liste d'attente mise à jour
 
-    console.log('Réveil: ', session.sessionId, doCpt, doEsp, lids.length)
+    if (config.mondebug) console.log('Réveil: ', session.sessionId, doCpt, doEsp, lids.length)
 
     if (doCpt || doEsp || doAdq || lids.length) {
       // Lancement de l'opération de Sync
@@ -462,20 +463,19 @@ export class OperationS extends Operation {
     const session = stores.session
     const config = stores.config
     let ds = ds1
-    let fini = false
-    let nbIter = 0
 
     /* A chaque itération il y a un commit IDB / store résultant (y compris le DataSync)*/
-    while (!fini) {
+    for (let nbIter = 0; nbIter < 50; nbIter++) {
       const hb = stores.hb
       const args =  { 
         token: session.authToken, 
         dataSync: ds ? ds.serial() : null, 
-        nhb: hb.nhb
+        nhb: hb.nhb,
+        nbIter
       }
       if ((!ds1 || full) && nbIter === 0) // Cas de login / relogin
         args.subJSON = config.subJSON
-      if (!nbIter) {
+      if (nbIter === 0) {
         if (full) args.full = true
         else args.lids = lids || []
       }
@@ -486,7 +486,7 @@ export class OperationS extends Operation {
       const buf = new IDBbuffer()
       await this.setCeCiIn(nvds, ret, sb, buf)
 
-      if (!ds1 && session.synchro && !nbIter) { 
+      if (!ds1 && session.synchro && nbIter === 0) { 
         // Premier retour de Sync a rempli: session. compteId, clek, nomBase
         await idb.open()
         const blOK = await idb.checkAge()
@@ -577,7 +577,7 @@ export class OperationS extends Operation {
         }
       }
 
-      if (!ds1 && !nbIter) { // Premier tour de la connexion
+      if (!ds1 && nbIter === 0) { // Premier tour de la connexion
         const ret = await post(this, 'GetEspace', { token: session.authToken })
         const x = await compile(ret.rowEspace)
         sb.setEs(x)
@@ -589,8 +589,7 @@ export class OperationS extends Operation {
       sb.store(buf)
       await buf.commit(ds)
       syncQueue.dataSync = ds
-      fini = ds.estAJour
-      nbIter++
+      if (ds.estAJour) break
     }
   }
 }

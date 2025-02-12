@@ -36,7 +36,7 @@ async function msgPush (event) {
       if (obj.sessionId === stores.session.sessionId)
         syncQueue.synchro(obj.trLog)
     } catch (e) {
-      console.log(e.toString())
+      console.log('msgPush: ' + e.toString())
     }
   }
 }
@@ -70,7 +70,7 @@ export default boot(async ({ app /* Vue */ }) => {
   
   cfg.search = window.location.search.replace('?', '')
 
-  // console.log('Mode silencieux: ' + (cfg['silence'] ? 'oui' : 'non'))
+  console.log('Mode silencieux: ' + (cfg['silence'] ? 'oui' : 'non'))
 
   cfg.locales = []
   cfg.localeOptions.forEach(t => {cfg.locales.push(t.value)})

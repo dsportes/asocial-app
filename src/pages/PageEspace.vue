@@ -322,6 +322,7 @@ const cols = [
 ]
 
 async function exportCSV () {
+  const config = stores.config
   const tit = ['id', 'code', 'nbc', 'nbd']
   cols.forEach(c => { tit.push(c)})
   const lignes = [tit.join(sep), '']
@@ -369,7 +370,7 @@ async function exportCSV () {
   const csv = lignes.join('\n')
   const buf = encoder.encode(csv)
   const blob = new Blob([buf], { type: 'text/csv' })
-  if (blob) console.log('blob', 'text/csv', buf.length)
+  if (blob) if (config.mondebug) console.log('blob', 'text/csv', buf.length)
   const nf = moisexpc.value + '.csv'
   saveAs(blob, '' + nf )
   await afficherDiag($t('PEfdisp', [nf]))

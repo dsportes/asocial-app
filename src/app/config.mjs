@@ -3,6 +3,7 @@
 export const config = {
   // CONFIGURATION TECHNIQUE : à adapter SI NECESSAIRE à chaque déploiement
   BUILD: '24-11-21 14:00',
+  mondebug: true,
 
   /* Configuration linguistiques - Commenter les langues non souhaitées dans ce déploiement */  
   locale: 'fr-FR',

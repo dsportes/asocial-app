@@ -85,7 +85,6 @@ export const useUiStore = defineStore('ui', {
       } else {
         if (et !== this.etroite) {
           this.etroite = et
-          // console.log('etroite', et)
           if (!this.aUnFiltre) 
             this.setPFiltre(false)
           else 

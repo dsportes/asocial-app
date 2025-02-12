@@ -527,7 +527,6 @@ function clairFonce () {
 
 ui.setScreenWH($q.screen.width, $q.screen.height)
 watchEffect(() => {
-  // console.log($q.screen.width, $q.screen.height)
   ui.setScreenWH($q.screen.width, $q.screen.height)
 })
 
@@ -555,7 +554,7 @@ const titrePage = computed(() => {
 
 async function demperm () {
   const p = await Notification.requestPermission()
-  console.log('Notification: ', p)
+  if (config.mondebug) console.log('Notification: ', p)
   await new SyncFull().run()
   ui.fD()
 }

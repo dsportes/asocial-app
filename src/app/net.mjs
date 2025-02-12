@@ -73,18 +73,18 @@ export async function pubsub (fonction, args) {
     try {
       return JSON.parse(r.data)
     } catch (e) {
-      console.log('PUBSUB ' + fonction + ' exc: ', e.toString())
+      if (config.mondebug) console.log('PUBSUB ' + fonction + ' exc: ', e.toString())
       return 0  
     }  
   } catch (e) {
     const status = (e.response && e.response.status) || 0
     if (status === 400 || status === 403) {
-      console.log('PUBSUB ' + fonction + ' exc: ', e.response.data)
+      if (config.mondebug) console.log('PUBSUB ' + fonction + ' exc: ', e.response.data)
     } else { 
       // inattendue, pas mise en forme (500 et autres)
       const code = !status ? 100 : (status >= 500 && status <= 599 ? 101 : 0)
       const ex = new AppExc(E_SRV, code, [status, (u || '?'), e.message])
-      console.log('PUBSUB ' + fonction + ' exc: ', e.toString())
+      if (config.mondebug) console.log('PUBSUB ' + fonction + ' exc: ', e.toString())
     }
     return 0
   }
@@ -138,6 +138,7 @@ export async function post (op, fonction, args) {
 }
 
 function procEx (e, op, u) {
+  const config = stores.config
   // Exceptions jetées par le this.BRK au-dessus)
   if (isAppExc(e) && e.majeur * 1000 === E_BRK) throw e
   if (axios.isCancel(e)) throw new AppExc(E_BRK)
@@ -160,7 +161,7 @@ function procEx (e, op, u) {
     throw ex
   } else { 
     // inattendue, pas mise en forme (500 et autres)
-    console.log('URL de POST: ', u || '?')
+    if (config.mondebug) console.log('URL de POST: ', u || '?')
     const code = !status ? 100 : (status >= 500 && status <= 599 ? 101 : 0)
     throw new AppExc(E_SRV, code, [status, (u || '?'), e.message])
   }

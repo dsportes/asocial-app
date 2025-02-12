@@ -259,7 +259,6 @@ export const useSessionStore = defineStore('session', {
       this.qv.pcn = pc(this.qv.nn + this.qv.nc + this.qv.ng, this.qv.qn, UNITEN)
       this.qv.pcv = pc(this.qv.v, this.qv.qv, UNITEV)
       this.qv.pcn = pc(this.qv.cjm * 30, this.qv.qc, 1)
-      // console.log('cjm ' + this.sessionId, c.qv.cjm, this.dhvu)
     },
 
     alVolCpt (v) {
@@ -378,7 +377,7 @@ export const useSessionStore = defineStore('session', {
 
     setFsSync (fsSync) { this.fsSync = fsSync },
 
-    setAvatarId (id) { this.avatarId = id ; console.log(id)},
+    setAvatarId (id) { this.avatarId = id },
 
     setPeopleId (id) { this.peopleId = id },
 

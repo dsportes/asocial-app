@@ -247,7 +247,6 @@ async function ctc () {
 }
 
 async function okCreation () {
-  // console.log(nom.value, quotas.value.qn, quotas.value.qv, una.value)
   await new NouveauGroupe().run(nom.value, una.value, quotas.value)
   ui.fD()
 }

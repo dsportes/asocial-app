@@ -20,9 +20,9 @@ export const useFicavStore = defineStore('ficav', {
   getters: {
     session: (state) => stores.session,
     nSt: (state) => stores.note,
-    cfg: (state => stores.config),
+    config: (state) => stores.config,
 
-    delaisec: (state) => { return state.cfg.dldemonsec },
+    delaisec: (state) => { return state.config.dldemonsec },
 
     mapDeNote: (state) => { return (ids) => {
         const m = new Map()
@@ -390,7 +390,7 @@ export const useFicavStore = defineStore('ficav', {
     },
 
     startDemon (sessionId) {
-      const DEBUG = false
+      const DEBUG = this.config.mondebug
       if (!this.session.accesIdb || (sessionId !== this.session.sessionId)) return
       setTimeout(async () => {
         if (DEBUG) console.log('Start démon ' + dhcool(Date.now(), true))

@@ -146,7 +146,6 @@ onMounted(() => {
 
 function onChange (input) {
   ligne1.value = input
-  // console.log(ligne1.value)
 }
 
 function handleShift () {

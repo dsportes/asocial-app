@@ -85,8 +85,6 @@ async function ok () {
   await afficherDiag(diag.value)
 }
 
-// console.log(props.label, props.color)
-
 </script>
 
 <style lang="sass" scoped>

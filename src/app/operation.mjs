@@ -33,7 +33,6 @@ export class Operation {
   }
 
   get label () { 
-    // console.log('label', 'OP_' + this.nom)
     return $t('OP_' + this.nom) 
   }
 

@@ -639,10 +639,11 @@ const url = (u) => {
 }
 
 async function dlnote (n, avecf) {
+  const config = stores.config
   dlvx.value = 0
   const ir = lstrm.value.get(n.r)
   const r = lstr.value[ir]
-  if (ralentissement) console.log(n.p)
+  if (ralentissement) if (config.mondebug) console.log(n.p)
   r.nbnd++
   dlnbn.value++
   const buf = enc.encode(n.n.texte)
@@ -655,7 +656,7 @@ async function dlnote (n, avecf) {
     for (const [, f] of n.n.mfa) {
       if (dlst.value === 0) return
       const nf = n.n.nomFichier(f)
-      if (ralentissement) console.log(nf)
+      if (ralentissement) if (config.mondebug) console.log(nf)
       const buf = await n.n.getFichier(f)
       if (buf) {
         const u = url(n.p + '/' + nf)
