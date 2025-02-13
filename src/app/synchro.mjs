@@ -26,6 +26,8 @@ class Queue {
 
   /* Enregistrement de l'arrivée d'un ou plusieurs row versions sur écoute / WS */
   synchro (trLog) { // trlog : { vcpt, vesp, vadq, lag }
+    const session = stores.session
+    if (session.estAdmin) return
     let rev = false
 
     if (trLog.vesp && (trLog.vesp > this.vesp[0])) { 
