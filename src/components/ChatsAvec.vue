@@ -50,7 +50,7 @@ const props = defineProps({
 })
 
 const estAvc = computed(() => session.compte.mav.has(props.idE))
-const chDuC = computed(() => aSt.chatsDuCompte(props.idE))
+const chDuC = computed(() => aSt.chatsDuCompte(props.idE, props.del))
 
 const chat = ref(null)
 

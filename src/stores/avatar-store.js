@@ -64,13 +64,13 @@ export const useAvatarStore = defineStore('avatar', {
 
     // chats des avatars du compte avec idE
     // si n'en a pas, e.cr est true si on peut en créer un (idE est people ou comptable)
-    chatsDuCompte: (state) => { return (idE) => {
+    chatsDuCompte: (state) => { return (idE, del) => {
         const l = []
         const lav = state.session.compte.lstAvatars
         for(let i = 0; i < lav.length; i++) {
           const e = { ...lav[i] } // { id, cv, nom }
           e.ch = state.chatDeAvec(e.id, idE)
-          if (!e.ch && (state.pSt.estPeople(idE) || ID.estComptable(idE))) e.cr = true
+          if (!e.ch && (del || state.pSt.estPeople(idE) || ID.estComptable(idE))) e.cr = true
           if (e.ch || e.cr) l.push(e)
         }
         return l
