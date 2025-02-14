@@ -72,14 +72,14 @@
   <div v-if="!session.estA">
     <q-separator color="orange" class="q-mt-md"/>
 
-    <ligne-alerte :niv="nrx(session.espace.notifP)" code="PALpart" hlp="alerte_part">
+    <ligne-alerte :niv="nrx(session.ntfP)" code="PALpart" hlp="alerte_part">
       <apercu-notif :idx="0" :type="1" simple
         :cible="session.compte.idp" :notif="session.notifP"/>
     </ligne-alerte>
 
     <q-separator color="orange" class="q-mt-md"/>
 
-    <ligne-alerte :niv="nrx(session.espace.notifC)" code="PALcpt" hlp="alerte_cpt">
+    <ligne-alerte :niv="nrx(session.ntfC)" code="PALcpt" hlp="alerte_cpt">
       <apercu-notif :idx="0" :type="2" simple
         :cible="session.compteId" :notif="session.compte.notif"/>
     </ligne-alerte>
@@ -122,7 +122,7 @@ const pc = (x, y) => y === 0 ? 999 : (x * 100) / y
 const pced = (x, y) => { const q = pc(x, y)
   return q >= 999 ? '?' : (q === 0 ? '0%' : (q < 1 ? '<1%' : Math.round(q) + '%'))
 }
-const nrx = (ntf) => !ntf ? 0 : (ntf.nr === 3 ? 2 : (ntf.nr === 0 ? 0 : 1))
+const nrx = (ntf) => !ntf || !ntf.nr ? 0 : ntf.nr - 1
 
 const secRal = computed(() => Math.round((1 + (AL.txRal(c.value.qv) / 10))))
 

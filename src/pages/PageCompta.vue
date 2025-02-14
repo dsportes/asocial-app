@@ -22,7 +22,6 @@
     <q-card v-for="(e, idx) in lurg" :key="e.id">
       <div :class="'q-my-sm q-px-sm ' + dkli(idx)">
         <apercu-genx :id="e.id" :del="e.del" :idx="idx" urgence/>
-        <chats-avec urgence :id-e="e.id" :del="e.del"/>
       </div>
     </q-card>
   </div>
@@ -42,7 +41,6 @@ import PanelCredits from '../components/PanelCredits.vue'
 import PanelAlertes from '../components/PanelAlertes.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BtnCond from '../components/BtnCond.vue'
-import ChatsAvec from '../components/ChatsAvec.vue'
 import { $t, dkli, afficher8000 } from '../app/util.mjs'
 import { ID, UNITEN, UNITEV, AMJ } from '../app/api.mjs'
 import { RafraichirCvsAv, GetPartition } from '../app/operations4.mjs'

@@ -128,7 +128,7 @@ const lstDons = computed(() => {
   return t
 })
 
-const maxdl = computed(() => Math.floor(AMJ.djMoisN(AMJ.amjUtc(), -1) / 100))
+const maxdl = computed(() => Math.floor(AMJ.djMoisN(AMJ.amjUtc(), 0) / 100))
 const mindl = computed(() => Math.floor(session.espace.dcreation / 100))
 
 async function dlstat (mr) {

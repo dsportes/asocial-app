@@ -118,8 +118,8 @@ export const useSessionStore = defineStore('session', {
     estClos (state) { const n = state.ntfE; return n && (n.nr === 3) },
     
     RAL: (state) => AL.txRal(state.qv), // Taux de ralentissement
-    hasAR: (state) => AL.has(state.flags, AL.ARSN) || AL.has(state.flags, AL.ARSN),
-    hasLS: (state) => AL.has(state.flags, AL.ARSN),
+    hasAR: (state) => AL.has(state.flags, AL.ARSN) || AL.has(state.flags, AL.ARNTF),
+    hasLS: (state) => AL.has(state.flags, AL.LSNTF),
     hasNRED: (state) => AL.has(state.flags, AL.NRED),
     hasVRED: (state) => AL.has(state.flags, AL.VRED),
     nbjAt: (state) => AMJ.diff(state.dlvat, state.auj),
@@ -441,9 +441,9 @@ export const useSessionStore = defineStore('session', {
       
       const np = this.notifP
       const nc = this.compte.notif
-      const dh4 = np && np.nr === 2 ? np.dh : 0
+      let dh4 = np && np.nr === 2 ? np.dh : 0
       if (nc && nc.nr === 2 && nc.dh > dh4) dh4 = nc.dh
-      const dh5 = np && np.nr === 3 ? np.dh : 0
+      let dh5 = np && np.nr === 3 ? np.dh : 0
       if (nc && nc.nr === 3 && nc.dh > dh5) dh5 = nc.dh
       this.aldh[4] = dh4
       this.aldh[5] = dh5

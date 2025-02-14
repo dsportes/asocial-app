@@ -17,7 +17,7 @@
   </q-card-section>
   <q-card-actions v-if="step===2" align="right">
     <btn-cond flat :label="$t('renoncer')" icon="close" @ok="ui.fD"/>
-    <btn-cond color="warning" icon="check" @ok="creer" 
+    <btn-cond color="warning" icon="check" @ok="creer" class="q-ml-sm"
       :label="$t('valider')"
       :disable="!txt.length"
       :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />

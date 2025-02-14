@@ -19,10 +19,8 @@
         </div>
         <div v-else>
           <div class="col-auto row q-gutter-xs" v-if="!estComptable">
-            <btn-cond v-if="estAvc" icon="badge" round stop @ok="edcv"/>
-            <btn-cond v-if="!estAvc && estPeople" icon="badge" round stop @ok="ovcv"/>
-            <!--btn-cond v-if="estPeople && !nodetP && !detPeople" round icon="zoom_in" 
-              stop @ok="ouvrirdetails"/-->
+            <btn-cond v-if="estAvc && !session.cEdit" icon="badge" round stop @ok="edcv"/>
+            <btn-cond v-if="session.cEdit || (!estAvc && estPeople)" icon="badge" round stop @ok="ovcv"/>
           </div>
         </div>
       </div>
