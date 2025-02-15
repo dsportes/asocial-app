@@ -180,11 +180,13 @@
         <div class="row justify-center q-my-sm">
           <btn-cond class="titre-md" @ok="saisirPS" :label="$t('OTps')"/>
         </div>
-        <div class='t1 q-mt-slg'>{{$t('OTh1')}}</div>
+        <div class='t1 q-mt-md'>{{$t('OTph')}}</div>
+        <div class='t2'>{{ phrase ? phrase : '?'}}</div>
+        <div class='t1 q-mt-md'>{{$t('OTh1')}}</div>
         <div class='t2'>{{ ps ? ps.hps1 : '?'}}</div>
-        <div class='t1 q-mt-sm'>{{$t('OTcx')}}</div>
+        <div class='t1 q-mt-md'>{{$t('OTcx')}}</div>
         <div class='t2'>{{ ps ? ps.shax64 : '?' }}</div>
-        <div class='t1 q-mt-sm'>{{$t('OThcx')}}</div>
+        <div class='t1 q-mt-md'>{{$t('OThcx')}}</div>
         <div class='t2'>{{ ps ? ps.hpsc : '?' }}</div>
       </q-card-section>
 
@@ -279,6 +281,7 @@ const testCompteurs = false
 
 const tab = ref('cpt')
 const ps = ref(null)
+const phrase = ref('')
 const htx = ref(new Set())
 const resultat1a = ref('-')
 const resultat2a = ref('-')
@@ -378,7 +381,10 @@ function ouvCpt () {
 }
 
 function okps (psx) {
-  if (psx) psx.phrase = null
+  if (psx) {
+    phrase.value = psx.phrase
+    psx.phrase = null
+  }
   ps.value = psx
 }
 
@@ -485,7 +491,7 @@ async function getVU (it) {
 
 .t1
   font-style: italic
-  color: var(--q-primary)
 .t2
   font-family: 'Ubuntu Mono'
+  font-weight: bold
 </style>

@@ -573,6 +573,7 @@ export default {
   OTtst: 'Tests d\'accès',
   OTtheme: 'Thème',
   OTps: 'Tester une phrase secrète',
+  OTph: 'Phrase secrète',
   OTh1: 'Hash du PBKFD de la phrase réduite',
   OTcx: 'SHA256 du PBKFD de la phrase complète',
   OThcx: 'Hash du PBKFD de la phrase complète',
@@ -709,6 +710,9 @@ export default {
   PSl1: 'les sanglots longs de ...',
   PSctc1: 'Phrase de contact',
   PSctc3: 'Le code de l\'organisation est requis',
+  PScourte: 'Phrase secrète trop courte: {0} signe(s), minimum requis {1}.',
+  PSnopin: 'Code PIN inconnu',
+  PSkopin: 'Code PIN indéchiffrable',
 
   // App.vue
   MLAntfg: 'Le navigateur "accepte" les notifications pour l\'application.',

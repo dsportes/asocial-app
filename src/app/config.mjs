@@ -43,12 +43,6 @@ export const config = {
     afaire: { 'fr-FR': 'afaire', 'en-EN': 'todo'}
   },
 
-  // EN TEST pour éviter de frapper les "phrases secrètes" de test. COMMENTER en production
-  phrases: [
-    'leszsanglotszLONGSzgarezauzGORILLEz',
-    'auzvillagezSANSzjaizmauvaisezREPUTATIONz'
-  ],
-
   /* Valeurs à ne pas changer, sauf rares exception */
   portupload: 33666, // Ne pas changer en général
   dldemonsec: 10, // ficav-store : délai du démon

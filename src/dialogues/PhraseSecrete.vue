@@ -40,18 +40,11 @@
           :disable="ligne1.length === 0" @ok="forceInput('')"/>
       </div>
 
-      <div class="row justify-between items-center q-my-md">
-        <div v-if="config.phrases" class="row">
-          <span class="text-primary cursor-pointer q-px-xs" v-for="(p, idx) in config.phrases" 
-            :key="idx" @click="selph(p)">{{idx}}</span>
-        </div>
-        <div v-else></div>
-        <div>
-          <btn-cond class="q-mr-sm" flat icon="undo" :label="labelRenoncer" @ok="ko"/>
-          <btn-cond color="warning" :label="labelVal()" :icon="iconValider"
-            :disable="!ligne1 || ligne1.length < lgph || !orgL"
-            @ok="ok" />
-        </div>
+      <div class="row justify-end items-center q-gutter-md">
+        <btn-cond flat icon="undo" :label="labelRenoncer" @ok="ko"/>
+        <btn-cond color="warning" :label="labelVal()" :icon="iconValider"
+          :disable="!ligne1 || ligne1.length < 6 || !orgL"
+          @ok="ok2" />
       </div>
 
       <div v-if="login && session.synchro" class="fs-md column justify-center q-px-sm">
@@ -77,7 +70,10 @@ import stores from '../stores/stores.mjs'
 
 import { Phrase } from '../app/modele.mjs'
 import BtnCond from '../components/BtnCond.vue'
-import { $t, styp, afficherDiag } from '../app/util.mjs'
+import { $t, styp, afficherDiag, u8ToB64, b64ToU8 } from '../app/util.mjs'
+import { pbkfd, crypter, decrypterStr } from '../app/webcrypto.mjs'
+
+const encoder = new TextEncoder()
 
 const lgph = 24
 const layout = {
@@ -192,6 +188,7 @@ watch(vkb, (ap, av) => {
 
 const secligne1 = computed(() => isPwd.value ? ''.padStart(ligne1.value.length, '*') : ligne1.value)
 
+/*
 watch(ligne1, (ap) => {
   if (ap && ap.length > 4 && ap.endsWith('*')) {
     const c = ap.substring(0, ap.length - 1)
@@ -200,6 +197,7 @@ watch(ligne1, (ap) => {
     forceInput(s)
   }
 })
+*/
 
 watch(razdb, async (ap) => {
   if (ap === true) await afficherDiag($t('LOGrazbl'))
@@ -215,7 +213,8 @@ function labelVal () {
   return phase.value < 2 ? $t('ok') : $t((labelValider.value || 'PSval'))
 }
 
-function ok2 () {
+async function ok2 () {
+  await doPin()
   if (ligne1.value.length >= lgph) ok()
 }
 
@@ -263,6 +262,43 @@ function raz () {
   ligne1.value = ''
   vligne1.value = ''
   phase.value = 0
+}
+
+// traite la ligne d'entrée comme un PIN
+const doPin = async () => {
+  const lg = ligne1.value
+  if (!lg.startsWith('&')) return
+  const i = lg.indexOf('&', 1)
+  if (i < 4) return
+  const pin = lg.substring(1, i)
+  const ph = lg.substring(i + 1)
+  if (ph.length > 0 && ph.length < lgph) {
+    await afficherDiag($t('PScourte', [ph.length, lgph]))
+    return
+  }
+
+  const lstk = '&&' + u8ToB64(await pbkfd(encoder.encode(pin + pin + pin)), true)
+  const cle = await pbkfd(encoder.encode(pin + pin + pin + pin + pin))
+  if (ph.length === 0) {
+    const x = localStorage.getItem(lstk)
+    if (!x) {
+      await afficherDiag($t('PSnopin', [pin]))
+      return
+    }
+    let v
+    try {
+      v = await decrypterStr(cle, b64ToU8(x))
+    } catch (e) {}
+    if (!v) {
+      await afficherDiag($t('PSkopin'))
+      return
+    }
+    ligne1.value = v
+  } else {
+    const x = u8ToB64(await crypter(cle, encoder.encode(ph)), true)
+    localStorage.setItem(lstk, x)
+    ligne1.value = ph
+  }
 }
 
 </script>
