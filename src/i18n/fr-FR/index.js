@@ -713,6 +713,7 @@ export default {
   PScourte: 'Phrase secrète trop courte: {0} signe(s), minimum requis {1}.',
   PSnopin: 'Code PIN inconnu',
   PSkopin: 'Code PIN indéchiffrable',
+  PSutpin: 'Utiliser un code PIN ?',
 
   // App.vue
   MLAntfg: 'Le navigateur "accepte" les notifications pour l\'application.',
@@ -1948,6 +1949,7 @@ La "consommation mensuelle" de calcul est en centimes et est la somme des coûts
   A_panel_outils: 'Boîte à outils',
 
   A_page_login: 'Se connecter / créer son compte',
+  A_page_login_pin: 'Se connecter avec un code PIN',
   A_page_login_m: 'Modes synchronisé / incognito / avion',
   A_page_ficavion: 'Fichiers accessibles en mode avion',
   A_page_login_pp: 'Le "presse-papier" de notes et fichiers',

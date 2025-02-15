@@ -10,8 +10,16 @@
     </q-toolbar>
 
     <q-card-section class="fs-md">
-      <q-checkbox v-model="vkb" color="warning" style="position:relative;left:-8px"/>
-      <span class="text-primary fs-lg ">{{$t('PSkb')}}</span>
+      <div class="row justify-between items-center">
+        <div class="row items-center q-gutter-sm">
+          <q-checkbox v-model="vkb" color="warning" style="position:relative;left:-8px"/>
+          <span class="text-primary fs-lg ">{{$t('PSkb')}}</span>
+        </div>
+        <div class="row items-center q-gutter-sm">
+          <span class="titre-sm text-italic">{{$t('PSutpin')}}</span>
+          <bouton-help page="page_login_pin"/>
+        </div>
+      </div>
 
       <div v-if="!orgext" class="q-my-md">
         <div class="titre-lg">{{$t('PSorg1')}}</div>
@@ -47,11 +55,13 @@
           @ok="ok2" />
       </div>
 
+      <div class="q-my-md">
       <div v-if="login && session.synchro" class="fs-md column justify-center q-px-sm">
         <q-checkbox v-if="$q.dark.isActive" v-model="razdb" dense size="xs" color="grey-8"
           class="bg1 text-italic text-grey-8 q-ml-sm q-mb-sm" :label="$t('LOGreinit')"/>
         <q-checkbox v-else v-model="razdb" dense size="xs" color="grey-5"
           class="bg1 text-italic text-grey-7 q-ml-sm q-mb-sm" :label="$t('LOGreinit')"/>
+      </div>
       </div>
     
     </q-card-section>
@@ -70,6 +80,7 @@ import stores from '../stores/stores.mjs'
 
 import { Phrase } from '../app/modele.mjs'
 import BtnCond from '../components/BtnCond.vue'
+import BoutonHelp from '../components/BoutonHelp.vue'
 import { $t, styp, afficherDiag, u8ToB64, b64ToU8 } from '../app/util.mjs'
 import { pbkfd, crypter, decrypterStr } from '../app/webcrypto.mjs'
 
