@@ -1989,10 +1989,9 @@ La "consommation mensuelle" de calcul est en centimes et est la somme des coûts
   A_dial_notedl: 'Téléchargement des notes et leurs fichiers',
 
   A_how_to: 'Comment faire pour ...',
-  A_ht_sponsoriser: '...sponsoriser des comptes',
-  A_ht_cvmaj: '...éditer une carte de visite',
-  A_ht_htcomm: '...éditer mes commentaires / hashtags (d\'un de mes contacts / groupes)',
-  A_ht_mutation_oa: '...muter de compte "O" en "A" et vice-versa',
+  A_ht_compte: '...créer son compte, s\'y connecter, le gérer',
+  A_ht_sponsoriser: '...sponsoriser de nouveaux comptes',
+  A_ht_mutation_oa: '...muter son compte "O" en "A" et vice-versa',
 
   A_dial: 'Boîtes de dialogues',
   A_dial_editeur: 'L\'éditeur des textes',
@@ -2001,7 +2000,7 @@ La "consommation mensuelle" de calcul est en centimes et est la somme des coûts
   A_dial_majalerte2: 'Déclaration d\'une alerte à un compte spécifique',
   A_cv_aff: 'Affichage d\'une carte de visite',
   A_cv_maj: 'Édition d\'une carte de visite',
-  A_htcomm_maj: 'Édition des commentaires / hashtags personnels',
+  A_memoht_maj: 'Édition des mémos / hashtags personnels',
   A_chat_nouveau: 'Création d\'un nouveau "chat"',
   A_chat_maj: 'Visualisation et édition d\'un "chat"',
   A_suppr_avatar: 'Suppression d\'un avatar ou compte',

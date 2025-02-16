@@ -27,13 +27,13 @@ Ces informations sont:
 C'est l'endroit idéal pour renseigner les objectifs du groupe, son mode de fonctionnement éventuel, ses valeurs et règles de courtoisie ...
 
 ## Mémo et _hashtags_ **personnels** à propos d'un contact ou d'un groupe
-Comme une carte de visite ne donne qu'une identité choisie par son titulaire / animateur, un compte peut souhaiter attacher à un contact / groupe un **nom / mémo** de son cru et qu'il maîtrise totalement:
+Du fait qu'une carte de visite donne une **identité choisie par son titulaire / animateur**, un compte peut souhaiter attacher à un contact / groupe un **nom / mémo** de son cru et qu'il maîtrise totalement:
 - **ce nom / mémo est strictement personnel** et personne d'autre que le compte ne le voit: il peut être parfaitement incorrect dans tous les sens du termes.
 
 Afin de pouvoir _filtrer_ dans des listes de contacts ou de groupes, ceux d'un intérêt donné, **un compte peut attacher des _hashtags_** de son cru à un contact ou groupe:
 - **ces _hashtags_ sont strictement personnels** et personne d'autre que le compte ne les voit: ils peuvent être parfaitement incorrects dans tous les sens du termes.
 
-# Édition d'une carte de visite d'un contact ou d'un groupe | cv_aff htcomm_maj
+# Édition d'une carte de visite d'un contact ou d'un groupe | cv_aff memoht_maj  dial_editeur
 Le **texte** d'une carte de visite peut être édité dans la partie inférieure de la boîte de dialogue. Le début de la première ligne est utilisé pour afficher le _nom_ de l'avatar ou du groupe.
 
 En partie supérieure on peut choisir d'éditer la photo, voir de revenir à la photo initiale si la nouvelle n'est finalement jugée pas satisfaisante.

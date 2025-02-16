@@ -13,7 +13,7 @@ Elles sont proposées en fonction de la situation du compte
 Cette indication n'apparaît que pour un compte "O" délégué de sa partition. Le bouton au bout de la ligne ouvre la page de sa partition.
 
 ### M'auto-muter en compte "A"
-Cette indication n'apparaît que pour un compte "O" délégué de sa partition.
+Cette indication n'apparaît que pour **un compte "O" délégué de sa partition**.
 
 Le dialogue propose d'adapter les quotas à l'occasion de cette mutation: les quotas sont contraints par l'allocation réservée aux comptes "A" par le Comptable, diminuée des allocations faites par les comptes "A" existants.
 
@@ -29,7 +29,7 @@ Donner la nouvelle phrase (deux fois pour contrôle). Le _clavier virtuel_ peut 
 Donner le nom de l'avatar. Ce sera le début de la première ligne de la carte de visite, qu'il est donc possible de corriger en mettant à jour celle-ci.
 
 ### Quotas du compte
-Ce bouton n'apparaît que pour les comptes "O" délégué de leur partition (dont le Comptable) et pour les comptes "A".
+Ce bouton n'apparaît que pour les **comptes "O" délégué de leur partition** (dont le Comptable) et pour les **comptes "A"**.
 
 Les autres comptes ("O" non délégué) doivent le demander à un des délégués de leur partition ou au Comptable.
 
