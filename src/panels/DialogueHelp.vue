@@ -9,7 +9,9 @@
       <btn-cond v-if="!stackvide" class="q-ml-xs" icon="arrow_back" @ok="back">
         <q-tooltip class="bg-white text-primary">{{$t('HLPprec')}}</q-tooltip>
       </btn-cond>
-      <q-toolbar-title class="titre-lg">{{$t('A_' + selected)}}</q-toolbar-title>
+      <q-toolbar-title class="titre-lg">{{$t('A_' + selected)}}
+        <q-tooltip class="bg-white text-primary">{{selected}}</q-tooltip>
+      </q-toolbar-title>
     </q-toolbar>
     <q-separator color="grey-5" size="2px"/>
     <q-toolbar class="tbp">

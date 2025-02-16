@@ -55,7 +55,7 @@ Sur ce _chat_ un bouton **Mutations** permet:
 # Satisfaire une demande de mutation
 La demande a été adressée au Comptable ou à un de ses délégués: pour une mutation de compte "O" en "A", plus précisément à un des _délégués de la partition à laquelle le compte est actuellement rattachée_.
 
-Sur la page des _chats_ on peut filter les chats concernés par une _mutation_. En ouvrant un de ces chats, l'appui sur le bouton **Mutations** ouvre un dialogue qui indique si une demande a été faite:
+Sur la page des _chats_ on peut filtrer les chats concernés par une _mutation_. En ouvrant un de ces chats, l'appui sur le bouton **Mutations** ouvre un dialogue qui indique si une demande a été faite:
 - le Comptable ou le _délégué_ peut afficher la fiche **Abonnement / Consommation** du compte demandeur s'il a besoin de ces informations pour accepter ou non de satisfaire la demande.
 - un second bouton ouvre le dialogue de mutation.
 
