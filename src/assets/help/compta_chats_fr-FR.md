@@ -1,4 +1,6 @@
 
+## Ouvrir un _chat_ d'urgence avec le Comptable ou un _délégué_
+
 # Compte "O"
 Un compte "O" peut avoir besoin de joindre en **urgence** le Comptable ou un délégué de sa partition:
 - pour faire ajuster ses quotas,
