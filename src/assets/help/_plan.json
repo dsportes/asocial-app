@@ -54,7 +54,14 @@
   ["how_to",
     "ht_compte",
     "ht_sponsoriser",
-    "ht_mutation_oa"
+    "ht_mutation_oa",
+    "ht_contacts",
+    "ht_groupes",
+    "ht_notes",
+    "ht_alertes",
+    "ht_delegue",
+    "ht_comptable",
+    "ht_admin"
   ],
   ["special",
     "page_admin"

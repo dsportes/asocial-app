@@ -1992,6 +1992,13 @@ La "consommation mensuelle" de calcul est en centimes et est la somme des coûts
   A_ht_compte: '...créer son compte, s\'y connecter, le gérer',
   A_ht_sponsoriser: '...sponsoriser de nouveaux comptes',
   A_ht_mutation_oa: '...muter son compte "O" en "A" et vice-versa',
+  A_ht_contacts: '...se créer des contacts, "chatter" avec eux',
+  A_ht_groupes: '...créer un groupe, inviter et se faire inviter',
+  A_ht_notes: '...rédiger des notes, leur attcher des fichiers',
+  A_ht_alertes: '...faire face aux diverses alertes',
+  A_ht_delegue: '...assurer le rôle de "délégué"',
+  A_ht_comptable: '...assurer le rôle de "Comptable"',
+  A_ht_admin: '...assurer l\'administration technique',
 
   A_dial: 'Boîtes de dialogues',
   A_dial_editeur: 'L\'éditeur des textes',

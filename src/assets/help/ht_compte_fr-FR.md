@@ -79,6 +79,7 @@ Autre option: dans la barre du haut le cinquième bouton **Alertes** est dans le
 Se reporter à l'aide sur cette page d'aide **Gestion des paiements, liste des dons**.
 
 # Faire un don / recevoir un don
+(TODO)
 
 # Muter son compte de "O" à "A" et réciproquement | ht_mutation_oa
 Lire cette rubrique d'aide dédiée à ce sujet.
