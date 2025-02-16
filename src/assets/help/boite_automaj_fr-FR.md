@@ -1,4 +1,6 @@
-## La mise à jour automatique des données
+
+## Mise à jour automatique des données d'une session
+
 L'application affiche, sauf en mode _avion_, à tout instant les données qui concernent le compte dans l'état le plus récent connu sur le serveur: quand une action a été effectuée par une autre session sur un autre poste ou le même, les nouvelles valeurs sont remontées du serveur et apparaissent à l'écran si la page actuellement visible les affichent.
 
 Ce mécanisme repose sur deux conditions:

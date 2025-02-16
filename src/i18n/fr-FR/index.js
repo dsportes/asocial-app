@@ -1945,7 +1945,7 @@ La "consommation mensuelle" de calcul est en centimes et est la somme des coûts
   A_page_people: 'Page des contacts du compte',
   A_page_session: 'Page de résumé de l\'état de la session',
   A_page_sponsorings: 'Page des sponsorings d\'un avatar',
-  A_boite_automaj: 'Etat de maj automatique des données',
+  A_boite_automaj: 'Mise à jour automatique des données d\'une session',
   A_panel_outils: 'Boîte à outils',
 
   A_page_login: 'Se connecter / créer son compte',
@@ -1994,7 +1994,7 @@ La "consommation mensuelle" de calcul est en centimes et est la somme des coûts
   A_ht_mutation_oa: '...muter son compte "O" en "A" et vice-versa',
   A_ht_contacts: '...se créer des contacts, "chatter" avec eux',
   A_ht_groupes: '...créer un groupe, inviter et se faire inviter',
-  A_ht_notes: '...rédiger des notes, leur attcher des fichiers',
+  A_ht_notes: '...rédiger des notes, leur attacher des fichiers',
   A_ht_alertes: '...faire face aux diverses alertes',
   A_ht_delegue: '...assurer le rôle de "délégué"',
   A_ht_comptable: '...assurer le rôle de "Comptable"',
