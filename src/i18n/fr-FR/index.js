@@ -252,7 +252,7 @@ export default {
   EX8065: 'Maximum de notes du groupe dépassé (attribué par le compte hébergeur du groupe). Demande:{0} - Maximum:{1}',
   EX8066: 'Maximum de volume de fichiers pour les notes du groupe dépassé (attribué par le compte hébergeur du groupe). Demande:{0} - Maximum:{1}',
 
-  EX8101: 'L\'administrateur technique a restreint l\'application à la lecture seulement. L\'opération "{0}" a tenté une écriture et a échoué.',
+  EX8101: 'L\'administrateur technique a restreint l\'organisation à la lecture seulement [{1}].\nL\'opération "{0}" a tenté une écriture et a échoué.',
   EX8102: 'Le code de l\`organisation n\'est pas reconnu.\nCorriger la saisie.',
   EX8104: 'Cette phrase secrète de correspond pas celle du Comptable.',
   EX8105: 'Le compte du Comptable a déjà été créé.',
@@ -285,6 +285,7 @@ export default {
   EX8801: 'Action impossible du fait de la restriction "lecture seulement"',
   EX8802: 'Action impossible du fait de la restriction "accès minimal"',
 
+  EX8995: 'Organisation [{0}] inconnue / fermée / figée.',
   EX8996: 'Cette organisation n\'est pas reconnue.',
   EX8997: 'Le compte a été radié pour non utilisation prolongée.',
   EX8998: 'La phrase secrète fournie ne correspond à aucun compte enregistré',
@@ -427,9 +428,7 @@ export default {
   EX9351: '(BUG) Le compte n\'a pas d\'avatar membre du groupe pour consulter sa CV',
   EX9352: '(BUG) Demande d\'automutation en compte A d\'un compte qui n\'est pas O.',
 
-  // EX9100: 'Erreur de cryptage AES: {0}',
-  // EX9101: 'Erreur de cryptage RSA: {0}',
-  EX9999: 'L\'administrateur technique a fermé l\'application : {0}.',
+  EX9999: 'Cette organisation n\'est plus active sur ce site: {0}.',
 
   OP_ConnexionAdmin: 'Connexion en tant qu\'administrateur technique',
   OP_ConnexionCompte: 'Connexion d\'un compte standard',

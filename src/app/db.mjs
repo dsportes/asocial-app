@@ -452,7 +452,7 @@ class IDB {
     try {
       const session = stores.session
       const k = u8ToB64(await crypter(session.clek, '' + f.id, 1), true)
-      const dataf = await crypter(session.clek, new Uint8Array(encode(f.toRow())))
+      const dataf = await crypter(session.clek, new Uint8Array(encode(f)))
       await this.db.transaction('rw', ['ficav', 'fdata'], async () => {
         await this.db.ficav.put( { id: k, data: dataf } )
         if (buf) await this.db.fdata.put( { id: k, data: buf } )
@@ -496,7 +496,7 @@ export class IDBbuffer {
       this.lmaj.push({ nom: obj._nom, id: obj.id, ids: obj.ids, _data_: row })
     }
   }
-  putFIDB (f) { if (this.w) this.lmajf.push(f.toRow()) }
+  putFIDB (f) { if (this.w) this.lmajf.push({ ...f }) }
   purgeFIDB (id) { if (this.w) this.lfic.add(id) }
   purgeAvatarIDB (id) { if (this.w) this.lav.add(id) }
   purgeGroupeIDB (id) { if (this.w) this.lgr.add(id) }

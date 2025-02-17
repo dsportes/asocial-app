@@ -255,10 +255,11 @@ export async function compile (row) { // row est le row._data_ du serveur
   obj.id = x.id
   if (x.ids !== undefined) obj.ids = x.ids
   if (x.dlv !== undefined) obj.dlv = x.dlv
-  if (row.dfh !== undefined) obj.dfh = x.dfh
+  if (x.dfh !== undefined) obj.dfh = x.dfh
   obj.vsh = x.vsh || 0
   obj.v = x.v || 0  
-  if (!x._zombi) await obj.compile(x); else obj._zombi = true
+  if (!x._zombi) await obj.compile(x)
+  else obj._zombi = true
   
   return obj
 }
@@ -1570,8 +1571,6 @@ export class Ficav {
     f.avn = avn
     return f
   }
-
-  toRow () { return { ...this } }
 
 }
 
