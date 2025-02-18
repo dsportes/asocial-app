@@ -42,7 +42,7 @@ Cette phrase est communiquée au _sponsorisé_ (hors de l'application): c'est ce
 # Étape: Nom de l'avatar primaire du compte
 Ce nom de 6 signes au moins est celui du sponsorisé qui pourra le changer en éditant sa carte de visite.
 
-De ce fait si le sponsorisé change son nom juste après son acceptation de sponsoring, le sponsor pourrait ne pas le reconnaître. Pour éviter ce problème, le _nom attribué par le sponsor_ va être inscrit d'office en tant que _alias / commentaire_ attaché au nouveau compte (seul le sponsor verra cet _alias_).
+De ce fait si le sponsorisé change son nom juste après son acceptation de sponsoring, le sponsor pourrait ne pas le reconnaître. Pour éviter ce problème, le _nom attribué par le sponsor_ va être inscrit d'office en tant que _commentaire_ attaché au nouveau compte (seul le sponsor le verra).
 
 # Étape: Mot de bienvenue pour le futur compte
 Le sponsor inscrit ce qu'il veut, éventuellement un conseil, le rappel des circonstances dans lesquelles ils se sont rencontrés, etc.

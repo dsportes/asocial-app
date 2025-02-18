@@ -19,7 +19,7 @@ Le compte peut attacher à tout contact,
 - des _hashtags_ attribués personnellement et connus seulement de lui-même, le qualifiant pour des filtres de recherche.
 
 #### Début du nom du contact
-Frapper un ou plusieurs caractères: seuls les contacts dont, soit **le nom dans la _carte de visite_**, soit **l'alias / commentaire donné personnellement** commence ainsi seront listés.
+Frapper un ou plusieurs caractères: seuls les contacts dont, soit **le nom dans la _carte de visite_**, soit **le commentaire donné personnellement** commence ainsi seront listés.
 
 #### Membre d'un groupe
 En cochant cette case, seuls les contacts membres d'un groupe où le compte est actif seront affichés.
@@ -33,6 +33,6 @@ Le contact n'est retenu dans la liste résultat **que si le compte ne lui a atta
 # Détail d'un contact listé
 _En dépliant_ un des contact on fait apparaître:
 - sa _carte de visite_,
-- _son alias / commentaire et les hashtags attribués personnellement_ au contact: ils peuvent être mis à jour.
+- _son commentaire et les hashtags attribués personnellement_ au contact: ils peuvent être mis à jour.
 - la liste des _chats_ ouverts ou pouvant être ouverts avec un des avatars du compte. Pour chaque chat l'appui sur le bouton associé ouvre la page du _chat_.
 - la liste des _groupes_ où les avatars du compte et le contact sont membres actifs. Pour chaque groupe l'appui sur le bouton associé ouvre la page du groupe.

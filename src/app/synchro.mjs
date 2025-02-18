@@ -488,6 +488,12 @@ export class OperationS extends Operation {
       const buf = new IDBbuffer()
       await this.setCeCiIn(nvds, ret, sb, buf)
 
+      if (nbIter === 0 && ret.rowEspace) {
+        const x = await compile(ret.rowEspace)
+        sb.setEs(x)
+        buf.putIDB(x, ret.rowEspace)
+      }
+
       if (!ds1 && session.synchro && nbIter === 0) { 
         // Premier retour de Sync a rempli: session. compteId, clek, nomBase
         await idb.open()
@@ -577,13 +583,6 @@ export class OperationS extends Operation {
         for (const [,x] of ds.groupes) {
           if (x.chg) { x.chg = false; x.vs = x.vb; x.ms = x.m; x.ns = x.n }
         }
-      }
-
-      if (!ds1 && nbIter === 0) { // Premier tour de la connexion
-        const ret = await post(this, 'GetEspace', { token: session.authToken })
-        const x = await compile(ret.rowEspace)
-        sb.setEs(x)
-        buf.putIDB(x, ret.rowEspace)  
       }
 
       // Commit Store et IDB d'un cycle
@@ -748,10 +747,10 @@ Retour:
 export class GetEspace extends Operation {
   constructor () { super('GetEspace') }
 
-  async run (ns) { 
+  async run () { 
     try {
       const session = stores.session
-      const args = { token: session.authToken, ns }
+      const args = { token: session.authToken }
       const ret = await post(this, 'GetEspace', args)
       const s = await compile(ret.rowEspace)
       session.setEspace(s)

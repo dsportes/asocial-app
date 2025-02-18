@@ -751,7 +751,6 @@ export class Avatar extends GenDoc {
   async compile (row) {
     const session = stores.session
     const clek = session.clek
-    this.alias = row.alias
 
     // phrase de contact cryptée par la clé K.
     if (row.pcK) this.pc = await decrypterStr(clek, row.pcK) 
@@ -969,7 +968,6 @@ Calculée : mmb: Map des membres. Clé: id long du membre, Valeur: son im
 export class Groupe extends GenDoc {
 
   async compile (row) {
-    this.alias = row.alias
     this.qn = row.qn; this.qv = row.qv; this.nn = row.nn; this.vf = row.vf
     this.imh = row.imh
     this.dfh = row.dfh || 0

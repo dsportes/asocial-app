@@ -258,8 +258,7 @@ export default {
   EX8105: 'Le compte du Comptable a déjà été créé.',
   EX8106: 'La phrase de sponsoring de l\'Administrateur Technique pour le Comptable de cette organisation n\'est pas celle saisie.',
 
-  EX8203: 'Création impossible de l\'espace [{0 / 1}], numéro déjà attribué.',
-  EX8204: 'Création impossible de l\'espace [{0 / 1}], code d\'organisation déjà attribué.',
+  EX8203: 'L\'espace [{0] existe déjà. Création impossible.',
   EX8205: 'Données d\'authentification absentes.',
   EX8206: 'Données d\'authentification illisibles (détail: {0})',
   EX8207: 'Phrase de sponsoring trop proche d\'une phrase existante.',
@@ -295,6 +294,7 @@ export default {
   EX9010: 'Erreur fonctionnelle volontaire pour test.\nDétail: {0}',
 
   EX9013: '(BUG) Argument {0} de l\'opération {1} mal formé.',
+  EX9015: '(BUG) Accès impossible au document "espace" [{0}]',
   EX9016: '(BUG) Accès impossible au document "synthese" [{0}]',
   EX9017: '(BUG) Compteurs de comptabilité corrompus: {0} - {1}',
   EX9019: '(BUG) Mode d\'autorisation non reconnu [{0}]',

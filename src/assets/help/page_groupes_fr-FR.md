@@ -48,7 +48,7 @@ Voir l'aide sur ce panel dont le lien figure ci-dessus.
 # Liste des groupes | chatgr page_groupe
 Pour chaque groupe où un des avatars du compte est actif, une carte est visible avec:
 - la _carte de visite_ du groupe,
-- son _alias / commentaire_ écrit par le compte et visible de lui-seul,
+- son _commentaire_ écrit par le compte et visible de lui-seul,
 - les _hashtags_ attachés par le compte à ce groupe et dont il est seul à les voir et éditer.
 
 ### Boutons
@@ -63,7 +63,7 @@ Cette liste pouvant être longue, le panneau de _recherche_ donne la possibilit�
 #### Début du nom du groupe
 
 #### Texte dans le mémo attaché
-Seuls les groupes ayant un _alias / commentaire_ attaché par le compte au groupe contenant le texte cité sont listés.
+Seuls les groupes ayant un _commentaire_ attaché par le compte au groupe contenant le texte cité sont listés.
 
 #### Ayant au moins un des hashtags / N'ayant aucun des hashtags
 Exclusion selon les hashtags attachés par le compte: par exemple ayant _ecologie_ mais pas _indesirable_.

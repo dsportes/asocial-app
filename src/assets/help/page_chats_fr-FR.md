@@ -37,7 +37,7 @@ Toutefois, si le contact continue d'écrire des lignes sur le chat (qui lui appa
 Le filtre de la page (obtenu en appuyant sur l'icône de _loupe_ en haut à droite), permet de raccourcir la liste des chats.
 
 Rappel: Le compte peut attacher à tout contact,
-- un _alias / commentaire_ attribué personnellement (connu seulement de lui-même),
+- un _commentaire_ attribué personnellement (connu seulement de lui-même),
 - des _hashtags_ attribués personnellement (connu seulement de lui-même), le qualifiant pour des filtres de recherche.
 
 ### Chats NON LUS seulement
@@ -52,7 +52,7 @@ Si cette cas est cochée et que le chat a été lu, le compte en a vu l'état le
 Ce filtre permet de ne sélectionner que les chats modifiés _récemment_ (un jour, une semaine, un mois, un trimestre, une année). Un moyen simple pour voir ce qu'il y a de nouveau depuis la visite (approximativement). 
 
 ### Début du nom du contact ou du groupe
-Frapper un ou plusieurs caractères: seuls les chats émis par des contacts ou des groupes dont, soit **le nom dans la _carte de visite_**, soit **l'alias donné personnellement** commence ainsi seront listés.
+Frapper un ou plusieurs caractères: seuls les chats émis par des contacts ou des groupes dont, soit **le nom dans la _carte de visite_**, soit **le commentaire donné personnellement** commence ainsi seront listés.
 
 ### Texte cherché dans les chats
 Seuls les chats dont le texte contient (n'importe où) le texte saisi sont listés.
@@ -83,7 +83,7 @@ Deux niveaux de détails sont disponibles:
     - le début du texte de l'échange le plus récent.
   - **un aperçu de l'avatar avec qui le _chat_ est ouvert:**
     - sa _carte de visite_,
-    - _son alias / commentaire et les hashtags attribués personnellement_ au contact: ils peuvent être mis à jour.
+    - _son commentaire et les hashtags attribués personnellement_ au contact: ils peuvent être mis à jour.
     - la liste des _chats_ ouverts ou pouvant être ouverts avec un des avatars du compte. Pour chaque chat l'appui sur le bouton associé ouvre la page du _chat_.
     - la liste des _groupes_ où les avatars du compte et le contact sont membres actifs. Pour chaque groupe l'appui sur le bouton associé ouvre la page du groupe.
 - **en cliquant sur l'icône _chat_**, une fiche détaillée du chat apparaît (et recouvre la liste des chats). Voir la section de l'aide détaillant un chat.

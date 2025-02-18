@@ -16,7 +16,7 @@ Si l'avatar est déjà _contact / actif_ dans le groupe, ceci est indiqué (il n
 
 ### Carte de visite ...
 - _carte de visite_ du contact,
-- _alias / commentaires_ attaché au contact par le compte et visible seulement par lui-même,
+- _commentaires_ attaché au contact par le compte et visible seulement par lui-même,
 - _hashtags_ attachés au contact par le compte et visibles seulement par lui-même.
 
 ### Chats et groupes de l'avatar
@@ -31,7 +31,7 @@ La liste peut être longue. Un filtre permet de la raccourcir en fonction du cri
 En cochant cette case, les avatars qui ne peuvent pas être choisis (déjà _contact ou actif_) sont omis de la liste.
 
 ### Début du nom du contact
-Seuls ceux dont le nom ou _l'alias / commentaire_ commence par le texte indiqué, sont affichés.
+Seuls ceux dont le nom ou _le commentaire_ commence par le texte indiqué, sont affichés.
 
 ### Ayant au moins un des hashtags / N'ayant aucun des hashtags
 Réduit la liste si l'avatar a (n'a pas) les hashtags cités.

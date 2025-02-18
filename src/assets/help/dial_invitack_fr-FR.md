@@ -6,7 +6,7 @@ Dans la page listant les groupes, la liste des **invitations en cours**, ni acce
 # Zone "Groupe et invité"
 Cette zone affiche les _cartes de visite_ du groupe et de l'invité.
 - _carte de visite_,
-- _alias / commentaires_ à propos du groupe édités par le compte et visible de lui seul,
+- _commentaires_ à propos du groupe édités par le compte et visible de lui seul,
 - _hashtags_ attachés par le compte et visibles de lui-seul.
 
 # Zone "Animateur du groupe invitant"

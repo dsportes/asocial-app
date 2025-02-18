@@ -79,7 +79,7 @@ Sélectionner tous les membres sans tenir compte de ses droits d'accès OU seulm
 
 ### Carte de visite ...
 - _carte de visite_ du membre,
-- _alias / commentaire_ attribué par le compte et visible que par lui.
+- _commentaire_ attribué par le compte et visible que par lui.
 - _hashtags_ attribués par le compte et visibles que par lui.
 
 ### Statut et droits effectifs
