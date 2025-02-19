@@ -12,8 +12,8 @@
         <btn-cond icon="refresh" @ok="getTaches"/>
         <div class="row items-center">
           <span class="q-mr-sm">{{$t('ESfta')}}</span>
-          <q-input class="w6" v-model="ns"
-              :label="$t('ESns')" :hint="$t('ESnsh2')" dense>
+          <q-input class="w6" v-model="org"
+            :label="$t('ESorg')" :hint="$t('ESorgh')" dense>
             <template v-slot:append>
               <btn-cond icon="check" round @ok="getTaches"/>
             </template>
@@ -31,9 +31,9 @@
       <q-separator class="q-my-xs" color="orange"/>
         <div :class="dkli(1) + ' row q-mb-md full-with text-italic titre-md'">
           <div class="col-1 text-center">{{$t('EScol0')}}</div>
-          <div class="col-1 text-center">{{$t('EScol1')}}</div>
+          <div class="col-2 text-center">{{$t('EScol1')}}</div>
           <div class="col-4 text-center">{{$t('EScol2')}}</div>
-          <div class="col-4 text-center">{{$t('EScol3')}}</div>
+          <div class="col-3 text-center">{{$t('EScol3')}}</div>
           <div class="col-1 text-center">{{$t('EScol4')}}</div>
           <div class="col-1"></div>
         </div>
@@ -42,12 +42,12 @@
         <div :class="dkli(idx) + ' q-my-sm full-with'">
           <div class="row font-mono">
             <div class="col-1 text-center">{{OPNOMS[t.op]}}</div>
-            <div class="col-1 text-center">{{t.ns}}</div>
+            <div class="col-1 text-center">{{t.org}}</div>
             <div class="col-4 text-center">{{dhstring(t.dh, true)}}</div>
-            <div v-if="!t.ns" class="col-4 text-center">
+            <div v-if="!t.org" class="col-4 text-center">
               <span v-if="!t.exc">{{t.dhf ? dhstring(t.dhf, true) : '?'}}</span>
             </div>
-            <div v-else class="col-4 text-center">{{t.id}} / {{t.ids}}</div>
+            <div v-else class="col-3 text-center">{{t.id}}</div>
             <div class="col-1 text-center">{{t.nb}}</div>
             <div class="col-1 row items-center justify-end q-gutter-xs">
               <btn-cond icon="delete" @ok="tacheDel(t)"/>
@@ -67,14 +67,13 @@
     </div>
 
     <div v-if="tab==='espaces'" class="spmd"> <!-- Liste des espaces -->
-      <q-expansion-item  v-for="(esp, idx) in lstEsp" :key="esp.ns" class="q-my-xs"
+      <q-expansion-item  v-for="(esp, idx) in lstEsp" :key="esp.org" class="q-my-xs"
         switch-toggle-side expand-separator dense group="espaces">
         <template v-slot:header>
           <div :class="dkli(idx) + ' full-width'">
             <div class="row full-width justify-between text-bold font-mono fs-lg">
               <div class="col">
-                <span class="q-mr-md">#{{esp.ns}}</span>
-                <span>{{esp.org}}</span>
+                <span class="titre-md text-bold">{{esp.org}}</span>
                 <span v-if="esp.hTC" class="msg q-mx-sm">{{$t('ESencrea')}}</span>
                 <span v-if="!esp.hTC && esp.moisStat" class="q-ml-md fs-sm">{{$t('ESdms', [esp.moisStat])}}</span>
               </div>
@@ -143,13 +142,8 @@
       confirm :okfn="creerNS" :actif="ps !== null && !dns && !dorg">
       <q-card-section class="q-my-md q-mx-sm">
         <div class="row items-center full-width">
-          <q-input class="col-6 q-pr-md" v-model="ns"
-            :label="$t('ESns')" :hint="$t('ESnsh')" dense/>
-          <div v-if="dns" class="col-6 text-negative bg-yellow-3 text-bold q-px-xs">{{dns}}</div>
-        </div>
-        <div class="row items-center full-width">
           <q-input class="col-6  q-pr-md" v-model="org"
-            :label="$t('ESorg')" hint="monorg" dense/>
+            :label="$t('ESorg')" :hint="$t('ESorgh')" dense/>
           <div v-if="dorg" class="col-6 text-negative bg-yellow-3 text-bold q-px-xs">{{dorg}}</div>
         </div>
         <div class="column justify-center q-mt-md">
@@ -274,6 +268,7 @@ const abot = (idx) => {
   lstEsp.value[idx].abot.forEach(x => { y.push(x.toFixed(2))})
   return y
 }
+
 const limc = (idx) => {
   const dlvat = lstEsp.value[idx].dlvat
   return !dlvat || dlvat === AMJ.max ? '' : Math.floor(dlvat / 100)
@@ -282,7 +277,6 @@ const limc = (idx) => {
 const gccode = ref('???')
 const tab = ref('espaces')
 const gcop = ref('')
-const ns = ref('')
 const nsc = ref('') // ns "courant" de PageEspace à ouvrir
 const org = ref('')
 const ps = ref(null)
@@ -437,7 +431,7 @@ async function dlstat2 (esp) {
 }
 
 async function getTaches () {
-  taches.value = await new GetTaches().run(ns.value)
+  taches.value = await new GetTaches().run(org.value)
 }
 
 async function tacheDel (t) {

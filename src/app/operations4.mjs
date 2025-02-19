@@ -2021,10 +2021,9 @@ export class SupprCompte extends Operation {
 }
 
 /* OP_DownloadStatC: 'Téléchargement d\'un fichier statistique comptable mensuel'
-ComptaStat (org, mr)
 args.token: éléments d'authentification du compte.
-args.org
-args.mr : mois relatif 1 2 ou 3
+args.org : pour admin seulement
+args.mr : mois relatif 0 à 11
 */
 export class DownloadStatC extends Operation {
   constructor () { super('DownloadStatC') }
@@ -2032,8 +2031,14 @@ export class DownloadStatC extends Operation {
   async run (org, mr, cleES) { 
     try {
       const session = stores.session
-      const args = { token: session.authToken, org, mr }
-      const ret =  await post(this, 'ComptaStat', args)
+      const args = { token: session.authToken, mr }
+      let ret
+      if (!org) {
+        args.org = org
+        ret =  await post(this, 'ComptaStatA', args)
+      } else {
+        ret =  await post(this, 'ComptaStat', args)
+      }
       let buf, buf2
       try { 
         buf = await getData(ret.getUrl) 
@@ -2054,7 +2059,6 @@ export class DownloadStatC extends Operation {
 }
 
 /* OP_DownloadStatC2: 'Téléchargement d\'un fichier statistique comptable mensuel déjà calculé'
-*/
 export class DownloadStatC2 extends Operation {
   constructor () { super('DownloadStatC2') }
 
@@ -2081,6 +2085,7 @@ export class DownloadStatC2 extends Operation {
     }
   }
 }
+*/
 
 /* OP_TicketsStat: 'Téléchargements en CSV de la liste des tickets d\'un mois'
 args.token: éléments d'authentification du compte.
