@@ -18,7 +18,6 @@ export const useSessionStore = defineStore('session', {
     status: 0, // 0:fermée, 1:en chargement, 2: ouverte, 3: admin
     mode: 0, // 1:synchronisé, 2:incognito, 3:avion
 
-    ns: '', // namespace du compte. Pour "admin" : espace "courant", donc peut être 0
     org: '', // code de l'organisation
     compteId: '', // id du compte
     clek: null, // clek du compte

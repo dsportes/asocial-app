@@ -461,7 +461,6 @@ export class InitTachesGC extends Operation {
 
 /* `CreationEspace` : création d'un nouvel espace
 - token : jeton d'authentification du compte de **l'administrateur**
-- ns : numéro de l'espace
 - org : code de l'organisation
 - TC : PBKFD de la phrase de sponsoring du Comptable par l'AT
 - hTC : hash de TC
@@ -478,13 +477,12 @@ Création des rows espace, synthese
 export class CreationEspace extends Operation {
   constructor() { super('CreationEspace') }
 
-  async run(org, phrase, ns) {
+  async run(org, phrase) {
     try {
       const session = stores.session
 
       const args = {
         token: session.authToken,
-        ns: ns,
         org: org,
         TC: phrase.pcb,
         hTC: phrase.hpsc,
@@ -495,7 +493,7 @@ export class CreationEspace extends Operation {
       await this.finKO(e)
     }
   }
-} // MajSponsEspace
+}
 
 /* OP_MajSponsEspace : 'Changement de la phrase de contact du Comptable'
 - token : jeton d'authentification du compte de **l'administrateur**
@@ -508,13 +506,12 @@ Retour: rien
 export class MajSponsEspace extends Operation {
   constructor() { super('MajSponsEspace') }
 
-  async run(org, phrase, ns) {
+  async run(org, phrase) {
     try {
       const session = stores.session
 
       const args = {
         token: session.authToken,
-        ns: ns,
         org: org,
         TC: phrase.pcb,
         hTC: phrase.hpsc,
@@ -861,10 +858,10 @@ Retour: rien
 export class SetEspaceQuotas extends Operation {
   constructor () { super('SetEspaceNprof') }
 
-  async run (ns, quotas) {
+  async run (org, quotas) {
     try {
       const session = stores.session
-      const args = { token: session.authToken, ns, quotas}
+      const args = { token: session.authToken, org, quotas}
       await post(this, 'SetEspaceQuotas', args)
       this.finOK()
     } catch (e) {
@@ -882,10 +879,10 @@ Retour:
 export class SetNotifE extends Operation {
   constructor () { super('SetNotifE') }
 
-  async run (ntf, ns) {
+  async run (ntf, org) {
     try {
       const session = stores.session
-      const args = { token: session.authToken, ns, ntf}
+      const args = { token: session.authToken, org, ntf}
       await post(this, 'SetNotifE', args)
       this.finOK()
     } catch (e) {
@@ -2037,7 +2034,7 @@ export class DownloadStatC extends Operation {
         args.org = org
         ret =  await post(this, 'ComptaStatA', args)
       } else {
-        ret =  await post(this, 'ComptaStat', args)
+        ret =  await post(this, 'ComptaStatC', args)
       }
       let buf, buf2
       try { 

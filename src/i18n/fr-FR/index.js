@@ -424,9 +424,10 @@ export default {
   EX9348: '(BUG) Attribution d\'exclusivité à un avatar externe au compte par un compte non animateur',
   EX9349: '(BUG) Suppression d\'exclusivité par un compte n\'ayant pas l\'exclusivité actelle',
   EX9350: '(BUG) Transfert d\'exclusivité par un compte n\'ayant pas l\'exclusivité actelle',
-
   EX9351: '(BUG) Le compte n\'a pas d\'avatar membre du groupe pour consulter sa CV',
   EX9352: '(BUG) Demande d\'automutation en compte A d\'un compte qui n\'est pas O.',
+  EX9353: '(BUG) Mois de statistique demandée avant sa création.',
+  EX9354: '(BUG) Mois de statistique demandée dans le futur.',
 
   EX9999: 'Cette organisation n\'est plus active sur ce site: {0}.',
 
@@ -820,9 +821,8 @@ export default {
   PPnv2: 'Création d\'une nouvelle note',
 
   // Critères de tri
-  TRIadmin0: 'ID de l\'espace ↑',
-  TRIadmin1: 'Code organisation ↑',
-  TRIadmin2: 'Coût abonnement ↓',
+  TRIadmin0: 'Code organisation ↑',
+  TRIadmin1: 'Coût abonnement ↓',
   TRIespace0: 'Code partition ↑',
   TRIespace1: 'Code partition ↓',
   TRIespace2: 'Nb d\'Alertes de partition ↑',

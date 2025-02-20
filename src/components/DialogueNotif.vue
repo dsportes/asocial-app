@@ -46,7 +46,7 @@ import { RegCles } from '../app/modele.mjs'
 const props = defineProps({  
   type: Number,
   /* Type des notifications:
-  - 0 : de l'espace - cible: ns
+  - 0 : de l'espace - cible: org
   - 1 : d'une partition - cible: idPartition
   - 2 : d'un compte - cible: idCompte
   */

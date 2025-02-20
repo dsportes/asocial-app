@@ -63,7 +63,7 @@
     <div v-if="tab==='espaces'" class="row justify-between tbs q-pa-xs full-width q-my-sm">
       <btn-cond icon="refresh" @ok="loadEsp"/>
       <div class="col titre-lg text-center">{{$t('ESlo', lstEsp.length, { count: lstEsp.length })}}</div>
-      <btn-cond icon="add" :label="$t('ESne')" @ok="plusNS"/>
+      <btn-cond icon="add" :label="$t('ESne')" @ok="plusES"/>
     </div>
 
     <div v-if="tab==='espaces'" class="spmd"> <!-- Liste des espaces -->
@@ -105,7 +105,7 @@
             <div class="q-my-sm">
               <bouton-dlvat :espace="esp" @close="finDlv"/>
               <apercu-notif class="q-my-sm" :notif="esp.notifE" :idx="idx" 
-                :type="0" :cible="esp.ns"/>
+                :type="0" :cible="esp.org"/>
             </div>
           </q-expansion-item>
 
@@ -130,7 +130,7 @@
                 <btn-cond class="self-start b1" label="M-3" @ok="dlstat(esp, 3)"/>
               </div>
               <saisie-mois v-model="mois" :dmax="maxdl" :dmin="mindl(esp)" :dinit="maxdl"
-                @ok="dlstat2(esp)" icon="download" :label="$t('ESdlc')"/>
+                @ok="dlstat(esp, -1)" icon="download" :label="$t('ESdlc')"/>
             </div>
           </q-expansion-item>
         </div>
@@ -139,7 +139,7 @@
 
     <!-- Création d'un espace -->
     <dial-std1 v-if="m3" v-model="m3" :titre="$t('ESne2')"
-      confirm :okfn="creerNS" :actif="ps !== null && !dns && !dorg">
+      confirm :okfn="creerES" :actif="ps !== null && !dorg">
       <q-card-section class="q-my-md q-mx-sm">
         <div class="row items-center full-width">
           <q-input class="col-6  q-pr-md" v-model="org"
@@ -230,15 +230,12 @@ const lstEsp = computed(() => {
   const t = fSt.tri.admin
   for (const r of lstEspB.value) {
     if (f.org && r.org.indexOf(f.org) === -1) continue
-    if (f.ns && r.ns !== f.ns) continue
     lst.push(r)
   }
-  if (t === 1)
+  if (t === 0)
     lst.sort((a, b) => { return a.org < b.org ? -1 : (a.org === b.org ? 0 : 1)})
-  else if (t === 2)
+  else if (t === 1)
     lst.sort((a, b) => { return a.abot[0] > b.abot[0] ? -1 : (a.abot[0] === b.abot[0] ? 0 : 1)})
-  else
-    lst.sort((a, b) => { return a.ns > b.ns ? -1 : (a.ns === b.ns ? 0 : 1)})
   return lst
 })
 
@@ -277,22 +274,14 @@ const limc = (idx) => {
 const gccode = ref('???')
 const tab = ref('espaces')
 const gcop = ref('')
-const nsc = ref('') // ns "courant" de PageEspace à ouvrir
 const org = ref('')
 const ps = ref(null)
 const singl = ref(null)
-const dns = ref($t('ESreq'))
 const dorg = ref($t('ESreq'))
 const quotas = ref(null)
 const esp = ref(null)
 const mois = ref(Math.floor(session.auj / 100))
 const taches = ref([])
-  
-watch (ns, (ap, av) => {
-  if (ap.length !== 1 || Cles.nsToInt(ap) === -1) { dns.value = $t('ESnsh'); return }
-  if (aNS(ap)) { dns.value = $t('ESnum'); return }
-  dns.value = ''
-})
  
 watch (org, (ap, av) => {
   if (ap.length < 4) { dorg.value = $t('ESorg1'); return }
@@ -334,26 +323,14 @@ async function startDemon () {
   }
 }
 
-function aNS (ns) {
-  for (const e of lstEspB.value)
-    if (e.ns === ns) return true
-  return false
-}
-
 function aOrg (org) {
   for (const e of lstEsp.value)
     if (e.org === org) return true
   return false
 }
 
-function plusNS () {
+function plusES () {
   ui.oD('PAcreationesp', idc)
-}
-
-function cancelNS () {
-  ns.value = 0
-  ps.value = null
-  ui.fD()
 }
 
 function okps (p) {
@@ -367,23 +344,23 @@ function ovnspc (e) {
 }
 
 async function nvspc () {
-  await new MajSponsEspace().run(esp.value.org, ps.value, esp.value.ns)
+  await new MajSponsEspace().run(esp.value.org, ps.value)
   ns.value = 0
   ps.value = null
   ui.fD()
   await loadEsp()
 }
 
-async function creerNS () {
-  await new CreationEspace().run(org.value, ps.value, ns.value)
-  ns.value = 0
+async function creerES () {
+  await new CreationEspace().run(org.value, ps.value)
+  org.value = ''
   ps.value = null
   ui.fD()
   await loadEsp()
 }
 
 async function valider (ctx) {
-  await new SetEspaceQuotas().run(esp.value.ns, quotas.value)
+  await new SetEspaceQuotas().run(esp.value.org, quotas.value)
   ui.fD()
   await loadEsp()
 }
@@ -400,26 +377,15 @@ function ovchgquotas (e) {
   ui.oD('PAedprf', idc)
 }
 
-async function dlstat (esp, mr) {
-  const cleES = esp.cleES
-  const { err, blob, creation, mois } = 
-    await new DownloadStatC().run(esp.org, mr, cleES)
-  const nf = esp.org + '-C_' + mois
-  if (!err) {
-    saveAs(blob, nf)
-    await afficherDiag($t('PEsd', [nf]))
-  } else {
-    await afficherDiag($t('PEnd' + err))
-  }
-}
-
 function mindl (esp) { 
-  return Math.floor(esp.dcreation / 100)
+  return Math.floor(esp.creation / 100)
 }
 
-async function dlstat2 (esp) {
+async function dlstat (esp, mr) {
+  if (mr >= 0) 
+    mois.value = AMJ.moisMoins(Math.floor(session.auj / 100), mr)
   const cleES = esp.cleES
-  const { err, blob } = await new DownloadStatC2()
+  const { err, blob } = await new DownloadStatC()
     .run(esp.org, mois.value, 'C', cleES)
   const nf = esp.org + '-C_' + mois.value
   if (!err) {

@@ -64,7 +64,7 @@ const props = defineProps({
   - 1 : d'une partition
   - 2 : d'un compte
   */
-  cible: String, // type 0: ns, type 1: idPartition, type 2: idCompte
+  cible: String, // type 0: org, type 1: idPartition, type 2: idCompte
   idx: Number,
   simple: Boolean
 })
