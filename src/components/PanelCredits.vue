@@ -158,11 +158,13 @@ async function dlstat2 () {
 async function nvtk () { ui.oD('PCdialtk', idc) }
 
 async function generer ({m, ref}) {
-  const [ax, mx, j] = AMJ.aaaammjj(AMJ.amjUtc())
+  const [ax, mx, j] = session.auj
+  // DLV: dernier jour de M + 2
+  const dlv = AMJ.djMoisN(session.auj, 2)
   const ids = ID.dunTicket(ax, mx)
   const tkx = idTkToL6(ids)
   ui.fD()
-  await new PlusTicket().run(m, ref, ids)
+  await new PlusTicket().run(m, ref, ids, dlv)
   await afficherDiag($t('TKrefp', [session.org, tkx]))
 }
 

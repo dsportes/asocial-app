@@ -1400,10 +1400,10 @@ Retour:
 export class PlusTicket extends Operation {
   constructor () { super('PlusTicket') }
 
-  async run (ma, refa, ids) { 
+  async run (ma, refa, ids, dlv) { 
     try {
       const session = stores.session
-      const args = { token: session.authToken, ma, refa, ids }
+      const args = { token: session.authToken, ma, refa, ids, dlv }
       const ret = await post(this, 'PlusTicket', args)
       const compta = await compile(ret.rowCompta)
       session.setCompta(compta)
