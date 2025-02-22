@@ -10,7 +10,7 @@
         <span class="bg-primary text-white b1" @click="dlstat(3)">M-3</span>
       </div>
       <saisie-mois v-model="mois" :dmax="maxdl" :dmin="mindl" :dinit="maxdl"
-        @ok="dlstat2" icon="download" :label="$t('ESdlc')"/>
+        @ok="dlstat(-1)" icon="download" :label="$t('ESdlc')"/>
     </div>
   </div>
 
@@ -132,20 +132,9 @@ const maxdl = computed(() => Math.floor(AMJ.djMoisN(AMJ.amjUtc(), 0) / 100))
 const mindl = computed(() => Math.floor(session.espace.dcreation / 100))
 
 async function dlstat (mr) {
-  const { err, blob, creation, mois } = await new TicketsStat().run(mr)
-  const nf = session.espace.org + '-T_' + mois
-  if (!err) {
-    saveAs(blob, nf)
-    await afficherDiag($t('PEsd', [nf]))
-  } else {
-    await afficherDiag($t('PEnd' + err))
-  }
-}
-
-async function dlstat2 () {
-  const aj = Math.floor(AMJ.amjUtc() / 100)
-  const mr = AMJ.nbMois(mois.value, aj)
-  const { err, blob } = await new TicketsStat().run(mr)
+  if (mr >= 0) 
+    mois.value = AMJ.moisMoins(Math.floor(session.auj / 100), mr)
+  const { err, blob } = await new TicketsStat().run(mois.value)
   const nf = session.org + '-T_' + mois.value
   if (!err) {
     saveAs(blob, nf)
@@ -158,7 +147,7 @@ async function dlstat2 () {
 async function nvtk () { ui.oD('PCdialtk', idc) }
 
 async function generer ({m, ref}) {
-  const [ax, mx, j] = session.auj
+  const [ax, mx, j] = AMJ.aaaammjj(session.auj)
   // DLV: dernier jour de M + 2
   const dlv = AMJ.djMoisN(session.auj, 2)
   const ids = ID.dunTicket(ax, mx)

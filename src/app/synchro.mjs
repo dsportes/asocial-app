@@ -93,7 +93,8 @@ class Queue {
     }
     this.avgrs = nvm // liste d'attente mise à jour
 
-    if (config.mondebug) console.log('Réveil: ', session.sessionId, doCpt, doEsp, lids.length)
+    if (config.mondebug) 
+      console.log('Réveil: ', session.sessionId + ' cpt:' + doCpt + ' esp:' + doEsp + ' lids:' + lids.length)
 
     if (doCpt || doEsp || doAdq || lids.length) {
       // Lancement de l'opération de Sync

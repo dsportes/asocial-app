@@ -2025,12 +2025,12 @@ args.mr : mois relatif 0 à 11
 export class DownloadStatC extends Operation {
   constructor () { super('DownloadStatC') }
 
-  async run (org, mr, cleES) { 
+  async run (org, mois, cleES) { 
     try {
       const session = stores.session
-      const args = { token: session.authToken, mr }
+      const args = { token: session.authToken, mois }
       let ret
-      if (!org) {
+      if (org) {
         args.org = org
         ret =  await post(this, 'ComptaStatA', args)
       } else {
@@ -2055,35 +2055,6 @@ export class DownloadStatC extends Operation {
   }
 }
 
-/* OP_DownloadStatC2: 'Téléchargement d\'un fichier statistique comptable mensuel déjà calculé'
-export class DownloadStatC2 extends Operation {
-  constructor () { super('DownloadStatC2') }
-
-  async run (org, mois, cs, cleES) { 
-    try {
-      const session = stores.session
-      const args = { token: session.authToken, org, mois, cs }
-      const ret =  await post(this, 'GetUrlStat', args)
-      let buf, buf2
-      try { 
-        buf = await getData(ret.getUrl) 
-      } catch (e) { 
-        return this.finOK({ err: 1, msg: e.message })
-      }
-      try {
-        buf2 = await decrypter(cleES, buf)
-      } catch (e) { 
-        return this.finOK({ err: 2 })
-      }
-      const blob = new Blob([buf2], { type: 'text/csv' })
-      return this.finOK({ blob })
-    } catch (e) {
-      this.finKO(e)
-    }
-  }
-}
-*/
-
 /* OP_TicketsStat: 'Téléchargements en CSV de la liste des tickets d\'un mois'
 args.token: éléments d'authentification du compte.
 args.org
@@ -2092,11 +2063,11 @@ args.mr : mois relatif demandé
 export class TicketsStat extends Operation {
   constructor () { super('TicketStat') }
 
-  async run (mr) { 
+  async run (mois) { 
     try {
       const session = stores.session
       const cleES = session.compte.cleE
-      const args = { token: session.authToken, org: session.org, mr }
+      const args = { token: session.authToken, mois }
       const ret =  await post(this, 'TicketsStat', args)
       let buf = null, buf2 = null
       try { 

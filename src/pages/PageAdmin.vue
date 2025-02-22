@@ -192,7 +192,7 @@ import QuotasVols from '../components/QuotasVols.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import DialStd1 from '../dialogues/DialStd1.vue'
 import { GetEspaces, CreationEspace, MajSponsEspace, SetEspaceQuotas, InitTachesGC, 
-  DownloadStatC, DownloadStatC2, GetTaches, DelTache, GoTache } from '../app/operations4.mjs'
+  DownloadStatC, GetTaches, DelTache, GoTache } from '../app/operations4.mjs'
 import { get } from '../app/net.mjs'
 import { compile } from '../app/modele.mjs'
 import { Cles, ID, AMJ, Tarif, UNITEN, UNITEV } from '../app/api.mjs'
@@ -386,13 +386,13 @@ async function dlstat (esp, mr) {
     mois.value = AMJ.moisMoins(Math.floor(session.auj / 100), mr)
   const cleES = esp.cleES
   const { err, blob } = await new DownloadStatC()
-    .run(esp.org, mois.value, 'C', cleES)
+    .run(esp.org, mois.value, cleES)
   const nf = esp.org + '-C_' + mois.value
   if (!err) {
     saveAs(blob, nf)
     await afficherDiag($t('PEsd', [nf]))
   } else {
-    await afficherDiag($t('PEnd') + err)
+    await afficherDiag($t('PEnd' + err))
   }
 }
 

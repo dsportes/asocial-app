@@ -92,7 +92,7 @@
             <btn-cond class="self-start b1" label="M-3" @ok="dlstat(3)"/>
           </div>
           <saisie-mois v-model="mois" :dmax="maxdl" :dmin="mindl" :dinit="maxdl"
-            @ok="dlstat2" icon="download" :label="$t('ESdlc')"/>
+            @ok="dlstat(-1)" icon="download" :label="$t('ESdlc')"/>
         </div>
       </q-expansion-item>
 
@@ -158,7 +158,7 @@ import { dkli, styp, $t, mon, afficherDiag, edvol } from '../app/util.mjs'
 import { ID, AMJ, Tarif, UNITEN, UNITEV } from '../app/api.mjs'
 import { Synthese } from '../app/modele.mjs'
 import { GetSynthese, GetPartition, SetEspaceOptionA, NouvellePartition, SetQuotasA,
-  DownloadStatC, DownloadStatC2 } from '../app/operations4.mjs'
+  DownloadStatC } from '../app/operations4.mjs'
 
 const encoder = new TextEncoder('utf-8')
 const sep = ','
@@ -380,7 +380,9 @@ const optesp = computed(() => session.espace ? (session.espace.opt ? true : fals
 
 const nbmiesp = computed(() => session.espace ? session.espace.nbmi : 12)
 
-watch(optesp, (ap) => { optionA.value = ap })
+watch(optesp, (ap) => { 
+  optionA.value = ap 
+})
 watch(nbmiesp, (ap) => { nbmi.value = session.espace ? session.espace.nbmi : 12 })
 watch(optionA, async (ap) => {
   if (session.espace && ((session.espace.opt ? true : false) !== ap))
@@ -392,23 +394,12 @@ watch(nbmi, async (ap) => {
   })
 
 async function dlstat (mr) {
+  if (mr >= 0) 
+    mois.value = AMJ.moisMoins(Math.floor(session.auj / 100), mr)
   const cleES = session.compte.cleE
-  const { err, blob, creation, mois } = 
-    await new DownloadStatC().run(session.espace.org, mr, cleES)
-  const nf = session.espace.org + '-C_' + mois
-  if (!err) {
-    saveAs(blob, nf)
-    await afficherDiag($t('PEsd', [nf]))
-  } else {
-    await afficherDiag($t('PEnd' + err))
-  }
-}
-
-async function dlstat2 () {
-  const cleES = session.compte.cleE
-  const { err, blob } = await new DownloadStatC2()
-    .run(session.espace.org, mois.value, 'C', cleES)
-  const nf = session.espace.org + '-C_' + mois.value
+  const { err, blob } = 
+    await new DownloadStatC().run(null, mois.value, cleES)
+  const nf = session.org + '-C_' + mois.value
   if (!err) {
     saveAs(blob, nf)
     await afficherDiag($t('PEsd', [nf]))
