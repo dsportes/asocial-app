@@ -105,14 +105,19 @@ export async function post (op, fonction, args) {
   const config = stores.config
   const session = stores.session
   const hb = stores.hb
-  let u
+  const u = config.OPURL + fonction
   try {
     if (op) op.BRK()
     args.APIVERSION = APIVERSION
     const data = new Uint8Array(encode(args))
-    u = config.OPURL + fonction
     if (op) op.cancelToken = axios.CancelToken.source()
-    const par = { method: 'post', url: u, data: data, responseType: 'arraybuffer' }
+    const par = { 
+      method: 'post', 
+      url: u,
+      timeout: 0,
+      data: data, 
+      responseType: 'arraybuffer' 
+    }
     if (op) par.cancelToken = op.cancelToken.token
     const r = await axios(par)
     if (op) op.cancelToken = null
@@ -161,7 +166,8 @@ function procEx (e, op, u) {
     throw ex
   } else { 
     // inattendue, pas mise en forme (500 et autres)
-    if (config.mondebug) console.log('URL de POST: ', u || '?')
+    if (config.mondebug) 
+      console.log('EXC de POST - status:' + status + ' url:' + (u || '?') + ' exc:' + e.toString())
     const code = !status ? 100 : (status >= 500 && status <= 599 ? 101 : 0)
     throw new AppExc(E_SRV, code, [status, (u || '?'), e.message])
   }

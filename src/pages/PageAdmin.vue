@@ -42,12 +42,12 @@
         <div :class="dkli(idx) + ' q-my-sm full-with'">
           <div class="row font-mono">
             <div class="col-1 text-center">{{OPNOMS[t.op]}}</div>
-            <div class="col-1 text-center">{{t.org}}</div>
+            <div class="col-2 text-center">{{t.org}}</div>
             <div class="col-4 text-center">{{dhstring(t.dh, true)}}</div>
-            <div v-if="!t.org" class="col-4 text-center">
-              <span v-if="!t.exc">{{t.dhf ? dhstring(t.dhf, true) : '?'}}</span>
+            <div v-if="!t.org" class="col-3 text-center">
+              <span v-if="t.op < 20">{{t.dhf ? dhstring(t.dhf, true) : '?'}}</span>
             </div>
-            <div v-else class="col-3 text-center">{{t.id}}</div>
+            <div v-else class="col-3 text-center">{{t.id || '?'}}</div>
             <div class="col-1 text-center">{{t.nb}}</div>
             <div class="col-1 row items-center justify-end q-gutter-xs">
               <btn-cond icon="delete" @ok="tacheDel(t)"/>

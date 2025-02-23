@@ -954,7 +954,7 @@ export default {
   EScol0: 'OP',
   EScol1: 'ORG',
   EScol2: 'DH prochain start',
-  EScol3: 'DH dernière fin OU id/ids',
+  EScol3: 'DH fin OU id',
   EScol4: 'NB',
 
   // Page people et ApercuPeople
