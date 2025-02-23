@@ -2353,10 +2353,10 @@ args.ns :
 export class GetTaches extends Operation {
   constructor () { super('GetTaches') }
 
-  async run (ns) { 
+  async run (org) { 
     try {
       const session = stores.session
-      const args = { token: session.authToken, ns }
+      const args = { token: session.authToken, org }
       const ret = await post(this, 'GetTaches', args)
       return this.finOK(ret.taches)
     } catch (e) {
@@ -2376,7 +2376,7 @@ export class DelTache extends Operation {
   async run (t) { 
     try {
       const session = stores.session
-      const args = { token: session.authToken, op: t.op, ns: t.ns, id: t.id, ids: t.ids }
+      const args = { token: session.authToken, op: t.op, org: t.org, id: t.id }
       await post(this, 'DelTache', args)
       this.finOK()
     } catch (e) {
@@ -2396,7 +2396,7 @@ export class GoTache extends Operation {
   async run (t) { 
     try {
       const session = stores.session
-      const args = { token: session.authToken, op: t.op, ns: t.ns, id: t.id, ids: t.ids }
+      const args = { token: session.authToken, op: t.op, org: t.org, id: t.id }
       await post(this, 'GoTache', args)
       this.finOK()
     } catch (e) {
