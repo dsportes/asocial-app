@@ -132,6 +132,7 @@ export const useSessionStore = defineStore('session', {
     */
     nivAlerte (state) {
       if (state.nbjAt < state.config.alerteDlv || state.nbjDlv < state.config.alerteDlv) return 3
+      if (state.avion) return 0
       if (state.hasAR) return 2
       if (state.RAL || state.hasLS || state.hasNRED || state.hasVRED
         || state.ntfE || state.ntfC || state.ntfP || state.estFige) return 1

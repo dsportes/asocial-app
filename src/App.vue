@@ -45,7 +45,7 @@
 
       <q-toolbar-title>
         <div class="row justify-between items-center">
-          <div v-if="config.nouvelleVersion" @click="ui.oD('reload', 'a')" 
+          <div v-if="(!session.ok || (session.ok && session.accesNet)) && config.nouvelleVersion" @click="ui.oD('reload', 'a')" 
             class="bg-negative row items-center">
             <span class="titre-sm text-white text-bold q-mr-sm">{{$t('RLnvver')}}</span>
             <q-icon name="system_update" size="sm" color="white"/>
@@ -70,7 +70,7 @@
 
     <q-toolbar v-if="ui.page === 'compta'" inset 
       class="full-width tbp row justify-between">
-      <btn-cond icon="refresh" @ok="session.reloadCompta()"/>
+      <btn-cond :disable="session.avion" icon="refresh" @ok="session.reloadCompta()"/>
       <q-tabs  class="col titre-md" v-model="ui.pagetab" inline-label outside-arrows mobile-arrows no-caps>
         <q-tab name="notif" :label="$t('PNCntf')" @click="ui.setTab('alertes')"/>
         <q-tab name="compta" :label="$t('PNCabo')" @click="ui.setTab('compta')"/>

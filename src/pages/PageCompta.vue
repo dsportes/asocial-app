@@ -36,19 +36,18 @@ import { computed, ref, onMounted } from 'vue'
 import stores from '../stores/stores.mjs'
 import PanelCompta from '../components/PanelCompta.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
-import ApercuNotif from '../components/ApercuNotif.vue'
 import PanelCredits from '../components/PanelCredits.vue'
 import PanelAlertes from '../components/PanelAlertes.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BtnCond from '../components/BtnCond.vue'
 import { $t, dkli, afficher8000 } from '../app/util.mjs'
-import { ID, UNITEN, UNITEV, AMJ } from '../app/api.mjs'
+import { ID } from '../app/api.mjs'
 import { RafraichirCvsAv, GetPartition } from '../app/operations4.mjs'
 
 const al = 'titre-md text-italic bg-yellow-3 text-negative text-bold q-mb-xs q-ml-xl'
 
 const session = stores.session
-const pSt = stores.people
+// const pSt = stores.people
 const ui = stores.ui
 
 if (session.accesNet) onMounted( async () => { 

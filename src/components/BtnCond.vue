@@ -1,7 +1,7 @@
 <template>
 <span>
   <q-btn v-if="stop"
-    :icon="diag ? 'error' : icon"
+    :icon="icon"
     padding="none" 
     :disable="disable || false"
     :flat="flat || false"
@@ -17,7 +17,7 @@
     <slot />
   </q-btn>
   <q-btn v-else
-    :icon="diag ? 'error' : icon"
+    :icon="icon"
     padding="none" 
     :disable="disable || false"
     :flat="flat || false"
@@ -69,7 +69,7 @@ const tc = computed(() => {
 })
 
 const clr = computed(() => { 
-  const x = diag.value ? 'accent' : ( 
+  const x = diag.value ? 'negative' : ( 
     !props.color || props.color === 'primary' ? 'btnbg' : 
     (props.color === 'warning' ? 'btwbg' : (props.color || 'none')))
   return x
