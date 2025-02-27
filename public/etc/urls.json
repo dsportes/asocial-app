@@ -1,9 +1,9 @@
 {
   "BUILD": "10",
-  "opurlX": "http://localhost:8080",
-  "pubsuburlX": "http://localhost:8080",
-  "opurl": "https://asocial-test1.ew.r.appspot.com",
-  "pubsuburl": "https://asocial-test1.ew.r.appspot.com",
+  "opurl": "http://localhost:8080",
+  "pubsuburl": "http://localhost:8080",
+  "opurlX": "https://asocial-test1.ew.r.appspot.com",
+  "pubsuburlX": "https://asocial-test1.ew.r.appspot.com",
   "docsurls": { 
     "fr-FR": "https://asocialapps.github.io/frdocs", 
     "en-EN": "https://asocialapps.github.io/frdocs" 
