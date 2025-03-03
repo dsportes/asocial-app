@@ -210,11 +210,17 @@ $tph: 32px
   min-height: 1.6rem !important
 
 .q-tree__arrow 
-  font-size: 22px !important
-  margin-right: -4px !important
+  font-size: 32px !important
+  margin-right: -2px !important
 
 .q-tree__node-header 
   align-items: center !important
+
+.q-tree__node-header:before
+  left: -2px !important
+
+.q-tree--dense .q-tree__node--child > .q-tree__node-header:before
+  left: -18px !important
 
 .q-item__section--avatar
   min-width: 0 !important
