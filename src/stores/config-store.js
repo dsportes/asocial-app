@@ -20,6 +20,11 @@ export const useConfigStore = defineStore('config', {
     motsclesloc: {},
     motscles: {},
 
+    OPURL: '',
+    PUBSUBURL: '',
+    services: null,
+    orgs: {},
+
     pagesHelp: new Set(),
 
     logo: '',
@@ -83,7 +88,16 @@ export const useConfigStore = defineStore('config', {
       if (cfg.tarifs) 
         Tarif.tarifs = cfg.tarifs
       for(const x in cfg) this[x] = cfg[x]
+      for(const svc in this.services)
+        for(const org of this.services[svc].orgs) this.orgs[org] = svc
       await this.getPerm()
+    },
+
+    setURLs (svc) {
+      this.OPURL = this.services[svc].opurl + '/op/'
+      this.PUBSUBURL = (this.services[svc].pubsuburl || this.services[svc].opurl) + '/pubsub/'
+      console.log('OPURL: ' + this.OPURL)
+      console.log('PUBSUBURL: ' + this.PUBSUBURL)
     },
 
     setEmojiIndex (ei) {

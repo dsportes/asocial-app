@@ -91,7 +91,7 @@ import { useI18n } from 'vue-i18n'
 const $t = useI18n().t
 
 import stores from '../stores/stores.mjs'
-import { ref, onMounted, computed, onUnmounted } from 'vue'
+import { ref, computed, onUnmounted } from 'vue'
 import { decode } from '@msgpack/msgpack'
 
 import { afficherDiag, beep, styp } from '../app/util.mjs'
@@ -100,7 +100,6 @@ import { Sponsoring, RegCles } from '../app/modele.mjs'
 import { AMJ } from '../app/api.mjs'
 import PhraseContact from '../components/PhraseContact.vue'
 import AcceptationSponsoring from '../panels/AcceptationSponsoring.vue'
-import BoutonHelp from '../components/BoutonHelp.vue'
 import BtnCond from '../components/BtnCond.vue'
 import { decrypter } from '../app/webcrypto.mjs'
 import { CreationComptable, GetSponsoring } from '../app/operations4.mjs'

@@ -103,11 +103,11 @@
         <div class="column fs-sm font-mono q-ml-lg">
           <div class="row">
             <span class="col-2 text-right q-pr-md text-italic">OP:</span>
-            <span class="col-10">{{config.OPURL}}</span>
+            <span class="col-10">{{config.OPURL || '?'}}</span>
           </div>
           <div class="row">
             <span class="col-2 text-right q-pr-md text-italic">PUBSUB:</span>
-            <span class="col-10">{{config.PUBSUBURL}}</span>
+            <span class="col-10">{{config.PUBSUBURL || '?'}}</span>
           </div>
         </div>
       </q-card-section>

@@ -42,17 +42,18 @@ async function msgPush (event) {
 }
 
 export default boot(async ({ app /* Vue */ }) => {
-  const urls = require('/public/etc/urls.json')
+  const svc = require('/public/services.json')
   const readme = require('/public/README.md')
 
   const cfg = { pageSessionId: ID.rnd(), nc: 0 }
   for(const x in config) cfg[x] = config[x]
-  if (urls.BUILD) cfg.BUILD = urls.BUILD
 
+  cfg.services = svc.services
   cfg.readme = readme || ''
-  cfg.docsurls = urls.docsurls || { 'en-FR': 'http://localhost:4000' }
-  cfg.vapid_public_key = urls.vapid_public_key || 'BC8J60JGGoZRHWJDrSbRih-0qi4Ug0LPbYsnft668oH56hqApUR0piwzZ_fsr0qGrkbOYSJ0lX1hPRTawQE88Ew'
+  cfg.docsurls = svc.docsurls || { 'en-FR': 'http://localhost:4000' }
+  cfg.vapid_public_key = svc.vapid_public_key || 'BC8J60JGGoZRHWJDrSbRih-0qi4Ug0LPbYsnft668oH56hqApUR0piwzZ_fsr0qGrkbOYSJ0lX1hPRTawQE88Ew'
 
+  /*
   const h = window.location.host
   let u = (urls.opurl === 'http' || urls.opurl === 'https') ?
     urls.opurl + '://' + h : urls.opurl
@@ -61,8 +62,11 @@ export default boot(async ({ app /* Vue */ }) => {
 
   u = (urls.pubsuburl === 'http' || urls.pubsuburl === 'https') ?
   urls.pubsuburl + '://' + h : urls.pubsuburl
+    cfg.OPURL = u + '/op/' 
+  console.log('OPURL: ' + cfg.OPURL)
   cfg.PUBSUBURL = u + '/pubsub/'
   console.log('PUBSUBURL: ' + cfg.PUBSUBURL)
+  */
 
   console.log('build:' + cfg.BUILD)
   
@@ -70,7 +74,7 @@ export default boot(async ({ app /* Vue */ }) => {
   
   cfg.search = window.location.search.replace('?', '')
 
-  console.log('Mode silencieux: ' + (cfg['silence'] ? 'oui' : 'non'))
+  // console.log('Mode silencieux: ' + (cfg['silence'] ? 'oui' : 'non'))
 
   cfg.locales = []
   cfg.localeOptions.forEach(t => {cfg.locales.push(t.value)})

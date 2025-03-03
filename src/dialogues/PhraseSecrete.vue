@@ -199,17 +199,6 @@ watch(vkb, (ap, av) => {
 
 const secligne1 = computed(() => isPwd.value ? ''.padStart(ligne1.value.length, '*') : ligne1.value)
 
-/*
-watch(ligne1, (ap) => {
-  if (ap && ap.length > 4 && ap.endsWith('*')) {
-    const c = ap.substring(0, ap.length - 1)
-    let s = ''
-    while (s.length < lgph) s += c
-    forceInput(s)
-  }
-})
-*/
-
 watch(razdb, async (ap) => {
   if (ap === true) await afficherDiag($t('LOGrazbl'))
   ui.razdb = ap
@@ -248,14 +237,43 @@ function ok () {
   }
 }
 
-function okem () {
+async function gererOrg (o) {
+  let org, svc
+  const i = o.indexOf('-')
+  if (i === -1) { 
+    org = o
+    svc = config.orgs[org]
+    if (!config.services[svc]) {
+      await afficherDiag($t('PSnosvc1', [org]))
+      return false
+    }
+    session.setOrg(org)
+    config.setURLs(svc)
+  }
+  else { 
+    org = o.substring(0, i)
+    svc = o.substring(i + 1)
+    if (!config.services[svc]) {
+      await afficherDiag($t('PSnosvc2', [svc]))
+      return false
+    }
+    session.setOrg(org)
+    config.setURLs(svc)
+  }
+  return true
+}
+
+async function okem () {
+  if (login.value) {
+    const ok = await gererOrg(orgL.value)
+    if (!ok) return
+  }
   encours.value = true
   ui.fD()
   setTimeout(async () => {
     const pc = new Phrase()
     await pc.init(ligne1.value)
     // await sleep(5000)
-    if (login.value) session.setOrg(orgL.value)
     // ui.ps.ok est la fonction de callback quand ok
     await ui.ps.ok(pc)
     raz()

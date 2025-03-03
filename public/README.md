@@ -8,4 +8,3 @@ Sources:
 - tag: v1.1
 - patchs: _aucun_
 
-URLS externes: /etc/urls.json

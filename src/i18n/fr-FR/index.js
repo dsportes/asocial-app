@@ -702,7 +702,7 @@ export default {
   PSkb: 'Clavier virtuel',
   PSorg1: 'Organisation:',
   PSorg2: '3 à 12 minuscules / chiffres / moins',
-  PSorg3: 'monasso-94',
+  PSorg3: 'monasso OU monasso-xx',
   PSm0: 'Phrase secrète de connexion',
   PSm1: 'Phrase non confirmée, la re-saisir',
   PSm2: 'Confirmer la phrase secréte',
@@ -714,6 +714,8 @@ export default {
   PSnopin: 'Code PIN inconnu',
   PSkopin: 'Code PIN indéchiffrable',
   PSutpin: 'Utiliser un code PIN ?',
+  PSnosvc1: 'Aucun serveur n\'est associé à ce code d\'organisation [{0}].\nChanger le ou préciser le code X du serveur [{0}-X] qui sert cette organisation.',
+  PSnosvc2: 'Aucun serveur n\'est déclaré avec le code [{0}].',
 
   // App.vue
   MLAntfg: 'Le navigateur "accepte" les notifications pour l\'application.',
