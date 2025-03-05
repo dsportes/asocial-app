@@ -258,7 +258,7 @@ export const useSessionStore = defineStore('session', {
       for(const f in c.qv) this.qv[f] = c.qv[f]
       this.qv.pcn = pc(this.qv.nn + this.qv.nc + this.qv.ng, this.qv.qn, UNITEN)
       this.qv.pcv = pc(this.qv.v, this.qv.qv, UNITEV)
-      this.qv.pcn = pc(this.qv.cjm * 30, this.qv.qc, 1)
+      this.qv.pcc = pc(this.qv.cjm * 30, this.qv.qc, 1)
     },
 
     alVolCpt (v) {
