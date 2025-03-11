@@ -12,6 +12,11 @@
 
   <q-page-container >
     <q-page class="q-pa-xs">
+      <canvas ref="canvas" :width="imgsz" :height="imgsz" class="d-none"></canvas>
+      <div v-if="fic.thn" class="row justify-center">
+        <img class="q-my-sm bordimg" :width="imgsz" :height="imgsz" :src="fic.thn"/>
+      </div>
+
       <q-stepper v-model="step" vertical color="primary" animated>
         <q-step :name="1" :title="$t('PNFnv1')" icon="attach_file" :done="step > 1">
           <div class="column items-center">
@@ -102,7 +107,7 @@
 import { ref, watch, computed } from 'vue'
 
 import stores from '../stores/stores.mjs'
-import { $t, edvol, dhcool, readFile, styp, sty, dkli, trapex, dhstring } from '../app/util.mjs'
+import { $t, edvol, dhcool, readFile, styp, sty, dkli, trapex, dhstring, u8ToB64 } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BtnCond from '../components/BtnCond.vue'
 import { NouveauFichier } from '../app/operations4.mjs'
@@ -114,7 +119,36 @@ const nSt = stores.note
 const aSt = stores.avatar 
 const gSt = stores.groupe 
 const session = stores.session
-const ppSt = stores.pp 
+const ppSt = stores.pp
+
+const canvas = ref()
+const thn = ref()
+
+const imgsz = 96
+
+async function draw(fic) {
+  if (!fic.value.type.startsWith('image/')) {
+    delete fic.value.thn
+    return
+  }
+  const url = 'data:' + fic.value.type + ';base64,' + u8ToB64(fic.value.u8)
+  console.log(url.length)
+  const ctx = canvas.value.getContext('2d')
+  const img = new Image()
+  await new Promise(r => img.onload=r, img.src=url)
+  const w = img.width
+  const h = img.height
+  const r = h > w ? imgsz / h : imgsz / w
+  const h2 = h * r
+  const w2 = w * r
+  let x = 0, y =0
+  if (h > w) x = (imgsz - w2) / 2
+  else y = (imgsz - h2) / 2
+  ctx.clearRect(0, 0, imgsz, imgsz)
+  ctx.drawImage(img, x, y, w2, h2)
+  fic.value.thn = canvas.value.toDataURL('image/jpeg')
+  console.log(fic.value.thn.length)
+}
 
 const props = defineProps({ 
   note: Object,
@@ -165,6 +199,7 @@ watch(fileList, async (file) => {
       fic.value.lg = size
       fic.value.type = type
       fic.value.u8 = u8
+      await draw(fic)
     }
   } catch (e) { trapex (e, resetFic)}
 })
@@ -182,13 +217,14 @@ watch(step, (s) => {
   }
 })
 
-watch(ccFic, ([modecc, f], av) => {
+watch(ccFic, async ([modecc, f], av) => {
   if (!modecc) { // fichier copié
     fic.value.nom = f.nom
     fic.value.info = f.info
     fic.value.lg = f.lg
     fic.value.type = f.type
     fic.value.u8 = f.u8
+    await draw(fic)
     step.value = 2
   }
 })
@@ -244,4 +280,8 @@ function selFic () {
   border-radius: 5px
 .bordt
   border-top: 1px solid $grey-5
+.bordimg
+  border: 1px solid $grey-5
+.d-none
+  display: none
 </style>
