@@ -1,7 +1,7 @@
 import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 import mime2ext from 'mime2ext'
-import { $t, u8ToB64, gzipB, ungzipB, gzipT, ungzipT, titre, 
+import { $t, u8ToB64, b64ToU8, gzipB, ungzipB, gzipT, ungzipT, titre, 
   dhstring, normNomFichier, edvol } from './util.mjs'
 import { pbkfd, sha256, crypter, decrypter, decrypterStr, decrypterRSA } from './webcrypto.mjs'
 import { ID, Cles, E_BRO, Compteurs, AMJ,
@@ -1258,8 +1258,8 @@ _data_:
 
 Map des fichiers attachés
 - _clé_ `idf`: identifiant aléatoire (absolu) généré à la création.
-- _valeur_ : `{ idf, lg, ficN }`
-  - `ficN` : `{ nom, info, dh, type, gz, lg, sha }` crypté par la clé de la note
+- _valeur_ : `{ idf, lg, ficN, pic }`
+  - `ficN` : `{ nom, info, dh, type, gz, lg, sha, thn }` crypté par la clé de la note
 
 **A propos de `[pid, pids]`**:
 - Pour un note de groupe:
@@ -1305,8 +1305,11 @@ export class Note extends GenDoc {
     this.mfa = new Map()
     this.fnom = new Map()
     this.vf = row.vf
+    this.nbp = row.nbp || 0
     if (this.vf && row.mfa) for (const idf in row.mfa) {
       const f = decode(await decrypter(this.cle, row.mfa[idf].ficN))
+      if (f.thn)
+        f.thn = 'data:image/jpeg;base64,' + u8ToB64(f.thn)
       this.mfa.set(f.idf, f)
       let e = this.fnom.get(f.nom); if (!e) { e = []; this.fnom.set(f.nom, e) }
       e.push(f)
@@ -1345,24 +1348,17 @@ export class Note extends GenDoc {
     return s
   }
 
-  /*
-  get key () { return this.id + '/' + this.ids }
-   clé du parent:
-    - si elle n'est pas rattachée, c'est la racine (avatar ou groupe) de son id
-    - sinon, c'est,
-      - si ref[1] = 0 elle est rattachée à une autre racine (un groupe pour une note d'avatar): ref[0]
-      - sinon c'est la note ref[0]/ref[1]
-  */
-
   get shIds () { return this.ids.substring(this.ids.length - 4) }
 
-  async nouvFic (nom, info, lg, type, u8) {
-    // propriétés ajoutées : u8 (contenu du fichier gzippé crypté), sha, dh, gz
+  async nouvFic (nom, info, lg, type, u8, thn) {
+    // propriétés ajoutées : u8 (contenu du fichier gzippé), sha, dh, gz
+    // thn : u8 du thumbnail si photo
     const fic = { nom, info, lg, type }
     fic.sha = sha256(u8)
     fic.dh = Date.now()
-    fic.gz = fic.type.startsWith('text/')
-    fic.u8 = await crypter(this.cle, fic.gz ? await gzipT(u8) : u8)
+    fic.gz = fic.type.startsWith('text/') && u8.length > 200
+    fic.u8 = fic.gz ? await gzipT(u8) : u8
+    if (thn) fic.thn = b64ToU8(thn.substring(thn.indexOf(',') + 1))
     return fic
   }
 

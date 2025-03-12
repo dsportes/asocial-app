@@ -522,6 +522,7 @@ export default {
   OP_MajLectChatgr: 'Mise à jour de la date-heure de lecture d\'un "chat de groupe".',
   OP_MajLectChat: 'Mise à jour de la date-heure de lecture d\'un "chat".',
   OP_GetCv: 'Obtention de la carte de visite d\'un avatar ou d\'un groupe.',
+  OP_PutUrlNf : 'Obtention de l\'URL de PUT d\'un fichier d\'une note',
 
   // Login
   LOGpubsub: 'Autoriser les "notifications" afin d\'avoir des données à jour en continu même suite aux actions des autres sessions',
@@ -1204,6 +1205,10 @@ export default {
   PNFsuppr: 'Supprimer définitivement',
   PNFvoirn: 'Voir la note ...',
   PNFdetail: 'Accessibilité en avion ...',
+  PNFn1: 'Volume de fichier [{0}o] supérieur au maximum autorisé dans le groupe [{1}o]',
+  PNFn2: 'Nombre de notes + photos [{0}o] supérieur au maximum autorisé dans le groupe [{1}o]',
+  PNFn3: 'Volume de fichier [{0}o] supérieur au maximum autorisé par le quota du compte hébergeur [{1}o]',
+  PNFn4: 'Nombre de notes + photos [{0}o] supérieur au maximum autorisé par le quota du compte hébergeur [{1}o]',
   PNFnv: 'Nouveau fichier attaché',
   PNFnvr: 'Nouvelle révision du fichier #{0}',
   PNFnvf: 'Fichier',
@@ -1261,7 +1266,7 @@ export default {
   PCPref3: 'Crée {0} - Passage en compte "A" {1}.',
   PCPqmn: 'Quota moyen de nombre de documents',
   PCPnbdoc: '{0} note(s) + {1} chat(s) + {2} groupe(s)',
-  PCPnbdoc2: '{1} note(s) + {2} chat(s) + {3} groupe(s)',
+  PCPnbdoc2: '{0} note(s) + {1} chat(s) + {2} groupe(s)',
   PCPqmv: 'Quota moyen de volume de fichiers / utilisé',
   PCPqmc: 'Quota moyen de calcul / consommé',
   PCPcabo: 'Coût d\'abonnement / Facturé(1)',

@@ -60,6 +60,9 @@
                 :aut="ro ? '0' : (estGr ? aut : '1')" :note="note"/>
             </div>
           </div>
+          <div v-if="e.f.thn" class="row justify-center q-mt-xs q-mb-md">
+            <img class="q-my-sm bordimg" :width="imgsz" :height="imgsz" :src="e.f.thn"/>
+          </div>
         </div>
         <q-separator color="orange" size="2px" class="q-mt-xs q-mb-sm"/>
       </div>
@@ -89,6 +92,8 @@ import { Note } from '../app/modele.mjs'
 import ListeAuts from '../components/ListeAuts.vue'
 import NodeParent from '../components/NodeParent.vue'
 import { ID } from '../app/api.mjs'
+
+const imgsz = 96
 
 const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
@@ -161,4 +166,6 @@ async function nouveau (nf) {
 .info
   max-height: 1.6rem !important
   overflow: hidden
+.bordimg
+  border: 1px solid $grey-5
 </style>

@@ -107,10 +107,10 @@
 import { ref, watch, computed } from 'vue'
 
 import stores from '../stores/stores.mjs'
-import { $t, edvol, dhcool, readFile, styp, sty, dkli, trapex, dhstring, u8ToB64 } from '../app/util.mjs'
+import { $t, edvol, dhcool, readFile, styp, sty, dkli, trapex, dhstring, u8ToB64, afficherDiag } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BtnCond from '../components/BtnCond.vue'
-import { NouveauFichier } from '../app/operations4.mjs'
+import { NouveauFichier, PutUrlNf } from '../app/operations4.mjs'
 import NomGenerique from '../components/NomGenerique.vue'
 import { isAppExc, ID } from '../app/api.mjs'
 
@@ -124,13 +124,14 @@ const ppSt = stores.pp
 const canvas = ref()
 const thn = ref()
 
-const imgsz = 96
+const imgsz = 96 // doit être multiple de 8
 
 async function draw(fic) {
   if (!fic.value.type.startsWith('image/')) {
     delete fic.value.thn
     return
   }
+  const png = fic.value.type.indexOf('png') !== -1
   const url = 'data:' + fic.value.type + ';base64,' + u8ToB64(fic.value.u8)
   console.log(url.length)
   const ctx = canvas.value.getContext('2d')
@@ -145,9 +146,32 @@ async function draw(fic) {
   if (h > w) x = (imgsz - w2) / 2
   else y = (imgsz - h2) / 2
   ctx.clearRect(0, 0, imgsz, imgsz)
+  if (png) damier(ctx)
+  if (h > w) {
+    ctx.clearRect(0, 0, x, imgsz)
+    ctx.clearRect(x + w2, 0, x, imgsz)
+  }
+  if (h < w) {
+    ctx.clearRect(0, 0, imgsz, y)
+    ctx.clearRect(0, y + h2, imgsz, y)
+  }
   ctx.drawImage(img, x, y, w2, h2)
   fic.value.thn = canvas.value.toDataURL('image/jpeg')
   console.log(fic.value.thn.length)
+}
+
+function damier (ctx) {
+  const n = imgsz / 8
+  let g1 = true
+  for (let i = 0; i < n; i++) {
+    let g2 = !g1
+    for (let j = 0; j < n; j++) {
+      ctx.fillStyle = g2 ? 'grey' : 'white'
+      ctx.fillRect(i * 8, j * 8, 8, 8)
+      g2 = !g2
+    }
+    g1 = !g1
+  }
 }
 
 const props = defineProps({ 
@@ -236,16 +260,23 @@ async function valider () {
   const nf = await props.note.nouvFic(
     nfic.value, 
     info.value || '',
-    fic.value.lg, 
+    fic.value.lg,
     fic.value.type, 
-    fic.value.u8
+    fic.value.u8,
+    fic.value.thn || false
   )
   const sidf = []
   if (lstfic.value && lstfic.value.length) lstfic.value.forEach(f => {if (f.sel) sidf.push(f.idf)})
   ui.etf = 1
   const ida = props.aut <= '1' ? null : props.aut
-  if (!await new NouveauFichier().run(props.note, ida, nf, sidf)) {
-    errTrf.value = true
+
+  const ret = await new PutUrlNf().run(props.note, ida, nf, sidf)
+  if (nf.idf) {
+    if (!await new NouveauFichier().run(props.note, ida, nf, sidf, ret)) { // ret est l'url
+      errTrf.value = true
+    }
+  } else {
+    afficherDiag($t('PNFe' + ret.code, [ret.n1, ret.n2]))
   }
 }
 
