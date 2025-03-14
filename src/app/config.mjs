@@ -14,6 +14,7 @@ export const config = {
 
   silence: false,
   silenceHome: true,
+  touchInMinutes: 10,
 
   theme: {
     primary: ['#0D47A1', '#BBDEFB'],

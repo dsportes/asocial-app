@@ -16,6 +16,7 @@
 
   <q-page-container>
     <q-page class="q-pa-xs column items-center">
+      <canvas ref="canvas" class="d-none"></canvas>
       <q-expansion-item class="full-width q-my-xs" dense :label="$t('PNOapropos')" header-class="tbs">
         <div class="q-pa-sm">
           <node-parent />
@@ -61,7 +62,8 @@
             </div>
           </div>
           <div v-if="e.f.thn" class="row justify-center q-mt-xs q-mb-md">
-            <img class="q-my-sm bordimg" :width="imgsz" :height="imgsz" :src="e.f.thn"/>
+            <img class="q-my-sm bordimg cursor-pointer"
+              :src="e.f.thn" @click="affImg(e.f)"/>
           </div>
         </div>
         <q-separator color="orange" size="2px" class="q-mt-xs q-mb-sm"/>
@@ -75,6 +77,23 @@
       :aut="ro ? '0' : (estGr ? aut : '1')" :pasheb="pasHeb" :ro="ro"/>
   </q-dialog>
 
+  <!-- Zoom d'une photo -->
+  <q-dialog v-model="ui.d[idc].Zimg" maximized
+      transition-show="slide-up"
+      transition-hide="slide-down">
+      <div class="column justify-center bg-grey-7 full-width">
+        <div class="row justify-center">
+          <img :src="imgZUrl"
+            :class="noir ? 'bg-black' : 'bg-white'"/>
+        </div>
+      </div>
+      <div class="imgbar bg-transparent row items-center">
+        <btn-cond icon="close" @ok="ui.fD"/>
+        <q-toggle v-if="png" v-model="noir" class="bg-grey-7"
+          dense color="black"/>
+      </div>
+  </q-dialog>
+
 </q-layout>
 </template>
 
@@ -82,18 +101,15 @@
 import { ref, computed, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
-import { styp, dkli, edvol, dhcool, suffixe } from '../app/util.mjs'
+import { styp, edvol, dhcool, u8ToB64 } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import NouveauFichier from '../dialogues/NouveauFichier.vue'
 import MenuFichier from '../components/MenuFichier.vue'
 import NoteEcritepar2 from '../components/NoteEcritepar2.vue'
 import BtnCond from '../components/BtnCond.vue'
-import { Note } from '../app/modele.mjs'
 import ListeAuts from '../components/ListeAuts.vue'
 import NodeParent from '../components/NodeParent.vue'
 import { ID } from '../app/api.mjs'
-
-const imgsz = 96
 
 const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
@@ -104,9 +120,15 @@ const pSt = stores.people
 const gSt = stores.groupe
 const faSt = stores.ficav
 
-const texte = ref('')
+const scrH = computed(() => ui.screenHeight )
+const scrW = computed(() => ui.screenWidth ) 
+const canvas = ref()
+const imgZUrl = ref()
+const noir = ref(true)
+
 const aut = ref(null)
 const nomf = ref('')
+const png = ref()
 
 const note = computed(() => nSt.note)
 const nom = computed(() => pSt.nom(note.value.id))
@@ -156,6 +178,33 @@ async function nouveau (nf) {
   ui.oD('NFouvrir', idc)
 }
 
+async function affImg (f) {
+  const u8 = await note.value.getFichier(f)
+  if (!u8) {
+    await afficherDiag($t('PNFgetEr'))
+    return
+  }
+  const url = 'data:' + f.type + ';base64,' + u8ToB64(u8)
+  const img = new Image()
+  await new Promise(r => img.onload=r, img.src=url)
+  const w = img.width
+  const h = img.height
+  const rh = scrH.value / h
+  const rw = scrW.value / w
+  let r = rh > rw ? rh : rw 
+  if (r > 1) r = 1 // pas de réduction
+  const wi = w * r
+  const hi = h * r
+  canvas.value.width = wi
+  canvas.value.height = hi
+  const ctx = canvas.value.getContext('2d')
+  ctx.clearRect(0, 0, wi, hi)
+  ctx.drawImage(img, 0, 0, wi, hi)
+  imgZUrl.value = canvas.value.toDataURL(f.type)
+  png.value = f.type.indexOf('png') !== -1
+  ui.oD('Zimg', idc)
+}
+
 </script>
 
 <style lang="sass" scoped>
@@ -168,4 +217,14 @@ async function nouveau (nf) {
   overflow: hidden
 .bordimg
   border: 1px solid $grey-5
+.d-none
+  display: none
+.imgbar
+  position: absolute
+  padding: 0
+  margin: 0
+  max-height: 24px
+  overflow: hidden
+  top: -4px
+  left: 0
 </style>

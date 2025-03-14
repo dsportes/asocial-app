@@ -14,6 +14,8 @@ const X = {
 
 export const useUiStore = defineStore('ui', {
   state: () => ({
+    touch: Date.now(), // dh dernière "activité" de l'utilisateur
+
     diag: '',
     diagresolve: null,
 
@@ -94,6 +96,7 @@ export const useUiStore = defineStore('ui', {
     },
 
     getIdc () {
+      this.touch = Date.now()
       X.idc++
       this.d[X.idc] = {}
       return X.idc
@@ -168,6 +171,7 @@ export const useUiStore = defineStore('ui', {
     },
 
     setPage (p, t) {
+      if (p !== 'login') this.touch = Date.now()
       this.resetD()
       this.pageback = pagesB.has(this.page) ? this.page : 'accueil'
       this.page = p

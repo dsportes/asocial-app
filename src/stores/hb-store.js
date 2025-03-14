@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 
 import stores from './stores.mjs'
 import { pubsub } from '../app/net.mjs'
-import { SyncFull } from '../app/synchro.mjs'
+import { SyncFull, deconnexion } from '../app/synchro.mjs'
 
 const normal = 120 * 1000
 const court = 10 * 1000
@@ -11,6 +11,7 @@ const court = 10 * 1000
 export const useHbStore = defineStore('hb', () => {
   const session = stores.session
   const config = stores.config
+  const ui = stores.ui
 
   const iterTO = ref(0) // itération sur l'envoi de hb
 
@@ -42,8 +43,16 @@ export const useHbStore = defineStore('hb', () => {
   }
 
   async function doHB () {
+    const now = Date.now()
+    if (session.ok) {
+      const n = (now - ui.touch) / 60000
+      if (n > config.touchInMinutes) {
+        await deconnexion()
+        return
+      }
+    }
     if (KO.value) { nextHB(); return }
-    dhhb.value = Date.now()
+    dhhb.value = now
 
     if (nbRetry.value) {
       if (session.sessionId === sessionId.value) {

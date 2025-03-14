@@ -4,7 +4,7 @@ import mime2ext from 'mime2ext'
 import { $t, u8ToB64, b64ToU8, gzipB, ungzipB, gzipT, ungzipT, titre, 
   dhstring, normNomFichier, edvol } from './util.mjs'
 import { pbkfd, sha256, crypter, decrypter, decrypterStr, decrypterRSA } from './webcrypto.mjs'
-import { ID, Cles, E_BRO, Compteurs, AMJ,
+import { ID, Cles, E_BRO, Compteurs, AMJ, AppExc,
   synthesesPartition, synthesePartPC, FLAGS, UNITEN, UNITEV } from './api.mjs'
 import { DownloadFichier } from './operations4.mjs'
 
@@ -1357,7 +1357,7 @@ export class Note extends GenDoc {
     fic.sha = sha256(u8)
     fic.dh = Date.now()
     fic.gz = fic.type.startsWith('text/') && u8.length > 200
-    fic.u8 = fic.gz ? await gzipT(u8) : u8
+    fic.u8 = await crypter(this.cle, fic.gz ? await gzipT(u8) : u8)
     if (thn) fic.thn = b64ToU8(thn.substring(thn.indexOf(',') + 1))
     return fic
   }

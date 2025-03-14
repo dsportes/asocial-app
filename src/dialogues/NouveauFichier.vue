@@ -211,7 +211,6 @@ const vgr = computed(() =>  !groupe.value ? 0 : groupe.value.alVolGr(vx.value))
 const alRed = computed(() =>  volsupp.value < (fic.value.lg || 0)
   && (vcpt.value === 2 || vgr.value === 2 || props.pasheb))
 
-
 watch(fileList, async (file) => {
   try {
     if (file) {
