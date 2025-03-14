@@ -37,6 +37,7 @@ onMounted(async () => {
   const u8 = await props.note.getFichier(props.fic)
   if (!u8) {
     await afficherDiag($t('PNFgetEr'))
+    ui.fD()
     return
   }
   const url = 'data:' + props.fic.type + ';base64,' + u8ToB64(u8)
