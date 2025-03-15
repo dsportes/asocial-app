@@ -292,6 +292,20 @@ export const useNoteStore = defineStore('note', {
   },
 
   actions: {
+    /* Liste des [{idf, node, fic}] des fichiers photos
+    existants sous un node, accumulation dans l */
+    photos (node, l) {
+      if (!node) { // racines
+        for (const c of this.nodes) this.photos(c, l)
+      } else {
+        const n = node.note
+        if (n) for(const [idf, f] of n.mfa)
+          if (f.thn) l.push({ idf, node, fic: f })
+        if (node.children)
+          for (const c of node.children) this.photos(c, l)
+      }
+    },
+
     calculNfnt () {
       const m = {}
       if (this.ui.page === 'notes') {

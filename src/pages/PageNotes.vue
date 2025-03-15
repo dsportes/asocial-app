@@ -44,6 +44,10 @@
       <note-fichier/>
     </q-dialog>
 
+    <q-dialog v-model="ui.d[idc].AP" position="left" persistent>
+      <album-photos :lstPhotos="lstPhotos" @select="clicknode"/>
+    </q-dialog>
+
     <q-dialog v-model="ui.d[idc].confirmSuppr" persistent>
       <q-card :class="styp('sm')">
         <q-toolbar class="tbs">
@@ -256,6 +260,12 @@
             :label="$t('PNOsupp')" @ok="ovSuppr"/>
           <btn-cond v-if="rattaut" icon="account_tree" :label="$t('PNOratt')" 
             cond="cEdit" @ok="rattacher"/>
+          <btn-cond icon="photo_album" :label="$t('PNOalbum')" 
+            @ok="ovAlbum"/>
+        </div>
+
+        <div v-if="!selected && !rec" class="q-my-xs row justify-center">
+          <btn-cond icon="photo_album" :label="$t('PNOalbum')" @ok="ovAlbum"/>
         </div>
       </div>
           
@@ -289,6 +299,7 @@ import NotePlus from '../components/NotePlus.vue'
 import HashTags from '../components/HashTags.vue'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
+import AlbumPhotos from '../panels/AlbumPhotos.vue'
 import { RattNote, HTNote, SupprNote } from '../app/operations4.mjs'
 import { Note } from '../app/modele.mjs'
 import { putData, getData } from '../app/net.mjs'
@@ -349,8 +360,21 @@ const dlv2f = ref(0)
 const dlvx = ref(0)
 const portupload = ref(cfg.portupload)
 const dirloc = ref($t('PNOdirloc'))
+const lstPhotos = ref()
 
 const estAnim = computed(() => { const e = nSt.note ? gSt.egr(nSt.note.id) : null; return e && e.estAnim })
+
+const photos = computed(() => {
+  const l = []
+  nSt.photos(nSt.node, l)
+  return l
+})
+
+async function ovAlbum () {
+  lstPhotos.value = photos.value
+  if (!lstPhotos.value.length) await afficherDiag($t('PNnoph'))
+  else ui.oD('AP', idc)
+}
 
 async function ovNE () {
   if (session.cEdit) { await afficherDiag($t(session.cEdit)); return }
@@ -453,8 +477,9 @@ const pc = (i, j) => !i ? '-' : Math.round((j * 100) / i) + '%'
 function clicknode (n) {
   nodeDiag.value = ''
   switch (rec.value) {
-    case 0 : { 
-      selected.value = n.ids
+    case 0 : {
+      if (n.type === 1 && selected.value === n.ids) selected.value = ''
+      else selected.value = n.ids
       return
     }
     case 1 : { 

@@ -1048,6 +1048,7 @@ export default {
   PNCurg: 'Chats d\'urgence',
 
   // PageNotes
+  PNOalbum: 'Album',
   PNOdep: 'Déplier',
   PNOrep: 'Replier',
   PNOnosel: 'Pas de note sélectionnée',
@@ -1240,6 +1241,10 @@ export default {
   PNFsf: 'Confirmer ou infirmer la suppression du fichier',
   PNFcpp: 'Fichier copié dans le presse-papier',
   PNFrevx: 'ne voir que les révisions pour ce nom',
+
+  // AlbumPhotos
+  APnote: 'note',
+  APzoom: 'zoom',
 
   //EditeurMd
   EMDqss: 'Les modifications n\'ont pas été validées. En quittant cette fenêtre elles seront perdues.',
