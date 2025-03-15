@@ -1999,6 +1999,7 @@ La "consommation mensuelle" de calcul est en centimes et est la somme des coûts
   A_dial_notefic: 'Fichiers attachés à une note',
   A_dial_noteht: 'Hashtags à propos d\'une note',
   A_dial_notedl: 'Téléchargement des notes et leurs fichiers',
+  A_album_photos: 'Album de photos des notes',
 
   A_how_to: 'Comment faire pour ...',
   A_ht_compte: '...créer son compte, s\'y connecter, le gérer',
