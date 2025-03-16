@@ -27,7 +27,7 @@ L'état _normal_ du **chat d'un avatar** est _actif_:
 
 Mais un _chat d'un avatar_ peut avoir été **ouvert par le contact**. Il se peut aussi que le chat ait perdu de son intérêt pour une raison quelconque.
 
-Dans ce cas le compte peut **raccrocher** le chat qui va devenir _passif / raccroché_:
+Dans ce cas le compte peut **raccrocher** le chat indésirable qui va devenir _passif / raccroché_:
 - les lignes du chat sont effacées (pour le compte, pas pour son contact).
 - le chat N'EST PLUS décompté pour 1 dans le nombre de _documents_ dont le quota QN attaché au compte limite l'inflation.
 

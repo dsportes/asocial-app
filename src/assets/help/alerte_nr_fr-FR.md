@@ -1,6 +1,11 @@
 Dans la documentation générale, lire <a href="$$/appli/alertes.html" target="_blank">Alertes et restrictions d'accès associées</a>
 
 ## Le nombre de documents excède le quota autorisé
+
+> _Remarques:_
+>- une note n'ayant pas de fichier _image_ (photo) attaché compte pour 1.
+>- une note ayant N fichiers _image_ (photos) attachés compte pour N+1.
+
 Il y a trop de notes / chats / groupes par rapport au _quota QN_ déclaré:
 - il est impossible d'ajouter une nouvelle note,
 - il est impossible d'ouvrir un nouveau _chat_,

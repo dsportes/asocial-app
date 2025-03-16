@@ -10,7 +10,7 @@ Un bouton au sommet de la page ouvre le dialogue de déclaration d'un nouveau sp
 ### Qui peut _sponsoriser_ un nouveau compte ?
 Si le Comptable de l'organisation a déclaré que celle-ci autorise l'existence de comptes "A" _autonomes_: tous les comptes peuvent être _sponsors_.
 
-Sinon, seuls les comptes "O" (_de l'organisation_) peuvent être crées: ils peuvent être _sponsorisés_,
+Sinon, seuls les comptes "O" (_de l'organisation_) peuvent être _sponsorisés_,
 - soit par le Comptable lui-même qui peut sponsoriser un compte "O" de n'importe quelle partition.
 - soit par un des délégués du Comptable qui peuvent sponsoriser un compte "O" de **leur** partition.
 

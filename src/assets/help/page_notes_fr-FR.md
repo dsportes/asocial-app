@@ -130,6 +130,13 @@ Après appui sur ce bouton, l'arbre fait apparaître des racines / notes munies 
 - elles sont _dépliées_ dans l'arbre. Toutefois s'il y en a beaucoup, appuyer sur le bouton proposé.
 - une fois la note choisie, confirmer le choix (ou l'effacer et recommencer).
 
+# Album des photos des notes | album_photos
+Une note peut avoir des fichiers _image_ attachés: pour chaque image une _miniature_ de taille réduite (96 pixels) est enregistrée.
+
+Quand un article de l'arbre est sélectionné, dans la partie supérieure de détail un bouton **Album** ouvre un panel affichant toutes les images des notes du sous-arbre sélectionné.
+
+En l'absence de sélection d'un sous-arbre, l'album considère **toutes** les notes (du moins celles répondant au filtre).
+
 # Télécharger la sélection des notes affichées dial_notedl
 Ce téléchargement est possible sur un poste Windows / Linux après avoir installé un petit outil téléchargeable.
 - on peut télécharger les textes **décryptés** des notes,

@@ -37,7 +37,7 @@ C'est un peu paradoxal: on vient d'ajouter un item au chat et il apparaît avec 
 
 Par économie de calcul un chat (et ses items) est marqué comme _lu_ à la fermeture de sa page: un nouvel item est en conséquence marqué _non lu_ jusqu'à fermeture de la page mais apparaîtra bien _lu_ à sa réouverture.
 
-## Faire un don depuis un chat
+# Faire un don depuis un _chat_
 Au lieu d'ouvrir un nouvel échange par le bouton **NOUVEL ÉCHANGE** il faut l'ouvrir par le bouton **FAIRE UN DON**: le dialogue qui s'ouvre est légèrement différent:
 - il permet de sélectionner un montant,
 - il permet d'indiquer si le montant du don doit ou non apparaître dans le texte de l'échange.

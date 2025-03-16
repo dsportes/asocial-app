@@ -9,7 +9,7 @@ La connexion s'effectue par la page qui s'affiche à l'entrée dans l'applicatio
 
 Il existe trois modes de connexion, _synchronisé, incognito et avion_: pour plus de détails sur comment choisir son mode, se reporter à la rubrique d'aide **Modes synchronisé / incognito / avion**.
 
-# Comment créer son compte ? |
+# Comment créer son compte ? | page_sponsoring ht_sponsoriser
 Il faut avoir trouver un **sponsor** ayant un compte dans l'application: c'est lui qui peut définir une _fiche de sponsoring_ qui précise les droits, quotas et conditions de création du compte.
 
 Le **sponsor** a communiqué au _sponsorisé_ une phrase secrète de sponsoring qui lui est propre et a une durée de vie limitée.
@@ -78,8 +78,18 @@ Autre option: dans la barre du haut le cinquième bouton **Alertes** est dans le
 
 Se reporter à l'aide sur cette page d'aide **Gestion des paiements, liste des dons**.
 
-# Faire un don / recevoir un don
-(TODO)
+# Faire un don / recevoir un don | page_chats chat_maj
+Faire un don s'effectue par un _chat_:
+- par la page d'accueil ou le le menu d'accueil (menu _hamburger_ en haut à gauche), ouvrir la page **Tous les chats**, puis sélectionner le chat avec l'avatar à qui le don doit être fait.
+- se reporter à la seconde rubrique d'aide ci-dessus, section **Faire un don depuis un _chat_**.
+
+**La réception d'un don** ne nécessite aucune action de la part du destinataire.
+
+**Pour lister les dons** effectués et reçus:
+- par la page d'accueil, appuyer sur le bouton **Crédits**.
+- OU appuyer sur la cinquième icône en haut à gauche et choisir l'onglet **Crédits** dans la page qui q'ouvre.
+
+Déplier la zone **Dons reçus / donnés** pour en voir la liste.
 
 # Muter son compte de "O" à "A" et réciproquement | ht_mutation_oa
 Lire cette rubrique d'aide dédiée à ce sujet.

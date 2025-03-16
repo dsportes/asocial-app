@@ -1,3 +1,4 @@
+Dans la documentation générale, lire <a href="$$/appli/alertes.html" target="_blank">Alertes et restrictions d'accès associées</a>
 
 A un instant donné plusieurs alertes peuvent concerner le compte. 
 
