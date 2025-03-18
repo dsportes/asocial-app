@@ -1,4 +1,4 @@
-Dans la documentation générale, lire <a href="$$/appli/partitions.html" target="_blank">Partitions des comptes "O"e</a>
+Dans la documentation générale, lire <a href="$$/appli/partitions.html" target="_blank">Partitions des comptes "O"</a>
 
 **Cette page n'est accessible que par le Comptable et ses délégués.**
 - le Comptable depuis la **Page Espace** peut accéder à n'importe quelle partition.

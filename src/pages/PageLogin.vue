@@ -3,7 +3,7 @@
 
   <div class="row self-end items-center">
     <div v-if="infx" class="font-mono fs-sm text-italic q-mr-sm">
-      {{config.subJSON.substring(0, 70) + '... ' + config.BUILD}}
+      {{endp + config.BUILD}}
     </div>
     <q-toggle :class="'q-my-xs bg-' + clrInfx " v-model="infx" color="grey-5" size="25px"/>
   </div>
@@ -111,6 +111,7 @@ const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 
 const clrInfx = computed(() => config.subJSON.startsWith('???') ? 'warning': 'green')
+const endp = computed(() => config.subJSON.startsWith('???') ? config.subJSON + '... ': '')
 
 const infx = ref()
 const btncd = ref()
