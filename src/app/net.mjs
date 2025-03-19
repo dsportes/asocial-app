@@ -26,6 +26,23 @@ export async function ping () {
   }
 }
 
+export async function getRessource (path, type) {
+  try {
+    const r = await axios({
+      method: 'get',
+      url: './' + path,
+      responseType: type
+    })
+    if (r.status === 200) {
+      return r.data
+    } else {
+      throw new AppExc(E_SRV, 0, [r.statusText])
+    }
+  } catch (e) {
+    return {}
+  }
+}
+
 /*
 Envoi une requête GET :
 - fonction : code de la fonction

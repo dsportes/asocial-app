@@ -7,6 +7,7 @@ import { config } from '../app/config.mjs'
 import { ID } from '../app/api.mjs'
 import { syncQueue } from '../app/synchro.mjs'
 import { setRequiredModules, b64ToU8 } from '../app/util.mjs'
+import { getRessource } from '../app/net.mjs'
 
 export function getImgUrl (name) {
   try {
@@ -42,8 +43,9 @@ async function msgPush (event) {
 }
 
 export default boot(async ({ app /* Vue */ }) => {
-  const svc = require('/public/services.json')
-  const readme = require('/public/README.md')
+  // const svc = require('/public/services.json')
+  const svc = await getRessource('services.json', 'json')
+  const readme = await getRessource('README.md', 'text')
 
   const cfg = { pageSessionId: ID.rnd(), nc: 0 }
   for(const x in config) cfg[x] = config[x]
