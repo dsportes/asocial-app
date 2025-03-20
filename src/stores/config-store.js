@@ -114,7 +114,7 @@ export const useConfigStore = defineStore('config', {
     async listenPerm () {
       await this.getPerm()
       this.notificationPerm.onchange = async () => {
-        console.log("User decided to change his seettings. New permission: " + this.notificationPerm.state)
+        console.log("User decided to change his settings. New permission: " + this.notificationPerm.state)
         await this.getPerm()
         if (this.permState === 'granted') await this.setSubscription()
       }
