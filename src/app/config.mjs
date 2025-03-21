@@ -15,6 +15,7 @@ export const config = {
   silence: false,
   silenceHome: true,
   touchInMinutes: 10,
+  heartBeatsInSec: [10, 120], // lapse entre deux heartbeats
 
   theme: {
     primary: ['#0D47A1', '#BBDEFB'],
