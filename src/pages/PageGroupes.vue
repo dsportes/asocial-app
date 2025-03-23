@@ -78,7 +78,7 @@
     <invitation-acceptation :inv="inv"/>
   </dial-std2>
 
-  <!-- Contact du groupe ------------------------------------------------>
+  <!-- Création d'un nouveau contact du groupe ------------------------------------------------>
   <dial-std1 v-if="m3" v-model="m3" :titre="$t('PGctc', [nomgi] )"
     okic="close" cond="cEdit" :okfn="ctc">
     <div class="q-pa-xs">
@@ -87,7 +87,7 @@
     </div>
   </dial-std1>
 
-  <!-- Nouveau groupe ------------------------------------------------>
+  <!-- Création d'un nouveau groupe ------------------------------------------------>
   <dial-std1 v-if="m1" v-model="m1" :titre="$t('PGcrea')"
     :disable="quotas.err !== '' || !nom" okic="add" oklbl="creer" cond="cEdit" :okfn="okCreation">
     <div class="q-pa-sm column">
@@ -99,6 +99,7 @@
     </div>
   </dial-std1>
 
+  <!-- Chat du groupe -->
   <dial-std2  v-model="m4" :titre="$t('CHGtit', [session.getCV(session.groupeId).nom])" help="chatgr">
     <apercu-chatgr />
   </dial-std2>
@@ -110,11 +111,10 @@
 import { ref, computed, watch, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
-import { edvol, $t, dkli, styp, afficher8000 } from '../app/util.mjs'
+import { edvol, $t, dkli, afficher8000 } from '../app/util.mjs'
 import BtnCond from '../components/BtnCond.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import NomAvatar from '../components/NomAvatar.vue'
-import BoutonHelp from '../components/BoutonHelp.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import SelAvid from '../components/SelAvid.vue'
 import ApercuChatgr from '../panels/ApercuChatgr.vue'
@@ -134,9 +134,7 @@ const m3 = computed(() => ui.d[idc].PGctc)
 const m4 = computed(() => ui.d[idc].PGACGouvrir)
 
 const session = stores.session
-const aSt = stores.avatar
 const fStore = stores.filtre
-const stats = fStore.stats
 const gSt = stores.groupe
 
 const options = [

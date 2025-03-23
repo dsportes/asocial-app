@@ -65,10 +65,9 @@
 import { computed } from 'vue'
 
 import stores from '../stores/stores.mjs'
-import { edvol, dhcool, dkli, styp } from '../app/util.mjs'
+import { edvol, dhcool, dkli } from '../app/util.mjs'
 import MenuFichier from '../components/MenuFichier.vue'
 import BtnCond from '../components/BtnCond.vue'
-import { idb } from '../app/db.mjs'
 
 const icx = ['circle', 'hourglass_empty', 'error']
 const clrx = ['positive', 'warning', 'negative']
@@ -76,7 +75,6 @@ const clrx = ['positive', 'warning', 'negative']
 const faSt = stores.ficav
 const nSt = stores.note
 const session = stores.session
-const ui = stores.ui
 
 const lst = computed(() => {
   const l = []

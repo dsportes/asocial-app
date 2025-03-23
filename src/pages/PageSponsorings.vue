@@ -64,7 +64,7 @@
       </q-expansion-item>
     </div>
 
-    <!-- Dialogue de création d'un sponsoring ici la partition est la sienne -->
+    <!-- Dialogue de création d'un sponsoring: pour un délégué et un compte "O" dans sa propre partition -->
     <q-dialog v-if="ui.d[idc] && ui.d[idc].NSnvsp" v-model="ui.d[idc].NSnvsp" position="left" persistent>
       <nouveau-sponsoring/>
     </q-dialog>
@@ -76,9 +76,8 @@
 import { computed, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
-import { AMJ, UNITEN, UNITEV, ID } from '../app/api.mjs'
-import { dhcool, edvol, dkli } from '../app/util.mjs'
-import BoutonHelp from '../components/BoutonHelp.vue'
+import { AMJ, UNITEN, UNITEV } from '../app/api.mjs'
+import { dhcool, edvol } from '../app/util.mjs'
 import ShowHtml from '../components/ShowHtml.vue'
 import NouveauSponsoring from '../panels/NouveauSponsoring.vue'
 import BtnCond from '../components/BtnCond.vue'

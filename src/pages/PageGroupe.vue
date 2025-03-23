@@ -199,6 +199,7 @@
     </div>
   </dial-std2>
 
+  <!-- Chat du groupe -->
   <dial-std2  v-model="m1" :titre="$t('CHGtit', [nomg])" help="chatgr">
     <apercu-chatgr />
   </dial-std2>
@@ -211,9 +212,8 @@ import { ref, computed, watch, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import { UNITEN, UNITEV, AMJ } from '../app/api.mjs'
-import { $t, bcf, dhcool, styp, dkli, edvol, afficher8000 } from '../app/util.mjs'
+import { $t, dkli, edvol, afficher8000 } from '../app/util.mjs'
 import BtnCond from '../components/BtnCond.vue'
-import BoutonHelp from '../components/BoutonHelp.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import ApercuMembre from '../components/ApercuMembre.vue'
 import SelAvidgr from '../components/SelAvidgr.vue'

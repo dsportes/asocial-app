@@ -32,22 +32,27 @@
       </template>
     </q-tree>
 
+    <!-- Edition du texte de la note -->
     <q-dialog v-model="ui.d[idc].NE" position="left" persistent>
       <note-edit/>
     </q-dialog>
 
+    <!-- Gestion de l'exclusivité de la note -->
     <q-dialog v-model="ui.d[idc].NX" position="left" persistent>
       <note-exclu/>
     </q-dialog>
 
+    <!-- Gestion des fichiers attachés à la note -->
     <q-dialog v-model="ui.d[idc].NF" position="left" persistent>
       <note-fichier/>
     </q-dialog>
 
+    <!-- Album de photo de la note et ses descendantes -->
     <q-dialog v-model="ui.d[idc].AP" position="left" persistent>
       <album-photos :lstPhotos="lstPhotos" @select="clicknode"/>
     </q-dialog>
 
+    <!-- Confirmation de la suppression d'une note -->
     <q-dialog v-model="ui.d[idc].confirmSuppr" persistent>
       <q-card :class="styp('sm')">
         <q-toolbar class="tbs">
@@ -63,7 +68,7 @@
       </q-card>
     </q-dialog>
 
-    <!-- Download des notes sélectionnées -->
+    <!-- Dialogue de download des notes sélectionnées -->
     <q-dialog v-model="ui.d[idc].PNdl" persistent>
       <q-card :class="styp('md')">
         <q-toolbar class="tbs">
@@ -148,6 +153,7 @@
       </q-card>
     </q-dialog>
 
+    <!-- Mise à jour des hashtags de la note -->
     <q-dialog v-model="ui.d[idc].NM" persistent>
       <div :class="styp('md')">
         <q-toolbar class="btbs">
@@ -288,7 +294,7 @@ import stores from '../stores/stores.mjs'
 import { dkli, sty, styp, $t, u8ToB64, dhcool, edvol, afficherDiag, 
   sleep, egalite, normNomFichier } from '../app/util.mjs'
 import ShowHtml from '../components/ShowHtml.vue'
-import { ID, appexc, AppExc, E_WS } from '../app/api.mjs'
+import { appexc, AppExc, E_WS } from '../app/api.mjs'
 import NoteEdit from '../panels/NoteEdit.vue'
 import NoteExclu from '../panels/NoteExclu.vue'
 import NoteFichier from '../panels/NoteFichier.vue'

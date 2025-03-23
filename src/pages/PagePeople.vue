@@ -16,7 +16,6 @@
       </div>
     </div>
 
-
     <div v-if="peLpF.length">
       <q-expansion-item v-for="(p, idx) in peLpF" :key="p.id"
         :header-class="dkli(idx)" switch-toggle-side expand-separator dense 
@@ -39,19 +38,18 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { computed, watch } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import BtnCond from '../components/BtnCond.vue'
-import { GetPartition, RafraichirCvsAv } from '../app/operations4.mjs'
+import { RafraichirCvsAv } from '../app/operations4.mjs'
 import { afficher8000, $t, dkli } from '../app/util.mjs'
 import { ID } from '../app/api.mjs'
 
 const session = stores.session
 const ui = stores.ui
 const pSt = stores.people
-const gSt = stores.groupe
 
 const peLpF = computed(() => {
   const ci = session.compti
