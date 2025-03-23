@@ -84,7 +84,6 @@ import { $t, mon, dkli, styp } from '../app/util.mjs'
 import { AMJ, idTkToL6 } from '../app/api.mjs'
 import PanelDialtk from '../components/PanelDialtk.vue'
 import BtnCond from '../components/BtnCond.vue'
-import { Ticket } from '../app/modele.mjs'
 import { MoinsTicket, ReceptionTicket } from '../app/operations4.mjs'
 
 const session = stores.session

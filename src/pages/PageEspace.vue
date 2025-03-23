@@ -154,10 +154,10 @@ import SynthHdrs from '../components/SynthHdrs.vue'
 import SynthLigne from '../components/SynthLigne.vue'
 import FiltreNom from '../components/FiltreNom.vue'
 import DialStd1 from '../dialogues/DialStd1.vue'
-import { dkli, styp, $t, mon, afficherDiag, edvol } from '../app/util.mjs'
-import { ID, AMJ, Tarif, UNITEN, UNITEV } from '../app/api.mjs'
+import { $t, mon, afficherDiag, edvol } from '../app/util.mjs'
+import { AMJ, Tarif, UNITEN, UNITEV } from '../app/api.mjs'
 import { Synthese } from '../app/modele.mjs'
-import { GetSynthese, GetPartition, SetEspaceOptionA, NouvellePartition, SetQuotasA,
+import { GetSynthese, SetEspaceOptionA, NouvellePartition, SetQuotasA,
   DownloadStatC } from '../app/operations4.mjs'
 
 const encoder = new TextEncoder('utf-8')

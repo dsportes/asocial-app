@@ -37,7 +37,6 @@
         <template v-slot:header>
           <div class="row full-width items-center justify-between">
             <div class="row items-center">
-              <!--img class="photomax" :src="c.cv.photo" /-->
               <div class="titre-md q-ml-sm">{{c.cv.nomC}}
                 <span v-if="session.compteId === c.id" class="q-ml-sm">[{{$t('moi')}}]</span>
                 <span v-if="c.del" class="q-ml-sm">[{{$t('delegue')}}]</span>
@@ -45,9 +44,6 @@
               <q-icon size="md" v-if="c.notif" :name="ico(c)"
                 :class="'q-ml-md ' + tclr(c) + ' ' + bgclr(c)"/>
             </div>
-            
-            <!--btn-cond v-if="session.compteId !== c.id" class="q-ml-md" icon="open_in_new"
-              stop @ok="voirpage(c)"/-->
           </div>
         </template>
 
@@ -102,8 +98,7 @@ import QuotasVols from '../components/QuotasVols.vue'
 import NouveauSponsoring from '../panels/NouveauSponsoring.vue'
 import BarrePeople from '../components/BarrePeople.vue'
 import DialStd1 from '../dialogues/DialStd1.vue'
-import { GetNotifC, GetPartition, SetQuotas, GetCompta } from '../app/operations4.mjs'
-import { styp } from '../app/util.mjs'
+import { GetPartition, SetQuotas } from '../app/operations4.mjs'
 
 const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
@@ -114,9 +109,6 @@ const txt = ['green-3', 'green-5', 'warning', 'negative']
 const bg = ['none', 'none', 'yellow-1', 'yellow-5']
 
 const session = stores.session
-const aSt = stores.avatar
-const pSt = stores.people
-const cfg = stores.config
 const fSt = stores.filtre
 
 async function reload () {

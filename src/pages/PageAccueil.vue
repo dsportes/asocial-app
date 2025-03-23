@@ -70,7 +70,6 @@ import { computed } from 'vue'
 import { useQuasar } from 'quasar'
 
 import stores from '../stores/stores.mjs'
-import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonLangue from '../components/BoutonLangue.vue'
 import IconAlerte from '../components/IconAlerte.vue'
 import MenuAccueil from '../components/MenuAccueil.vue'

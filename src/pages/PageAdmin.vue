@@ -180,10 +180,8 @@ const $q = useQuasar()
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
-import BoutonConfirm from '../components/BoutonConfirm.vue'
 import BoutonDlvat from '../components/BoutonDlvat.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
-import BoutonHelp from '../components/BoutonHelp.vue'
 import BtnCond from '../components/BtnCond.vue'
 import PhraseContact from '../components/PhraseContact.vue'
 import SaisieMois from '../components/SaisieMois.vue'
@@ -195,8 +193,8 @@ import { GetEspaces, CreationEspace, MajSponsEspace, SetEspaceQuotas, InitTaches
   DownloadStatC, GetTaches, DelTache, GoTache } from '../app/operations4.mjs'
 import { get } from '../app/net.mjs'
 import { compile } from '../app/modele.mjs'
-import { Cles, ID, AMJ, Tarif, UNITEN, UNITEV } from '../app/api.mjs'
-import { styp, edvol, mon, nbn, dkli, afficherDiag, dhstring } from '../app/util.mjs'
+import { AMJ, Tarif, UNITEN, UNITEV } from '../app/api.mjs'
+import { edvol, mon, nbn, dkli, afficherDiag, dhstring } from '../app/util.mjs'
 
 const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))

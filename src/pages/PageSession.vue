@@ -37,18 +37,14 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { computed } from 'vue'
 
 import RapportSynchro from '../components/RapportSynchro.vue'
 import stores from '../stores/stores.mjs'
 import { edvol, mon, $t } from '../app/util.mjs'
-import { Tarif, AMJ } from '../app/api.mjs'
+import { Tarif } from '../app/api.mjs'
 
-const ui = stores.ui
 const session = stores.session
-const config = stores.config
-const aSt = stores.avatar
-const fSt = stores.fetat
 
 const nc = computed(() => session.getCV(session.compteId).nom )
 const couts = computed(() => Tarif.evalConso2(session.consocumul))

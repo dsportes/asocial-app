@@ -62,7 +62,7 @@
     </div>
   </div>
 
-  <!-- Dialogue de mise à jour des quotas des comptes A -->
+  <!-- Dialogue de mise à jour des quotas de la partition -->
   <q-dialog v-model="ui.d[idc].PEedqP" persistent>
     <q-card :class="styp('sm')">
       <q-toolbar class="tbs">

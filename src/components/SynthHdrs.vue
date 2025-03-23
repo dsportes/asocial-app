@@ -14,7 +14,6 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
 
 import BtnCond from './BtnCond.vue'
 import { $t } from '../app/util.mjs'
