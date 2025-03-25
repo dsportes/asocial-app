@@ -252,7 +252,7 @@
 
   import stores from '../stores/stores.mjs'
 
-  import { styp, sty, dhcool, dkli, afficherDiag, $q } from '../app/util.mjs'
+  import { styp, sty, dhcool, afficherDiag, $q } from '../app/util.mjs'
   import { GetPartition, GetSynthese, GetCompta, MajChat, PassifChat, 
     MutChat, StatutChatE, MuterCompteO, MuterCompteA, MajLectChat } from '../app/operations4.mjs'
   import { ID } from '../app/api.mjs'

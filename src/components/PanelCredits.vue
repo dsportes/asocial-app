@@ -76,7 +76,7 @@ import PanelDialtk from '../components/PanelDialtk.vue'
 import BtnCond from '../components/BtnCond.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import SaisieMois from '../components/SaisieMois.vue'
-import { $t, dhcool, mon, dkli, styp, afficherDiag } from '../app/util.mjs'
+import { $t, dhcool, mon, afficherDiag } from '../app/util.mjs'
 import { PlusTicket, TicketsStat } from '../app/operations4.mjs'
 import { AMJ, idTkToL6, ID } from '../app/api.mjs'
 

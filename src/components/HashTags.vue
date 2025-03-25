@@ -44,7 +44,7 @@ import stores from '../stores/stores.mjs'
 import BtnCond from './BtnCond.vue'
 import BoutonHelp from './BoutonHelp.vue'
 import BoutonBulle from './BoutonBulle.vue'
-import { styp, $t } from '../app/util.mjs'
+import { $t } from '../app/util.mjs'
 
 const props = defineProps({ 
   src: Object, // set d'origine, le set resultat est v-model

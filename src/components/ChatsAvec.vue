@@ -30,7 +30,6 @@
 import { ref, computed, onUnmounted } from 'vue'
 import stores from '../stores/stores.mjs'
 import { RegCles } from '../app/modele.mjs'
-import { dhcool } from '../app/util.mjs'
 import NouveauChat from '../dialogues/NouveauChat.vue'
 import ApercuChat from '../panels/ApercuChat.vue'
 import BtnCond from './BtnCond.vue'

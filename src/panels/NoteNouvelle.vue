@@ -54,7 +54,7 @@
 import { ref, computed } from 'vue'
 
 import stores from '../stores/stores.mjs'
-import { dkli, styp } from '../app/util.mjs'
+import { styp } from '../app/util.mjs'
 import { ID, UNITEN } from '../app/api.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonUndo from '../components/BoutonUndo.vue'

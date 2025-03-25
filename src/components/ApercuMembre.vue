@@ -238,7 +238,7 @@ a accès aux membres (donc dans l'onglet "membres").
 <script setup>
 import { ref, watch, computed, onUnmounted } from 'vue'
 
-import { $t, styp, dkli, dhcool, afficher8000, afficherDiag } from 'src/app/util.mjs'
+import { $t, dkli, afficher8000, afficherDiag } from 'src/app/util.mjs'
 import { AMJ, edit, FLAGS, MAXTAILLEGROUPE } from '../app/api.mjs'
 import stores from '../stores/stores.mjs'
 import ApercuGenx from './ApercuGenx.vue'

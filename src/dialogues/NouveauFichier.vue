@@ -107,7 +107,7 @@
 import { ref, watch, computed } from 'vue'
 
 import stores from '../stores/stores.mjs'
-import { $t, edvol, dhcool, readFile, styp, sty, dkli, trapex, dhstring, u8ToB64, afficherDiag } from '../app/util.mjs'
+import { $t, edvol, dhcool, readFile, styp, sty, trapex, dhstring, u8ToB64, afficherDiag } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BtnCond from '../components/BtnCond.vue'
 import { NouveauFichier, PutUrlNf } from '../app/operations4.mjs'

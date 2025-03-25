@@ -78,7 +78,7 @@ import ShowHtml from './ShowHtml.vue'
 import DroitsMembre from './DroitsMembre.vue'
 
 import { AcceptInvitation } from '../app/operations4.mjs'
-import { styp, afficher8000, $t } from '../app/util.mjs'
+import { afficher8000, $t } from '../app/util.mjs'
 import { FLAGS } from '../app/api.mjs'
 
 const session = stores.session

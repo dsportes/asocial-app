@@ -88,7 +88,7 @@ import EditeurMd from '../components/EditeurMd.vue'
 import PhraseContact from '../components/PhraseContact.vue'
 import DialStd1 from '../dialogues/DialStd1.vue'
 import DialStd2 from '../dialogues/DialStd2.vue'
-import { $t, styp, edvol, afficherDiag } from '../app/util.mjs'
+import { $t, edvol, afficherDiag } from '../app/util.mjs'
 import { StatutChatE, ChangerPartition, DeleguePartition, GetCompta, GetComptaQv,  
   GetAvatarPC, GetSynthese, GetPartition } from '../app/operations4.mjs'
 

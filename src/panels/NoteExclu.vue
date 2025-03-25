@@ -77,7 +77,6 @@
 import { ref, computed } from 'vue'
 
 import stores from '../stores/stores.mjs'
-import { dkli, styp } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import ListeAuts from '../components/ListeAuts.vue'
@@ -85,6 +84,7 @@ import BoutonBulle from '../components/BoutonBulle.vue'
 import BtnCond from '../components/BtnCond.vue'
 import NodeParent from '../components/NodeParent.vue'
 import { ExcluNote } from '../app/operations4.mjs'
+import { styp, dkli } from '../app/util.mjs'
 
 const ui = stores.ui
 const session = stores.session

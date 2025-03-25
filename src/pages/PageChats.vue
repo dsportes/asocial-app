@@ -59,7 +59,7 @@ import NouveauChat from '../dialogues/NouveauChat.vue'
 import SelAvid from '../components/SelAvid.vue'
 import BtnCond from '../components/BtnCond.vue'
 import { RafraichirCvsAv } from '../app/operations4.mjs'
-import { dhstring, afficher8000, afficherDiag, photoToBin, dkli, dhcool } from '../app/util.mjs'
+import { dhstring, afficher8000, afficherDiag, photoToBin, dkli } from '../app/util.mjs'
 import { ID } from '../app/api.mjs'
 
 // const img1 = '<img src="'

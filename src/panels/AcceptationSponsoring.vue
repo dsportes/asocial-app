@@ -23,10 +23,6 @@
           <div class="titre-md">{{$t('NPdlv')}}
             <span class="q-ml-sm font-mono text-bold fs-md">{{AMJ.editDeAmj(sp.dlv)}}</span>
           </div>
-
-          <!--div class="titre-md">{{$t('NPphr')}}
-            <span class="q-ml-sm font-mono text-bold fs-md">{{pc.phrase}}</span>
-          </div-->
           
           <div class="titre-md column">
             <div class="row items-center q-gutter-md">
