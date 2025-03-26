@@ -1,11 +1,10 @@
 import stores from '../stores/stores.mjs'
 import { Operation } from './operation.mjs'
-import { afficherDiag, $t, random, gzipB, setTrigramme, getTrigramme, sleep } from './util.mjs'
+import { afficherDiag, $t, setTrigramme, getTrigramme, sleep } from './util.mjs'
 import { idb, IDBbuffer } from './db.mjs'
-import { DataSync, appexc, ID, Cles, AMJ, HBINSECONDS, Tarif } from './api.mjs'
+import { DataSync, ID, AMJ, Tarif } from './api.mjs'
 import { post } from './net.mjs'
-import { CV, compile, RegCles } from './modele.mjs'
-import { crypter, genKeyPair, crypterRSA } from './webcrypto.mjs'
+import { compile } from './modele.mjs'
 
 /* classe Queue ***********************************************************/
 class Queue {
@@ -275,10 +274,12 @@ class SB {
 /* garderMode : si true, garder le mode */
 export async function deconnexion(recon) {
   const ui = stores.ui
+  ui.resetParano()
   // ui.setPage('null')
   const session = stores.session
   const hb = stores.hb
   await hb.stopHB()
+  const parano = ui.parano
   const mode = session.mode
   const org = session.org
   const phrase = session.phrase
@@ -294,6 +295,7 @@ export async function deconnexion(recon) {
     ui.setPage('session')
     session.phrase = phrase
     await connexion(phrase)
+    ui.setParano(parano, parVal.value)
   } else {
     ui.reLogin = true
     ui.setPage('login')
@@ -304,7 +306,6 @@ export async function deconnexion(recon) {
 export async function connexion(phrase, razdb) {
   if (!phrase) return
   const session = stores.session
-  const hb = stores.hb
   await session.initSession(phrase)
 
   if (session.org === 'admin') {

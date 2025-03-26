@@ -16,6 +16,7 @@ export const config = {
   silenceHome: true,
   touchInMinutes: 10,
   heartBeatsInSec: [10, 120], // lapse entre deux heartbeats
+  paranolapse: 5000, // 5 * 60000, // lapse entre 2 parano (5 minutes)
 
   theme: {
     primary: ['#0D47A1', '#BBDEFB'],

@@ -544,7 +544,13 @@ export default {
   LOGsp3: 'Sponsoring annulé par le sponsor',
   LOGnosp: 'Le compte du Comptable ne peut pas être créé: la phrase d\'autorisation déclarée par l\'Administrateur Technique n\'est pas celle saisie.',
   LOGnosp2: '(BUG) Clé E non decryptable. Demander à l\'Administrateur Technique de décklarer une nouvelle phrase d\'autisation de compte Comptable.', 
-  
+  LOGparano1: 'Option facultative pour les paranoïaques',
+  LOGparano2: 'Code PIN',
+  LOGparah: '4 c. de 1 à 9',
+  LOGopt1: '30 sec',
+  LOGopt2: '2 min',
+  LOGopt3: '5 min',
+
   // Rapport Synchro
   RStit: 'Avatars et groupes du compte "{0}"',
   RScav: 'Avatars',
@@ -707,6 +713,9 @@ export default {
   PSm0: 'Phrase secrète de connexion',
   PSm1: 'Phrase non confirmée, la re-saisir',
   PSm2: 'Confirmer la phrase secréte',
+  PSac: 'Phrase ACTUELLE COMPLETE de connexion',
+  PSacer: 'Cette phrase n\'est pas la phrase actuelle. Vous allez être déconnecté.',
+  PSfu: 'FUTURE phrase secrète de connexion',
   PSnbc: 'Au moins {0} caractères',
   PSl1: 'les sanglots longs de ...',
   PSctc1: 'Phrase de contact',
@@ -719,6 +728,7 @@ export default {
   PSnosvc2: 'Aucun serveur n\'est déclaré avec le code [{0}].',
 
   // App.vue
+  MLAparano1: 'Pour poursuivre la session saisir le code PIN déclaré à la connexion',
   MLAntfg: 'Le navigateur "accepte" les notifications pour l\'application.',
   MLAntfd: 'Le navigateur "bloque les notifications" pour l\'application.',
   MLAntfr1: 'Demander au navigateur d\'autoriser les notifications',
@@ -1962,6 +1972,7 @@ La "consommation mensuelle" de calcul est en centimes et est la somme des coûts
 
   A_page_login: 'Se connecter / créer son compte',
   A_page_login_pin: 'Se connecter avec un code PIN',
+  A_page_login_par: 'Option pour les paranoïaques',
   A_page_login_m: 'Modes synchronisé / incognito / avion',
   A_page_ficavion: 'Fichiers accessibles en mode avion',
   A_page_login_pp: 'Le "presse-papier" de notes et fichiers',

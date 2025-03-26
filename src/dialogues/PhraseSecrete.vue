@@ -5,7 +5,7 @@
     <q-toolbar class="tbs">
       <btn-cond color="warning" icon="close" @ok="ko"/>
       <q-toolbar-title class="titre-lg">
-        {{$t('PSm' + phase)}}
+        {{$t(chgt === 1 ? 'PSac' : (chgt === 2 && phase === 0 ? 'PSfu' : ('PSm' + phase)))}}
       </q-toolbar-title>
     </q-toolbar>
 
@@ -15,7 +15,7 @@
           <q-checkbox v-model="vkb" color="warning" style="position:relative;left:-8px"/>
           <span class="text-primary fs-lg ">{{$t('PSkb')}}</span>
         </div>
-        <div class="row items-center q-gutter-sm">
+        <div v-if="chgt===0" class="row items-center q-gutter-sm">
           <span class="titre-sm text-italic">{{$t('PSutpin')}}</span>
           <bouton-help page="page_login_pin"/>
         </div>
@@ -30,7 +30,7 @@
       <q-input v-if="!keyboard.v" dense counter
         :hint="ligne1.length < lgph ? $t('PSnbc', [lgph]) : $t('entree')" 
         v-model="ligne1" 
-        @keydown.enter.prevent="ok2" 
+        @keydown.enter.prevent="ok1" 
         :type="isPwd ? 'password' : 'text'" :placeholder="$t('PSl1')">
         <template v-slot:append>
           <btn-cond :icon="isPwd ? 'visibility_off' : 'visibility'" round 
@@ -52,7 +52,7 @@
         <btn-cond flat icon="undo" :label="labelRenoncer" @ok="ko"/>
         <btn-cond color="warning" :label="labelVal()" :icon="iconValider"
           :disable="!ligne1 || ligne1.length < 6 || !orgL"
-          @ok="ok2" />
+          @ok="ok1" />
       </div>
 
       <div class="q-my-md">
@@ -81,8 +81,9 @@ import stores from '../stores/stores.mjs'
 import { Phrase } from '../app/modele.mjs'
 import BtnCond from '../components/BtnCond.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
-import { $t, styp, afficherDiag, u8ToB64, b64ToU8 } from '../app/util.mjs'
+import { $t, styp, afficherDiag, u8ToB64, b64ToU8, equ8 } from '../app/util.mjs'
 import { pbkfd, crypter, decrypterStr } from '../app/webcrypto.mjs'
+import { deconnexion } from '../app/synchro.mjs'
 
 const encoder = new TextEncoder()
 
@@ -127,6 +128,7 @@ const razdb = ref(false)
 const encours = ref(false)
 const isPwd = ref(false)
 const vligne1 = ref('')
+const chgt = ref(ui.ps.chgt || 0)
 
 if (orgext.value) { // PageAdmin SyncSp PageCompte
   if (orgext.value !== session.org) {
@@ -213,25 +215,37 @@ function labelVal () {
   return phase.value < 2 ? $t('ok') : $t((labelValider.value || 'PSval'))
 }
 
-async function ok2 () {
-  await doPin()
-  if (ligne1.value.length >= lgph) ok()
+async function ok1 () {
+  if (chgt.value === 0) await doPin()
+  if (ligne1.value.length >= lgph) await ok2()
 }
 
-function ok () {
-  if (!verif.value) {
-    okem()
+async function ok2 () {
+  if (chgt.value === 1) {
+    const pc = new Phrase()
+    await pc.init(ligne1.value)
+    if (!equ8(pc.pcb, session.phrase.pcb)) {
+      await afficherDiag($t('PSacer'))
+      ui.fD()
+      deconnexion()
+    }
+    chgt.value = 2
+    ligne1.value = ''
   } else {
-    if (phase.value < 2) {
-      vligne1.value = ligne1.value
-      forceInput('')
-      phase.value = 2
+    if (!verif.value) {
+      await okem()
     } else {
-      if (ligne1.value === vligne1.value) {
-        okem()
+      if (phase.value < 2) {
+        vligne1.value = ligne1.value
+        forceInput('')
+        phase.value = 2
       } else {
-        raz()
-        phase.value = 1
+        if (ligne1.value === vligne1.value) {
+          await okem()
+        } else {
+          raz()
+          phase.value = 1
+        }
       }
     }
   }
@@ -269,15 +283,12 @@ async function okem () {
     if (!ok) return
   }
   encours.value = true
+  const pc = new Phrase()
+  await pc.init(ligne1.value)
+  encours.value = false
   ui.fD()
-  setTimeout(async () => {
-    const pc = new Phrase()
-    await pc.init(ligne1.value)
-    // await sleep(5000)
-    // ui.ps.ok est la fonction de callback quand ok
-    await ui.ps.ok(pc)
-    raz()
-  }, 300)
+  raz()
+  await ui.ps.ok(pc)
 }
 
 function ko () {
@@ -317,7 +328,7 @@ const doPin = async () => {
     let v
     try {
       v = await decrypterStr(cle, b64ToU8(x))
-    } catch (e) {}
+    } catch (e) { }
     if (!v) {
       await afficherDiag($t('PSkopin'))
       return

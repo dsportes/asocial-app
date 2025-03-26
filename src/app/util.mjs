@@ -200,7 +200,6 @@ export function photoToBin (t) {
   return [mime, bin]
 }
 
-
 /* gzip / ungzip ***************************************************/
 export function gzipT (data) { return pako.gzip(data) }
 
@@ -226,8 +225,13 @@ export function ungzipB (arg) {
   return t ? decoder.decode(arrayBuffer(res)) : res
 }
 
+export function equ8(a, b) {
+  if ((a && !b) || (b && !a) || (b.length !== a.length)) return false
+  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false
+  return true
+}
 
-/* divers *****************************************************************/
+/* divers ***************************************************************
 export function deselect (u8, idx) {
   if (!u8) return new Uint8Array(0)
   const s = new Set(u8)
@@ -251,6 +255,7 @@ export function cloneU8 (u8) {
   u8.forEach((x, i) => { r[i] = x })
   return r
 }
+**/
 
 // eslint-disable-next-line no-control-regex
 const regex = /[.<>:"/\\|?* \x00-\x1F]/g
@@ -268,16 +273,6 @@ export function edvol (vol) {
   if (v < 1000000000000000) return (v / 1000000000000).toPrecision(3) + 'TB'
   return (v / 1000000000000000).toPrecision(3) + 'PB'
 }
-
-/*
-export function mon (v, n) { // n : nombres de chiffres après les centimes
-  if (!v) return '0c'
-  const p = v < 0 ? -v : v
-  const s = v < 0 ? '-' : ''
-  if (!n) return s + Math.round(p) + 'c'
-  return s + p.toFixed(n).replace('.', ',') + 'c'
-}
-*/
 
 const chouia = '0.000000000000000'
 
@@ -360,26 +355,6 @@ export function titre (m) {
   return ''
 }
 
-/* conversions ************************************************************/
-export function u8ToHex (u8) { return [...u8].map(b => b.toString(16).padStart(2, '0')).join('') }
-
-export function Sid (id) { return id ? (typeof id === 'string' ? id : idToSid(id)) : '' }
-
-/* trace des u8 en debug */
-const TRACEU8 = false
-export function tru8 (info, u8) {
-  if (!TRACEU8 || !u8) return
-  const l = u8.length
-  if (!l) return
-  if (l > 32) {
-    const d = u8ToHex(u8.slice(0, 16))
-    const f = u8ToHex(u8.slice(l - 16, l))
-    console.log(info + ' [' + l + '] ' + d + ' ... ' + f)
-  } else {
-    console.log(info + ' [' + l + '] ' + u8ToHex(u8))
-  }
-}
-
 export function u8ToB64 (u8, url) {
   const s = fromByteArray(u8)
   return !url ? s : s.replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_')
@@ -395,7 +370,29 @@ export function b64ToU8 (s) {
   return toByteArray(x.replace(/-/g, '+').replace(/_/g, '/'))
 }
 
-/* Retourne l'année et le mois depuis un code à 6 lettres */
+/* conversions ***********************************************************
+
+// trace des u8 en debug 
+export function u8ToHex (u8) { return [...u8].map(b => b.toString(16).padStart(2, '0')).join('') }
+
+export function Sid (id) { return id ? (typeof id === 'string' ? id : idToSid(id)) : '' }
+
+const TRACEU8 = false
+export function tru8 (info, u8) {
+  if (!TRACEU8 || !u8) return
+  const l = u8.length
+  if (!l) return
+  if (l > 32) {
+    const d = u8ToHex(u8.slice(0, 16))
+    const f = u8ToHex(u8.slice(l - 16, l))
+    console.log(info + ' [' + l + '] ' + d + ' ... ' + f)
+  } else {
+    console.log(info + ' [' + l + '] ' + u8ToHex(u8))
+  }
+}
+
+
+// Retourne l'année et le mois depuis un code à 6 lettres 
 export function amDeL6 (l6) {
   const a = new Date().getFullYear()
   const pa = a % 2
@@ -408,6 +405,7 @@ export function suffixe (int) {
   const s = '0000' + int
   return s.substring(s.length - 4, s.length)
 }
+*/
 
 /************************************************************************/
 export function normNomFichier (v) {
@@ -423,6 +421,7 @@ export function normNom (v, max) {
   return s.length > max ? s.substring(0, max) : s
 }
 
+/*
 export function u8ToInt (u8) {
   if (!u8 || !u8.length || u8.length > 8) return 0
   let r = 0
@@ -461,6 +460,7 @@ export function idToSid (n) {
 export function SidToId (s) {
   return u8ToInt(b64ToU8(s, true))
 }
+*/
 
 export async function afficherDiag (diag) {
   const ui = stores.ui

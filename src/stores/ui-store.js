@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { $t, hms } from '../app/util.mjs'
+import stores from './stores.mjs'
 
 const seuillarge = 900
 const pagesF = new Set(['admin', 'chats', 'partition', 'people', 'groupes', 'groupesac', 'groupe', 'contactgr', 'notes'])
@@ -23,6 +24,11 @@ export const useUiStore = defineStore('ui', {
     screenWidth: 0,
     screenHeight: 0,
     portrait: false,
+
+    parano: '',
+    paranoLapse: 300000,
+    paranovis: false,
+    paranoTO: null,
 
     pagetab: '',
     page: 'login',
@@ -64,6 +70,7 @@ export const useUiStore = defineStore('ui', {
   }),
 
   getters: {
+    config: (state) => stores.config,
     aUnFiltre (state) { 
       if (!pagesF.has(state.page)) return false
       return !state.pagetab || tabF.has(state.pagetab)
@@ -93,6 +100,22 @@ export const useUiStore = defineStore('ui', {
             this.redoPFiltre()
         }
       }
+    },
+
+    setParano (p, d) {
+      this.parano = p
+      if (d) this.paranoLapse = d
+      if (p) this.paranoTO = setTimeout(() => { this.paranovis = true }, this.paranoLapse)
+    },
+
+    hideParano () {
+      this.paranovis = false
+      this.paranoTO = setTimeout(() => { this.paranovis = true }, this.paranoLapse)
+    },
+
+    resetParano () {
+      this.paranovis = false
+      if (this.paranoTO) clearTimeout(this.paranoTO)
     },
 
     getIdc () {

@@ -411,6 +411,11 @@
     </q-card>
   </q-dialog>
 
+  <q-dialog v-model="ui.paranovis" maximized persistent
+      transition-show="slide-up" transition-hide="slide-down">
+    <dialogue-parano/>
+  </q-dialog>
+
 </q-layout>
 </template>
 
@@ -453,6 +458,7 @@ import FiltreAvecmut from './components/FiltreAvecmut.vue'
 import DialogueErreur from './dialogues/DialogueErreur.vue'
 import MenuAccueil from './components/MenuAccueil.vue'
 import PhraseSecrete from './dialogues/PhraseSecrete.vue'
+import DialogueParano from './dialogues/DialogueParano.vue'
 
 // niveau 2
 import PageSession from './pages/PageSession.vue'

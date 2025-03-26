@@ -145,6 +145,7 @@ function saisiePS () {
   ui.ps = { 
     orgext: session.org,
     verif: true,
+    chgt: 1,
     labelValider: 'ok',
     ok: okps
   }

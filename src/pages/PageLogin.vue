@@ -12,11 +12,27 @@
     <template v-slot:header>
       <div class="full-width titre-lg row justify-between bord1">
         <div>{{$t('LOGconn2')}}</div>
-        <!--bouton-help page="page_login_cn" class="col-auto"/-->
       </div>
     </template>
 
-    <div class="row justify-center q-gutter-sm q-mt-sm q-mr-xl">
+    <div class="row q-mx-lg fullwidth">
+      <q-expansion-item class="col titre-sm" :label="$t('LOGparano1')">
+        <div class="row justify-center q-my-sm q-gutter-sm items-center">
+          <div class="col-auto column items-center">
+            <div class="titre-sm">{{$t('LOGparano2')}}</div>
+            <div :class="'titre-sm text-italic ' + (chkp(parano) ? '' : 'bg-negative')">
+              {{$t('LOGparah')}}
+            </div>
+          </div>
+          <q-input filled v-model="parano" dense class="parano font-mono fs-sm" 
+            counter maxlength="4"/>
+          <q-select filled dense v-model="optVal" :options="optPar" class="w6 font-mono fs-sm"/>
+        </div>
+      </q-expansion-item>
+      <bouton-help class="col-auto self-start" page="page_login_par"/>
+    </div>
+
+    <div class="row justify-center q-gutter-sm q-mt-sm">
       <btn-cond class="titre-lg" no-caps @ok="ouvrirPS(1)">
         <div class="row items-center q-gutter-sm">
           <q-icon size="sm"><img src="~assets/sync_saved_locally.svg"/></q-icon>
@@ -101,17 +117,36 @@ import { AMJ } from '../app/api.mjs'
 import PhraseContact from '../components/PhraseContact.vue'
 import AcceptationSponsoring from '../panels/AcceptationSponsoring.vue'
 import BtnCond from '../components/BtnCond.vue'
+import BoutonHelp from '../components/BoutonHelp.vue'
 import { decrypter } from '../app/webcrypto.mjs'
 import { CreationComptable, GetSponsoring } from '../app/operations4.mjs'
 
 const config = stores.config
 const session = stores.session
 
+const optPar = [
+  { label: $t('LOGopt1'), value: 30000 },
+  { label: $t('LOGopt2'), value: 120000 },
+  { label: $t('LOGopt3'), value: 300000 },
+]
+
+const optVal = ref(optPar[optPar.length - 1])
+
 const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 
 const clrInfx = computed(() => config.subJSON.startsWith('???') ? 'warning': 'green')
 const endp = computed(() => config.subJSON.startsWith('???') ? config.subJSON + '... ': '')
+
+const chkp = val => { 
+  if (!val) return true
+  if (val.length !== 4) return false
+  for (let i = 0; i < val.length; i++) { 
+    const c = val.charAt(i)
+    if (c < '1' || c > '9') return false
+  }
+  return true
+}
 
 const infx = ref()
 const btncd = ref()
@@ -121,6 +156,7 @@ const pc = ref()
 const org = ref()
 const hTC = ref()
 const cleE = ref()
+const parano = ref('')
 
 function raz () {
   btncd.value = false
@@ -128,6 +164,7 @@ function raz () {
   sp.value = null
   org.value = ''
   initval.value = ''
+  parano.value = ''
 }
 
 raz()
@@ -162,6 +199,7 @@ function saisiePS () {
 async function onps (phrase) {
   if (phrase) phrase.phrase = null
   await connexion(phrase, ui.razdb)
+  ui.setParano(parano.value || '', optVal.value.value)
   if (!config.silenceHome) await beep()
 }
 
@@ -238,6 +276,10 @@ setTimeout(() => {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
+.parano
+  width: 4rem
+.w6
+  width: 7rem
 .bord1
   border-bottom: 1px solid $orange
 .disabled
