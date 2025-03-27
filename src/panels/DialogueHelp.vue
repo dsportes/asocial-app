@@ -89,6 +89,7 @@
     </div>
   </q-page-container>
 
+  <!-- Affichage du README de la version courante de l'application -->
   <q-dialog v-model="ui.d.a.readme" persistent>
     <q-card :class="styp('md') + 'q-pa-sm'">
       <q-card-section>

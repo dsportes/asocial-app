@@ -135,7 +135,7 @@
       </q-card>
     </q-dialog>
 
-    <!-- Mutation de type de compte en "type" -->
+    <!-- Mutation de type de compte en "type" A ou O-->
     <q-dialog v-model="ui.d[idc].BPmut" persistent>
       <q-card :class="styp('md')">
         <q-toolbar class="tbs">

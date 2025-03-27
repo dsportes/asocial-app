@@ -2,7 +2,7 @@
 
 export const config = {
   // CONFIGURATION TECHNIQUE : à adapter SI NECESSAIRE à chaque déploiement
-  BUILD: 'v1.3 - 1.01',
+  BUILD: 'v1.4.1 - 1.01',
   mondebug: true,
 
   /* Configuration linguistiques - Commenter les langues non souhaitées dans ce déploiement */  
@@ -16,7 +16,6 @@ export const config = {
   silenceHome: true,
   touchInMinutes: 10,
   heartBeatsInSec: [10, 120], // lapse entre deux heartbeats
-  paranolapse: 5000, // 5 * 60000, // lapse entre 2 parano (5 minutes)
 
   theme: {
     primary: ['#0D47A1', '#BBDEFB'],

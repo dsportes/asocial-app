@@ -223,6 +223,7 @@
         </div>
     </q-card-section>
 
+    <!-- Dialogue de calcul du volume d'une base locale -->
     <q-dialog v-model="ui.d[idc].OTrunning" persistent>
       <q-card :class="styp('sm')">
         <div class="column items-center">
@@ -232,6 +233,7 @@
       </q-card>
     </q-dialog>
 
+    <!-- Dialogue de suppression d'une base locale -->
     <q-dialog v-model="ui.d[idc].OTsuppbase" persistent>
       <q-card :class="styp('sm') + 'q-pa-sm'">
         <q-card-section>

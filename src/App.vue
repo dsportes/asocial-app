@@ -417,6 +417,7 @@
     </q-card>
   </q-dialog>
 
+  <!-- Panel de déverrouillage -->
   <q-dialog v-model="ui.paranovis" maximized persistent
       transition-show="slide-up" transition-hide="slide-down">
     <dialogue-parano/>

@@ -66,6 +66,7 @@
 
     <div class="filler"/>
 
+    <!-- Dialogue d'édition du contenu d'une note -->
     <q-dialog v-model="ui.d[idc].PPnvnote" persistent>
       <q-card :class="styp('md')">
         <q-card-section>
@@ -80,6 +81,7 @@
       </q-card>
     </q-dialog>
 
+    <!-- Dialogue d'ajout d'un nouveau fichier -->
     <q-dialog v-model="ui.d[idc].PPnvfic" persistent>
       <q-card :class="styp('md')">
       <q-card-section>
@@ -102,6 +104,7 @@
       </q-card>
     </q-dialog>
 
+    <!-- Dialogue de confirmation de suppression d'une note -->
     <q-dialog v-model="ui.d[idc].PPsupprnote" persistent>
       <q-card :class="styp('sm')">
         <q-card-section class="column items-center q-my-md">
@@ -115,6 +118,7 @@
       </q-card>
     </q-dialog>
 
+    <!-- Dialogue de confirmation de suppression d'un fichier -->
     <q-dialog v-model="ui.d[idc].PPsupprfic" persistent>
       <q-card :class="styp('sm')">
         <q-card-section class="column items-center q-my-md">
