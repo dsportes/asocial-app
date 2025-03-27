@@ -544,12 +544,13 @@ export default {
   LOGsp3: 'Sponsoring annulé par le sponsor',
   LOGnosp: 'Le compte du Comptable ne peut pas être créé: la phrase d\'autorisation déclarée par l\'Administrateur Technique n\'est pas celle saisie.',
   LOGnosp2: '(BUG) Clé E non decryptable. Demander à l\'Administrateur Technique de décklarer une nouvelle phrase d\'autisation de compte Comptable.', 
-  LOGparano1: 'Option facultative pour les paranoïaques',
-  LOGparano2: 'Code PIN',
+  LOGparano1: 'Verrouillage (fac.) pour les paranoïaques',
+  LOGparano2: 'Code PIN de déverrouillage',
   LOGparah: '4 c. de 1 à 9',
   LOGopt1: '30 sec',
   LOGopt2: '2 min',
   LOGopt3: '5 min',
+  LOGopt0: 'Sur demande',
 
   // Rapport Synchro
   RStit: 'Avatars et groupes du compte "{0}"',
@@ -747,6 +748,7 @@ export default {
   MLAcf4: 'Oui, je veux l\'interrompre (si possible)',
   MLAsfer: 'pas de compte connecté',
   MLAout: 'Outils et tests techniques',
+  MLAlock: 'Verrouillage de l\'application',
   MLAoad0: '',
   MLAoad1: '[org.]',
   MLAoad2: '[délégué]',

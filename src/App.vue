@@ -107,6 +107,12 @@
         <q-tooltip class="ttip">{{$t('MLAout')}}</q-tooltip>
       </btn-cond>
 
+      <!-- Verrouillage -->
+      <btn-cond icon="lock" round :disable="ui.parano === ''"
+        @ok="ui.lockParano()">
+        <q-tooltip class="ttip">{{$t('MLAlock')}}</q-tooltip>
+      </btn-cond>
+
       <q-toolbar-title class="row justify-end items-center titre-md text-right q-mx-xs">
         <span v-if="session.org" class="q-mr-sm titre-sm text-italic">{{session.org}}</span>
         <icon-mode class="cursor-none"/>

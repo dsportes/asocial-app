@@ -105,12 +105,21 @@ export const useUiStore = defineStore('ui', {
     setParano (p, d) {
       this.parano = p
       if (d) this.paranoLapse = d
-      if (p) this.paranoTO = setTimeout(() => { this.paranovis = true }, this.paranoLapse)
+      if (this.parano && this.paranoLapse !== -1) 
+        this.paranoTO = setTimeout(() => { this.paranovis = true }, this.paranoLapse)
+    },
+
+    lockParano () {
+      if (this.parano) {
+        if (this.paranoTO) clearTimeout(this.paranoTO)
+        this.paranovis = true
+      }
     },
 
     hideParano () {
       this.paranovis = false
-      this.paranoTO = setTimeout(() => { this.paranovis = true }, this.paranoLapse)
+      if (this.parano && this.paranoLapse !== -1)
+        this.paranoTO = setTimeout(() => { this.paranovis = true }, this.paranoLapse)
     },
 
     resetParano () {

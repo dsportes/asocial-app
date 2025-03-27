@@ -36,12 +36,16 @@ Quand cette case est cochée, la base locale du compte dans le browser est détr
 
 > La page des outils a un onglet qui affiche les bases locales existantes dans le browser et propose si souhaité de détruire celles inopportunes.
 
-### Pour les paranos
-Si vous n'avez pas confiance dans le matériel que vous utilisez et que vous craignez que votre **clavier soit écouté** (ce qui techniquement est réalisable depuis longtemps), il faut éviter de sa saisir sa phrase secrète au clavier _physique_ de votre appareil.
+# Pour les paranoïaques | page_login_par
+## Clavier virtuel pour saisir la phrase secrète
+Si vous n'avez pas confiance dans le matériel que vous utilisez et que vous craignez que votre **clavier soit écouté** (ce qui techniquement est réalisable), il faut éviter de sa saisir sa phrase secrète au clavier _physique_ de votre appareil.
 
 Cocher la case **Clavier virtuel** de la boîte de dialogue de saisie de votre phrase secrète. Le clavier physique / système est évité et votre phrase ne peut pas être écoutée et déroutée.
 
 > De manière générale, si vous n'avez pas confiance dans le browser que vous utilisez et que vous soupçonnez qu'une _backdoor_ donne, sans votre consentement, accès à sa mémoire depuis un process externe (ce qui se passe quand vous demandez au browser d'ouvrir un port de _debug_), aucune confiance ne peut être accordée à aucune application.
+
+## Définir un code PIN de déverrouillage
+Si ce code est déclaré, l'écran de l'application se verrouillera automatiquement à la périodicité choisie (ou sur demande). Voir la rubrique d'aide citée ci-dessus.
 
 # Créer son compte par _sponsoring_ | page_login_m sponsoring_a ht_sponsoriser
 Vous avez rencontré une personne ayant un compte dans l'application et ayant la capacité de _sponsoriser_ de nouveaux comptes. Cette personne vous a communiqué:

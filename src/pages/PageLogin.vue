@@ -128,9 +128,10 @@ const optPar = [
   { label: $t('LOGopt1'), value: 30000 },
   { label: $t('LOGopt2'), value: 120000 },
   { label: $t('LOGopt3'), value: 300000 },
+  { label: $t('LOGopt0'), value: -1 }
 ]
 
-const optVal = ref(optPar[optPar.length - 1])
+const optVal = ref(optPar[2])
 
 const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))

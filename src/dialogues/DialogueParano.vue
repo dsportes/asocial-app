@@ -46,4 +46,6 @@ watch(inp, val => {
   border-radius: 10px
   font-size: 32px !important
   padding: 12px 16px
+.bord:hover
+  background-color: $grey-5
 </style>
