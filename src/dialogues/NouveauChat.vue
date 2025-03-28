@@ -1,4 +1,4 @@
-<template> <!-- BtnCond incorporés -->
+<template>
 <q-dialog v-model="ui.d[idc].CCouvrir" persistent>
   <q-card :class="styp('sm')">
   <q-toolbar class="tbs">
