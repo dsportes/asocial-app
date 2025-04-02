@@ -427,7 +427,7 @@
 </template>
 
 <script setup>
-import { watchEffect, computed } from 'vue'
+import { watchEffect, computed, onMounted } from 'vue'
 import { useQuasar, setCssVar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 
@@ -516,6 +516,10 @@ const people = stores.people
 const config = stores.config
 const ui = stores.ui
 const hb = stores.hb
+
+onMounted(async () => {
+  config.callSW('App.vue OK')
+})
 
 const msgClass = computed(() => ui.d.aunmessage && ui.d.messages[0].type ? 'bg-warning' : 'bg-primary')
 

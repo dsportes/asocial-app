@@ -285,8 +285,6 @@ export async function deconnexion(recon) {
   const phrase = session.phrase
 
   if (session.accesIdb) idb.close()
-  if (session.websocket) session.websocket.close()
-  if (session.fsSync) session.fsSync.close()
   stores.reset() // Y compris session
   syncQueue.reset()
   session.setMode(mode)
@@ -295,7 +293,7 @@ export async function deconnexion(recon) {
     ui.setPage('session')
     session.phrase = phrase
     await connexion(phrase)
-    ui.setParano(parano, parVal.value)
+    ui.setParano(parano)
   } else {
     ui.reLogin = true
     ui.setPage('login')

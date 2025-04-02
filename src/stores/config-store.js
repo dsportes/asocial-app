@@ -1,11 +1,15 @@
 import { defineStore } from 'pinia'
 import { useI18n } from 'vue-i18n'
 import { Tarif } from '../app/api.mjs'
-import { b64ToU8, HelpTree } from '../app/util.mjs'
+import { b64ToU8, HelpTree, sleep } from '../app/util.mjs'
+import stores from '../stores/stores.mjs'
+import { syncQueue } from '../app/synchro.mjs'
 
 export const useConfigStore = defineStore('config', {
   state: () => ({
     build: 0,
+
+    bc: new BroadcastChannel('channel-pubsub'),
 
     // données gérées par SW
     nouvelleVersion: false, // nouvelle version disponible
@@ -91,6 +95,19 @@ export const useConfigStore = defineStore('config', {
       for(const svc in this.services)
         for(const org of this.services[svc].orgs) this.orgs[org] = svc
       await this.getPerm()
+      
+      this.bc.onmessage = (event) => {
+        const session = stores.session
+        const obj = event && event.data ? event.data : null
+        if (obj) {
+          if (obj.sessionId === session.sessionId) {
+            // console.log('msgPush traitement: ' + session.sessionId + ' obj=' + JSON.stringify(obj))
+            syncQueue.synchro(obj.trLog)
+          } else {
+            // console.log('msgPush ignoré: ' + session.sessionId + ' obj=' + JSON.stringify(obj))
+          }
+        }
+      }
     },
 
     setURLs (svc) {
@@ -109,6 +126,11 @@ export const useConfigStore = defineStore('config', {
       this.registration = registration
       if (this.permState === 'granted') await this.setSubscription()
       console.log('SW ready. subJSON: ' + this.subJSON.substring(0, 50))
+    },
+
+    async callSW (payload) {
+      while (!this.registration) await sleep(1000)
+      this.registration.active.postMessage({ type: 'FROM_APP', payload })
     },
 
     async listenPerm () {
