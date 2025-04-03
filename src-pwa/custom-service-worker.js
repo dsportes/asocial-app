@@ -11,19 +11,13 @@ const mf = self.__WB_MANIFEST
 const local = {}
 
 const b64ToU8 = base64String => {
-  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding)
-      .replace(/\-/g, '+')
-      .replace(/_/g, '/');
-
-  const rawData = atob(base64);
-  const outputArray = new Uint8Array(rawData.length);
-
-  for (let i = 0; i < rawData.length; ++i) {
-      outputArray[i] = rawData.charCodeAt(i);
-  }
-
-  return outputArray;
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
+  const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/')
+  const rawData = atob(base64)
+  const outputArray = new Uint8Array(rawData.length)
+  for (let i = 0; i < rawData.length; ++i)
+    outputArray[i] = rawData.charCodeAt(i)
+  return outputArray
 }
 
 import { precacheAndRoute } from 'workbox-precaching'
@@ -34,20 +28,27 @@ import { precacheAndRoute } from 'workbox-precaching'
 const broadcast = new BroadcastChannel('channel-pubsub')
 
 self.addEventListener('push', (event) => {
-  const payload = event.data ? event.data.text() : ''
+  const payload = event.data ? event.data.text() : null
   let obj
   try {
     obj = payload ? decode(b64ToU8(payload)) : {}
-    // console.log('SW à traiter:' + (obj ? JSON.stringify(obj) : '???'))
   } catch (e) {
     console.log('msgPush: ' + e.toString())
   }
-  if (obj && obj.sessionId)
-    broadcast.postMessage(obj)
-  else {
-    console.log('Futur traitement:' + (obj ? JSON.stringify(obj) : '???'))
+  if (obj) {
+    if (!obj.sw) {
+      // console.log('SW à traiter:' + (obj ? JSON.stringify(obj) : '???'))
+      broadcast.postMessage(obj)
+    } else {
+      console.log('Futur traitement:' + (obj ? JSON.stringify(obj) : '???'))
+    }
   }
 })
+
+/* Il est possible de récupérer la configuration services.json dans le SW
+- par ajout d'un listener 'install' qui charge le fichier
+  et fait différer l'actiivation effective après le chargement
+- par récupération de la subscription lors de l'activation
 
 self.addEventListener('install', event => {
   console.log('Install dans custom-service-worker')
@@ -55,15 +56,13 @@ self.addEventListener('install', event => {
     const resp = await fetch('/services.json')
     if (resp) {
       local.data = await resp.json()
-      console.log('services.json chargé')
+      // console.log('services.json chargé')
       resolve()
     } else reject()
   }))
 })
 
 self.addEventListener('activate', async event => {
-  if (local.data)
-    console.log('Prêt')
   let subscription = await self.registration.pushManager.getSubscription() // déjà faite ?
   if (!subscription) subscription = await self.registration.pushManager.subscribe({
       userVisibleOnly: true,
@@ -71,11 +70,13 @@ self.addEventListener('activate', async event => {
     })
   local.subscription = subscription
   local.subJSON = JSON.stringify(subscription)
-  console.log('Dans SW: ' + local.subJSON)
+  // console.log('Subscription dans SW: ' + local.subJSON)
 })
+*/
 
+/* On peut appeler une fonction du SW depuis une app Web */
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'FROM_APP') {
-    console.log(event.data.payload)
+    console.log('Appel depuis app:' + JSON.stringify(event.data.payload))
   }
 })

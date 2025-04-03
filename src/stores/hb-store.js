@@ -46,7 +46,7 @@ export const useHbStore = defineStore('hb', () => {
     const now = Date.now()
     if (session.ok) {
       const n = (now - ui.touch) / 60000
-      if (n > config.touchInMinutes) {
+      if (session.deconAuto && n > config.touchInMinutes) {
         await deconnexion()
         return
       }

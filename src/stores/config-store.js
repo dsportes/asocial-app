@@ -2,14 +2,16 @@ import { defineStore } from 'pinia'
 import { useI18n } from 'vue-i18n'
 import { Tarif } from '../app/api.mjs'
 import { b64ToU8, HelpTree, sleep } from '../app/util.mjs'
-import stores from '../stores/stores.mjs'
-import { syncQueue } from '../app/synchro.mjs'
 
 export const useConfigStore = defineStore('config', {
   state: () => ({
     build: 0,
 
-    bc: new BroadcastChannel('channel-pubsub'),
+    search: '',
+    appurl: '',
+    appbase: '',
+    readme: '',
+    docsurl: '',
 
     // données gérées par SW
     nouvelleVersion: false, // nouvelle version disponible
@@ -61,6 +63,7 @@ export const useConfigStore = defineStore('config', {
 
   
   getters: {
+    session: (state) => stores.session,
     motsclesLOC (state) { 
       const lg = useI18n().locale.value
       return state.motsclesloc[lg]
@@ -95,19 +98,6 @@ export const useConfigStore = defineStore('config', {
       for(const svc in this.services)
         for(const org of this.services[svc].orgs) this.orgs[org] = svc
       await this.getPerm()
-      
-      this.bc.onmessage = (event) => {
-        const session = stores.session
-        const obj = event && event.data ? event.data : null
-        if (obj) {
-          if (obj.sessionId === session.sessionId) {
-            // console.log('msgPush traitement: ' + session.sessionId + ' obj=' + JSON.stringify(obj))
-            syncQueue.synchro(obj.trLog)
-          } else {
-            // console.log('msgPush ignoré: ' + session.sessionId + ' obj=' + JSON.stringify(obj))
-          }
-        }
-      }
     },
 
     setURLs (svc) {
@@ -131,6 +121,17 @@ export const useConfigStore = defineStore('config', {
     async callSW (payload) {
       while (!this.registration) await sleep(1000)
       this.registration.active.postMessage({ type: 'FROM_APP', payload })
+    },
+
+    sendNotif (titre, texte, icon) {
+      if (this.registration && this.session.acceptNotif) {
+        this.registration.showNotification(titre, {
+          requireIntercation: false,
+          body: texte || '',
+          badge: this.logo,
+          icon: icon || this.logo
+        })
+      }
     },
 
     async listenPerm () {

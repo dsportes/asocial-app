@@ -524,6 +524,10 @@ export default {
   OP_GetCv: 'Obtention de la carte de visite d\'un avatar ou d\'un groupe.',
   OP_PutUrlNf : 'Obtention de l\'URL de PUT d\'un fichier d\'une note',
 
+ // synchro.mjs
+ SYchgr: 'Chat du groupe {0}',
+ SYchav: 'Chat avec {0}',
+
   // Login
   LOGpubsub: 'Autoriser les "notifications" afin d\'avoir des données à jour en continu même suite aux actions des autres sessions',
   LOGcrec: 'Le compte du Comptable a été créé: vous pouvez vous y connecter.',
@@ -729,6 +733,8 @@ export default {
   PSnosvc2: 'Aucun serveur n\'est déclaré avec le code [{0}].',
 
   // App.vue
+  MLAicones: 'Icônes des barres',
+  MLAmenu: 'Menu des pages',
   MLAparano1: 'Pour poursuivre la session saisir le code PIN déclaré à la connexion',
   MLAntfg: 'Le navigateur "accepte" les notifications pour l\'application.',
   MLAntfd: 'Le navigateur "bloque les notifications" pour l\'application.',
@@ -1058,6 +1064,8 @@ export default {
   PNCabo: 'Abon. / Conso.',
   PNCcre: 'Crédits',
   PNCurg: 'Chats d\'urgence',
+  PNCdeconAuto: 'Déconnexion après 10 minutes sans activité',
+  PNCchntf: 'Afficher les notifications de mise à jour des chats',
 
   // PageNotes
   PNOalbum: 'Album',

@@ -43,6 +43,8 @@ export default boot(async ({ app /* Vue */ }) => {
   console.log('build:' + cfg.BUILD)
   
   cfg.search = window.location.search.replace('?', '')
+  cfg.appurl = window.location.origin + window.location.pathname
+  cfg.appbase = cfg.appurl.substring(0, cfg.appurl.lastIndexOf('/'))
 
   cfg.locales = []
   cfg.localeOptions.forEach(t => {cfg.locales.push(t.value)})

@@ -1,5 +1,5 @@
 <template>
-<q-layout view="hHh lpR fFf">
+<q-layout view="hHh lpR fFf" :class="clr">
   <q-header elevated>
     <q-toolbar class="full-width tbp">
       <!--
@@ -427,7 +427,7 @@
 </template>
 
 <script setup>
-import { watchEffect, computed, onMounted } from 'vue'
+import { watchEffect, computed } from 'vue'
 import { useQuasar, setCssVar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 
@@ -495,7 +495,6 @@ import PageChats from './pages/PageChats.vue'
 import PageCompta from './pages/PageCompta.vue'
 import PageNotes from './pages/PageNotes.vue'
 import PagePartition from './pages/PagePartition.vue'
-// import PanelPeople from './panels/PanelPeople.vue'
 
 // Niveau 8
 import PageGroupes from './pages/PageGroupes.vue'
@@ -517,9 +516,9 @@ const config = stores.config
 const ui = stores.ui
 const hb = stores.hb
 
-onMounted(async () => {
-  config.callSW('App.vue OK')
-})
+const deg = computed(() => ui.page === 'login' || ui.page === 'accueil')
+const clr = computed(() => $q.dark.isActive ? (deg.value ? 'degradeF' : 'black') : (deg.value ? 'degradeC' : 'white'))
+// onMounted(async () => { config.callSW('App.vue OK') })
 
 const msgClass = computed(() => ui.d.aunmessage && ui.d.messages[0].type ? 'bg-warning' : 'bg-primary')
 
@@ -686,4 +685,9 @@ un élément qui apparaît quand le drawer est caché*/
   height: 2.5rem
   border-radius: 8px
   overflow: hidden
+.degradeF
+  background: linear-gradient(to right, #22093f, #3a0623)
+  /* background: linear-gradient(to right, $purple-10, $pink-10) */
+.degradeC
+  background: linear-gradient(to right, $deep-purple-3, white)
 </style>

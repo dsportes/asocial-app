@@ -17,6 +17,8 @@ export const useSessionStore = defineStore('session', {
   state: () => ({
     status: 0, // 0:fermée, 1:en chargement, 2: ouverte, 3: admin
     mode: 0, // 1:synchronisé, 2:incognito, 3:avion
+    acceptNotif: true,
+    deconAuto: true,
 
     org: '', // code de l'organisation
     compteId: '', // id du compte

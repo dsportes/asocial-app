@@ -6,6 +6,19 @@ import { DataSync, ID, AMJ, Tarif } from './api.mjs'
 import { post } from './net.mjs'
 import { compile } from './modele.mjs'
 
+const broadCastChannel = new BroadcastChannel('channel-pubsub')
+broadCastChannel.onmessage = (event) => {
+  const session = stores.session
+  if (event.data) {
+    if (event.data.sessionId === session.sessionId) {
+      // console.log('msgPush traitement: ' + JSON.stringify(event.data))
+      syncQueue.synchro(event.data.trLog)
+    } else {
+      // console.log('msgPush ignoré: ' + session.sessionId + ' / ' + event.data.sessionId)
+    }
+  }
+}
+
 /* classe Queue ***********************************************************/
 class Queue {
   constructor () {
@@ -125,6 +138,7 @@ class SB {
     this.n = stores.note
     this.p = stores.people
     this.faSt = stores.ficav
+    this.cfg = stores.config
 
     this.espace = null
     this.compte = null
@@ -183,6 +197,7 @@ class SB {
   conduit à mettre à jour / supprimer des Avnote.
   */
   store (buf) {
+    const ntf = this.s.ok && this.s.acceptNotif
     if (this.espace) this.s.setEspace(this.espace)
     if (this.compte) this.s.setCompte(this.compte)
     if (this.compti) this.s.setCompti(this.compti)
@@ -202,7 +217,14 @@ class SB {
       this.faSt.delNotes(idg, buf)
     }
 
-    if (this.chatgrs.size) for(const [,ch] of this.chatgrs) this.g.setChatgr(ch) 
+    if (this.chatgrs.size) 
+      for(const [,ch] of this.chatgrs) {
+        this.g.setChatgr(ch)
+        if (ntf) {
+          const cv = this.s.getCV(ch.id)
+          this.cfg.sendNotif($t('SYchgr', [cv.nom]), ch.tit, cv.photo)
+        }
+      }
 
     if (this.notes.size) {
       for(const [,n] of this.notes) { 
@@ -228,6 +250,10 @@ class SB {
       } else {
         this.a.setChat(ch)
         this.p.setPCh(ch.idE, ch.id)
+        if (ntf) {
+          const cv = this.s.getCV(ch.idE)
+          this.cfg.sendNotif($t('SYchav', [cv.nom]), ch.tit, cv.photo)
+        }
       }
     }
     
