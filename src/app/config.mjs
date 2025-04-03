@@ -2,7 +2,7 @@
 
 export const config = {
   // CONFIGURATION TECHNIQUE : à adapter SI NECESSAIRE à chaque déploiement
-  BUILD: 'v1.4.1 - 1.01',
+  BUILD: 'v1.5.0 - 1.01',
   mondebug: true,
 
   /* Configuration linguistiques - Commenter les langues non souhaitées dans ce déploiement */  
