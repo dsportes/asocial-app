@@ -69,7 +69,8 @@ export const useConfigStore = defineStore('config', {
       const lg = useI18n().locale.value
       return state.motsclesloc[lg]
     },
-    permission: (state) => state.permState === 'granted'
+    permission: (state) => state.permState === 'granted',
+    subOK: (state) => state.subJSON !== '???'
   },
 
   actions: {
@@ -146,7 +147,7 @@ export const useConfigStore = defineStore('config', {
 
     async setSubscription () {
       if (!this.registration) return
-      const pm = this.registration.pushManager || window.safari.pushNotification
+      const pm = this.registration.pushManager
       if (!pm) {
         const m = 'pushManager pas disponsible dans ce browser'
         console.log(m)

@@ -393,24 +393,33 @@
     <q-card :class="styp('sm') + ' q-pa-sm column items-center'">
       <bouton-help class="self-end" page="boite_automaj"/>
 
+      <div v-if="config.permission && !config.subOK">
+        <div class="titre-lg q-my-md text-center">{{$t('MLAsubKO')}}</div>
+        <btn-cond class="q-mt-md" flat :label="$t('MLAraf')" @ok="rafraichir"/>
+      </div>
+
       <div v-if="config.permission" class="titre-lg q-my-md text-center">{{$t('MLAntfg')}}</div>
       <div v-else class="msg2 titre-lg text-italic text-bold q-my-md text-center">{{$t('MLAntfd')}}</div>
 
       <div v-if="!config.permission" class="titre-md q-my-md text-center">
-        <btn-cond v-if="config.permState === 'prompt'" flat :label="$t('MLAntfr1')" @ok="demperm"/>
+        <btn-cond v-if="config.permState === 'prompt'" flat :label="$t('MLAntfr1')" 
+          @ok="demperm"/>
         <div v-else class="titre-lg text-italic text-center">{{$t('MLAntfr2')}}</div>
         <btn-cond class="q-mt-md" flat :label="$t('MLAraf')" @ok="rafraichir"/>
       </div>
 
-      <div v-if="config.permission && hb.statusHB" class="column q-my-md justify-center">
+      <div v-if="config.permission && hb.statusHB" 
+        class="column q-my-md items-center justify-center">
         <div class="titre-lg text-center">{{$t('MLAhbOK')}}</div>
-        <div class="q-my-md titre-md text-center">{{$t('MLAmajok')}}</div>
+        <div class="q-mt-md titre-md text-center">{{$t('MLAmajok')}}</div>
+        <btn-cond class="q-mt-xs" size="sm" flat :label="$t('MLAraf')" @ok="rafraichir"/>
       </div>
 
       <div v-if="config.permission && !hb.statusHB" 
-        class="q-my-md column justify-center">
+        class="q-my-md column items-center justify-center">
         <div class="titre-lg text-center">{{$t('MLAhbKO')}}</div>
         <div class="q-mt-md titre-lg text-center msg2">{{$t('MLAhbKO2', [hb.nbRetry])}}</div>
+        <btn-cond class="q-mt-xs" size="sm" flat :label="$t('MLAraf')" @ok="rafraichir"/>
       </div>
 
       <btn-cond class="q-my-md" flat :label="$t('jailu')" @ok="ui.fD"/>

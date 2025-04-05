@@ -12,7 +12,7 @@ export const useHbStore = defineStore('hb', () => {
   const ui = stores.ui
 
   const normal = HBINSECONDS * 1000
-  const court = HBINSECONDS * 200
+  const court = HBINSECONDS * 100
 
   const iterTO = ref(0) // itération sur l'envoi de hb
 
@@ -39,8 +39,7 @@ export const useHbStore = defineStore('hb', () => {
   function nextHB (boot) { // démon lancé au boot et à chaque exécution
     // évite un éventuel doublon de démon
     if (iterTO.value) clearTimeout(iterTO.value)
-    iterTO.value = setTimeout(doHB, 
-      boot ? 1 : (nbRetry.value > 0 ? court : normal))
+    iterTO.value = setTimeout(doHB, boot ? 1 : (nbRetry.value > 0 ? court : normal))
   }
 
   async function doHB () {
@@ -81,9 +80,14 @@ export const useHbStore = defineStore('hb', () => {
     statusHB.value = ret === nhbx - 1
     // cas "normal" : le nouvel hb est de la même session et en séquence
     // cas "erreur" : perte de hb, pas en séquence
-    if (statusHB.value) nbRetry.value = 0
-    else nbRetry.value++
-    if (config.mondebug) console.log('heartbeat ', statusHB.value, ' nhb=' + nhb.value, ' retry=' + nbRetry.value, new Date(dhhb.value).toTimeString())
+    if (statusHB.value) {
+      nbRetry.value = 0
+      if (config.mondebug) console.log('heartbeat ', statusHB.value, ' nhb=' + nhb.value, ' retry=0', new Date(dhhb.value).toTimeString())
+    } else {
+      nbRetry.value++
+      console.log('heartbeat ', statusHB.value, ' nhb reçu=' + ret, 
+        ' nhb attendu=' + nhb.value, ' retry=' + nbRetry.value, new Date(dhhb.value).toTimeString())
+    }
     nextHB()
   }
 

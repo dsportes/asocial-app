@@ -570,11 +570,11 @@ export default {
   // App.vue reload
   RLnvver: 'Nouvelle version disponible',
   RLnvver2: 'Une nouvelle version a été téléchargée et est prête à être installée',
-  RLtit1: 'Il est important d\'en bénéficier le plus tôt possible en raison d\'éventuels correctifs d\erreurs qu\'ele peut inclure.',
+  RLtit1: 'Il est important d\'en bénéficier le plus tôt possible en raison d\'éventuels correctifs d\'erreurs qu\'ele peut inclure.',
   RLtit2: 'L\'installation initialise une nouvelle session et le besoin de se connecter à nouveau.', 
   RLopt: 'Option {0} :',
   RLopt1: 'presser le bouton ',
-  RLopt2: 'presser CONTROL+F5',
+  RLopt2: 'presser CONTROL+F5 (sur Mac SHIFT+CMD+R)',
   RLopt3: 'fermer la fenêtre / onglet puis appeler à nouveau l\'aplication dans une nouvelle fenêtre / onglet.',
   RLinstal: 'Installer',
 
@@ -741,11 +741,12 @@ export default {
   MLAntfr1: 'Demander au navigateur d\'autoriser les notifications',
   MLAntfr2: 'Vous devez modifier les autorisations du navigateur pour cette application afin qu\'il accepte les notifications',
   MLAhbKO: 'Le service de publication des mises à jour par les autres est temporairement HORS-SERVICE.',
-  MLAhbKO2: 'Tentative de reconnexion #{0}',
+  MLAhbKO2: 'Des tentatives pour joindre ce service sont effectuées automatiquement toutes les 12s - #{0}',
   MLAhbOK: 'Le service de publication des mises à jour par les autres est a priori en service',
   MLAraf: 'Rafraîchir les données',
-  MLAmajok: 'Les données de la session sont mises à jour en continu, même suite aux actions des autres sessions.',
+  MLAmajok: 'Les données de la session sont mises à jour en continu, même suite aux actions des autres sessions. Rafraîchir les données est a priori inutile.',
   MLAnotif: 'Notifications des maj',
+  MLAsubKO: 'Le browser ne sait pas gérer les notifications pour l\'application. Rafraîchir l\'application manuellement en cas de doute sur la fraîcheur des données affichées.',
 
   MLAbrk: 'Opération en cours',
   MLAatt: 'Information importante',
