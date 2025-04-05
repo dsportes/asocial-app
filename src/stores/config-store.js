@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { useI18n } from 'vue-i18n'
 import { Tarif } from '../app/api.mjs'
 import { b64ToU8, HelpTree, sleep } from '../app/util.mjs'
+import stores from './stores.mjs'
 
 export const useConfigStore = defineStore('config', {
   state: () => ({
@@ -115,7 +116,7 @@ export const useConfigStore = defineStore('config', {
       await this.listenPerm()
       this.registration = registration
       if (this.permState === 'granted') await this.setSubscription()
-      console.log('SW ready. subJSON: ' + this.subJSON.substring(0, 50))
+      console.log('SW ready. subJSON: ' + this.subJSON.substring(0, 200))
     },
 
     async callSW (payload) {
@@ -145,14 +146,24 @@ export const useConfigStore = defineStore('config', {
 
     async setSubscription () {
       if (!this.registration) return
+      const pm = this.registration.pushManager || window.safari.pushNotification
+      if (!pm) {
+        const m = 'pushManager pas disponsible dans ce browser'
+        console.log(m)
+        this.subJSON = '???' + m
+        return
+      }
+      console.log('pushManager getSubscription')
       try {
-        let subscription = await this.registration.pushManager.getSubscription() // déjà faite
-        if (!subscription) subscription = await this.registration.pushManager.subscribe({
+        let subscription = await pm.getSubscription() // déjà faite
+        if (!subscription) subscription = await pm.subscribe({
             userVisibleOnly: true,
             applicationServerKey: b64ToU8(this.vapid_public_key)
           })
         this.subJSON = JSON.stringify(subscription)
+        console.log('subJSON: ' + this.subJSON.substring(0, 200))
       } catch (e) {
+        console.log(e.toString())
         this.subJSON = '???' + e.message
       }
     },

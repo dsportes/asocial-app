@@ -4,14 +4,15 @@ import { defineStore } from 'pinia'
 import stores from './stores.mjs'
 import { pubsub } from '../app/net.mjs'
 import { SyncFull, deconnexion } from '../app/synchro.mjs'
+import { HBINSECONDS } from '../app/api.mjs'
 
 export const useHbStore = defineStore('hb', () => {
   const session = stores.session
   const config = stores.config
   const ui = stores.ui
 
-  const normal = config.heartBeatsInSec[1] * 1000
-  const court = config.heartBeatsInSec[0] * 1000
+  const normal = HBINSECONDS * 1000
+  const court = HBINSECONDS * 200
 
   const iterTO = ref(0) // itération sur l'envoi de hb
 
