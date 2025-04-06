@@ -308,9 +308,11 @@ export const useNoteStore = defineStore('note', {
     calculNfnt () {
       const m = {}
       if (this.ui.page === 'notes') {
-        this.nodes.forEach(n => { m[n.id] = { nf: 0, nt: 0 }}) // racines
+        this.nodes.forEach(n => { // racines
+          m[n.id] = { nf: 0, nt: 0 }
+        }) 
         this.map.forEach(node => { 
-          node.fily = false
+          node.fily = node.type < 4 ? true : false
           node.filx = node.note ? this.filtrage(node.note) : false 
         })
         this.map.forEach((node, idx) => {
