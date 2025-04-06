@@ -11,7 +11,7 @@
       v-model:selected="selected"
       v-model:expanded="expanded"
       :filter="nSt.filtre.v"
-      :filter-method="nSt.filtrage"
+      :filter-method="nSt.filtrage2"
     >
       <template v-slot:default-header="prop">
         <div @click.stop="clicknode(prop.node)" @keypress.stop="clicknode(prop.node)" 
@@ -26,6 +26,8 @@
             <q-icon v-if="nbf(prop.node)" name="attachment" class="col-auto q-mr" color="orange" size="sm"/>
             <q-badge v-if="nbf(prop.node)" class="col-auto q-mr-xs" color="orange" rounded 
               :label="nbf(prop.node)" text-color="black"/>
+            <q-icon v-if="!prop.node.filx" size="xs" class="col-auto q-mr-xs" name="check"
+              color="warning"/>
             <div :class="'col ' + styn(prop.node)">{{lib(prop.node)}}</div>
           </div>
         </div>
@@ -292,7 +294,7 @@ import { ref, computed, watch, onUnmounted} from 'vue'
 import mime2ext from 'mime2ext'
 import stores from '../stores/stores.mjs'
 import { dkli, sty, styp, $t, u8ToB64, dhcool, edvol, afficherDiag, 
-  sleep, egalite, normNomFichier } from '../app/util.mjs'
+  sleep, normNomFichier } from '../app/util.mjs'
 import ShowHtml from '../components/ShowHtml.vue'
 import { appexc, AppExc, E_WS } from '../app/api.mjs'
 import NoteEdit from '../panels/NoteEdit.vue'
@@ -425,6 +427,13 @@ const nodesTries = computed(() => {
   })
   return t
 })
+
+function egalite (setA, setB) {
+  if (setA.size !== setB.size) return false
+  for (const elem of setA) if (!setB.has(elem)) return false
+  for (const elem of setB) if (!setA.has(elem)) return false
+  return true
+}
 
 const presel = computed(() => nSt.presel)
 const lib2 = computed(() => lib(nSt.node))

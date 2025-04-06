@@ -91,47 +91,6 @@ export async function trapex (e, opt) {
   return
 }
 
-/* Sets, u8 egalité************************************************************/
-export function difference (setA, setB) { // element de A pas dans B
-  const diff = new Set(setA)
-  for (const elem of setB) diff.delete(elem)
-  return diff
-}
-
-export function intersection (setA, setB) { // element de A aussi dans B
-  const inter = new Set()
-  for (const elem of setA) if (setB.has(elem)) inter.add(elem)
-  return inter
-}
-
-export function union (setA, setB) { // element de A ou de B
-  const u = new Set()
-  for (const elem of setA) elem.add(elem)
-  for (const elem of setB) elem.add(elem)
-  return u
-}
-
-export function egalite (setA, setB) {
-  if (setA.size !== setB.size) return false
-  for (const elem of setA) if (!setB.has(elem)) return false
-  for (const elem of setB) if (!setA.has(elem)) return false
-  return true
-}
-
-export function egaliteU8 (a, b) {
-  if ((!a && b) || (!b && a)) return false
-  if (!a && !b) return true
-  if (a.length !== b.length) return false
-  for(let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false
-  return true
-}
-
-export function inverse (a) {
-  const b = new Uint8Array(a.length)
-  for(let i = 0; i < a.length; i++) b[a.length - 1 - i] = a[i]
-  return b
-}
-
 /* dates et heures, dlv *************************************************************/
 export function sleep (delai) {
   if (delai <= 0) return

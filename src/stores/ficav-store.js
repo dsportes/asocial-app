@@ -393,11 +393,11 @@ export const useFicavStore = defineStore('ficav', {
       const DEBUG = this.config.mondebug
       if (!this.session.accesIdb || (sessionId !== this.session.sessionId)) return
       setTimeout(async () => {
-        if (DEBUG) console.log('Start démon ' + dhcool(Date.now(), true))
+        // if (DEBUG) console.log('Start démon ' + dhcool(Date.now(), true))
         while (sessionId === this.session.sessionId) {
           const fa = this.prochain()
           if (!fa) {
-            if (DEBUG) console.log('Attente avant retart démon ' + dhcool(Date.now(), true))
+            // if (DEBUG) console.log('Attente avant retart démon ' + dhcool(Date.now(), true))
             setTimeout(() => { this.startDemon(sessionId) }, (this.delaisec * 1000))
             break
           }

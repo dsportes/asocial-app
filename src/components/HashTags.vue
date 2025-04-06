@@ -42,7 +42,6 @@ import { ref, computed, watch } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import BtnCond from './BtnCond.vue'
-import BoutonHelp from './BoutonHelp.vue'
 import BoutonBulle from './BoutonBulle.vue'
 import { $t } from '../app/util.mjs'
 

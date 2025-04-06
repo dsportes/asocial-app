@@ -1283,15 +1283,25 @@ export class Note extends GenDoc {
   static clen (id) { return ID.estGroupe(id) ? RegCles.get(id) : stores.session.clek }
 
   async compile (row) {
+    const session = stores.session
     this.deGroupe = ID.estGroupe(this.id)
     const clek = stores.session.clek
     this.cle = this.deGroupe ? RegCles.get(this.id) : clek
 
     this.im = row.im || 0
+    this.smc = new Set()
     let y = row.ht ? await decrypterStr(clek, row.ht) : null
     this.ht = new Set(y ? y.split(' ') : new Set())
+    if (this.ht.size) {
+      session.setHT(this.ht)
+      this.ht.forEach(m => {this.smc.add(m)})
+    }
     y = row.htg && this.deGroupe ? await decrypterStr(this.cle, row.htg) : null
     this.htg = new Set(y ? y.split(' ') : new Set())
+    if (this.htg.size) {
+      session.setHT(this.htg)
+      this.htg.forEach(m => {this.smc.add(m)})
+    }
     this.l = row.l || []
     this.d = row.d || 0
 

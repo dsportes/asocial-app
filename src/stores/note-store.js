@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { ID } from '../app/api.mjs'
 import stores from './stores.mjs'
-import { difference, intersection } from '../app/util.mjs'
 
 /* On ne peut recevoir des notes que de ce type:
 - note d'avatar (4) - key:av1/ids1 relative à l'avatar av1 du compte. Elle peut avoir un ref:
@@ -310,32 +309,44 @@ export const useNoteStore = defineStore('note', {
       const m = {}
       if (this.ui.page === 'notes') {
         this.nodes.forEach(n => { m[n.id] = { nf: 0, nt: 0 }}) // racines
+        this.map.forEach(node => { 
+          node.fily = false
+          node.filx = node.note ? this.filtrage(node.note) : false 
+        })
         this.map.forEach((node, idx) => {
-          const ok = this.filtrage(node)
           const anc = this.getAncetres(idx) // pour une racine, seulement son id
           for(let i = 1; i < anc.length; i++){
-            // on ne prend pas la note elle-même, seulement ses ancêtres
+            // on ne décompte pas la note elle-même, seulement ses ancêtres
             const k = anc[i]
             let e = m[k]; if (!e) { e = { nf: 0, nt: 0 }; m[k] = e }
-            e.nt++; if (ok) e.nf++  
+            const a = this.map.get(k)
+            if (node.filx) { a.fily = true; e.nf++ }
+            e.nt++
           }
         })
       }
       this.nfnt = m
     },
 
-    filtrage (node, arg) {
-      const n = node.note
-      if (!n) return true
+    filtrage2 (node, arg) {
+      return node.filx || node.fily
+    },
+
+    filtrage (n) {
       const f = this.filtre
       if (f.v === '0') return true
       if (f.avgr && n.id !== f.avgr) return false
       if (f.lim && n.d && n.d < f.lim) return false
       if (f.note && n.texte && n.texte.indexOf(f.note) === -1) return false
       if (f.vf && n.vf < f.vf) return false
-      if (f.mcp && n.smc && difference(f.mcp, n.smc).size) return false
-      if (f.mcn && n.smc && intersection(f.mcn, n.smc).size) return false
+      if (f.mcp && f.mcp.size && !this.inter(f.mcp, n.smc)) return false
+      if (f.mcn && f.mcn.size && n.smc.size && this.inter(f.mcn, n.smc)) return false
       return true
+    },
+
+    inter (a, b) {
+      for(const x of b) if (a.has(x)) return true
+      return false
     },
 
     setFiltre (f) {
