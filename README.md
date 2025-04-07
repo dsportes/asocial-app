@@ -2,6 +2,11 @@ Application **asocial**.
 
 [Site de la documentation](https://asocialapps.github.io/frdocs)
 
+## v1.5.7 - 7 Avril 2025
+Version d'API : '1.01'
+
+Correction sur l'affichage en pleine page du texte d'une note.
+
 ## v1.5.6 - 6 Avril 2025
 Version d'API : '1.01'
 

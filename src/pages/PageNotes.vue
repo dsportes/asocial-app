@@ -202,10 +202,9 @@
 
           <apercu-genx v-if="selected && nSt.node.type <= 3" :id="nSt.node.id" />
 
-          <div v-if="selected && nSt.note" class="q-ml-md row"> 
-            <show-html class="col bord1 q-mr-lg" :texte="nSt.note.texte" zoom maxh="4rem" />
-            <btn-cond :disable="rec!==0" class="col-auto self-start" round icon="edit" @ok="ovNE"/>
-          </div>
+          <show-html v-if="selected && nSt.note" 
+            class="col bord1 q-ml-md" :texte="nSt.note.texte" zoom maxh="4rem" 
+            :edit="rec===0" @edit="ovNE"/>
 
           <liste-auts v-if="selected && nSt.note && nSt.estGr"/>
 

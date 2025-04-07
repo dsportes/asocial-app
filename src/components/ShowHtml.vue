@@ -15,20 +15,22 @@
 
   <q-dialog v-model="ui.d[idc].SHfs" persistent maximized 
     transition-show="slide-up" transition-hide="slide-down">
-    <q-card>
-      <q-bar>
-        <q-space />
-        <btn-cond v-if="edit" round icon="edit" @ok="editer">
-          <q-tooltip class="bg-white text-primary">{{$t('SHed')}}</q-tooltip>
-        </btn-cond>
-        <btn-cond round icon="close_fullscreen" @ok="ui.fD">
-          <q-tooltip class="bg-white text-primary">{{$t('SHre')}}</q-tooltip>
-        </btn-cond>
-      </q-bar>
-      <q-card-section style="max-height: 100vh" :class="sty() + 'scroll'">
-        <sd-nb :style="styx" :texte="texte"/>
-      </q-card-section>
-    </q-card>
+    <q-layout container view="hHh lpR fFf" :class="sty()">
+      <q-header elevated class="tbs">
+        <q-toolbar>
+          <q-space/>
+          <btn-cond v-if="edit" round icon="edit" @ok="editer">
+            <q-tooltip class="bg-white text-primary">{{$t('SHed')}}</q-tooltip>
+          </btn-cond>
+          <btn-cond round icon="close_fullscreen" @ok="ui.fD" class="q-ml-xs">
+            <q-tooltip class="bg-white text-primary">{{$t('SHre')}}</q-tooltip>
+          </btn-cond>
+        </q-toolbar>
+      </q-header>
+      <q-page-container>
+        <sd-nb :texte="texte" class="q-pa-xs"/>
+      </q-page-container>
+    </q-layout>
   </q-dialog>
 </div>
 </template>

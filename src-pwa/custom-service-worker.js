@@ -6,8 +6,6 @@
 
 import { decode } from '@msgpack/msgpack'
 
-const mf = self.__WB_MANIFEST
-
 const local = {}
 
 const b64ToU8 = base64String => {
@@ -20,9 +18,16 @@ const b64ToU8 = base64String => {
   return outputArray
 }
 
-import { precacheAndRoute } from 'workbox-precaching'
-
-// Use with precache injection
+/* Use with precache injection
+L'utilisation du precaching a provoqué des bouclages de rechargement de la page
+Toutefois la variable mf ci-dessous est requise:
+webpack cherche le string qui figure après self...
+et se plante si ne le trouve pas.
+En conséquence webpack installe, au build, une liste de fichiers qui
+n'est pas utilisée en runtime.
+*/
+// import { precacheAndRoute } from 'workbox-precaching'
+const mf = self.__WB_MANIFEST
 // precacheAndRoute(mf)
 
 const broadcast = new BroadcastChannel('channel-pubsub')
