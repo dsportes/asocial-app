@@ -21,12 +21,6 @@
         </div>
       </div>
 
-      <div v-if="!orgext" class="q-my-md">
-        <div class="titre-lg">{{$t('PSorg1')}}</div>
-        <q-input v-model="orgL" dense class="ph"
-          :hint="$t('PSorg2')" :placeholder="$t('PSorg3')"/>
-      </div>
-
       <q-input v-if="!keyboard.v" dense counter
         :hint="ligne1.length < lgph ? $t('PSnbc', [lgph]) : $t('entree')" 
         v-model="ligne1" 
@@ -51,7 +45,7 @@
       <div class="row justify-end items-center q-gutter-md">
         <btn-cond flat icon="undo" :label="labelRenoncer" @ok="ko"/>
         <btn-cond color="warning" :label="labelVal()" :icon="iconValider"
-          :disable="!ligne1 || ligne1.length < 6 || !orgL"
+          :disable="!ligne1 || ligne1.length < 6"
           @ok="ok1" />
       </div>
 
@@ -116,12 +110,9 @@ const iconValider = ref(ui.ps.iconValider || 'check')
 const verif = ref(ui.ps.verif || false) // vérifier par double saisie
 const labelValider = ref(ui.ps.labelValider || '')
 const labelRenoncer = ref($t(ui.ps.labelRenoncer || 'renoncer'))
-// Vient de login: proposer le raz de la base locale ET enregistrer org
-const login = ref(ui.ps.login || false)
-const orgext = ref(ui.ps.orgext || '') // le code de l'organisation a été saisi en dehors de ce dialogue
+// Vient de login: proposer le raz de la base locale
 const initVal = ref(ui.ps.initVal || '') // valeur initiale de la phrase (SyncSp)
 
-const orgL = ref()
 const ligne1 = ref(initVal.value || '')
 const phase = ref(0)
 const razdb = ref(false)
@@ -129,20 +120,6 @@ const encours = ref(false)
 const isPwd = ref(false)
 const vligne1 = ref('')
 const chgt = ref(ui.ps.chgt || 0)
-
-if (orgext.value) { // PageAdmin SyncSp PageCompte
-  if (orgext.value !== session.org) {
-    /* l'organisation a été saisie préalablement: 
-    - PageAdmin: juste avant dans le dialogue
-    - SyncSp: saisie pour accéder à la phrase de sponsoring et au sponsoring
-    */
-    session.setOrg(orgext.value)
-  }
-  // Dans le cas de PageCompte, changement de PS, orgext EST déjà session.org
-  orgL.value = orgext.value
-} else { // PageLogin OutilsTests
-  orgL.value = session.org || config.search || ''
-}
 
 onMounted(() => {
   ligne1.value = ''
@@ -251,37 +228,7 @@ async function ok2 () {
   }
 }
 
-async function gererOrg (o) {
-  let org, svc
-  const i = o.indexOf('-')
-  if (i === -1) { 
-    org = o
-    svc = config.orgs[org]
-    if (!config.services[svc]) {
-      await afficherDiag($t('PSnosvc1', [org]))
-      return false
-    }
-    session.setOrg(org)
-    config.setURLs(svc)
-  }
-  else { 
-    org = o.substring(0, i)
-    svc = o.substring(i + 1)
-    if (!config.services[svc]) {
-      await afficherDiag($t('PSnosvc2', [svc]))
-      return false
-    }
-    session.setOrg(org)
-    config.setURLs(svc)
-  }
-  return true
-}
-
 async function okem () {
-  if (login.value) {
-    const ok = await gererOrg(orgL.value)
-    if (!ok) return
-  }
   encours.value = true
   const pc = new Phrase()
   await pc.init(ligne1.value)

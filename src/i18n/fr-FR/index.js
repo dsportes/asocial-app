@@ -680,7 +680,6 @@ export default {
   NPconf: 'Confirmation',
   NPnav: 'Nom de l\'avatar',
   NPbj: 'Bonjour {0} !',
-  NP16: 'Au moins {0} signes',
   NPcred: 'Solde insuffisant actuel {0}c pour un don de {1}c.',
   NPdon: 'Don de votre sponsor: {0}c',
   NPdon2: 'Don au sponsorisé: {0}c',
@@ -729,8 +728,6 @@ export default {
   PSnopin: 'Code PIN inconnu',
   PSkopin: 'Code PIN indéchiffrable',
   PSutpin: 'Utiliser un code PIN ?',
-  PSnosvc1: 'Aucun serveur n\'est associé à ce code d\'organisation [{0}].\nChanger le ou préciser le code X du serveur [{0}-X] qui sert cette organisation.',
-  PSnosvc2: 'Aucun serveur n\'est déclaré avec le code [{0}].',
 
   // App.vue
   MLAicones: 'Icônes des barres',
@@ -971,6 +968,7 @@ export default {
   ESorg2: 'Au plus 8 caractères/chiffres',
   ESorg3: 'Minuscules (a-z), chiffres (0-9) et tiret (moins)',
   ESorg4: 'Nom d\'organisation déjà attribué',
+  ESorg5: 'Organisation inconnue',
   EStabe: 'Espaces',
   EStabt: 'Tâches',
   EScol0: 'OP',

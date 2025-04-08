@@ -28,8 +28,12 @@
           <bouton-help page="page1"/>
         </q-toolbar>
         <q-card-section class="q-pa-xs">
-          <phrase-contact @ok="declPC" :init-val="avatar.pc || ''"
-            declaration :orgext="session.org"/>
+          <phrase-contact :init-val="avatar.pc || ''" v-model="phraseE" declaration :orgext="session.org"/>
+          <div class="row justify-end items-center q-my-sm">
+            <q-spinner v-if="encours" color="primary" size="1.5rem" :thickness="8" />
+            <btn-cond icon="check" @ok="declPC" 
+              :label="$t('valider')" :disable="phraseE.err !== ''"/>
+          </div>
         </q-card-section>
       </q-card>
     </q-dialog>
@@ -64,19 +68,25 @@ const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 const session = stores.session
 const aSt = stores.avatar
 
+const phraseE = ref({ phrase: '', err: ''})
+
 const avatar = computed(() => { 
   const e = aSt.getElt(props.idav)
   return e ? e.avatar : null
 })
 const isPwd = ref(false)
+const encours = ref(false)
 
 async function editerpc () {
   session.setAvatarId(props.idav)
   ui.oD('AAeditionpc', idc)
 }
 
-async function declPC (pc) {
-  if (!pc) return
+async function declPC () {
+  encours.value = true
+  const pc = new Phrase()
+  await pc.init(phraseE.value.phrase)
+  encours.value = false
   if (await new ExistePhrase().run(pc.hps1, 3)) {
     await afficherDiag($t('existe'))
     return

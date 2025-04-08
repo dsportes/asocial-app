@@ -89,10 +89,10 @@
 
   <!-- Création d'un nouveau groupe ------------------------------------------------>
   <dial-std1 v-if="m1" v-model="m1" :titre="$t('PGcrea')"
-    :disable="quotas.err !== '' || !nom" okic="add" oklbl="creer" cond="cEdit" :okfn="okCreation">
+    :disable="quotas.err !== '' || nomE.err !== ''" okic="add" oklbl="creer" cond="cEdit" :okfn="okCreation">
     <div class="q-pa-sm column">
       <sel-avid class="self-center"/>
-      <nom-avatar class="titre-md q-my-sm" verif groupe @ok-nom="oknom"/>
+      <nom-avatar class="titre-md q-my-sm" groupe v-model="nomE"/>
       <div class="titre-md q-mt-sm">{{$t('PGquotas')}}</div>
       <choix-quotas v-model="quotas" groupe/>
       <q-option-group class="q-my-md" dense :options="options" type="radio" v-model="una"/>
@@ -146,7 +146,7 @@ const options2 = [{ label: $t('PGctc1'), value: false }, { label: $t('PGctc2'), 
 fStore.filtre.groupes.tous = props.tous || false
 
 const quotas = ref(null) // { q1) q2) min1) min2) max1) max2) err}
-const nom = ref('')
+const nomE = ref({ nom: ''})
 const una = ref(false)
 const inv = ref(null) // invitation courante
 
@@ -201,7 +201,6 @@ const pg = computed(() => {
 
 watch(pg, (ap) => { ui.fmsg(ap.r.length)})
 
-function oknom (n) { nom.value = n }
 const am = (idg) => gSt.amb(idg)
 const edqn = (n) => n * UNITEN 
 const edqv = (n) => edvol(n * UNITEV)
@@ -233,7 +232,7 @@ async function chat (elt) {
 async function nvGr () {
   const cpt = session.qv // { qc, qn, qv, pcc, pcn, pcv, nbj }
   quotas.value = { qn: 0, qv: 0, qc: 0, minn: 0, minv: 0, maxn: cpt.qn, maxv: cpt.qv, err: ''}
-  nom.value = ''
+  nomE.value.nom = ''
   una.value = false
   ui.oD('PGcrgr', idc)
 }
@@ -245,7 +244,7 @@ async function ctc () {
 }
 
 async function okCreation () {
-  await new NouveauGroupe().run(nom.value, una.value, quotas.value)
+  await new NouveauGroupe().run(nomE.value.nom, una.value, quotas.value)
   ui.fD()
 }
 

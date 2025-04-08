@@ -8,13 +8,19 @@
     <q-toggle :class="'q-my-xs bg-' + clrInfx " v-model="infx" color="grey-5" size="25px"/>
   </div>
 
-  <q-expansion-item class="q-mt-xl spsm" group="g1" v-model="ui.reLogin">
+  <div class="q-my-sm row justify-center items-center">
+    <div class="titre-lg q-mr-sm">{{$t('PSorg1')}}</div>
+    <nom-org v-model="orgE"/>
+  </div>
+
+  <q-expansion-item :disable="orgE.err !== ''" class="q-mt-xl spsm" group="g1" v-model="ui.reLogin">
     <template v-slot:header>
       <div class="full-width titre-lg row justify-between bord1">
         <div>{{$t('LOGconn2')}}</div>
       </div>
     </template>
 
+    <div :class="orgE.err !== '' ? 'disabled' : ''">
     <div class="row q-mx-lg fullwidth">
       <q-expansion-item class="col titre-sm" :label="$t('LOGparano1')">
         <div class="row justify-center q-my-sm q-gutter-sm items-center">
@@ -49,9 +55,10 @@
       <btn-cond class="titre-lg" icon="airplanemode_active" no-caps
         :label="$t('avion')" @ok="ouvrirPS(3)"/>
     </div>
+    </div>
   </q-expansion-item>
 
-  <q-expansion-item class="q-mt-xl spsm" group="g1">
+  <q-expansion-item :disable="orgE.err !== ''" class="q-mt-xl spsm" group="g1">
     <template v-slot:header>
       <div class="full-width titre-lg row justify-between bord1">
         <div>{{$t('LOGconn3')}}</div>
@@ -75,14 +82,18 @@
           </div>
         </q-radio>
       </div>
-      <phrase-contact v-if="session.mode" class="full-width"
-        :init-val="initval" @ok="crypterphrase"/>
+      <phrase-contact v-if="session.mode" class="full-width" v-model="phraseE"/>
+      <div v-if="session.mode" class="row justify-end items-center">
+        <q-spinner v-if="encours" color="primary" size="1.5rem" :thickness="8" />
+        <btn-cond :disable="orgE.err !== '' || phraseE.err !== ''" 
+          icon="check" :label="$t('creer')" @ok="crypterphrase"/>
+      </div>
     </div>
   </q-expansion-item>
 
   <!-- Dialogue d'acceptation d'un nouveau sponsoring -->
   <q-dialog v-if="ui.xD('ASaccsp', idc)" v-model="ui.d[idc].ASaccsp" full-height position="left" persistent>
-    <acceptation-sponsoring :sp="sp" :pc="pc" :org="org"/>
+    <acceptation-sponsoring :sp="sp" :pc="pc" :org="orgE.org"/>
   </q-dialog>
 
   <!-- Dialogue de demande de permission de notification -->
@@ -112,9 +123,10 @@ import { decode } from '@msgpack/msgpack'
 
 import { afficherDiag, beep, styp } from '../app/util.mjs'
 import { connexion } from '../app/synchro.mjs'
-import { Sponsoring, RegCles } from '../app/modele.mjs'
+import { Sponsoring, RegCles, Phrase } from '../app/modele.mjs'
 import { AMJ } from '../app/api.mjs'
 import PhraseContact from '../components/PhraseContact.vue'
+import NomOrg from '../components/NomOrg.vue'
 import AcceptationSponsoring from '../panels/AcceptationSponsoring.vue'
 import BtnCond from '../components/BtnCond.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -132,6 +144,17 @@ const optPar = [
 ]
 
 const optVal = ref(optPar[2])
+const encours = ref(false)
+
+const setSvc = () => {
+  let o = orgE.value.org
+  let svc
+  if (o.startsWith('admin')) {
+    svc = o.substring(5)
+    orgE.value.org = 'admin'
+  } else svc = config.orgs[o]
+  config.setURLs(svc)
+}
 
 const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
@@ -151,10 +174,10 @@ const chkp = val => {
 
 const infx = ref()
 const btncd = ref()
-const initval = ref()
+const phraseE = ref({ phrase: '', err: ''})
 const sp = ref()
 const pc = ref()
-const org = ref()
+const orgE = ref({ org: session.org || config.search || '', err:'' })
 const hTC = ref()
 const cleE = ref()
 const parano = ref('')
@@ -163,8 +186,7 @@ function raz () {
   btncd.value = false
   pc.value = null
   sp.value = null
-  org.value = ''
-  initval.value = ''
+  phraseE.value.phrase = ''
   parano.value = ''
 }
 
@@ -179,7 +201,6 @@ async function demperm () {
 function ouvrirPS (mode) {
   session.setMode(mode)
   ui.ps = { 
-    login: true, 
     labelValider: "LOGconn", 
     iconValider: "send",
     ok: onps
@@ -188,8 +209,7 @@ function ouvrirPS (mode) {
 }
 
 function saisiePS () {
-  ui.ps = { 
-    orgext: org.value,
+  ui.ps = {
     verif: true,
     labelValider: 'ok',
     ok: creationComptable
@@ -198,22 +218,27 @@ function saisiePS () {
 }
 
 async function onps (phrase) {
+  setSvc()
   if (phrase) phrase.phrase = null
-  await connexion(phrase, ui.razdb)
+  await connexion(phrase, ui.razdb, orgE.value.org)
   ui.setParano(parano.value || '', optVal.value.value)
   if (!config.silenceHome) await beep()
 }
 
-async function crypterphrase (p) {
+async function crypterphrase () {
+  encours.value = true
+  const p = new Phrase()
+  await p.init(phraseE.value.phrase)
+  encours.value = false
+  setSvc()
   pc.value = p
-  org.value = p.org
   try {
     /* Recherche sponsoring *******/
     RegCles.reset()
     const mode = session.mode
     stores.reset(true)
     hTC.value = p.hpsc
-    const res = await new GetSponsoring().run(org.value, p.hps1, p.hpsc)
+    const res = await new GetSponsoring().run(orgE.value.org, p.hps1, p.hpsc)
     if (res && res.cleET) {
       if (res.cleET === false) {
         await afficherDiag($t('LOGnosp'))
@@ -239,7 +264,7 @@ async function crypterphrase (p) {
     try {
       const row = decode(res.rowSponsoring)
       session.setMode(mode)
-      session.setOrg(org.value)
+      session.setOrg(orgE.value.org)
       sp.value = new Sponsoring()
       await sp.value.compileHS(row, p.pcb)
       if (sp.value.dlv <  AMJ.amjUtc()) {

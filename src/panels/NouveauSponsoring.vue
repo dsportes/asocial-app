@@ -40,21 +40,23 @@
       <q-step :name="2" :title="$t('NPphr')" icon="settings" :done="step > 2">
         <span class="titre-sm q-py-sm">{{$t('NPnpc')}}</span>
         <div ref="step2">
-          <phrase-contact @ok="crypterphrase" :orgext="session.org" 
-            :init-val="pc && pc.phrase ? pc.phrase : ''"/>
+          <phrase-contact :orgext="session.org" :init-val="pc && pc.phrase ? pc.phrase : ''"/>
         </div>
         <q-stepper-navigation>
           <btn-cond @ok="step = 1" flat icon="arrow_upward" :label="$t('precedent')"/>
+          <btn-cond @ok="crypterphrase" flat icon="arrow_downpward" :label="$t('suivant')"/>
+          <q-spinner v-if="encours" color="primary" size="1.5rem" :thickness="8" />
         </q-stepper-navigation>
       </q-step>
 
       <q-step :name="3" :title="$t('NPavp')" icon="settings" :done="step > 3" >
         <div ref="step3">
-          <nom-avatar class="q-ma-xs" @ok-nom="oknom" verif :init-val="nom || ''"
-            icon-valider="check" :label-valider="$t('suivant')"></nom-avatar>
+          <nom-avatar class="q-ma-xs" v-model="nomE"/>
         </div>
         <q-stepper-navigation>
           <btn-cond flat @ok="step = 2" icon="arrow_upward" :label="$t('precedent')"/>
+          <btn-cond flat @ok="oknom" icon="arrow_downward" :label="$t('suivant')" 
+            :disable="nomE.err !== ''" class="q-ml-sm" />
         </q-stepper-navigation>
       </q-step>
 
@@ -82,7 +84,7 @@
       <q-step :name="6" :title="$t('NPconf')" icon="check" :done="step > 6">
         <div class="column q-gutter-sm">
           <div class="titre-md">{{$t('NPphr')}} : <span class="font-mono q-pl-md">{{pc.phrase}}</span></div>
-          <div class="titre-md">{{$t('NPnav')}} : <span class="font-mono q-pl-md">{{nom}}</span></div>
+          <div class="titre-md">{{$t('NPnav')}} : <span class="font-mono q-pl-md">{{nomE.nom}}</span></div>
           <div class="titre-md">{{$t('NPmotc')}} : <span class="font-mono q-pl-md">{{mot}}</span></div>
           <div v-if="estAutonome" class=" titre-md">{{$t('compteA')}}</div>
           <div v-else class="titre-md">{{$t(estDelegue ? 'compteD' : 'compteO', [partition.id])}}</div>
@@ -141,7 +143,7 @@ if (session.espace.opt) optionsOSA.push({ label: $t('compteA'), value: 2 })
 
 const isPwd = ref(false)
 const max = ref([])
-const nom = ref('')
+const nomE = ref({ nom: '', err: false})
 const npi = ref(false)
 const pc = ref(null)
 const mot = ref('')
@@ -154,6 +156,7 @@ const step2 = ref(null)
 const step3 = ref(null)
 const step = ref(session.estA ? 1 : 0)
 const optOSA = ref(optionsOSA[0].value)
+const encours = ref(false)
 
 const optionsDon = ref([ { label: $t('pasdon'), value: 0}])
 for (const d of cfg.dons) optionsDon.value.push({ label: $t('don', [d]), value: d})
@@ -195,7 +198,11 @@ watch(step, async (ap) => {
   }
 })
 
-async function crypterphrase (p) {
+async function crypterphrase (ph) {
+  encours.value = true
+  const p = new Phrase()
+  await p.init(ph)
+  encours.value = false
   if (await new ExistePhrase().run(p.hps1, 2)) {
     await afficherDiag($t('existe'))
     return
@@ -212,13 +219,10 @@ async function setDon () {
   step.value = 2
 }
 
-function oknom (n) {
-  if (n) {
-    nom.value = n
-    if (!mot.value) mot.value = $t('NPbj', [n])
-    mot1.value = mot.value
-    step.value = 4
-  }
+function oknom () {
+  if (!mot.value) mot.value = $t('NPbj', [nomE.value.nom])
+  mot1.value = mot.value
+  step.value = 4
 }
 
 function okmot () {
@@ -255,7 +259,7 @@ async function confirmer () {
   try {
     const args = {
       pc: pc.value,
-      nom: nom.value,
+      nom: nomE.value.nom,
       estAutonome: estAutonome.value,
       del: estDelegue.value,
       quotas : q,

@@ -72,9 +72,10 @@
       <q-card :class="styp('md')">
         <q-toolbar class="tbs">
           <btn-cond icon="close" color="warning" @ok="ui.fD"/>
-          <q-toolbar-title class="titre-lg full-width text-center">{{$t('CPTnvav2')}}</q-toolbar-title>
+          <q-toolbar-title class="titre-lg full-width">{{$t('CPTnvav2')}}</q-toolbar-title>
+          <btn-cond icon="check" :disable="nomE.err!==''" @ok="oknom"/>
         </q-toolbar>
-        <nom-avatar class="q-my-xs q-mt-sm" icon-valider="check" verif :label-valider="$t('valider')" @ok-nom="oknom" />
+        <nom-avatar class="q-ma-sm" v-model="nomE" />
       </q-card>
     </q-dialog>
 
@@ -127,6 +128,7 @@ const avid = ref('')
 const quotas = ref(null)
 const synth = ref(null)
 const cf = ref(false)
+const nomE = ref({ nom:'' })
 
 const estA = computed(() => session.estA)
 const estDelegue = computed(() => session.estDelegue)
@@ -183,13 +185,12 @@ function courant (id, action) {
   }
 }
 
-async function oknom (nom) {
-  if (!nom) { ui.fD(); return }
-  if (session.compte.avatarDeNom(nom)) {
+async function oknom () {
+  if (session.compte.avatarDeNom(nomE.value.nom)) {
     await afficherDiag($t('CPTndc'))
     return
   }
-  await new NouvelAvatar().run(nom)
+  await new NouvelAvatar().run(nomE.value.nom)
   ui.fD()
 }
 

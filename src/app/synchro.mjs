@@ -317,8 +317,7 @@ export async function deconnexion(recon) {
   session.org = org
   if (recon) {
     ui.setPage('session')
-    session.phrase = phrase
-    await connexion(phrase)
+    await connexion(phrase, false, org)
     ui.setParano(parano)
   } else {
     ui.reLogin = true
@@ -327,9 +326,10 @@ export async function deconnexion(recon) {
 }
 
 /* Connexion depuis PageLogin ou reconnexion (ci-dessus) **********************/
-export async function connexion(phrase, razdb) {
+export async function connexion(phrase, razdb, org) {
   if (!phrase) return
   const session = stores.session
+  session.setOrg(org)
   await session.initSession(phrase)
 
   if (session.org === 'admin') {
