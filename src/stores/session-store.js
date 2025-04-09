@@ -19,6 +19,7 @@ export const useSessionStore = defineStore('session', {
     mode: 0, // 1:synchronisé, 2:incognito, 3:avion
     acceptNotif: true,
     deconAuto: true,
+    srvBUILD: '',
 
     org: '', // code de l'organisation
     compteId: '', // id du compte
@@ -288,7 +289,7 @@ export const useSessionStore = defineStore('session', {
         token.hXC = phrase ? phrase.hpsc : null
       }
       this.authToken = u8ToB64(new Uint8Array(encode(token)), true) 
-      this.lsk = '$asocial$-' + phrase.hps1
+      this.lsk = '$asocial$-' + this.org + '$' + phrase.hps1
     },
 
     /* Initialise une session depuis une phrase secrète

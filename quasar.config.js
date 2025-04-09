@@ -202,9 +202,9 @@ module.exports = configure(function (ctx) {
         theme_color: '#027be3',
         icons: [
           {
-            src: 'icons/favicon-128x128.png',
+            src: 'icons/favicon-128x128.jpg',
             sizes: '128x128',
-            type: 'image/png'
+            type: 'image/jpg'
           }
           /*,
           {

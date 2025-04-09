@@ -2,7 +2,10 @@
   <div class="fs-md" style="width:12rem">
     <q-input class="q-pr-md" v-model="org"
       :label="$t('ESorg')" :placeholder="$t('ESorgh')" dense/>
-    <div class="fs-sm text-negative text-bold h1">{{model.err}}</div>
+    <div class="row fs-sm justify-between h1">
+      <div class="text-negative text-bold">{{model.err}}</div>
+      <div class="text-italic">{{model.svc}}</div>
+    </div>
   </div>
 </template>
 
@@ -15,30 +18,38 @@ const config = stores.config
 
 const reg = /^([a-z0-9\-]+)$/
 
-const err = (val) => {
-  if (val.length < 4) return $t('ESorg1')
-  if (val.length > 8) return $t('ESorg2')
-  if (!val.match(reg)) return $t('ESorg3')
-  if (props.lstesp && lstesp.indexOf(val) !== -1) return $t('ESorg4')
-  if (val.startsWith('admin')) {
-    const svc = val.substring(5)
-    if (config.services[svc]) return ''
+const check = (val) => {
+  if (props.setOrgs) {
+    if (props.setOrgs.has(val)) return [val, config.svc, $t('ESorg4')]
+    if (val.length < 4 || val.length > 8 || !val.match(reg)) return [val, config.svc, $t('ESorg1')]
+    return [val, config.svc, '']
   }
-  if (!props.lstesp && !config.orgs[val]) return $t('ESorg5')
-  return ''
+  const i = val.indexOf('-')
+  const o = i === -1 ? val : val.substring(0, i)
+  const s = i === -1 ? '' : val.substring(i + 1)
+  const s1 = config.orgs[o]
+  if (s1) return [o, s1, '']
+  if (o.length < 4 || o.length > 8 || !o.match(reg)) return [o, s, $t('ESorg1')]
+  if (s && config.services[s]) return [o, s, '']
+  return [o, s, $t('ESorg5')]
 }
 
 const props = defineProps({
-  lstesp: Array
+  setOrgs: Object
 })
 
 const model = defineModel({ type: Object })
 const org = ref(model.value.org)
-model.value.err = err(model.value.org)
+const [o, s, e] = check(model.value.org)
+model.value.org = o
+model.value.svc = s
+model.value.err = e
 
 watch (org, (val, av) => {
-  model.value.err = err(val)
-  model.value.org = val
+  const [o, s, e] = check(val)
+  model.value.org = o
+  model.value.svc = s
+  model.value.err = e
 })
 
 </script>

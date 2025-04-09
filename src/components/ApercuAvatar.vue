@@ -28,9 +28,10 @@
           <bouton-help page="page1"/>
         </q-toolbar>
         <q-card-section class="q-pa-xs">
-          <phrase-contact :init-val="avatar.pc || ''" v-model="phraseE" declaration :orgext="session.org"/>
+          <phrase-contact :init-val="avatar.pc || ''" v-model="phraseE" declaration/>
           <div class="row justify-end items-center q-my-sm">
-            <q-spinner v-if="encours" color="primary" size="1.5rem" :thickness="8" />
+            <q-spinner v-if="encours" color="primary" class="q-mr-sm"
+              size="1.5rem" :thickness="8" />
             <btn-cond icon="check" @ok="declPC" 
               :label="$t('valider')" :disable="phraseE.err !== ''"/>
           </div>
@@ -49,7 +50,8 @@ import { computed, ref, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import { ID } from '../app/api.mjs'
-import { afficherDiag, dkli, styp } from '../app/util.mjs'
+import { afficherDiag, dkli, styp, sleep } from '../app/util.mjs'
+import { Phrase } from '../app/modele.mjs'
 import { ExistePhrase, GetAvatarPC, ChangementPC } from '../app/operations4.mjs'
 
 import BoutonHelp from './BoutonHelp.vue'
@@ -86,6 +88,7 @@ async function declPC () {
   encours.value = true
   const pc = new Phrase()
   await pc.init(phraseE.value.phrase)
+  // await sleep(5000)
   encours.value = false
   if (await new ExistePhrase().run(pc.hps1, 3)) {
     await afficherDiag($t('existe'))

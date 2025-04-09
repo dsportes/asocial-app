@@ -27,11 +27,11 @@
         @keydown.enter.prevent="ok1" 
         :type="isPwd ? 'password' : 'text'" :placeholder="$t('PSl1')">
         <template v-slot:append>
+          <q-spinner v-if="encours" color="primary" size="1.5rem" :thickness="8" />
           <btn-cond :icon="isPwd ? 'visibility_off' : 'visibility'" round 
             color="none" @ok="isPwd = !isPwd"/>
           <btn-cond icon="cancel" round :disable="ligne1.length === 0"
             color="none" @ok="forceInput('')"/>
-          <q-spinner v-if="encours" color="primary" size="1.5rem" :thickness="8" />
         </template>
       </q-input>
       <div v-else class="row items-center">
@@ -75,7 +75,7 @@ import stores from '../stores/stores.mjs'
 import { Phrase } from '../app/modele.mjs'
 import BtnCond from '../components/BtnCond.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
-import { $t, styp, afficherDiag, u8ToB64, b64ToU8, equ8 } from '../app/util.mjs'
+import { $t, styp, afficherDiag, u8ToB64, b64ToU8, equ8, sleep } from '../app/util.mjs'
 import { pbkfd, crypter, decrypterStr } from '../app/webcrypto.mjs'
 import { deconnexion } from '../app/synchro.mjs'
 
@@ -108,6 +108,7 @@ const vkb = ref(false)
 
 const iconValider = ref(ui.ps.iconValider || 'check')
 const verif = ref(ui.ps.verif || false) // vérifier par double saisie
+const login = ref(ui.ps.login)
 const labelValider = ref(ui.ps.labelValider || '')
 const labelRenoncer = ref($t(ui.ps.labelRenoncer || 'renoncer'))
 // Vient de login: proposer le raz de la base locale
@@ -232,6 +233,7 @@ async function okem () {
   encours.value = true
   const pc = new Phrase()
   await pc.init(ligne1.value)
+  // await sleep(5000)
   encours.value = false
   ui.fD()
   raz()

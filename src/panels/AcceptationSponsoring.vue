@@ -171,7 +171,7 @@ async function confirmer () {
   const x = ps.value
   await new AcceptationSponsoring().run(props.org, props.sp, texte.value, x, dconf.value)
   fermer()
-  await connexion(x)
+  await connexion(x, false, props.org)
 }
 
 async function refuser () {

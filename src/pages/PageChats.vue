@@ -41,7 +41,8 @@
       </q-expansion-item>
     </div>
 
-    <nouveau-chat v-if="ui.d[idc] && ui.d[idc].CCouvrir" :idc="idc" :idI="session.avatarId" :mode="0"/>
+    <nouveau-chat v-if="ui.d[idc] && ui.d[idc].CCouvrir" 
+      :idc="idc" :idI="session.avatarId" :mode="0"/>
 
   </q-page>
 </template>

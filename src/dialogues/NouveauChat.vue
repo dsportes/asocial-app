@@ -6,20 +6,25 @@
     <q-toolbar-title class="titre-lg full-size text-center">{{$t('CChtit')}}</q-toolbar-title>
     <bouton-help page="page1"/>
   </q-toolbar>
-  <q-card-section v-if="step===1">
-    <phrase-contact @ok="ok" :orgext="session.org" declaration/>
-    <div v-if="diag" class="q-ma-sm q-pa-xs bg-yellow-3 text-negative text-bold">{{diag}}</div>
+  <q-card-section>
+    <div v-if="mode===0" class="row items-center">
+      <phrase-contact class="col-10" v-model="phraseE" declaration/>
+      <btn-cond class="col-1 text-right" icon="check" round
+        :disable="phraseE.err !== ''"  @ok="getIdE"/>
+      <q-spinner class="col-1 text-right" v-if="encours" color="primary"
+        size="1.5rem" :thickness="8" />
+    </div>
+    <div v-if="nvIdE || idE">
+      <apercu-genx :id="nvIdE || idE"/>
+      <div class="q-mt-md q-mb-sm titre-md">{{$t('CHech1')}}</div>
+      <editeur-md mh="20rem" v-model="txt" :texte="''" editable modetxt/>
+    </div>
   </q-card-section>
-  <q-card-section v-if="step===2">
-    <apercu-genx :id="nvIdE || idE"/>
-    <div class="q-mt-md q-mb-sm titre-md">{{$t('CHech1')}}</div>
-    <editeur-md mh="20rem" v-model="txt" :texte="''" editable modetxt/>
-  </q-card-section>
-  <q-card-actions v-if="step===2" align="right">
+  <q-card-actions align="right">
     <btn-cond flat :label="$t('renoncer')" icon="close" @ok="ui.fD"/>
     <btn-cond color="warning" icon="check" @ok="creer" class="q-ml-sm"
       :label="$t('valider')"
-      :disable="!txt.length"
+      :disable="(!nvIdE && !idE) || !txt.length"
       :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
   </q-card-actions>
 </q-card>
@@ -31,7 +36,8 @@
 import { ref } from 'vue'
 
 import stores from '../stores/stores.mjs'
-import { styp, $t } from '../app/util.mjs'
+import { styp, $t, sleep, afficherDiag } from '../app/util.mjs'
+import { Phrase } from '../app/modele.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { GetAvatarPC, NouveauChat } from '../app/operations4.mjs'
 import PhraseContact from '../components/PhraseContact.vue'
@@ -53,29 +59,40 @@ const aSt = stores.avatar
 const session = stores.session
 const ui = stores.ui
 
-const step = ref(props.mode ? 2 : 1)
-const diag = ref('')
+const phraseE = ref({ phrase: '', err: '' })
 const txt = ref('')
+const encours = ref(false)
 const nvIdE = ref('')
-const hZC = ref('')
+const hpsc = ref('')
 
-async function ok (p) {
-  hZC.value = p.hpsc
+async function getIdE () {
+  encours.value = true
+  const p = new Phrase()
+  await p.init(phraseE.value.phrase)
+  hpsc.value = p.hpsc
+  // await sleep(5000)
+  encours.value = false
   nvIdE.value = await new GetAvatarPC().run(p)
   if (!nvIdE.value) {
-    diag.value = $t('CChnopc')
+    await afficherDiag($t('CChnopc'))
     return
   }
   if (session.compte.mav.has(nvIdE.value)) {
-    diag.value = $t('CChself')
+    await afficherDiag($t('CChself'))
     return
   }
-  step.value = 2
 }
 
 async function creer () {
   await new NouveauChat()
-    .run(props.idI, nvIdE.value || props.idE, props.mode, hZC.value, txt.value, props.urgence)
+    .run(
+      props.idI, 
+      nvIdE.value || props.idE, 
+      props.mode, 
+      hpsc.value,
+      txt.value, 
+      props.urgence
+    )
   ui.fD()
 }
 

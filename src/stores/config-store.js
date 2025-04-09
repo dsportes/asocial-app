@@ -29,6 +29,7 @@ export const useConfigStore = defineStore('config', {
 
     OPURL: '',
     PUBSUBURL: '',
+    svc: '',
     services: null,
     orgs: {},
 
@@ -103,6 +104,7 @@ export const useConfigStore = defineStore('config', {
     },
 
     setURLs (svc) {
+      this.svc = svc
       this.OPURL = this.services[svc].opurl + '/op/'
       this.PUBSUBURL = (this.services[svc].pubsuburl || this.services[svc].opurl) + '/pubsub/'
       console.log('OPURL: ' + this.OPURL)

@@ -3,7 +3,7 @@
 
   <div class="row self-end items-center">
     <div v-if="infx" class="font-mono fs-sm text-italic q-mr-sm">
-      {{endp + config.BUILD}}
+      {{endp + config.BUILD + (session.srvBUILD ? ' / ' + session.srvBUILD : '')}}
     </div>
     <q-toggle :class="'q-my-xs bg-' + clrInfx " v-model="infx" color="grey-5" size="25px"/>
   </div>
@@ -13,7 +13,7 @@
     <nom-org v-model="orgE"/>
   </div>
 
-  <q-expansion-item :disable="orgE.err !== ''" class="q-mt-xl spsm" group="g1" v-model="ui.reLogin">
+  <q-expansion-item :disable="orgE.err !== ''" class="q-mt-xl spsm" group="g1">
     <template v-slot:header>
       <div class="full-width titre-lg row justify-between bord1">
         <div>{{$t('LOGconn2')}}</div>
@@ -21,48 +21,49 @@
     </template>
 
     <div :class="orgE.err !== '' ? 'disabled' : ''">
-    <div class="row q-mx-lg fullwidth">
-      <q-expansion-item class="col titre-sm" :label="$t('LOGparano1')">
-        <div class="row justify-center q-my-sm q-gutter-sm items-center">
-          <div class="col-auto column items-center">
-            <div class="titre-sm">{{$t('LOGparano2')}}</div>
-            <div :class="'titre-sm text-italic ' + (chkp(parano) ? '' : 'bg-negative')">
-              {{$t('LOGparah')}}
+      <div class="row q-mx-lg fullwidth">
+        <q-expansion-item class="col titre-sm" :label="$t('LOGparano1')">
+          <div class="row justify-center q-my-sm q-gutter-sm items-center">
+            <div class="col-auto column items-center">
+              <div class="titre-sm">{{$t('LOGparano2')}}</div>
+              <div :class="'titre-sm text-italic ' + (chkp(parano) ? '' : 'bg-negative')">
+                {{$t('LOGparah')}}
+              </div>
             </div>
+            <q-input filled v-model="parano" dense class="parano font-mono fs-sm" 
+              counter maxlength="4"/>
+            <q-select filled dense v-model="optVal" :options="optPar" class="w6 font-mono fs-sm"/>
           </div>
-          <q-input filled v-model="parano" dense class="parano font-mono fs-sm" 
-            counter maxlength="4"/>
-          <q-select filled dense v-model="optVal" :options="optPar" class="w6 font-mono fs-sm"/>
-        </div>
-      </q-expansion-item>
-      <bouton-help class="col-auto self-start" page="page_login_par"/>
-    </div>
+        </q-expansion-item>
+        <bouton-help class="col-auto self-start" page="page_login_par"/>
+      </div>
 
-    <div class="row justify-center q-gutter-sm q-mt-sm">
-      <btn-cond class="titre-lg" no-caps @ok="ouvrirPS(1)">
-        <div class="row items-center q-gutter-sm">
-          <q-icon size="sm"><img src="~assets/sync_saved_locally.svg"/></q-icon>
-          <div>{{$t('sync')}}</div>
-        </div>
-      </btn-cond>
+      <div class="row justify-center q-gutter-sm q-mt-sm">
+        <btn-cond class="titre-lg" no-caps @ok="ouvrirPS(1)" :disable="orgE.org === 'admin'">
+          <div class="row items-center q-gutter-sm">
+            <q-icon size="sm"><img src="~assets/sync_saved_locally.svg"/></q-icon>
+            <div>{{$t('sync')}}</div>
+          </div>
+        </btn-cond>
 
-      <btn-cond class="titre-lg" no-caps @ok="ouvrirPS(2)">
-        <div class="row items-center q-gutter-sm">
-          <q-icon size="sm"><img src="~assets/incognito_blanc.svg"/></q-icon>
-          <div>{{$t('incognito')}}</div>
-        </div>
-      </btn-cond>
-      <btn-cond class="titre-lg" icon="airplanemode_active" no-caps
-        :label="$t('avion')" @ok="ouvrirPS(3)"/>
-    </div>
+        <btn-cond class="titre-lg" no-caps @ok="ouvrirPS(2)">
+          <div class="row items-center q-gutter-sm">
+            <q-icon size="sm"><img src="~assets/incognito_blanc.svg"/></q-icon>
+            <div>{{$t('incognito')}}</div>
+          </div>
+        </btn-cond>
+
+        <btn-cond class="titre-lg" icon="airplanemode_active" no-caps  @ok="ouvrirPS(3)"
+          :disable="orgE.org === 'admin'"
+          :label="$t('avion')"/>
+      </div>
     </div>
   </q-expansion-item>
 
-  <q-expansion-item :disable="orgE.err !== ''" class="q-mt-xl spsm" group="g1">
+  <q-expansion-item :disable="orgE.err !== '' || orgE.org === 'admin'" class="q-mt-xl spsm" group="g1">
     <template v-slot:header>
       <div class="full-width titre-lg row justify-between bord1">
         <div>{{$t('LOGconn3')}}</div>
-        <!--bouton-help page="page_login_cn" class="col-auto"/-->
       </div>
     </template>
 
@@ -84,7 +85,8 @@
       </div>
       <phrase-contact v-if="session.mode" class="full-width" v-model="phraseE"/>
       <div v-if="session.mode" class="row justify-end items-center">
-        <q-spinner v-if="encours" color="primary" size="1.5rem" :thickness="8" />
+        <q-spinner v-if="encours" color="primary" class="q-mr-sm"
+          size="1.5rem" :thickness="8" />
         <btn-cond :disable="orgE.err !== '' || phraseE.err !== ''" 
           icon="check" :label="$t('creer')" @ok="crypterphrase"/>
       </div>
@@ -121,7 +123,7 @@ import stores from '../stores/stores.mjs'
 import { ref, computed, onUnmounted } from 'vue'
 import { decode } from '@msgpack/msgpack'
 
-import { afficherDiag, beep, styp } from '../app/util.mjs'
+import { afficherDiag, beep, styp, sleep } from '../app/util.mjs'
 import { connexion } from '../app/synchro.mjs'
 import { Sponsoring, RegCles, Phrase } from '../app/modele.mjs'
 import { AMJ } from '../app/api.mjs'
@@ -144,17 +146,6 @@ const optPar = [
 ]
 
 const optVal = ref(optPar[2])
-const encours = ref(false)
-
-const setSvc = () => {
-  let o = orgE.value.org
-  let svc
-  if (o.startsWith('admin')) {
-    svc = o.substring(5)
-    orgE.value.org = 'admin'
-  } else svc = config.orgs[o]
-  config.setURLs(svc)
-}
 
 const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
@@ -172,12 +163,13 @@ const chkp = val => {
   return true
 }
 
+const encours = ref(false)
 const infx = ref()
 const btncd = ref()
 const phraseE = ref({ phrase: '', err: ''})
 const sp = ref()
 const pc = ref()
-const orgE = ref({ org: session.org || config.search || '', err:'' })
+const orgE = ref({ org: session.org || config.search || '', svc:'', err:'' })
 const hTC = ref()
 const cleE = ref()
 const parano = ref('')
@@ -201,6 +193,7 @@ async function demperm () {
 function ouvrirPS (mode) {
   session.setMode(mode)
   ui.ps = { 
+    login: true,
     labelValider: "LOGconn", 
     iconValider: "send",
     ok: onps
@@ -218,7 +211,7 @@ function saisiePS () {
 }
 
 async function onps (phrase) {
-  setSvc()
+  config.setURLs(orgE.value.svc)
   if (phrase) phrase.phrase = null
   await connexion(phrase, ui.razdb, orgE.value.org)
   ui.setParano(parano.value || '', optVal.value.value)
@@ -229,8 +222,9 @@ async function crypterphrase () {
   encours.value = true
   const p = new Phrase()
   await p.init(phraseE.value.phrase)
+  // await sleep(5000)
   encours.value = false
-  setSvc()
+  config.setURLs(orgE.value.svc)
   pc.value = p
   try {
     /* Recherche sponsoring *******/

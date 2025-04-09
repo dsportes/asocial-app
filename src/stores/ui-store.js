@@ -64,7 +64,6 @@ export const useUiStore = defineStore('ui', {
     // gestion des dialogues
     // Le compteur de dialogues ouverts idc DOIT ne pas être remis à 0
     // à la déconnexion (en fait au reset du store ui)
-    reLogin: true,
     dialogStack: [],
     d: { a: {}, messages: [], aunmessage: false },
   }),

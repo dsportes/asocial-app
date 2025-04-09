@@ -32,10 +32,8 @@ const min = 24
 const max = 50
 
 const props = defineProps({ 
-  initVal: String, 
-  orgext: String, 
-  declaration: Boolean,
-  btnok: Boolean
+  initVal: String,
+  declaration: Boolean
 })
 
 const model = defineModel({ type: Object })
@@ -47,27 +45,12 @@ model.value.err = err(phrase.value)
 
 watch (phrase, (val, av) => {
   model.value.err = err(val)
-  model.value.nom = val
+  model.value.phrase = val
 })
 
 const session = stores.session
 const config = stores.config
-const org = ref(props.orgext ? props.orgext : (config.search ? config.search : ''))
 const isPwd = ref(false)
-const encours = ref(false)
-
-async function crypterphrase () {
-  if (!props.btnok) return
-  if (err(model.value.phrase) !== '' || org.value === '') return
-  encours.value = true
-  const pc = new Phrase()
-  setTimeout(async () => {
-    await pc.init(model.value.phrase)
-    encours.value = false
-    pc.org = org.value
-    emit('ok', pc)
-  }, 1)
-}
 
 </script>
 

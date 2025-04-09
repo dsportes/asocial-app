@@ -40,12 +40,14 @@
       <q-step :name="2" :title="$t('NPphr')" icon="settings" :done="step > 2">
         <span class="titre-sm q-py-sm">{{$t('NPnpc')}}</span>
         <div ref="step2">
-          <phrase-contact :orgext="session.org" :init-val="pc && pc.phrase ? pc.phrase : ''"/>
+          <phrase-contact v-model="phraseE"/>
         </div>
         <q-stepper-navigation>
           <btn-cond @ok="step = 1" flat icon="arrow_upward" :label="$t('precedent')"/>
-          <btn-cond @ok="crypterphrase" flat icon="arrow_downpward" :label="$t('suivant')"/>
-          <q-spinner v-if="encours" color="primary" size="1.5rem" :thickness="8" />
+          <btn-cond :disable="phraseE.err !== ''" @ok="crypterphrase" 
+            flat icon="arrow_downpward" :label="$t('suivant')"/>
+          <q-spinner v-if="encours" color="primary" class="q-ml-sm" 
+            size="1.5rem" :thickness="8" />
         </q-stepper-navigation>
       </q-step>
 
@@ -83,7 +85,7 @@
 
       <q-step :name="6" :title="$t('NPconf')" icon="check" :done="step > 6">
         <div class="column q-gutter-sm">
-          <div class="titre-md">{{$t('NPphr')}} : <span class="font-mono q-pl-md">{{pc.phrase}}</span></div>
+          <div class="titre-md">{{$t('NPphr')}} : <span class="font-mono q-pl-md">{{phraseE.phrase}}</span></div>
           <div class="titre-md">{{$t('NPnav')}} : <span class="font-mono q-pl-md">{{nomE.nom}}</span></div>
           <div class="titre-md">{{$t('NPmotc')}} : <span class="font-mono q-pl-md">{{mot}}</span></div>
           <div v-if="estAutonome" class=" titre-md">{{$t('compteA')}}</div>
@@ -111,7 +113,8 @@ import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import NomAvatar from '../components/NomAvatar.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import EditeurMd from '../components/EditeurMd.vue'
-import { styp, edvol, afficherDiag, $t } from '../app/util.mjs'
+import { styp, edvol, afficherDiag, $t, sleep } from '../app/util.mjs'
+import { Phrase } from '../app/modele.mjs'
 import { ID, UNITEN, UNITEV } from '../app/api.mjs'
 import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -157,6 +160,7 @@ const step3 = ref(null)
 const step = ref(session.estA ? 1 : 0)
 const optOSA = ref(optionsOSA[0].value)
 const encours = ref(false)
+const phraseE = ref({ phrase: '', err: ''})
 
 const optionsDon = ref([ { label: $t('pasdon'), value: 0}])
 for (const d of cfg.dons) optionsDon.value.push({ label: $t('don', [d]), value: d})
@@ -198,10 +202,11 @@ watch(step, async (ap) => {
   }
 })
 
-async function crypterphrase (ph) {
+async function crypterphrase () {
   encours.value = true
   const p = new Phrase()
-  await p.init(ph)
+  await p.init(phraseE.value.phrase)
+  // await sleep(5000)
   encours.value = false
   if (await new ExistePhrase().run(p.hps1, 2)) {
     await afficherDiag($t('existe'))

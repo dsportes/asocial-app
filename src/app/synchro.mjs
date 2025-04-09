@@ -320,7 +320,6 @@ export async function deconnexion(recon) {
     await connexion(phrase, false, org)
     ui.setParano(parano)
   } else {
-    ui.reLogin = true
     ui.setPage('login')
   }
 }

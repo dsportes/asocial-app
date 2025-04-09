@@ -61,6 +61,7 @@ export default {
   cv: 'Carte de visite de {0}',
   ghost: 'Groupe fantôme {0}',
   ghostn: 'Note fantôme {0}',
+  toutes: '(toutes)',
 
   avatar: 'Avatar {0}', // FiltreAvgr
   groupe: 'Groupe {0}', // FiltreAvgr
@@ -229,7 +230,7 @@ export default {
   EX7001: 'Le serveur n\'accepte pas les requêtes d\'une application obtenue du site [{0}]',
   EX7003: 'Opération [{0}] inconnue du serveur',
   EX7004: 'Session déconnectée',
-  EX7005: 'La version d\'API [{0}] gérée par le serveur est incompatble avec celle [{1}] de l\'application',
+  EX7005: 'Les versions d\'API [{0}...{1}] supportées par le serveur (BUILD: {3}) n\'inclent pas celle [{2}] de l\'application',
 
   EX7010: 'Trop d\'accès parallèles à la base de données. Réessayer plus tard. Message technique: {0}',
   EX7011: 'Incident technique d\'accès à la base de données. Peut-être de réessayer plus tard évitera ce problème. Message technique: {0}',
@@ -935,7 +936,7 @@ export default {
   // PageAdmin et ApercuEspace
   EStabe: 'Liste des Espaces',
   EStabt: 'Tâches en cours',
-  ESfta: 'Filtre sur le code espace :',
+  ESfta: 'Filtre sur l\'organisation:',
   ESencrea: 'Comptable pas encore créé.',
   ENnpspc: 'Nouvelle phrase de sponsoring du Comptable',
   ESinitgc: 'Tâches du GC initialisées: {0} existante(s), {1} créées',
@@ -958,16 +959,13 @@ export default {
   ESnbmi: 'Comptes supprimés après N mois sans connexion',
   ESnbmi2: 'Comptes supprimés après {0} mois sans connexion',
   ESorg: 'Organisation',
-  ESorgh: 'monorg',
+  ESorgh: 'orga OU orga-b',
   ESquotas: 'Quotas de l\'espace',
   ESoptc: 'Options fixées par le Comptable',
   ESal: 'Alerte et limitation de connexion',
   ESreq: 'Valeur requise',
-  ESnum: 'Numéro d\'espace non disponible',
-  ESorg1: 'Au moins 4 caractères/chiffres',
-  ESorg2: 'Au plus 8 caractères/chiffres',
-  ESorg3: 'Minuscules (a-z), chiffres (0-9) et tiret (moins)',
-  ESorg4: 'Nom d\'organisation déjà attribué',
+  ESorg1: 'De 4 à 8 minuscules et chiffres',
+  ESorg4: 'Nom déjà attribué',
   ESorg5: 'Organisation inconnue',
   EStabe: 'Espaces',
   EStabt: 'Tâches',

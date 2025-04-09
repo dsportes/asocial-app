@@ -10,14 +10,10 @@
     <div v-if="tab==='taches'" class="q-pa-xs">
       <div class="full-width row items-center q-gutter-sm">
         <btn-cond icon="refresh" @ok="getTaches"/>
-        <div class="row items-center">
-          <span class="q-mr-sm">{{$t('ESfta')}}</span>
-          <q-input class="w6" v-model="org"
-            :label="$t('ESorg')" :hint="$t('ESorgh')" dense>
-            <template v-slot:append>
-              <btn-cond icon="check" round @ok="getTaches"/>
-            </template>
-          </q-input>
+        <div class="row items-center q-gutter-sm">
+          <q-select v-model="selOrg" :options="optOrgs" dense :label="$t('ESfta')"
+            style="width:8rem"/>
+          <btn-cond icon="check" round @ok="getTaches"/>
         </div>
       </div>
       <q-separator class="q-my-xs" color="orange"/>
@@ -139,24 +135,21 @@
 
     <!-- Création d'un espace -->
     <dial-std1 v-if="m3" v-model="m3" :titre="$t('ESne2')"
-      confirm :okfn="creerES" :actif="ps !== null && !dorg">
-      <q-card-section class="q-my-md q-mx-sm">
-        <div class="row items-center full-width">
-          <q-input class="col-6  q-pr-md" v-model="org"
-            :label="$t('ESorg')" :hint="$t('ESorgh')" dense/>
-          <div v-if="dorg" class="col-6 text-negative bg-yellow-3 text-bold q-px-xs">{{dorg}}</div>
-        </div>
-        <div class="column justify-center q-mt-md">
-          <phrase-contact declaration orgext="fake" @ok="okps" :disable="!org"/>
+      confirm :okfn="creerES" :actif="phraseE.err === '' && orgE.err === ''">
+      <q-card-section class="q-ma-sm column justify-center">
+        <div class="column justify-center">
+          <nom-org class="q-mb-md" :set-orgs="setOrgs" v-model="orgE"/>
+          <phrase-contact declaration v-model="phraseE" 
+            :class="orgE.err !== '' ? 'disabled' : ''"/>
         </div>
       </q-card-section>
     </dial-std1>
 
     <!-- Changement de la phrase de sponsoring du Comptable -->
     <dial-std1 v-if="m2" v-model="m2" :titre="$t('ENnpspc')"
-      :disable="!ps" :okfn="nvspc">
+      :disable="phraseE.err !== ''" :okfn="nvspc">
       <q-card-section class="q-my-md q-mx-sm">
-        <phrase-contact declaration :orgext="esp.org" @ok="okps" :disable="!org"/>
+        <phrase-contact declaration v-model="phraseE"/>
       </q-card-section>
     </dial-std1>
 
@@ -184,6 +177,7 @@ import BoutonDlvat from '../components/BoutonDlvat.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
 import BtnCond from '../components/BtnCond.vue'
 import PhraseContact from '../components/PhraseContact.vue'
+import NomOrg from '../components/NomOrg.vue'
 import SaisieMois from '../components/SaisieMois.vue'
 import IconAlerte from '../components/IconAlerte.vue'
 import QuotasVols from '../components/QuotasVols.vue'
@@ -192,7 +186,7 @@ import DialStd1 from '../dialogues/DialStd1.vue'
 import { GetEspaces, CreationEspace, MajSponsEspace, SetEspaceQuotas, InitTachesGC, 
   DownloadStatC, GetTaches, DelTache, GoTache } from '../app/operations4.mjs'
 import { get } from '../app/net.mjs'
-import { compile } from '../app/modele.mjs'
+import { compile, Phrase } from '../app/modele.mjs'
 import { AMJ, Tarif, UNITEN, UNITEV } from '../app/api.mjs'
 import { edvol, mon, nbn, dkli, afficherDiag, dhstring } from '../app/util.mjs'
 
@@ -221,6 +215,11 @@ const session = stores.session
 const fSt = stores.filtre
 const cfg = stores.config
 const lstEspB = ref([])
+const setOrgs = ref(new Set())
+const optOrgs = ref([])
+const selOrg = ref('')
+const orgE = ref({ org: '', err: '', svc: '' })
+const phraseE = ref({ phrase: '', err: ''})
 
 const lstEsp = computed(() => {
   const lst = []
@@ -239,13 +238,19 @@ const lstEsp = computed(() => {
 
 async function loadEsp () {
   const lst = []
+  setOrgs.value.clear()
   const rows = await new GetEspaces().run()
   if (rows) for (const row of rows) {
     const r = await compile(row)
     r.abot = Tarif.abo(r.quotas)
     lst.push(r)
+    setOrgs.value.add(r.org)
   }
   lstEspB.value = lst
+  const l = Array.from(setOrgs.value)
+  l.sort((a,b) => a < b ? -1 : (a > b ? 1 : 0))
+  l.unshift($t('toutes'))
+  optOrgs.value = l
 }
 
 onMounted(async () => {
@@ -275,19 +280,10 @@ const gcop = ref('')
 const org = ref('')
 const ps = ref(null)
 const singl = ref(null)
-const dorg = ref($t('ESreq'))
 const quotas = ref(null)
 const esp = ref(null)
 const mois = ref(Math.floor(session.auj / 100))
 const taches = ref([])
- 
-watch (org, (ap, av) => {
-  if (ap.length < 4) { dorg.value = $t('ESorg1'); return }
-  if (ap.length > 8) { dorg.value = $t('ESorg2'); return }
-  if (!ap.match(reg)) { dorg.value = $t('ESorg3'); return }
-  if (aOrg(ap)) { dorg.value = $t('ESorg4'); return }
-  dorg.value = ''
-})
 
 function nvntf (ntf) {
   return ntf.nr === 1 ? 1 : (ntf.nr === 2 ? 4 : 6)
@@ -321,38 +317,29 @@ async function startDemon () {
   }
 }
 
-function aOrg (org) {
-  for (const e of lstEsp.value)
-    if (e.org === org) return true
-  return false
-}
-
 function plusES () {
   ui.oD('PAcreationesp', idc)
 }
 
-function okps (p) {
-  if (p) p.phrase = null
-  ps.value = p
-}
-
 function ovnspc (e) {
-  esp.value = e
+  orgE.value.org = e.org
+  phraseE.value.phrase = e.phrase
   ui.oD('PAnvspc', idc)
 }
 
 async function nvspc () {
-  await new MajSponsEspace().run(esp.value.org, ps.value)
-  ns.value = 0
-  ps.value = null
+  const pc = new Phrase()
+  await pc.init(phraseE.value.phrase)
+  await new MajSponsEspace().run(orgE.value.org, pc)
   ui.fD()
   await loadEsp()
 }
 
 async function creerES () {
-  await new CreationEspace().run(org.value, ps.value)
-  org.value = ''
-  ps.value = null
+  const pc = new Phrase()
+  await pc.init(phraseE.value.phrase)
+  await new CreationEspace().run(orgE.value.org, pc)
+  orgE.value.org = ''
   ui.fD()
   await loadEsp()
 }
@@ -395,7 +382,8 @@ async function dlstat (esp, mr) {
 }
 
 async function getTaches () {
-  taches.value = await new GetTaches().run(org.value)
+  const o = selOrg.value === $t('toutes') ? '' : selOrg.value
+  taches.value = await new GetTaches().run(o)
 }
 
 async function tacheDel (t) {

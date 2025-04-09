@@ -2,7 +2,7 @@ import axios from 'axios'
 import { encode, decode } from '@msgpack/msgpack'
 
 import stores from '../stores/stores.mjs'
-import { APIVERSION, isAppExc, AppExc, E_BRO, E_SRV, E_BRK } from './api.mjs'
+import { isAppExc, AppExc, E_BRO, E_SRV, E_BRK } from './api.mjs'
 import { syncQueue } from './synchro.mjs'
 
 const decoder = new TextDecoder('utf-8')
@@ -125,7 +125,7 @@ export async function post (op, fonction, args) {
   const u = config.OPURL + fonction
   try {
     if (op) op.BRK()
-    args.APIVERSION = APIVERSION
+    args.APIVERSION = config.APIVERSION
     const data = new Uint8Array(encode(args))
     if (op) op.cancelToken = axios.CancelToken.source()
     const par = { 
@@ -148,6 +148,7 @@ export async function post (op, fonction, args) {
   try {
     const resp = decode(buf)
     if (resp) {
+      if (resp.srvBUILD) session.srvBUILD = resp.srvBUILD
       if (resp.adq) session.setAdq(resp.adq)
       if (resp.trlog) 
         syncQueue.synchro(resp.trlog)

@@ -22,7 +22,8 @@
     </q-header>
 
     <q-page-container>
-      <div class="font-mono fs-sm q-my-sm q-ml-sm">{{$t('OTbuild', [config.BUILD])}}</div>
+      <div class="font-mono fs-sm q-my-sm q-ml-sm">
+        {{$t('OTbuild', [config.BUILD + (session.srvBUILD ? ' / ' + session.srvBUILD : '')])}}</div>
       
       <div v-if="tab === 'theme'">
         <div class="font-def fs-sm">Normal sm</div>

@@ -114,7 +114,7 @@
       </btn-cond>
 
       <q-toolbar-title class="row justify-end items-center titre-md text-right q-mx-xs">
-        <span v-if="session.org" class="q-mr-sm titre-sm text-italic">{{session.org}}</span>
+        <span v-if="session.org" class="q-mr-sm titre-sm text-italic">{{session.org}}-{{config.svc}}</span>
         <icon-mode class="cursor-none"/>
         <img v-if="session.ok" :src="people.getCV(session.compteId).photo" 
           height="28" width="28" class="q-pa-none q-mr-sm img"/>
