@@ -1,6 +1,6 @@
 <template>
   <q-avatar class="cursor-pointer q-mr-xs" size="sm" square>
-    <img v-if="session.synchro" src="~assets/sync_saved_locally.svg">
+    <q-icon v-if="session.synchro" color="white" size="sm" name="cloud_sync"/>
     <img v-if="session.incognito" src="~assets/incognito_blanc.svg">
     <q-icon v-if="session.avion" color="white" size="sm" name="airplanemode_active"/>
   </q-avatar>

@@ -77,6 +77,7 @@ module.exports = configure(function (ctx) {
       extendWebpack (cfg) {
         cfg.module.rules.push({ test: /\.md$/i, type: 'asset/source' })
         cfg.module.rules.push({ test: /\.txt$/i, type: 'asset/source' })
+        /*
         cfg.module.rules.push({ 
           test: /\.svg$/i, 
           type: 'asset/inline',
@@ -88,6 +89,7 @@ module.exports = configure(function (ctx) {
             }
           }
         })
+        */
         cfg.module.rules.push({ test: /\.bin$/i, type: 'asset/inline' })
       },
       chainWebpack: chain => {
@@ -202,11 +204,10 @@ module.exports = configure(function (ctx) {
         theme_color: '#027be3',
         icons: [
           {
-            src: 'icons/favicon-128x128.jpg',
+            src: 'icons/icon-128x128.png',
             sizes: '128x128',
-            type: 'image/jpg'
-          }
-          /*,
+            type: 'image/png'
+          },
           {
             src: 'icons/icon-192x192.png',
             sizes: '192x192',
@@ -227,7 +228,6 @@ module.exports = configure(function (ctx) {
             sizes: '512x512',
             type: 'image/png'
           }
-          */
         ]
       }
     },

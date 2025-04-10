@@ -39,12 +39,8 @@
       </div>
 
       <div class="row justify-center q-gutter-sm q-mt-sm">
-        <btn-cond class="titre-lg" no-caps @ok="ouvrirPS(1)" :disable="orgE.org === 'admin'">
-          <div class="row items-center q-gutter-sm">
-            <q-icon size="sm"><img src="~assets/sync_saved_locally.svg"/></q-icon>
-            <div>{{$t('sync')}}</div>
-          </div>
-        </btn-cond>
+        <btn-cond class="titre-lg" no-caps @ok="ouvrirPS(1)" 
+          :disable="orgE.org === 'admin'" icon="cloud_sync" :label="$t('sync')"/>
 
         <btn-cond class="titre-lg" no-caps @ok="ouvrirPS(2)">
           <div class="row items-center q-gutter-sm">
@@ -72,7 +68,7 @@
       <div class="col q-py-sm q-gutter-md row justify-center">
         <q-radio dense v-model="session.mode" :val="1">
           <div class="row items-center q-gutter-sm">
-            <q-icon size="sm"><img src="~assets/sync_saved_locally.svg"/></q-icon>
+            <q-icon size="sm" name="cloud_sync"/>
             <div>{{$t('sync')}}</div>
           </div>
         </q-radio>

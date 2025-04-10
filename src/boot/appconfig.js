@@ -62,12 +62,12 @@ export default boot(async ({ app /* Vue */ }) => {
     }
   })
 
-  cfg.logo = require('../assets/logo.png')
+  // cfg.logo = require('../assets/logo.png')
   cfg.iconAvatar = require('../assets/avatar.jpg')
   cfg.iconGroupe = require('../assets/groupe.jpg')
   cfg.iconSuperman = require('../assets/superman.jpg')
   cfg.iconComptable = require('../assets/police.jpg')
-  cfg.logoSvg = require('../assets/logo.svg') // Taitement spécial Webpack (quasar.config.js)
+  // cfg.logoSvg = require('../assets/logo.svg') // Taitement spécial Webpack (quasar.config.js)
 
   /* N'importe quel binaire en .bin peut être chargé en dataURL:
   - son MIME est 'application/octet-stream'

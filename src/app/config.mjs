@@ -2,7 +2,7 @@
 
 export const config = {
   // CONFIGURATION TECHNIQUE : à adapter SI NECESSAIRE à chaque déploiement
-  BUILD: 'v2.0',
+  BUILD: 'v2.1',
   APIVERSION: 2,
   mondebug: true,
 
