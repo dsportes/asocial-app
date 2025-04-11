@@ -11,6 +11,7 @@
             <btn-cond v-if="editable && !md" :disable="md" class="q-mr-xs" @ok="ouvriremojimd1"
               icon="insert_emoticon" flat color="white"/>
             <btn-cond v-if="modifie" class="q-mr-xs" @ok="undo" icon="undo" flat color="white"/>
+            <slot/>
             <q-space/>
             <div :class="'font-mono fs-sm' + (textelocal && textelocal.length >= maxlg ? ' text-bold text-warning bg-yellow-5':'')">
               {{textelocal ? textelocal.length : 0}}/{{maxlg}}c

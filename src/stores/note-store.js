@@ -356,7 +356,7 @@ export const useNoteStore = defineStore('note', {
       this.calculNfnt()
     },
 
-    setCourant (ids) { this.node = this.map.get(ids) },
+    setCourant (ids) { this.node = ids ? this.map.get(ids) : null },
 
     setPreSelect (ids, opt) {
       if (opt) {

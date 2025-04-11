@@ -1,6 +1,5 @@
 <template>
   <q-page class="column q-pl-xs">
-
     <q-tree ref="tree" :class="sty() + 'sep q-mb-sm splg'"
       :nodes="nodesTries"
       no-transition
@@ -14,11 +13,9 @@
       :filter-method="nSt.filtrage2"
     >
       <template v-slot:default-header="prop">
-        <div @click.stop="clicknode(prop.node)" @keypress.stop="clicknode(prop.node)" 
-          :class="cl(prop.node.type)">
-          <div class="row items-center">
-            <q-icon v-if="prop.node.ratt" size="xs" class="col-auto q-mr-xs cursor-pointer" name="star"
-              color="green-5"/>
+        <div :class="cl(prop.node.type) + ' row full-width justify-between items-start'">
+          <div class="col-11 row items-center cursor-pointer" 
+            @click.stop="clicknode(prop.node)" @keypress.stop="clicknode(prop.node)">
             <q-icon :name="icons[prop.node.type]" :color="colors[prop.node.type]"
               size="sm" class="col-auto q-mr-xs"/>
             <q-icon v-if="prop.node.type === 3 || prop.node.type > 5" class="col-auto q-mr-xs"
@@ -30,44 +27,67 @@
               color="warning"/>
             <div :class="'col ' + styn(prop.node)">{{lib(prop.node)}}</div>
           </div>
+          <div class="col-1 row justify-end">
+            <btn-cond v-if="prop.node.ratt" icon="star"
+              color="green-5" stop @ok="clicketoile(prop.node)"/>
+            <btn-cond v-if="!rec" flat icon="more_vert" stop>
+              <q-menu>
+                <q-list class="sombre1 text-white menu">
+                  <q-item v-if="session.cEdit">
+                    <q-item-section class="text-italic text-bold">{{$t(session.cEdit)}}</q-item-section>
+                  </q-item>
+
+                  <q-item clickable v-close-popup @click.stop="ovAlbum(prop.node)">
+                    <div class="row q-gutter-sm items-center mi">
+                      <q-icon size="md" name="photo_album"/> 
+                      <span>{{$t('PNOalbum')}}</span>
+                    </div>
+                  </q-item>
+
+                  <q-item v-if="!session.cEdit && prop.node.type > 3" 
+                    clickable v-close-popup @click.stop="rattacher(prop.node)">
+                    <div class="row q-gutter-sm items-center mi">
+                      <q-icon size="md" name="account_tree"/>
+                      <span>{{$t('PNOratt')}}</span>
+                    </div>
+                  </q-item>
+
+                  <q-separator />
+                  <div v-if="!session.cEdit">
+                    <q-item v-if="!session.cEdit" class="text-italic">{{$t('PNOnvnote')}}</q-item>
+                    <q-item v-for="av of lav(prop.node)" :key="av.id"
+                      clickable v-close-popup @click.stop="okav(prop.node, av.id)">
+                      <div class="row q-gutter-sm items-center mi">
+                        <q-icon size="md" name="control_point" color="primary"/>
+                        <span>{{av.nom}}</span>
+                      </div>
+                    </q-item>
+                    <q-item v-if="!estAv(prop.node)" clickable v-close-popup 
+                      @click.stop="okgr(prop.node, prop.node.id)">
+                      <div class="row q-gutter-sm items-center mi">
+                        <q-icon size="md" name="control_point" color="secondary"/>
+                        <span>{{nom(prop.node)}}</span>
+                      </div>
+                    </q-item>
+                  </div>
+                  <div v-else class="text-italic">{{$t('PNOnonvnote', [$t(session.cEdit)])}}</div>
+                  <!--note-plus v-if="!nSt.estFake" v-model="selected" :node="prop.node"/-->
+                </q-list>
+              </q-menu>
+            </btn-cond>
+          </div>
         </div>
       </template>
     </q-tree>
 
     <!-- Edition du texte de la note -->
-    <q-dialog v-model="ui.d[idc].NE" position="left" persistent>
-      <note-edit/>
-    </q-dialog>
-
-    <!-- Gestion de l'exclusivité de la note -->
-    <q-dialog v-model="ui.d[idc].NX" position="left" persistent>
-      <note-exclu/>
-    </q-dialog>
-
-    <!-- Gestion des fichiers attachés à la note -->
-    <q-dialog v-model="ui.d[idc].NF" position="left" persistent>
-      <note-fichier/>
+    <q-dialog v-model="ui.d[idc].ND" position="left" persistent>
+      <note-detail/>
     </q-dialog>
 
     <!-- Album de photo de la note et ses descendantes -->
     <q-dialog v-model="ui.d[idc].AP" position="left" persistent>
       <album-photos :lstPhotos="lstPhotos" @select="clicknode"/>
-    </q-dialog>
-
-    <!-- Confirmation de la suppression d'une note -->
-    <q-dialog v-model="ui.d[idc].confirmSuppr" persistent>
-      <q-card :class="styp('sm')">
-        <q-toolbar class="tbs">
-          <btn-cond color="warning" icon="close" @ok="ui.fD"/>
-          <q-toolbar-title class="titre-lg full-width text-center">
-            {{$t('NCFsuppr')}}
-          </q-toolbar-title>
-        </q-toolbar>
-        <div class="q-my-md row justify-center items-center q-gutter-md">
-          <btn-cond icon="undo" flat :label="$t('renoncer')" @ok="ui.fD"/>
-          <bouton-confirm actif :confirmer="noteSuppr"/>
-        </div>
-      </q-card>
     </q-dialog>
 
     <!-- Dialogue de download des notes sélectionnées -->
@@ -155,133 +175,41 @@
       </q-card>
     </q-dialog>
 
-    <!-- Mise à jour des hashtags de la note -->
-    <q-dialog v-model="ui.d[idc].NM" persistent>
-      <div :class="styp('md')">
-        <q-toolbar class="btbs">
-          <btn-cond color="warning" icon="chevron_left" @ok="fermer"/>
-          <q-toolbar-title class="titre-lg full-width text-center">
-            {{$t('PNOht0')}}
-          </q-toolbar-title>
-          <btn-cond icon="check" :label="$t('valider')" cond="cEdit"
-            :disable="!modifie"  @ok="validerHt"/>
-          <bouton-help page="dial_noteht"/>
-        </q-toolbar>
-      
-        <hash-tags v-model="ht" :src="nSt.note.ht" :titre="$t('PNOht1')"/>
-
-        <hash-tags v-if="nSt.note.deGroupe && estAnim" v-model="htg" :src="nSt.note.htg" :titre="$t('PNOht2')"/>
-
-        <q-card v-if="nSt.note.deGroupe && !estAnim">
-          <div v-if="nSt.note.htg.size" class="row q-gutter-xs q-ma-sm">
-            <span class="text-italic">{{$t('PNOht2')}} : </span>
-            <span v-for="ht of nSt.note.htg" :key="ht">{{ht}}</span>
-          </div>
-          <div v-else class="text-italic">{{$t('PNOht3')}}</div>
-        </q-card>
-      </div>
+    <!-- Dialogue de création d'une nouvelle note -->
+    <q-dialog v-model="ui.d[idc].NNnotenouvelle" position="left" persistent>
+      <note-nouvelle
+        :estgr="estgr" 
+        :groupe="estgr ? groupex : null" 
+        :avatar="avatarx" 
+        :notep="nSt.node.note"/>
     </q-dialog>
 
     <q-page-sticky expand position="top" class="splg">
-      <div :class="sty() + ' box2 full-width q-pa-xs column justify-between'">
-        <div>
-          <div v-if="!selected" class="q-ml-xs titre-md text-italic">{{$t('PNOnosel')}}</div>
-          
-          <div v-if="selected" class="row justify-between">
-            <div class="titre-md">{{lib2}}</div>
-            <div v-if="nSt.note" class="col-auto font-mono fs-sm">
-              <span v-if="nSt.node && nSt.node.note" class="q-mr-xs font-mono fs-sm">#{{nSt.node.note.shIds}}</span>
-              <span class="q-mr-sm">({{edvol(nSt.note.texte.length)}})</span>
-              <span>{{dhcool(nSt.note.d)}}</span>
-            </div>
-            <div v-if="nSt.node.type === 3" class="titre-md text-italic text-bold">
-              {{$t('PNOtype3')}}</div>
-            <div v-if="nSt.node.type === 6 || nSt.node.type === 7" class="titre-md text-italic text-bold">
-              {{$t('PNOtype67')}}</div>
-          </div>
+      <div :class="sty() + ' box2 full-width q-pa-xs'">
+        <div class="row q-gutter-xs items-center">
+          <btn-cond v-if="!rec" 
+            icon="photo_album" :label="$t('PNOalbum')" @ok="ovAlbumG()"/>
+          <btn-cond v-if="!expandAll" size="md" icon="unfold_more"
+            :label="$t('PNOdep')" @ok="tree.expandAll();expandAll=true"/>
+          <btn-cond v-if="expandAll" size="md" icon="unfold_less"
+            :label="$t('PNOrep')" @ok="tree.collapseAll();expandAll=false"/>
+          <btn-cond v-if="rec" icon="undo" color="warning"
+            :label="$t('PNOanratt')" @ok="anrattacher"/>
+          <btn-cond class="q-mr-sm" flat icon="file_download" color="white" 
+            :label="$t('PNOdlc')" @ok="dlopen"/>
+        </div>
 
-          <apercu-genx v-if="selected && nSt.node.type <= 3" :id="nSt.node.id" />
-
-          <show-html v-if="selected && nSt.note" 
-            class="col bord1 q-ml-md" :texte="nSt.note.texte" zoom maxh="4rem" 
-            :edit="rec===0" @edit="ovNE"/>
-
-          <liste-auts v-if="selected && nSt.note && nSt.estGr"/>
-
-          <div v-if="selected && nSt.note && !rec" class="q-my-sm row justify-between"> 
-            <div class="col row q-gutter-xs">
-              <span class="text-italic">{{$t('hashtags')}} : </span>
-              <span v-for="ht of nSt.note.tousHt" :key="ht">{{ht}}</span>
-            </div>
-            <btn-cond class="col-auto self-start" round icon="edit" @ok="ovHT"/>
-          </div>
-
-          <div v-if="selected && nSt.note && !rec" class="q-my-sm row justify-between">  
-            <div class="col titre-sm">
-              <span :class="!nSt.note.mfa.size ? 'text-italic': ''">
-                {{$t('PNOnf', nSt.note.mfa.size, {count: nSt.note.mfa.size})}}
-              </span>
-              <span class="q-ml-xs">{{nSt.note.mfa.size ? (edvol(nSt.note.vf) + '.') : ''}}</span>
-            </div>
-            <btn-cond class="col-auto self-start" round icon="attach_file" @ok="ovNF">
-              <q-tooltip>{{$t('PNOattach')}}</q-tooltip>
-            </btn-cond>
-          </div>
-
-          <div v-if="selected && nSt.note && !rec && nSt.estGr" class="q-mt-xs q-mb-sm row">  
-            <div v-if="nSt.mbExclu" class="col titre-sm">{{$t('PNOexclu', [nSt.mbExclu.cv.nomC])}}</div>
-            <div v-else class="col text-italic titre-sm">{{$t('PNOnoexclu')}}</div>
-            <btn-cond class="col-auto self-start" round icon="person" @ok="ovNX">
-              <q-tooltip>{{$t('PNOexclu3')}}</q-tooltip>
-            </btn-cond>
-          </div>
-
-          <div v-if="selected && nSt.note && rec" class="rec shadow-10">
-            <q-toolbar class="tbs">
-              <btn-cond icon="undo" color="warning"
-                :label="setRatt.size ? $t('renoncer') : $t('jailu')"
-                @ok="anrattacher"/>
-              <q-toolbar-title class="titre-lg text-center">{{$t('PNOrattpos', setRatt.size, {count: setRatt.size})}}</q-toolbar-title>
-            </q-toolbar>
-            <div v-if="setRatt.size && rec===1" class="q-pa-md column items-center q-gutter-md">
-              <div class="titre-lg">{{$t('PNOrattinfo')}}</div>
-              <btn-cond v-if="setRatt.size > maxRatt" icon="unfold_more" :label="$t('PNOdepratt')"
-                @ok="depRatt"/>
-            </div>
-            <div v-if="rec===2" class="q-pa-md column items-center q-gutter-md">
-              <div v-if="!nodeDiag">
-                <span class="text-italic titre-md q-mr-md">{{$t('PNOratta')}}</span>
-                <span class="msg">{{lib(noderatt)}}</span>
-              </div>
-              <div v-if="nodeDiag" class="msg">{{nodeDiag}}</div>
-              <btn-cond v-if="!nodeDiag" icon="check" :label="$t('PNOcfratt')" color="warning" 
-                @ok="okrattacher" cond="cEdit"/>
-              <btn-cond icon="account_tree" :label="$t('PNOratt2')" @ok="rattacher"/>
-            </div>
+        <div v-if="rec" class="q-pa-md">
+          <div class="titre-md">{{$t('PNOrattinfo')}}</div>
+          <div>
+            <span class="titre.md">{{$t('PNOrattpos', [setRatt.size])}}</span>
+            <btn-cond v-if="setRatt.size > maxRatt" icon="unfold_more" color="primary"
+              :label="$t('PNOdepratt')" @ok="depRatt"/>
           </div>
         </div>
 
-        <div v-if="selected && !rec" class="q-my-xs row q-gutter-sm justify-center items-center">
-          <note-plus v-if="!nSt.estFake"/>
-          <btn-cond v-if="nSt.note" color="warning" icon="delete" 
-            :label="$t('PNOsupp')" @ok="ovSuppr"/>
-          <btn-cond v-if="rattaut" icon="account_tree" :label="$t('PNOratt')" 
-            cond="cEdit" @ok="rattacher"/>
-          <btn-cond icon="photo_album" :label="$t('PNOalbum')" 
-            @ok="ovAlbum"/>
-        </div>
+        <apercu-genx v-if="!rec && selected && nSt.node.type <= 3" :id="nSt.node.id" />
 
-        <div v-if="!selected && !rec" class="q-my-xs row justify-center">
-          <btn-cond icon="photo_album" :label="$t('PNOalbum')" @ok="ovAlbum"/>
-        </div>
-      </div>
-          
-      <div class="row full-width tbs items-center justify-between">
-        <btn-cond class="q-mr-sm" flat icon="file_download" color="white" :label="$t('PNOdlc')" @ok="dlopen"/>
-        <btn-cond v-if="!expandAll" size="sm" icon="unfold_more"
-          :label="$t('PNOdep')" @ok="tree.expandAll();expandAll=true"/>
-        <btn-cond v-if="expandAll" size="sm" icon="unfold_less"
-          :label="$t('PNOrep')" @ok="tree.collapseAll();expandAll=false"/>
       </div>
     </q-page-sticky>
   </q-page>
@@ -297,13 +225,15 @@ import { dkli, sty, styp, $t, u8ToB64, dhcool, edvol, afficherDiag,
 import ShowHtml from '../components/ShowHtml.vue'
 import { appexc, AppExc, E_WS } from '../app/api.mjs'
 import NoteEdit from '../panels/NoteEdit.vue'
-import NoteExclu from '../panels/NoteExclu.vue'
-import NoteFichier from '../panels/NoteFichier.vue'
+import NoteDetail from '../panels/NoteDetail.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BtnCond from '../components/BtnCond.vue'
 import ListeAuts from '../components/ListeAuts.vue'
+import NoteNouvelle from '../panels/NoteNouvelle.vue'
 import NotePlus from '../components/NotePlus.vue'
 import HashTags from '../components/HashTags.vue'
+import NoteExclu from '../panels/NoteExclu.vue'
+import NoteFichier from '../panels/NoteFichier.vue'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import AlbumPhotos from '../panels/AlbumPhotos.vue'
@@ -326,7 +256,7 @@ const styles = [
   'fs-md text-italic'
   ]
 
-const maxRatt = 20
+const maxRatt = 4
 
 const enc = new TextEncoder()
 const dec = new TextDecoder()
@@ -335,6 +265,7 @@ const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 const session = stores.session
 const pSt = stores.people
+const aSt = stores.avatar
 const gSt = stores.groupe
 const cfg = stores.config
 const nSt = stores.note
@@ -346,13 +277,11 @@ const tree = ref(null)
 const selected = ref('')
 const expanded = ref([])
 const setRatt = ref(new Set())
-const nodeDiag = ref('')
-const ht = ref(new Set())
-const htg = ref(new Set ())
-const op = ref('') // suppr
+
+// const op = ref('') // suppr
 const expandAll = ref(false)
-const rec = ref(0) // rattachement en cours
-const noderatt = ref(null)
+const rec = ref(false) // rattachement en cours
+
 const lstn = ref([]) // liste des notes restant à télécharger
 const dlnbntot = ref(0) // nombre total initial de notes à télécharger
 const dlnbnc = ref(0) // nombre restant de notes à télécharger
@@ -369,6 +298,15 @@ const portupload = ref(cfg.portupload)
 const dirloc = ref($t('PNOdirloc'))
 const lstPhotos = ref()
 
+const estAv = (n) => n.type === 1 || n.type === 4
+const nom = (n) => session.getCV(n.id).nom
+const lav = (n) =>  estAv(n) ? [{ nom: nom(n), id: n.id}] : session.compte.lstAvatars
+
+const nbf = (node) => {
+  const n = node.note
+  return n && n.mfa ? n.mfa.size : 0
+}
+
 const estAnim = computed(() => { const e = nSt.note ? gSt.egr(nSt.note.id) : null; return e && e.estAnim })
 
 const photos = computed(() => {
@@ -377,44 +315,45 @@ const photos = computed(() => {
   return l
 })
 
-async function ovAlbum () {
+const estgr = ref(false)
+const groupex = ref(null)
+const avatarx = ref(null)
+
+async function okgr (n, id) {
+  selected.value = n.ids
+  nSt.setCourant(n.ids)
+  groupex.value = gSt.egr(id).groupe
+  const diag = groupex.value && !groupex.value.aUnAccesEcrNote ? 'PNOroEcr' : ''
+  if (diag) {
+    await afficherDiag($t(diag))
+    return
+  }
+  estgr.value = true
+  ui.oD('NNnotenouvelle', idc)
+}
+
+async function okav (n, id) {
+  selected.value = n.ids
+  nSt.setCourant(n.ids)
+  avatarx.value = aSt.getElt(id).avatar
+  estgr.value = false
+  ui.oD('NNnotenouvelle', idc)
+}
+
+async function ovAlbum (n) {
+  selected.value = n.ids
+  nSt.setCourant(n.ids)
   lstPhotos.value = photos.value
-  if (!lstPhotos.value.length) await afficherDiag($t('PNnoph'))
+  if (!lstPhotos.value.length) await afficherDiag($t('PNOnoph'))
   else ui.oD('AP', idc)
 }
 
-async function ovNE () {
-  if (session.cEdit) { await afficherDiag($t(session.cEdit)); return }
-  if (nSt.diagEd) { await afficherDiag($t(nSt.diagEd)); return }
-  ui.oD('NE', idc)
-}
-
-async function ovSuppr () {
-  if (session.cEdit) { await afficherDiag($t(session.cEdit)); return }
-  if (nSt.diagEd) { await afficherDiag($t(nSt.diagEd)); return }
-  ui.oD('confirmSuppr', idc)
-}
-
-async function noteSuppr () {
-  ui.fD()
-  await new SupprNote().run()
-}
-
-async function ovNX () {
-  if (session.cEdit) { await afficherDiag($t(session.cEdit)); return }
-  ui.oD('NX', idc)
-}
-
-async function ovNF () {
-  ui.oD('NF', idc)
-}
-
-async function ovHT () {
-  if (session.cEdit) { await afficherDiag($t(session.cEdit)); return }
-  ht.value.clear()
-  nSt.note.ht.forEach(t => { ht.value.add(t)})
-  nSt.note.htg.forEach(t => { htg.value.add(t)})
-  ui.oD('NM', idc)
+async function ovAlbumG (n) {
+  selected.value = ''
+  nSt.setCourant(null)
+  lstPhotos.value = photos.value
+  if (!lstPhotos.value.length) await afficherDiag($t('PNOnoph'))
+  else ui.oD('AP', idc)
 }
 
 const nodesTries = computed(() => {
@@ -427,20 +366,9 @@ const nodesTries = computed(() => {
   return t
 })
 
-function egalite (setA, setB) {
-  if (setA.size !== setB.size) return false
-  for (const elem of setA) if (!setB.has(elem)) return false
-  for (const elem of setB) if (!setA.has(elem)) return false
-  return true
-}
-
 const presel = computed(() => nSt.presel)
 const lib2 = computed(() => lib(nSt.node))
 const rattaut = computed(() => { const n = nSt.node; return n && n.type >= 4 && n.type <= 5 })
-const modifie = computed(() => { 
-  if (!nSt.note) return false
-  return !egalite(nSt.note.ht, ht.value) || (estAnim.value && !egalite(nSt.note.htg, htg.value))
-})
 
 watch(presel, (ap) => {
   if (ap) {
@@ -468,44 +396,47 @@ const styn = (n) => {
   return s1 + (n && nSt.node && (n.ids === nSt.node.ids) ? ' msg' : '')
 }
 
-function fermer () { 
-  if (modifie.value) ui.oD('confirmFerm', idc)
-  else ui.fD() 
-}
-
-const s2Str = (s) => Array.from(s).sort().join(' ')
-
-async function validerHt () {
-  await new HTNote().run(nSt.note, s2Str(ht.value), 
-    nSt.note.deGroupe ? s2Str(htg.value) : null)
-  ui.fD()
-}
-
-const nbf = (node) => {
-  const n = node.note
-  return n && n.mfa ? n.mfa.size : 0
-}
-
 const pc = (i, j) => !i ? '-' : Math.round((j * 100) / i) + '%'
 
-function clicknode (n) {
-  nodeDiag.value = ''
-  switch (rec.value) {
-    case 0 : {
-      if (n.type === 1 && selected.value === n.ids) selected.value = ''
-      else selected.value = n.ids
+const selectN = (n) => {
+  if (!n || (n.type === 1 && selected.value === n.ids)) {
+    selected.value = ''
+    nSt.setCourant(null)
+  } else { 
+    selected.value = n.ids
+    nSt.setCourant(n.ids)
+  }
+}
+
+function clicknode (n, menu) {
+  if (!rec.value) {
+    selectN(n)
+    if (n.type > 3 && !menu) ui.oD('ND', idc)
+    return
+  }
+}
+
+/*
+function menuRatt (n) {
+  rec.value = 2
+  noderatt.value = n
+}
+*/
+
+async function clicketoile (r) {
+  if (r.ratt) {
+    const idas = Note.idasEdit(r)
+    if (!idas.size) {
+      await afficherDiag($t('PNOnoedit'))
+      rec.value = false
       return
     }
-    case 1 : { 
-      if (n.ratt) {
-        const idas = Note.idasEdit(nSt.node)
-        if (!idas.size) nodeDiag.value = $t('PNOnoedit')
-        rec.value = 2
-        noderatt.value = n
-      }
-      return
-    }
-    case 2 : return
+    const n = nSt.node
+    const pid = r.id
+    const pids = r.type > 3 ? r.note.ids : null
+    await new RattNote().run(n.id, n.ids, pid, pids)
+    rec.value = false
+    nSt.resetRatt(false)
   }
 }
 
@@ -568,11 +499,16 @@ const libF = (n) => {
 }
 
 // Rattachement d'une note *********************************************
-function rattacher () {
-  rec.value = 1
-  noderatt.value = null
+async function rattacher (n) {
+  selectN(n)
+  rec.value = true
   nSt.resetRatt(false) // tous KO
   setRatt.value = nSt.scanTop()
+  if (setRatt.value.size === 0) {
+    await afficherDiag($t('PNOrattpos', [0]))
+    rec.value = false
+    return
+  }
   if (setRatt.value.size < maxRatt)
     expanded.value = Array.from(setRatt.value)
 }
@@ -582,19 +518,7 @@ function depRatt () {
 }
 
 function anrattacher () { 
-  rec.value = 0
-  noderatt.value = null
-  nSt.resetRatt(false)
-}
-
-async function okrattacher () {
-  const n = nSt.note
-  const r = noderatt.value
-  const pid = r.id
-  const pids = r.type > 3 ? r.note.ids : null
-  await new RattNote().run(n.id, n.ids, pid, pids)
-  rec.value = 0
-  noderatt.value = null
+  rec.value = false
   nSt.resetRatt(false)
 }
 
@@ -759,16 +683,12 @@ async function dlfin () {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
-$hb: 18.7rem
-$hb2: 17rem
 .sep
-  margin-top: $hb
+  margin-top: 11rem
 .box2
   overflow-y: auto
-  height: $hb2
-.bord1
-  border-top: 1px solid $grey-8 !important
-  border-bottom: 1px solid $grey-8 !important
+  height: 10rem
+  border-bottom: 3px solid orange
 .bord
   padding: 1px
   margin: 1px
@@ -791,4 +711,10 @@ $hb2: 17rem
 .ncp
   height: 2.5rem
   overflow: hidden
+.menu
+  min-width: 250px
+  padding: 5px
+  border: 1px solid $grey-5
+.mi:hover
+  background-color: $grey-5
 </style>
