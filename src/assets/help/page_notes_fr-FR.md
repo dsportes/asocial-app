@@ -7,15 +7,28 @@ Cette page présente **toutes** les notes,
 - notes personnelles des avatars du compte,
 - notes des groupes auxquels le compte participe.
 
+# Zone d'information : partie supérieure
+Elle propose quelques actions:
+- **Album** : affichage de l'album général présentant les minitiatures de toutes les photos attachées à toutes les notes.
+- **Déplier / replier** l'arbre des notes.
+- **Téléchargement de la sélection affichée** : voir la section correspondante.
+
+Cette zone donne également:
+- la carte de visite de l'avatar ou groupe racine sélectionné dans l'arbre.
+- quand une _action de rattachement_ est en cours, l'information à propos des notes auxquelles le rattachement est possible.
+
 # Arbre des notes : partie inférieure
 
-La présentation arborescente affiche **toutes** les notes, du moins celles répondant au critère de filtre utile pour réduire la taille de cet arbre quand on chercher certaines notes.
+La présentation arborescente affiche **toutes** les notes, du moins celles répondant au critère de filtre utile pour réduire l'affichage quand on chercher certaines notes particulières.
 
 ### Le premier niveau est celui des _racines_ 
-Il comporte une entrée par _avatar du compte_ et un entrée par _groupe_. Pour chaque racine il s'affiche:
+Il comporte une entrée par _avatar du compte_ et une entrée par _groupe_. Pour chaque racine il s'affiche:
 - son nom, celui de la _carte de visite_ de l'avatar ou du groupe.
 - le nombre de notes du sous-arbre répondant au critère de sélection,
 - le nombre de notes total (sans aucun critère des sélection).
+- **un menu 3 points verticaux** qui présente les options suivantes:
+  - **album** : toutes les miniatures des photos rattachées aux sous cette racine.
+  - **nouvelle note**: création d'une nouvelle note rattachée à cette racine.
 
 ### Le second niveau (et au delà)
 Le second niveau affichent les notes qui ne sont rattachées à aucune autre. 
@@ -25,6 +38,13 @@ On peut _déplier_ chacune de ces notes et y voir les notes rattachées, et ains
   - le nombre de notes du sous-arbre répondant au critère de sélection,
   - le nombre de notes total (sans aucun critère des sélection).
 - son _titre_, le début de sa première ligne.
+- **un menu 3 points verticaux** qui présente les options suivantes:
+  - **détail de la note**,
+  - **rattachement** : déclenchement de l'opération de changement de rattachement de la note avec choix de la note ou racine à laquelle elle peut être rattachée.
+  - **album** : toutes les miniatures des photos rattachées à la note et celles qui lui sont rattachées.
+  - **nouvelle note**: création d'une nouvelle note rattachée, avec une option selon le propriétaire (avatar / note) de la note à créer.
+
+> En cliquant sur une note **son panel de détail s'affiche**.
 
 #### Remarques sur le rattachement des notes
 Rattacher une note à une autre c'est en préciser un de ses aspects.
@@ -34,13 +54,13 @@ On peut aussi imaginer des _notes de rubriques_, comme un répertoire d'un syst�
 - les notes rattachées étant toutes celles de la rubrique correspondante.
 
 **A une note d'un avatar,** il n'est possible de rattacher QUE des notes du même avatar. 
-- Il n'y aucun sens à ce qu'un autre avatar (du compte) commente un autre avatar du même compte.
+- Il n'y aucun sens à ce qu'un autre avatar (du compte) commente une note d'un autre avatar du même compte.
 
-**A une note d'un groupe** (ou à la racine du groupe), il n'est possible de rattacher QUE,
-- **des notes du groupe lui-même**: d'ailleurs les groupes s'ignorent entre eux.
-- **ET des notes d'un avatar du compte**:
-  - le compte peut _attacher des notes complémentaires_ à une note d'un groupe, sachant qu'il sera seul à les voir: aucun autre compte ne peut voir les notes personnelles du compte.
-  - les autres rattachées derrière celle-ci sont forcément du même avatar.
+**A une note d'un groupe G** (ou à la racine du groupe), il n'est possible de rattacher QUE,
+- **une note du groupe GR lui-même**: par des autres groupes car les groupes s'ignorent entre eux.
+- **OU une note d'un avatar du compte**:
+  - le compte peut _attacher des notes complémentaires_ à une note d'un groupe, sachant qu'il sera seul à la voir: aucun autre compte ne peut voir les notes personnelles du compte.
+  - les autres notes rattachées derrière celle-ci sont forcément du même avatar.
 
 ## Filtrer les notes visibles
 Le panneau de filtre s'ouvre avec le bouton **_loupe_** et permet de fixer les critères de filtre: seules les notes respectant le critère fixé s'affichent, mais aussi celles auxquelles elles sont rattachées afin de pouvoir y accéder depuis l'arbre.
@@ -82,60 +102,44 @@ Le compte pourra à son choix,
 - les détruire si elles n'ont plus d'intérêt,
 - les laisser là où elles sont: si plus tard le compte est à nouveau membre actif du groupe _fantôme_ celui-ci sera un groupe normal et ses notes reviendront s'inscrire derrière les notes du groupe à qui elles étaient rattachées. 
 
-# Détail de la note _sélectionnée_ : partie supérieure
+# Panel de détail d'une note
 La partie supérieure est un _zoom_ sur la note ou racine sélectionnée dans l'arbre en dessous.
 
 Pour une racine, le détail se limite à la _carte de visite_ de l'avatar ou du groupe sélectionné.
 
 ## Détail d'une note et actions possibles | dial_notenv dial_notemaj dial_noteex dial_notefic
 
-Pour le détail des actions ci-après se reporter à la rubrique d'aide correspondante citée ci-dessus.
+### Texte de la note
+Le texte de la note apparaît avec sa taille et la date de dernière mise à jour.
 
-#### Modifier son texte
-La note apparaît avec:
-- son titre (le début de sa première ligne),
-- les 4 derniers caractères de son identifiant,
-- sa taille,
-- la date de dernière mise à jour.
-
-Le texte complet de la note apparaît ensuite et peut être zoomé en plein écran.
-
+### Auteurs successifs (pour une note de groupe)
 Pour une note de groupe il s'affiche la liste des auteurs successifs ayant mis à jour la note, les plus récents en tête et cités au plus une fois.
 
-Le bouton CRAYON au boit de la ligne permet de modifier le texte de la note.
-
-#### Gérer ses hashtags
-Ses hashtags actuels sont affichés et peuvent être modifier en appuyant sur le bouton CRAYON au bout de la ligne.
-
-#### Lui attacher des fichiers et les gérer
-Le volume des fichiers est affiché sur la ligne, le bouton au bot de la ligne ouvre le dialogue de gestion des fichiers attachés à la note.
-
-#### Gérer son exclusivité d'écriture (pour une note de groupe)
+### Exclusivité d'écriture (pour une note de groupe)
 Pour une note de groupe seulement, le membre ayant l'exclusivité d'écriture s'affiche. Le bouton au bout de la ligne permet de gérer son attribution.
 
-### Créer une nouvelle note rattachée à la note sélectionnée
-Les boutons permettent de créer ces notes:
-- soit une note personnelle d'un avatar,
-- soit une note de groupe.
+### Hashtags
+Ses hashtags actuels sont affichés et peuvent être modifiés en appuyant sur le bouton CRAYON au bout de la ligne.
 
-Le choix dépend de la note sélectionnée.
+### Attacher des fichiers et les gérer
+Le volume des fichiers est affiché sur la ligne, le bouton au bout de la ligne ouvre le dialogue de gestion des fichiers attachés à la note.
 
 ### "SUPPRIMER"" la note
 Cette action demande confirmation.
 
-### "RATTACHER", la note sélectionnée à une autre note
-et la détacher de celle à laquelle elle était rattachée si c'était le cas.
+# Option de menu "RATTACHER"
+Pour rattacher la note sélectionnée à une autre note et la détacher de celle à laquelle elle était rattachée si c'était le cas.
 
 Après appui sur ce bouton, l'arbre fait apparaître des racines / notes munies d'une **étoile verte**: 
 - elles sont _dépliées_ dans l'arbre. Toutefois s'il y en a beaucoup, appuyer sur le bouton proposé.
-- une fois la note choisie, confirmer le choix (ou l'effacer et recommencer).
+- une fois la note choisie, confirmer le choix en appuyant sur _l'étoile verte_ (ou sur le bouton de renoncement de l'action de rattachement).
 
 # Album des photos des notes | album_photos
 Une note peut avoir des fichiers _image_ attachés: pour chaque image une _miniature_ de taille réduite (96 pixels) est enregistrée.
 
-Quand un article de l'arbre est sélectionné, dans la partie supérieure de détail un bouton **Album** ouvre un panel affichant toutes les images des notes du sous-arbre sélectionné.
+Le menu **trois points verticaux** d'une racine ou d'une note ouvre un panel affichant toutes les images des notes du sous-arbre sélectionné.
 
-En l'absence de sélection d'un sous-arbre, l'album considère **toutes** les notes (du moins celles répondant au filtre).
+> Remarque: le bouton **Album** en haut considère **toutes** les notes affichées (celles répondant au filtre).
 
 # Télécharger la sélection des notes affichées dial_notedl
 Ce téléchargement est possible sur un poste Windows / Linux après avoir installé un petit outil téléchargeable.

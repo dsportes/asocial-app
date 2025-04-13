@@ -3,7 +3,9 @@ Lire dans la documentation générale, lire <a href="$$/appli/groupes.html" targ
 ## Page de détail d'un groupe
 Cette page a deux onglets:
 - **Détail du groupe**,
-- **Membres**: cet onglet est vide si le compte n'a aucun avatar membre actif du groupe et ayant accès aux membres.
+- **Membres**: présente la liste des membres,
+    - les avatars du compte lui-même mebres actifs du groupe,
+    - la liste des autres membres du groupes: elle peut être vide s'il n'y a pas d'autres membres dans le groupe ou que le compte n'a pas d'avatar membre de ce groupe ayant accès aux membres (ou animateur).
 
 # L'onglet "Détail du groupe" | page_contactgr dial_una
 
@@ -53,7 +55,13 @@ Cette liste a une carte pour chaque avatar du compte **membre actif** dans le gr
 Voir ci-après la section **Détail d'un membre**.
 
 # L'onglet "Membres"
-Cette liste a une carte pour chaque membre du groupe, quelque soit son statut, **n'étant pas** un avatar du compte.
+## Mes participations au groupe
+Cette liste a une carte pour chaque avatar du compte **membre actif** dans le groupe.
+
+## Autres membres du groupe
+Cette liste a une carte pour chaque membre du groupe **n'étant pas** avatar du compte, quelque soit son statut.
+
+_Remarque_ : cette liste est vide si le compte n'a pas d'avatar membre de ce groupe ayant accès aux membres (ou animateur).
 
 Voir ci-après la section **Détail d'un membre**.
 

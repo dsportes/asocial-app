@@ -6,7 +6,7 @@
         <q-header elevated>
           <q-toolbar class="fs-md full-width tbs">
             <btn-cond class="q-mr-xs" @ok="ui.oD('EMmax', idc)" icon="zoom_out_map" flat color="white"/>
-            <btn-cond v-if="editable" flat color="white" :icon="md ? 'edit' : 'visibility'" 
+            <btn-cond flat color="white" :icon="md ? 'edit' : 'visibility'" 
               round @ok="md = !md"/>
             <btn-cond v-if="editable && !md" :disable="md" class="q-mr-xs" @ok="ouvriremojimd1"
               icon="insert_emoticon" flat color="white"/>
@@ -35,7 +35,7 @@
       <q-header elevated>
         <q-toolbar class="fs-md full-width tbs">
           <btn-cond class="q-mr-xs" @ok="ui.fD" icon="zoom_in_map" flat color="white"/>
-          <btn-cond v-if="editable" flat color="white" :icon="md ? 'edit' : 'visibility'" 
+          <btn-cond flat color="white" :icon="md ? 'edit' : 'visibility'" 
             round @ok="md = !md"/>
           <btn-cond v-if="editable && !md" :disable="md" class="q-mr-xs" @ok="ouvriremojimd2"
             icon="insert_emoticon" flat color="white"/>

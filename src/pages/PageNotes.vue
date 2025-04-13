@@ -14,7 +14,7 @@
     >
       <template v-slot:default-header="prop">
         <div :class="cl(prop.node.type) + ' row full-width justify-between items-start'">
-          <div class="col-11 row items-center cursor-pointer" 
+          <div class="col-11 row items-center cursor-pointer hov1" 
             @click.stop="clicknode(prop.node)" @keypress.stop="clicknode(prop.node)">
             <q-icon :name="icons[prop.node.type]" :color="colors[prop.node.type]"
               size="sm" class="col-auto q-mr-xs"/>
@@ -28,23 +28,27 @@
             <div :class="'col ' + styn(prop.node)">{{lib(prop.node)}}</div>
           </div>
           <div class="col-1 row justify-end">
-            <btn-cond v-if="prop.node.ratt" icon="star"
+            <btn-cond v-if="prop.node.ratt" icon="star" class="hov1"
               color="green-5" stop @ok="clicketoile(prop.node)"/>
-            <btn-cond v-if="!rec" flat icon="more_vert" stop>
+            <btn-cond v-if="!rec" flat icon="more_vert" stop class="hov1">
               <q-menu>
                 <q-list class="sombre1 text-white menu">
-                  <q-item v-if="session.cEdit">
-                    <q-item-section class="text-italic text-bold">{{$t(session.cEdit)}}</q-item-section>
+                  <q-item v-if="prop.node.type > 3"
+                    clickable class="hov1" v-close-popup @click.stop="clicknode(prop.node)">
+                    <div class="row q-gutter-sm items-center">
+                      <q-icon size="md" name="zoom_in"/> 
+                      <span>{{$t('details')}}</span>
+                    </div>
                   </q-item>
 
-                  <q-item clickable v-close-popup @click.stop="ovAlbum(prop.node)">
-                    <div class="row q-gutter-sm items-center mi">
+                  <q-item clickable class="hov1" v-close-popup @click.stop="ovAlbum(prop.node)">
+                    <div class="row q-gutter-sm items-center">
                       <q-icon size="md" name="photo_album"/> 
                       <span>{{$t('PNOalbum')}}</span>
                     </div>
                   </q-item>
 
-                  <q-item v-if="!session.cEdit && prop.node.type > 3" 
+                  <q-item v-if="prop.node.type > 3" class="hov1"
                     clickable v-close-popup @click.stop="rattacher(prop.node)">
                     <div class="row q-gutter-sm items-center mi">
                       <q-icon size="md" name="account_tree"/>
@@ -53,25 +57,24 @@
                   </q-item>
 
                   <q-separator />
+                  <q-item class="text-italic text-bold">{{$t('PNOnvnote')}}</q-item>
                   <div v-if="!session.cEdit">
-                    <q-item v-if="!session.cEdit" class="text-italic">{{$t('PNOnvnote')}}</q-item>
-                    <q-item v-for="av of lav(prop.node)" :key="av.id"
+                    <q-item v-for="av of lav(prop.node)" :key="av.id" class="hov1"
                       clickable v-close-popup @click.stop="okav(prop.node, av.id)">
-                      <div class="row q-gutter-sm items-center mi">
+                      <div class="row q-gutter-sm items-center">
                         <q-icon size="md" name="control_point" color="primary"/>
                         <span>{{av.nom}}</span>
                       </div>
                     </q-item>
-                    <q-item v-if="!estAv(prop.node)" clickable v-close-popup 
+                    <q-item v-if="!estAv(prop.node)" clickable v-close-popup class="hov1"
                       @click.stop="okgr(prop.node, prop.node.id)">
-                      <div class="row q-gutter-sm items-center mi">
+                      <div class="row q-gutter-sm items-center">
                         <q-icon size="md" name="control_point" color="secondary"/>
                         <span>{{nom(prop.node)}}</span>
                       </div>
                     </q-item>
                   </div>
-                  <div v-else class="text-italic">{{$t('PNOnonvnote', [$t(session.cEdit)])}}</div>
-                  <!--note-plus v-if="!nSt.estFake" v-model="selected" :node="prop.node"/-->
+                  <div v-else class="text-italic">{{$t(session.cEdit)}}</div>
                 </q-list>
               </q-menu>
             </btn-cond>
@@ -224,17 +227,11 @@ import { dkli, sty, styp, $t, u8ToB64, dhcool, edvol, afficherDiag,
   sleep, normNomFichier } from '../app/util.mjs'
 import ShowHtml from '../components/ShowHtml.vue'
 import { appexc, AppExc, E_WS } from '../app/api.mjs'
-import NoteEdit from '../panels/NoteEdit.vue'
 import NoteDetail from '../panels/NoteDetail.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BtnCond from '../components/BtnCond.vue'
 import ListeAuts from '../components/ListeAuts.vue'
 import NoteNouvelle from '../panels/NoteNouvelle.vue'
-import NotePlus from '../components/NotePlus.vue'
-import HashTags from '../components/HashTags.vue'
-import NoteExclu from '../panels/NoteExclu.vue'
-import NoteFichier from '../panels/NoteFichier.vue'
-import BoutonConfirm from '../components/BoutonConfirm.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import AlbumPhotos from '../panels/AlbumPhotos.vue'
 import { RattNote, HTNote, SupprNote } from '../app/operations4.mjs'
@@ -501,6 +498,10 @@ const libF = (n) => {
 // Rattachement d'une note *********************************************
 async function rattacher (n) {
   selectN(n)
+  if (session.cEdit) {
+    await await afficherDiag($t(session.cEdit))
+    return
+  }
   rec.value = true
   nSt.resetRatt(false) // tous KO
   setRatt.value = nSt.scanTop()
@@ -715,6 +716,7 @@ async function dlfin () {
   min-width: 250px
   padding: 5px
   border: 1px solid $grey-5
-.mi:hover
-  background-color: $grey-5
+.hov1:hover
+  background-color: $yellow-3
+  color: black
 </style>

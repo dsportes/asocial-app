@@ -5,7 +5,7 @@
       <btn-cond icon="cancel" size="12px" round color="none"
         :disable="!src.size" @ok="raz"/>
     </div>
-    <div class="row q-gutter-xs bord1">
+    <div class="row q-gutter-xs font-mono fs-sm text-italic mh1 q-pa-xs q-ml-sm">
       <span v-for="t in src" :key="t">{{t}}</span>
     </div>
     <q-dialog v-model="ui.d[idc].HTags" persistent>
@@ -51,10 +51,7 @@ function htok (ht) {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.bord1
-  margin-top: 5px
-  border: 1px solid $grey-5
-  padding: 2px
-  border-radius: 5px
-  min-height: 1.8rem
+.mh1
+  height: 3rem
+  overflow: hidden
 </style>

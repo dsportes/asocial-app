@@ -6,12 +6,12 @@
       <q-toolbar-title class="titre-lg full-width text-center">
         {{$t(note.deGroupe ? 'PNOngr' : 'PNOnper', [nom])}}
       </q-toolbar-title>
-      <btn-cond color="warning" icon="delete" :disable="nSt.diagEd !== ''"
+      <btn-cond color="warning" icon="delete" :disable="session.cEdit !== '' || nSt.diagEd !== ''"
         :label="$t('PNOsupp')" @ok="ui.oD('confirmSuppr', idc)"/>
       <bouton-help page="dial_notemaj"/>
     </q-toolbar>
     <q-toolbar v-if="ro" inset>
-      <div class="msg">{{$t(session.cEdit || nSt.diagEd)}}</div>
+      <div class="msg">{{$t('PNOmaj', [$t(session.cEdit || nSt.diagEd)])}}</div>
     </q-toolbar>
   </q-header>
 
@@ -25,21 +25,22 @@
         </div>
 
         <div v-if="note.deGroupe" class="q-my-sm">
-          <liste-auts class="q-my-md"/>
+          <liste-auts class="q-my-sm"/>
 
-          <note-ecritepar2 class="q-my-md" :note="note" @ok="selNa"/>
+          <note-ecritepar2 class="q-my-sm" :note="note" @ok="selNa"/>
 
           <!-- exclusivité d'écriture -->
-          <div class="row justify-between items-center">
-            <div v-if="xav" class="q-my-md">
-              <div class="text-italic titre-md text-bold">{{$t('PNOext2')}}</div>
-              <apercu-genx :id="xav.ida" :im="xav.im"/>
+          <div class="q-my-md">
+            <div class="row justify-between items-start">
+              <div v-if="xav" class="text-italic titre-md text-bold">{{$t('PNOext2')}}</div>
+              <div v-else class="text-italic titre-md text-bold">{{$t('PNOext1')}}</div>
+              <btn-cond class="col-auto self-start" round icon="person" @ok="ovNX">
+                <q-tooltip>{{$t('PNOexclu3')}}</q-tooltip>
+              </btn-cond>
             </div>
-            <div v-else class="text-italic titre-md text-bold">{{$t('PNOext1')}}</div>
-            <btn-cond class="col-auto self-start" round icon="person" @ok="ovNX">
-              <q-tooltip>{{$t('PNOexclu3')}}</q-tooltip>
-            </btn-cond>
+            <apercu-genx v-if="xav" :id="xav.ida" :im="xav.im" class="spsm bord1"/>
           </div>
+
         </div>
 
         <!-- hashtags -->
@@ -139,7 +140,7 @@
 import { ref, computed, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
-import { styp, edvol, dhcool } from '../app/util.mjs'
+import { styp, edvol, dhcool, afficherDiag, $t } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import { MajNote, HTNote, SupprNote } from '../app/operations4.mjs'
@@ -241,4 +242,7 @@ async function validerHt () {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
+.bord1
+  border: 1px solid $grey-5
+  border-radius: 8px
 </style>

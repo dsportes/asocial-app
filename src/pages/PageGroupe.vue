@@ -60,8 +60,12 @@
         </div>
       </q-expansion-item>
     </div>
+  </div>
 
-    <div  v-if="mesav">
+  <!-- Tab "membres" -------------------------------------------------->
+  <div v-if="ui.pagetab==='membres' && gSt.egrC" class="column">
+
+    <div v-if="mesav">
       <div class="titre-lg full-width text-center tbs q-mt-lg q-pa-xs">
         {{$t('PGmesav', mesav.length)}}
       </div>
@@ -69,28 +73,27 @@
       <div v-if="mesav.length">
         <div v-for="(id, idx) of mesav" :key="id" class="q-my-sm">
           <apercu-membre :id="id" :idx="idx"/>
-          <!--div>{{session.getCV(id).nom}}</div-->
           <q-separator v-if="idx < (sav.size - 1)" color="orange"/>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Tab "membres" -------------------------------------------------->
-  <div v-if="ui.pagetab==='membres' && gSt.egrC">
-    <div v-if="amb">
-      <div><btn-cond cond="cEdit" icon="check" :label="$t('PGrafcvs')" @ok="rafCvs"/></div>
-      <div v-if="!nb" class="titre-lg text-italic">
+    <div v-if="!amb" class="titre-lg full-width text-center tbs q-mt-lg q-pa-xs">
+      {{$t('PGnoamb')}}</div>
+    <div v-else>
+      <div v-if="!nb" class="titre-lg full-width text-center tbs q-mt-lg q-pa-xs">
         {{$t('PGnope')}}</div>
-      <div v-if="nb && !lst.length" class="titre-lg text-italic">
+      <div v-if="nb && !lst.length" class="titre-lg full-width text-center tbs q-mt-lg q-pa-xs">
         {{$t('PGnomb', [nb])}}</div>
+      <div v-if="nb" class="row justify-center">
+        <btn-cond cond="cEdit" icon="check" :label="$t('PGrafcvs')" @ok="rafCvs"/>
+      </div>
       <div v-if="lst.length">
         <!--div v-for="e of lst" :key="e.id">{{e.nom}}</div-->
         <apercu-membre v-for="(e, idx) of lst" :key="e.id"
           class="q-my-lg" :id="e.id" :idx="idx"/>
       </div>
     </div>
-    <div v-else class="titre-lg text-italic q-pa-sm">{{$t('PGnoamb')}}</div>
   </div>
 
   <!-- Gérer le mode simple / unanime -->
