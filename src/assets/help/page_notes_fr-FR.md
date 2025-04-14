@@ -141,8 +141,8 @@ Le menu **trois points verticaux** d'une racine ou d'une note ouvre un panel aff
 
 > Remarque: le bouton **Album** en haut considère **toutes** les notes affichées (celles répondant au filtre).
 
-# Télécharger la sélection des notes affichées dial_notedl
-Ce téléchargement est possible sur un poste Windows / Linux après avoir installé un petit outil téléchargeable.
+# Télécharger la sélection des notes affichées | dial_notedl
+Ce téléchargement est possible sur un poste Windows / Linux après avoir téléchargé un petit logiciel.
 - on peut télécharger les textes **décryptés** des notes,
 - sur option on peut aussi télécharger leurs fichiers attachés **décryptés** (ce qui le cas échéant peut requérir beaucoup de place sur le disque).
 

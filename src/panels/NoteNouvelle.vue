@@ -6,7 +6,7 @@
       <q-toolbar-title class="titre-lg full-width text-center">
         {{$t(estgr ? 'PNOnvtit2' : 'PNOnvtit1', [nom])}}
       </q-toolbar-title>
-      <btn-cond icon="check" :label="$t('valider')"
+      <btn-cond icon="check" :label="$t('ok')"
         :disable="err || (estgr && !infoAut) || !texte" @ok="valider"/>
       <bouton-help page="dial_notenv"/>
     </q-toolbar>

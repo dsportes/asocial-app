@@ -314,6 +314,13 @@ export function titre (m) {
   return ''
 }
 
+export function egaliteSet (setA, setB) {
+  if (setA.size !== setB.size) return false
+  for (const elem of setA) if (!setB.has(elem)) return false
+  for (const elem of setB) if (!setA.has(elem)) return false
+  return true
+}
+
 export function u8ToB64 (u8, url) {
   const s = fromByteArray(u8)
   return !url ? s : s.replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_')

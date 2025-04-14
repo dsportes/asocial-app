@@ -98,7 +98,7 @@
         <q-toolbar-title class="titre-lg full-width text-center">
           {{$t('PNOht0')}}
         </q-toolbar-title>
-        <btn-cond icon="check" :label="$t('valider')" cond="cEdit"
+        <btn-cond icon="check" :label="$t('ok')" cond="cEdit"
           :disable="!modifht"  @ok="validerHt"/>
         <bouton-help page="dial_noteht"/>
       </q-toolbar>
@@ -140,7 +140,7 @@
 import { ref, computed, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
-import { styp, edvol, dhcool, afficherDiag, $t } from '../app/util.mjs'
+import { styp, edvol, dhcool, afficherDiag, $t, egaliteSet } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import { MajNote, HTNote, SupprNote } from '../app/operations4.mjs'
@@ -181,15 +181,8 @@ const estAnim = computed(() => { const e = note.value ? gSt.egr(note.value.id) :
 
 const ro = computed(() => session.cEdit !== '' || nSt.diagEd !== '')
 
-function egalite (setA, setB) {
-  if (setA.size !== setB.size) return false
-  for (const elem of setA) if (!setB.has(elem)) return false
-  for (const elem of setB) if (!setA.has(elem)) return false
-  return true
-}
-
 const modifht = computed(() => { 
-  return !egalite(note.value.ht, ht.value) || (estAnim.value && !egalite(note.value.htg, htg.value))
+  return !egaliteSet(note.value.ht, ht.value) || (estAnim.value && !egaliteSet(note.value.htg, htg.value))
 })
 
 function fermer () { 

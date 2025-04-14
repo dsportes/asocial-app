@@ -1,10 +1,10 @@
 <template>
 <q-card>
   <q-toolbar class="tbs">
-    <btn-cond color="warning" icon="undo" @ok="undo"/>
     <q-toolbar-title class="titre-md full-width text-center">{{titre || $t('HTtit')}}</q-toolbar-title>
     <bouton-bulle idtext="BULLEhashtags"/>
-    <btn-cond v-if="okbtn" icon="check" @ok="$emit('ok',sr)"/>
+    <btn-cond color="warning" icon="undo" @ok="undo" :disable="!modifht"/>
+    <btn-cond v-if="okbtn" icon="check" @ok="$emit('ok',sr)" :disable="!modifht"/>
   </q-toolbar>
 
   <div class="q-mb-md">
@@ -43,7 +43,7 @@ import { ref, computed, watch } from 'vue'
 import stores from '../stores/stores.mjs'
 import BtnCond from './BtnCond.vue'
 import BoutonBulle from './BoutonBulle.vue'
-import { $t } from '../app/util.mjs'
+import { $t, egaliteSet } from '../app/util.mjs'
 
 const props = defineProps({ 
   src: Object, // set d'origine, le set resultat est v-model
@@ -62,6 +62,8 @@ const sel = ref('')
 
 const sr = ref(new Set())
 props.src.forEach(t => { sr.value.add(t)})
+
+const modifht = computed(() => !egaliteSet(props.src, sr.value))
 
 const x = new Set()
 session.defHT.forEach(t => { x.add(t) })

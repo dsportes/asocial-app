@@ -339,7 +339,9 @@ export const useNoteStore = defineStore('note', {
       if (f.v === '0') return true
       if (f.avgr && n.id !== f.avgr) return false
       if (f.lim && n.d && n.d < f.lim) return false
-      if (f.note && n.texte && n.texte.indexOf(f.note) === -1) return false
+      if (f.note && n.texte) {
+        if (n.texte.toUpperCase().indexOf(f.note.toUpperCase()) === -1) return false
+      }
       if (f.vf && n.vf < f.vf) return false
       if (f.mcp && f.mcp.size && !this.inter(f.mcp, n.smc)) return false
       if (f.mcn && f.mcn.size && n.smc.size && this.inter(f.mcn, n.smc)) return false
@@ -417,8 +419,8 @@ export const useNoteStore = defineStore('note', {
 
     // Tri des nodes enfants d'un node
     sort1 (a, b) { // les fake à la fin
-      const x = a.note ? '1' + a.note.titre : (a.type > 5 ? '3' + a.ids : '2' + a.ids)
-      const y = b.note ? '1' + b.note.titre : (b.type > 5 ? '3' + b.ids : '2' + b.ids)
+      const x = a.note ? '1' + a.note.titre.toUpperCase() : (a.type > 5 ? '3' + a.ids : '2' + a.ids)
+      const y = b.note ? '1' + b.note.titre.toUpperCase() : (b.type > 5 ? '3' + b.ids : '2' + b.ids)
       return x < y ? -1 : (x === y ? 0 : 1)
     },
 
@@ -445,6 +447,9 @@ export const useNoteStore = defineStore('note', {
           n.pid = note.pid || note.id
           n.pids = note.pids || null
           this.rattachNote(n) // rattachement au nouveau
+        } else {
+          const p = this.map.get(n.pids || n.pid)
+          if (p) p.children.sort(this.sort1)
         }
       } else { // création de son node
         n = {
