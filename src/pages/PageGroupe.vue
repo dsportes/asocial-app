@@ -63,7 +63,7 @@
   </div>
 
   <!-- Tab "membres" -------------------------------------------------->
-  <div v-if="ui.pagetab==='membres' && gSt.egrC" class="column">
+  <div v-if="ui.pagetab==='membres' && gSt.egrC" class="column spmd">
 
     <div v-if="mesav">
       <div class="titre-lg full-width text-center tbs q-mt-lg q-pa-xs">

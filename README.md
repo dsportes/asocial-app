@@ -2,6 +2,11 @@ Application **asocial**.
 
 [Site de la documentation](https://asocialapps.github.io/frdocs)
 
+## V2.5 - 15 Avril 2025
+Version d'API: 2
+
+Correction d'affichage des membres d'un groupe.
+
 ## V2.4 - 15 Avril 2025
 Version d'API: 2
 

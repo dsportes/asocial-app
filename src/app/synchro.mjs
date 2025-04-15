@@ -197,27 +197,42 @@ class SB {
   conduit à mettre à jour / supprimer des Avnote.
   */
   store (buf) {
+    const trx = ['sync store']
+
     const ntf = this.s.ok && this.s.acceptNotif
-    if (this.espace) this.s.setEspace(this.espace)
-    if (this.compte) this.s.setCompte(this.compte)
-    if (this.compti) this.s.setCompti(this.compti)
-    if (this.invit) this.g.setInvit(this.invit)
+    if (this.espace) { trx.push('espace'); this.s.setEspace(this.espace)}
+    if (this.compte) { trx.push('compte'); this.s.setCompte(this.compte)}
+    if (this.compti) { trx.push('compti'); this.s.setCompti(this.compti)}
+    if (this.invit) { trx.push('invit'); this.g.setInvit(this.invit)}
     
-    if (this.avatars.size) for(const [,a] of this.avatars) this.a.setAvatar(a)
+    if (this.avatars.size) {
+      trx.push(this.avatars.size + ' avatars')
+      for(const [,a] of this.avatars) this.a.setAvatar(a)
+    }
     
-    if (this.supprAv.size) for (const ida of this.supprAv) {
-      this.a.delAvatar(ida)
-      this.faSt.delNotes(ida, buf)
+    if (this.supprAv.size) {
+      trx.push(this.supprAv.size + ' supprAv')
+      for (const ida of this.supprAv) {
+        this.a.delAvatar(ida)
+        this.faSt.delNotes(ida, buf)
+      }
     }
 
-    if (this.groupes.size) for(const [,g] of this.groupes) this.g.setGroupe(g) 
+    if (this.groupes.size) {
+      trx.push(this.groupes.size + ' groupes')
+      for(const [,g] of this.groupes) this.g.setGroupe(g) 
+    }
     
-    if (this.supprGr.size) for (const idg of this.supprGr) {
-      this.g.delGroupe(idg)
-      this.faSt.delNotes(idg, buf)
+    if (this.supprGr.size) {
+      trx.push(this.supprGr.size + ' supprGr')
+      for (const idg of this.supprGr) {
+        this.g.delGroupe(idg)
+        this.faSt.delNotes(idg, buf)
+      }
     }
 
-    if (this.chatgrs.size) 
+    if (this.chatgrs.size) {
+      trx.push(this.chatgrs.size + ' chatgrs')
       for(const [,ch] of this.chatgrs) {
         this.g.setChatgr(ch)
         if (ntf) {
@@ -225,8 +240,10 @@ class SB {
           this.cfg.sendNotif($t('SYchgr', [cv.nom]), ch.tit, cv.photo)
         }
       }
+    }
 
     if (this.notes.size) {
+      trx.push(this.notes.size + ' notes')
       for(const [,n] of this.notes) { 
         const st = ID.estGroupe(n.id) ? this.g : this.a
         if (n._zombi) {
@@ -240,59 +257,78 @@ class SB {
       this.n.majNotes(this.notes)
     }
     
-    if (this.chats.size) for(const [,ch] of this.chats) {
-      if (ch._zombi) {
-        const chav = this.a.getChat(ch.id, ch.ids) // chat AVANT suppression
-        if (chav) {
-          this.p.delPCh(chav.idE, ch.id)
-          this.a.delChat(ch.id, ch.ids)
-        }
-      } else {
-        this.a.setChat(ch)
-        this.p.setPCh(ch.idE, ch.id)
-        if (ntf) {
-          const cv = this.s.getCV(ch.idE)
-          this.cfg.sendNotif($t('SYchav', [cv.nom]), ch.tit, cv.photo)
+    if (this.chats.size) {
+      trx.push(this.chats.size + ' chats')
+      for(const [,ch] of this.chats) {
+        if (ch._zombi) {
+          const chav = this.a.getChat(ch.id, ch.ids) // chat AVANT suppression
+          if (chav) {
+            this.p.delPCh(chav.idE, ch.id)
+            this.a.delChat(ch.id, ch.ids)
+          }
+        } else {
+          this.a.setChat(ch)
+          this.p.setPCh(ch.idE, ch.id)
+          if (ntf) {
+            const cv = this.s.getCV(ch.idE)
+            this.cfg.sendNotif($t('SYchav', [cv.nom]), ch.tit, cv.photo)
+          }
         }
       }
     }
     
-    if (this.sponsorings.size) for(const [,x] of this.sponsorings) {
-      if (x._zombi) this.a.delSponsoring(x.id, x.ids)
-      else this.a.setSponsoring(x)
+    if (this.sponsorings.size) {
+      trx.push(this.sponsorings.size + ' sponsorings')
+      for(const [,x] of this.sponsorings) {
+        if (x._zombi) this.a.delSponsoring(x.id, x.ids)
+        else this.a.setSponsoring(x)
+      }
     }
     
-    if (this.tickets.size) for(const [,x] of this.tickets) {
-      if (x._zombi) this.a.delTicket(x.id, x.ids)
-      else this.a.setTicket(x)
+    if (this.tickets.size) {
+      trx.push(this.tickets.size + ' sponsorings')
+      for(const [,x] of this.tickets) {
+        if (x._zombi) this.a.delTicket(x.id, x.ids)
+        else this.a.setTicket(x)
+      }
     }
 
-    if (this.membres.size) for(const [,mb] of this.membres) {
-      if (mb._zombi) { 
-        const mbav = this.g.getMembre(mb.id, mb.ids) // membre AVANT suppression
-        if (mbav) {
-          this.g.delMembre(mb.id, mb.ids)
-          this.p.delPGr(mbav.ida, mb.id) 
+    if (this.membres.size) {
+      trx.push(this.membres.size + ' membres')
+      for(const [,mb] of this.membres) {
+        if (mb._zombi) { 
+          const mbav = this.g.getMembre(mb.id, mb.ids) // membre AVANT suppression
+          if (mbav) {
+            this.g.delMembre(mb.id, mb.ids)
+            this.p.delPGr(mbav.ida, mb.id) 
+          }
+        }
+        else { 
+          this.g.setMembre(mb)
+          this.p.setPGr(mb.ida, mb.id) 
         }
       }
-      else { 
-        this.g.setMembre(mb)
-        this.p.setPGr(mb.ida, mb.id) 
+    }
+
+    if (this.supprMb.size) {
+      trx.push(this.supprMb.size + ' supprMb')
+      for(const idg of this.supprMb) {
+        const e = this.g.map.get(idg)
+        if (e) for (const mbav of e.membres) {
+          this.p.delPGr(mbav.idm, idg) 
+        }
+        this.g.delMembres(idg)
       }
     }
 
-    if (this.supprMb.size) for(const idg of this.supprMb) {
-      const e = this.g.map.get(idg)
-      if (e) for (const mbav of e.membres) {
-        this.p.delPGr(mbav.idm, idg) 
+    if (this.supprNo.size) {
+      trx.push(this.supprNo.size + ' supprNo')
+      for(const idg of this.supprNo) {
+        this.g.delNotes(idg, buf)
+        this.faSt.delNotes(idg, buf)
       }
-      this.g.delMembres(idg)
     }
-
-    if (this.supprNo.size) for(const idg of this.supprNo) {
-      this.g.delNotes(idg, buf)
-      this.faSt.delNotes(idg, buf)
-    }
+    if (this.cfg.mondebug) console.log(trx.join('; '))
   }
 }
 
