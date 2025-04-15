@@ -2,6 +2,11 @@ Application **asocial**.
 
 [Site de la documentation](https://asocialapps.github.io/frdocs)
 
+## V2.4 - 15 Avril 2025
+Version d'API: 2
+
+Correction d'un bug sur l'affichage des contacts en session synchronisée.
+
 ## V2.3 - 14 Avril 2025
 Version d'API: 2
 

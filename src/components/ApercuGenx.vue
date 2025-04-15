@@ -97,7 +97,9 @@ const gr = (idg) => { const e = gSt.egr(idg); return e ? e.groupe : null }
 const imx = (idg) => { const g = gr(idg); return g ? g.mmb.get(props.id) : 0 }
 const stmb = (idg) => { const i = imx(idg); return i ? gr(idg).st[i] : 0 }
 
-const estGroupe = computed(() => ID.estGroupe(props.id))
+const estGroupe = computed(
+  () => ID.estGroupe(props.id)
+)
 const estAnim = computed(() => gSt.estAnim(props.id))
 const estComptable = computed(() => ID.estComptable(props.id))
 const estAvc = computed(() => session.compte.mav.has(props.id))

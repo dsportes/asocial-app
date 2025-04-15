@@ -414,7 +414,7 @@ export class OperationS extends Operation {
           sb.setG(await compile(row))
         }
         if (m.chatgrs) for(const row of m.chatgrs) { // En fait il n'y en a toujours qu'un
-          sb.setC(await compile(row))
+          sb.setH(await compile(row))
         }
         if (eds.n && m.notes) for(const row of m.notes) {
           sb.setN(await compile(row))
