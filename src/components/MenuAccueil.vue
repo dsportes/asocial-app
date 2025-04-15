@@ -10,12 +10,12 @@
     @click="clickNotif2">{{$t('ACbloc')}}
   </div>
 
+  <q-separator color="orange" class="q-mt-sm"/>
+
   <div v-if="!session.hasAR || session.estComptable">
     <q-item class="q-my-md" clickable @click="ui.setPage('notes')">
       <q-item-section>
-        <q-item-label 
-          class="h1 titre-lg q-pa-xs bg-yellow-3 text-black text-bold text-center" 
-          lines="1">{{$t('ACmesnotes')}}</q-item-label>
+        <q-item-label class="titre-lg" lines="1">{{$t('ACmesnotes')}}</q-item-label>
       </q-item-section>
     </q-item>
 
@@ -218,9 +218,12 @@ function tousChats () {
 .q-item
   min-height: 20px !important
   padding: 3px 1rem !important
+.h1
+  border-radius: 10px
+  border: 1px solid var(--q-primary)
 .h1:hover
   font-style: italic !important
-  background-color: white !important
+  background-color: $grey-5 !important
 .bord
   border-radius: 8px 
   border: 2px solid var(--q-negative)
