@@ -93,7 +93,7 @@ export default {
   disparu: 'disparu', // App ApercuChat
   plustard: 'Plus Tard', // App
   compteKO: 'Le compte a été supprimé ou a changé de phrase secrète.', // PageClos
-  sessionKO: 'Incident technique nécessitant l\'interruption immédiate de la session. Tenter de se reconnecter plus tard.', // PageClos
+  sessionKO: 'La session est interrompue ou n\'a pas pu être ouverte suite à un incident technique. Tenter de se reconnecter plus tard.', // PageClos
   inconnu: '(inconnu)', // PageGroupe
   hashtags: 'Hashtags', // PageNotes
   invitation: 'Invitation', // ApercuMembre
@@ -235,8 +235,7 @@ export default {
   EX7010: 'Trop d\'accès parallèles à la base de données. Réessayer plus tard. Message technique: {0}',
   EX7011: 'Incident technique d\'accès à la base de données. Peut-être de réessayer plus tard évitera ce problème. Message technique: {0}',
   EX7012: 'Code d\'habilitation du lancement du GC incorrect',
-  EX7100: 'A priori c\'est une erreur de réseau (internet non joignable, etc.) mais ça peut aussi être le serveur distant qui n\'est pas joignable / lancé : HTTP:[{0}] - URL: [{1}] - message:[{2}]',
-  EX7101: 'A priori c\'est une erreur de réseau (internet non joignable, etc.) mais ça peut aussi être le serveur distant qui n\'est pas joignable / lancé : HTTP:[{0}] - URL: [{1}] - message:[{2}]',
+  EX7100: 'A priori c\'est une erreur de réseau (internet non joignable, etc.) mais ça peut aussi être le serveur distant qui n\'est pas opérationnel.\nHTTP:[{0}] - URL: [{1}] - message:[{2}]',
 
   // F_SRV = 8000 // Erreur fonctionnelle trappée sur le serveur
   EX8001: 'Exception générique 1',
@@ -708,8 +707,8 @@ export default {
   Code erreur: {0}<br>Se connecter en mode synchronisé ou incognito.`,
   OPmsg3: `La base locale est corrompue et ne peut pas être décryptée.<br>
   Se connecter en mode synchronisé ou incognito.`,
-  OPmsg7: 'Code local à 3 lettres',
-  OPmsg8: 'Ce code -par défaut "xxx"- facilite la gestion / suppressions des bases locales obsolètes.',
+  OPmsg7: 'Code local à 3 signes [a-z A-Z 0-9 - _]',
+  OPmsg8: 'Facilite la gestion / suppressions des bases locales obsolètes.',
 
   PSkb: 'Clavier virtuel',
   PSorg1: 'Organisation:',

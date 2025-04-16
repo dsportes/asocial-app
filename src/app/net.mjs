@@ -186,8 +186,7 @@ function procEx (e, op, u) {
     // inattendue, pas mise en forme (500 et autres)
     if (config.mondebug) 
       console.log('EXC de POST - status:' + status + ' url:' + (u || '?') + ' exc:' + e.toString())
-    const code = !status ? 100 : (status >= 500 && status <= 599 ? 101 : 0)
-    throw new AppExc(E_SRV, code, [status, (u || '?'), e.message])
+    throw new AppExc(E_SRV, 100, [status, (u || '?'), e.message])
   }
 }
 

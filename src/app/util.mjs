@@ -447,28 +447,35 @@ export function setTrigramme (nombase, trig) {
   const x = localStorage.getItem(nt)
   const trigs = x ? decode(b64ToU8(x)) : {}
   if (trig) {
-    trigs[nombase] = trig
+    let t = trig
+    if (trig.length > 3) t = trig.substring(trig.length - 3)
+    else if (trig.length < 3) t = trig + 'xxx'.substring(0, 3 - trig.length)
+    trigs[nombase] = t
   } else delete trigs[nombase]
   localStorage.setItem(nt, u8ToB64(new Uint8Array(encode(trigs)), true))
 }
 
-export function getTrigramme () {
+export function getTrigramme (nombase) {
   return new Promise((resolve) => {
+    const tr = nombase.substring(nombase.length - 3)
     function ko (val) {
-      return val.length !== 3 || val.search(/[^a-zA-Z]+/) !== -1
+      return val.length !== 3 || val.search(/[^a-zA-Z-_]+/) !== -1
     }
     $q.dialog({
       title: $t('OPmsg7'),
       message: $t('OPmsg8'),
       prompt: {
-        model: 'xxx',
+        model: tr,
         isValid: val => !ko(val),
         type: 'text'
       },
       cancel: true,
       persistent: true
-    }).onOk(trig => { resolve(trig)
-    }).onCancel(() => { resolve('xxx') }
+    }).onOk(trig => { 
+      if (trig.length > 3) resolve(trig.substring(trig.length - 3))
+      else if (trig.length < 3) resolve(trig + 'xxx'.substring(0, 3 - trig.length))
+      else resolve(trig)
+    }).onCancel(() => { resolve(tr) }
     )
   })
 }

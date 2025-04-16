@@ -199,26 +199,26 @@
           <div v-else>
             <div class="titre-md text-italic text-warning">{{$t('GBcl')}}</div>
             <div v-for="it in bases" :key="it.nb" class="zone items-center fs-md zone">
-              <div class="row">
-                <div class="col fs-md">{{it.nb}}</div>
-                <btn-cond v-if="it.vu" class="col-auto self-start q-mr-sm" icon="delete" 
-                  round color="warning" @ok="itdel=it; ui.oD('OTsuppbase', idc)"/>
-              </div>
-              <div v-if="it.vu" class="q-pl-md q-mb-sm row items.center">
+              <div v-if="!it.vu" class="row">
                 <div class="col-1">{{it.trig}}</div>
-                <div class="col-3 fs-sm font-mono">{{it.hps1}}</div>
-                <div class="col-4 text-center font-mono">{{edvol(it.v1 + it.v2)}}</div>
-                <div class="col-4 text-center font-mono">{{$t('GBfi', [edvol(it.v2)])}}</div>
-              </div>
-              <div v-else class="q-pl-md q-mb-sm row items.center">
-                <div class="col-1">{{it.trig}}</div>
-                <div class="col-3 fs-sm font-mono">{{it.hps1}}</div>
-                <span v-if="!it.vu" class="col-8 text-right">
+                <div class="col-11 text-right">
                   <btn-cond :disable="ui.d[idc].OTrunning" stop @ok="getVU(it)"
                     no-caps :label="$t('GBvol')"/>
-                </span>
+                </div>
+                <btn-cond v-if="it.vu" class="col-1 self-start q-mr-sm" icon="delete" 
+                  round color="warning" @ok="itdel=it; ui.oD('OTsuppbase', idc)"/>
               </div>
-
+              <div v-else class="row">
+                <div class="col-1">{{it.trig}}</div>
+                <div class="col-5 text-center font-mono">{{edvol(it.v1 + it.v2)}}</div>
+                <div class="col-5 text-center font-mono">{{$t('GBfi', [edvol(it.v2)])}}</div>
+                <btn-cond class="col-1" icon="delete" 
+                  round color="warning" @ok="itdel=it; ui.oD('OTsuppbase', idc)"/>
+              </div>
+              <div class="row q-mb-sm">
+                <div class="col-1"></div>
+                <div class="col-10 fs-md">{{it.nb}}</div>
+              </div>
             </div>
           </div>
         </div>
@@ -241,12 +241,6 @@
           <div class="titre-md text-center q-my-sm">{{$t('GBprop', [itdel.trig])}}</div>
           <div class="titre-md text-center q-mt-sm">{{$t('GBnomb')}}</div>
           <div class="text-center fs-sm font-mono q-mb-sm">{{itdel.nb}}</div>
-          <div v-if="!itdel.hps1" class="titre-md text-bold bg-yellow-5 text-negative">
-            {{$t('GBm1')}}
-          </div>
-          <div v-else class="titre-md text-bold text-warning">
-            {{$t('GBm2')}}
-          </div>
         </q-card-section>
         <q-card-actions align="right" class="q-gutter-sm">
           <btn-cond flat icon="undo"
@@ -263,7 +257,7 @@
 </template>
 
 <script setup>
-import { ref, onUnmounted } from 'vue'
+import { ref, onUnmounted, onMounted } from 'vue'
 
 import { encode, decode } from '@msgpack/msgpack'
 
@@ -279,6 +273,10 @@ import { vuIDB, deleteIDB, idb } from '../app/db.mjs'
 
 const encoder = new TextEncoder()
 const decoder = new TextDecoder()
+
+onMounted(async () => {
+  await getBases()
+})
 
 const testCompteurs = false
 
@@ -313,56 +311,56 @@ const styl = (c) => 'background:' + config.theme[c][1]
 
 const pfx = '$asocial$-'
 
-function getBases () {
-  // trigs[nombase] = [reseau, trig]
-  // localStore : key: reseau-hps1 val = nombase
-  const mb = {}
-  const nt = pfx + 'trigrammes'
-  const x = localStorage.getItem(nt)
-  let trigs
-  try {
-    trigs = decode(b64ToU8(x))
-  } catch (e) {
-    console.log('LocalStorage: entrée $asocial$-trigrammes non trouvée / illisible')
-  }
-  for (const nb in trigs) {
-    const i = trigs[nb]
-    mb[nb] = { nb: nb, trig: i, hps1: '?', v1: 0, v2: 0, vu: false }
-    nbbases.value++
-  }
+async function getBases () {
+  // trigs[nombase] = trig
+  // localStore : key: pfx + org-hps1, val: nombase
+  bases.value = {}
+  const bases2 = {}
+  let trigs = {}
+
+  const x = localStorage.getItem(pfx + 'trigrammes')
+  if (x) try {
+      trigs = decode(b64ToU8(x))
+    } catch (e) {
+      localStorage.removeItem(pfx + 'trigrammes')
+      console.log('LocalStorage: entrée $asocial$-trigrammes non trouvée / illisible')
+    }
+
   for (const lsk in localStorage) {
-    if (!lsk.startsWith(pfx) || lsk === nt) continue
-    const hps1 = lsk.substring(pfx.length)
+    if (!lsk.startsWith(pfx) || lsk === pfx + 'trigrammes') continue
     const nb = localStorage.getItem(lsk)
-    const x = mb[nb]
-    if (x) {
-      x.hps1 = hps1
+    if (!trigs[nb]) {
+      try { await deleteIDB(nb) } catch (e) { console.log('delIDB: ' + e.toString()) }
+      localStorage.removeItem(lsk)
+    }
+    bases2[nb] = lsk
+  }
+
+  for (const nb in trigs) {
+    if (!bases2[nb]) {
+      try { await deleteIDB(nb) } catch (e) { console.log('delIDB: ' + e.toString()) }
     } else {
       nbbases.value++
-      mb[nb] = { nb: nb, trig: '???', hps1: hps1, v1: 0, v2: 0, vu: false }
+      bases.value[nb] = { nb: nb, trig: trigs[nb], lsk: bases2[nb], v1: 0, v2: 0, vu: false }
     }
   }
   bases.value = mb
 }
 
 async function delIDB (it) {
-  try {
-    ui.fD()
-    deleteIDB(it.nb)
-    localStorage.removeItem(pfx + it.hps1)
-    delete bases.value[it.nb]
-    nbbases.value = 0
-    const trigs = {}
-    for (const nb in bases.value) {
-      trigs[nb] = bases.value[nb].nb
-      nbbases.value++
-    }
-    const buf = u8ToB64(new Uint8Array(encode(trigs)), true)
-    localStorage.setItem(pfx + 'trigrammes', buf)
-    console.log('RAZ db ' + it.nb + ' trig:' + it.trig)
-  } catch (e) {
-    console.log('delIDB: ' + e.toString())
+  ui.fD()
+  try { await deleteIDB(it.nb) } catch (e) { console.log('delIDB: ' + e.toString()) }
+  localStorage.removeItem(it.lsk)
+  delete bases.value[it.nb]
+  nbbases.value = 0
+  const trigs = {}
+  for (const nb in bases.value) {
+    trigs[nb] = bases.value[nb].nb
+    nbbases.value++
   }
+  const buf = u8ToB64(new Uint8Array(encode(trigs)), true)
+  localStorage.setItem(pfx + 'trigrammes', buf)
+  console.log('RAZ db ' + it.nb + ' trig:' + it.trig)
 }
 
 function saisirPS () {
@@ -379,7 +377,6 @@ async function testDiag() {
 }
 
 function ouvCpt () {
-  getBases()
   tab.value ='cpt'
 }
 
@@ -389,10 +386,6 @@ function okps (psx) {
     psx.phrase = null
   }
   ps.value = psx
-}
-
-function traceq (q) {
-  console.log('q change', q.q1, q.q2, q.err)
 }
 
 async function testErr () {

@@ -561,7 +561,7 @@ export class OperationS extends Operation {
         const blOK = await idb.checkAge()
         await idb.storeBoot()
         if (!blOK)
-          setTrigramme(session.nombase, await getTrigramme())
+          setTrigramme(session.nombase, await getTrigramme(session.nombase))
         // la base locale est utilisable en mode synchro, mais peut être VIDE si !this.blOK 
 
         const dav = await idb.getDataSync()

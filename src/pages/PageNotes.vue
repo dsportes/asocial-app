@@ -650,7 +650,7 @@ function dlgo (avecf) {
     try {
       while (lstn.value.length !== 0) {
         if (dlst.value !== 2) {
-          await sleep(1000)
+          // await sleep(1000)
           continue
         }
         const n = lstn.value[0]

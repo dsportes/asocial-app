@@ -1,10 +1,10 @@
 Application "asocial":
 - distribution: t1
-- build: v2.5.1
+- build: v2.6.1
 - url: https://asocialapps.github.io/t1
 - patchs: _aucun_
 
 Sources:
-- dépôt: https://github.com/dsportes/asocial-app/tree/v2.5
+- dépôt: https://github.com/dsportes/asocial-app/tree/v2.6
 
-Correction d'affichage des membres d'un groupe.
+Correction de la gestion des bases locales.
