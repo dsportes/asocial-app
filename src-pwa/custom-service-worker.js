@@ -28,6 +28,11 @@ n'est pas utilisée en runtime.
 */
 // import { precacheAndRoute } from 'workbox-precaching'
 const mf = self.__WB_MANIFEST
+console.log('WB_MANIFEST >>>>>>>')
+mf.forEach(x => {
+  console.log('WB_MANIFEST: ' + x.url)
+})
+console.log('WB_MANIFEST <<<<<<<')
 // precacheAndRoute(mf)
 
 const broadcast = new BroadcastChannel('channel-pubsub')

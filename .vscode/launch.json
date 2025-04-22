@@ -9,10 +9,7 @@
       "request": "launch",
       "name": "Quasar App: chrome",
       "url": "http://localhost:8081?local",
-      "webRoot": "${workspaceFolder}/src",
-      "sourceMapPathOverrides": {
-        "webpack://asocial/./src/*": "${webRoot}/*"
-      }
+      "webRoot": "${workspaceFolder}"
     }
   ]
 }
