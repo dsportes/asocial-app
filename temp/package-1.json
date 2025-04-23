@@ -12,7 +12,6 @@
   "dependencies": {
     "@msgpack/msgpack": "^3.0.0-beta2",
     "@quasar/extras": "^1.16.12",
-    "@quasar/vite-plugin": "^1.9.0",
     "animate.css": "^4.1.1",
     "axios": "^1.7.7",
     "core-js": "^3",
@@ -23,8 +22,9 @@
     "js-sha256": "^0.11.0",
     "mime2ext": "^2.0.0",
     "mini-svg-data-uri": "^1.4.4",
+    "pako": "^2.1.0",
     "pinia": "^2.2.2",
-    "quasar": "^2.16.0",
+    "quasar": "^2.16.11",
     "raw-loader": "^4.0.2",
     "simple-keyboard": "^3.7.107",
     "vue": "^3.5.3",
@@ -35,18 +35,17 @@
     "webcam-easy": "^1.1.1"
   },
   "devDependencies": {
-    "@intlify/unplugin-vue-i18n": "^4.0.0",
-    "@quasar/app-vite": "^2.2.0",
-    "autoprefixer": "^10.4.2",
-    "postcss": "^8.4.14",
-    "vite-plugin-pwa": "^1.0.0",
-    "workbox-build": "^7.0.0",
-    "workbox-cacheable-response": "^7.0.0",
-    "workbox-core": "^7.0.0",
-    "workbox-expiration": "^7.0.0",
-    "workbox-precaching": "^7.0.0",
-    "workbox-routing": "^7.3.0",
-    "workbox-strategies": "^7.0.0",
+    "@babel/eslint-parser": "^7.13.14",
+    "@intlify/vue-i18n-loader": "^4.2.0",
+    "@quasar/app-webpack": "^3.13.0",
+    "eslint": "^8.57.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.19.1",
+    "eslint-plugin-n": "^15.0.0",
+    "eslint-plugin-promise": "^6.0.0",
+    "eslint-plugin-vue": "^9.0.0",
+    "eslint-webpack-plugin": "^3.1.1",
+    "prettier": "^2.5.1",
     "workbox-webpack-plugin": "^7.1.0"
   },
   "browserslist": [
@@ -61,8 +60,7 @@
     "last 5 Opera versions"
   ],
   "engines": {
-    "node": "^28 || ^26 || ^24 || ^22 || ^20 || ^18",
-    "npm": ">= 6.13.4",
-    "yarn": ">= 1.22.22"
-  }
+    "node": "^22.0.0"
+  },
+  "packageManager": "yarn@4.4.1"
 }

@@ -8,17 +8,15 @@
 // Configuration for your app
 // https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js
 
+import ESLintPlugin from 'eslint-webpack-plugin'
+import path from 'path'
+
 import { defineConfig } from '#q-app/wrappers'
 import { fileURLToPath } from 'node:url'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig((ctx) => {
   return {
-    plugins: [
-      VitePWA({
-        registerType: 'autoUpdate'
-      })
-    ],
     // https://v2.quasar.dev/quasar-cli-webpack/supporting-ts
     supportTS: false,
 
@@ -51,14 +49,9 @@ export default defineConfig((ctx) => {
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-build
     build: {
-      target: {
-        browser: [ 'es2022', 'firefox115', 'chrome115', 'safari14' ],
-        node: 'node20'
-      },
-
       // this is a configuration passed on
       // to the underlying Webpack
-      // devtool: 'source-map',
+      devtool: 'source-map',
 
       vueRouterMode: 'hash', // available values: 'hash', 'history'
 
@@ -78,36 +71,28 @@ export default defineConfig((ctx) => {
 
       // Options below are automatically set depending on the env, set them if you want to override
       // extractCSS: false,
-      viteVuePluginOptions: {
-        build: {
-          assetsInlineLimit: 64000
-        }
-      },
-      vitePlugins: [
-        ['@intlify/unplugin-vue-i18n/vite', {
-          // if you want to use Vue I18n Legacy API, you need to set `compositionOnly: false`
-          // compositionOnly: false,
-
-          // if you want to use named tokens in your Vue I18n messages, such as 'Hello {name}',
-          // you need to set `runtimeOnly: false`
-          // runtimeOnly: false,
-
-          ssr: ctx.modeName === 'ssr',
-
-          // you need to set i18n resource including paths !
-          include: [ fileURLToPath(new URL('./src/i18n', import.meta.url)) ]
-        }]
-      ]
 
       // https://v2.quasar.dev/quasar-cli-webpack/handling-webpack
       // "chain" is a webpack-chain object https://github.com/neutrinojs/webpack-chain
-      // watchOptions: {
-        // ignored: '**/node_modules',
-      // },
-      /*
+      watchOptions: {
+        ignored: '**/node_modules',
+      },
       extendWebpack (cfg) {
         cfg.module.rules.push({ test: /\.md$/i, type: 'asset/source' })
         cfg.module.rules.push({ test: /\.txt$/i, type: 'asset/source' })
+        /*
+        cfg.module.rules.push({
+          test: /\.svg$/i,
+          type: 'asset/inline',
+          generator: {
+            dataUrl(content) {
+              // élimination de 'module export = "' en tête du contenu
+              const x = content.toString()
+              return x.substring(x.indexOf('data:image'), x.length - 1)
+            }
+          }
+        })
+        */
         cfg.module.rules.push({ test: /\.bin$/i, type: 'asset/inline' })
       },
       chainWebpack: chain => {
@@ -126,7 +111,6 @@ export default defineConfig((ctx) => {
           .use('i18n')
           .loader('@intlify/vue-i18n-loader')
       }
-      */
     },
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-devServer
@@ -134,7 +118,10 @@ export default defineConfig((ctx) => {
       // https: true,
       port: 8081,
       host: 'localhost',
-      open: false // opens browser window automatically
+      open: false, // opens browser window automatically
+      server: {
+        type: 'http',
+      }
     },
 
     // https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-framework
@@ -171,18 +158,23 @@ export default defineConfig((ctx) => {
     // https://quasar.dev/options/animations
     animations: 'all',
 
+    // https://v2.quasar.dev/quasar-cli-webpack/developing-ssr/configuring-ssr
+
     // https://v2.quasar.dev/quasar-cli-webpack/developing-pwa/configuring-pwa
     pwa: {
-      workboxMode: 'InjectManifest', // 'GenerateSW' or 'InjectManifest'
-      workboxPluginMode: 'InjectManifest'
-      // swFilename: 'sw.js',
-      // manifestFilename: 'manifest.json',
-      // extendManifestJson (json) {},
-      // useCredentialsForManifestTag: true,
-      // injectPwaMetaTags: false,
-      // extendPWACustomSWConf (esbuildConf) {},
-      // extendGenerateSWOptions (cfg) {},
-      // extendInjectManifestOptions (cfg) {}
+      workboxPluginMode: 'InjectManifest', // 'GenerateSW' or 'InjectManifest'
+      workboxOptions: {
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024
+      }, // only for GenerateSW
+
+      // for the custom service worker ONLY (/src-pwa/custom-service-worker.[js|ts])
+      // if using workbox in InjectManifest mode
+
+      chainWebpackCustomSW (chain) {
+        chain.plugin('eslint-webpack-plugin')
+          .use(ESLintPlugin, [{ extensions: [ 'js' ] }])
+      }
     }
   }
+
 })

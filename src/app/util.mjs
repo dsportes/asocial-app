@@ -4,12 +4,12 @@ import { encode, decode } from '@msgpack/msgpack'
 import { toByteArray, fromByteArray } from './base64.mjs'
 import { AMJ, appexc } from './api.mjs'
 
+import { gzip, ungzip } from './pako.mjs'
+
 /* i18n : fonction $t() ********************************************/
 export let $t
 export let $q
 export function set$t (t, q) { $t = t; $q = q}
-
-let pako
 
 export const interdits = '< > : " / \\ | ? *'
 // eslint-disable-next-line no-control-regex
@@ -18,10 +18,6 @@ export const regInt = /[<>:"/\\|?*\x00-\x1F]/
 export const regIntg = /[<>:"/\\|?*\x00-\x1F]/g
 // eslint-disable-next-line no-control-regex
 export const regInt2g = /[\u{0180}-\u{10FFFF}]/gu
-
-export function setRequiredModules (m) { 
-  pako = m.pako
-}
 
 export function random (nbytes) {
   const u8 = new Uint8Array(nbytes)
@@ -41,12 +37,12 @@ export function dkli (idx) {
 
 export function bcf () { return $q.dark.isActive ? ' bordfonce' : ' bordclair' }
 
-export function styp (sz) { 
+export function styp (sz) {
   // if (!$q) $q = useQuasar()
   return ($q.dark.isActive ? 'sombre bsf pw' : 'clair bsc pw') + (sz || 'md') + ' '
 }
 
-export function sty () { 
+export function sty () {
   // if (!$q) $q = useQuasar()
   return $q.dark.isActive ? 'sombre ' : 'clair '
 }
@@ -134,7 +130,7 @@ export function hms (t, sec) {
   return hh + mm + ss
 }
 
-export function aaaammjj (t) { 
+export function aaaammjj (t) {
   if (!t) return '?'
   const d = t instanceof Date ? t : new Date(t)
   const aa = d.getFullYear()
@@ -143,7 +139,7 @@ export function aaaammjj (t) {
   return aa + mm + jj
 }
 
-export function dhstring (t, sec) { 
+export function dhstring (t, sec) {
   const d = t instanceof Date ? t : new Date(t)
   return d.toISOString(d)
   // return aaaammjj(d) + ' ' + hms(d, sec)
@@ -159,10 +155,14 @@ export function photoToBin (t) {
   return [mime, bin]
 }
 
-/* gzip / ungzip ***************************************************/
-export function gzipT (data) { return pako.gzip(data) }
+export function binToPhoto (bin, type) {
+  return 'data:image/' + type + ';base64,' + u8ToB64(bin, true)
+}
 
-export function ungzipT (data) { return pako.ungzip(data) }
+/* gzip / ungzip ***************************************************/
+export function gzipT (data) { return gzip(data) }
+
+export function ungzipT (data) { return ungzip(data) }
 
 export function gzipB (arg) {
   if (!arg) return null
@@ -175,6 +175,18 @@ export function gzipB (arg) {
   res.set([t], 0)
   return res
 }
+
+/*
+try {
+  const x1 = 'totototototototototototototototototototototototo'
+  const b1 = gzip(encoder.encode(x1))
+  const b2 = ungzip(b1)
+  const x2 = decoder.decode(b2)
+  console.log(x1 === x2 ? 'OK' : 'KO')
+} catch (e) {
+  console.log(e.toString())
+}
+*/
 
 export function ungzipB (arg) {
   if (!arg || arg.length < 1) return null
@@ -338,7 +350,7 @@ export function b64ToU8 (s) {
 
 /* conversions ***********************************************************
 
-// trace des u8 en debug 
+// trace des u8 en debug
 export function u8ToHex (u8) { return [...u8].map(b => b.toString(16).padStart(2, '0')).join('') }
 
 export function Sid (id) { return id ? (typeof id === 'string' ? id : idToSid(id)) : '' }
@@ -358,7 +370,7 @@ export function tru8 (info, u8) {
 }
 
 
-// Retourne l'année et le mois depuis un code à 6 lettres 
+// Retourne l'année et le mois depuis un code à 6 lettres
 export function amDeL6 (l6) {
   const a = new Date().getFullYear()
   const pa = a % 2
@@ -471,7 +483,7 @@ export function getTrigramme (nombase) {
       },
       cancel: true,
       persistent: true
-    }).onOk(trig => { 
+    }).onOk(trig => {
       if (trig.length > 3) resolve(trig.substring(trig.length - 3))
       else if (trig.length < 3) resolve(trig + 'xxx'.substring(0, 3 - trig.length))
       else resolve(trig)

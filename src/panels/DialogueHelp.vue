@@ -32,7 +32,7 @@
         </template>
       </q-input>
       <q-space />
-      <btn-cond v-if="!expandAll" icon="unfold_more" 
+      <btn-cond v-if="!expandAll" icon="unfold_more"
         :label="$t('PNOdep')" @ok="tree.expandAll();expandAll=true"/>
       <btn-cond v-if="expandAll" icon="unfold_less" padding="none"
         :label="$t('PNOrep')" @ok="tree.collapseAll();expandAll=false"/>
@@ -41,7 +41,7 @@
 
   <q-page-container>
     <div :class="ui.portrait ? 'column' : 'row justify-between'">
-      <q-scroll-area :class="!ui.portrait ? 'col-6' : ''" 
+      <q-scroll-area :class="!ui.portrait ? 'col-6' : ''"
         :style="ui.portrait ? 'height: 50vh;padding-bottom:10px;border-bottom:5px solid grey' : 'height: 80vh;'">
         <show-html v-if="intro" class="q-mx-sm q-my-md" :texte="intro"/>
         <q-expansion-item v-for="c in chaps" :key="c.t" class="q-my-sm"
@@ -61,7 +61,7 @@
         </q-expansion-item>
       </q-scroll-area>
 
-      <q-scroll-area :class="!ui.portrait ? 'col-6' : ''" 
+      <q-scroll-area :class="!ui.portrait ? 'col-6' : ''"
         :style="ui.portrait ? 'height: 30vh;' : 'height: 80vh;'">
         <q-tree ref="tree"
           dense
@@ -176,8 +176,8 @@ function resetFilter () {
   filterRef.value.focus()
 }
 
-function setChaps (id) {
-  const y = getMd(id, locale)
+async function setChaps (id) {
+  const y = await getMd(id, locale)
   const x = y.replaceAll('\r\n', '\n').split('\n')
   intro.value = ''
   chaps.value = []
@@ -209,17 +209,17 @@ function setChaps (id) {
       }
     } else {
       const l2 = l.replaceAll('<a href="$$/', urld)
-      tx.push(remplaceImg(l2))
+      tx.push(await remplaceImg(l2))
     }
   }
   if (!t && tx.length) { intro.value = tx.join('\n') }
   if (t) { chaps.value.push({t, tx: tx.join('\n'), m}) }
 }
 
-function remplaceImg (l) {
+async function remplaceImg (l) {
   const lx = []
   let i = 0, j = 0
-  while (true){ 
+  while (true){
     i = l.indexOf('<img src="', j)
     if (i === -1) {
       if (j === 0) return l
@@ -229,7 +229,7 @@ function remplaceImg (l) {
       if (j !== i) lx.push(l.substring(j, i))
       j = l.indexOf('"', i + 10)
       const n = l.substring(i + 10, j)
-      const u = getImgUrl(n)
+      const u = await getImgUrl(n)
       lx.push('<img src="' + u)
     }
   }
