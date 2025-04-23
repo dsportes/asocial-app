@@ -26,23 +26,6 @@ export async function ping () {
   }
 }
 
-export async function getRessource (path, type) {
-  try {
-    const r = await axios({
-      method: 'get',
-      url: './' + path,
-      responseType: type
-    })
-    if (r.status === 200) {
-      return r.data
-    } else {
-      throw new AppExc(E_SRV, 0, [r.statusText])
-    }
-  } catch (e) {
-    return {}
-  }
-}
-
 /*
 Envoi une requête GET :
 - fonction : code de la fonction
@@ -91,13 +74,13 @@ export async function pubsub (fonction, args) {
       return JSON.parse(r.data)
     } catch (e) {
       if (config.mondebug) console.log('PUBSUB ' + fonction + ' exc: ', e.toString())
-      return 0  
-    }  
+      return 0
+    }
   } catch (e) {
     const status = (e.response && e.response.status) || 0
     if (status === 400 || status === 403) {
       if (config.mondebug) console.log('PUBSUB ' + fonction + ' exc: ', e.response.data)
-    } else { 
+    } else {
       // inattendue, pas mise en forme (500 et autres)
       const code = !status ? 100 : (status >= 500 && status <= 599 ? 101 : 0)
       const ex = new AppExc(E_SRV, code, [status, (u || '?'), e.message])
@@ -113,7 +96,7 @@ Envoi une requête POST :
 - fonction : classe de l'opération invoquée
 - args : objet avec les arguments qui seront transmis encodé dans le body de la requête.
 Retour :
-- OK : l'objet retourné par la fonction demandée 
+- OK : l'objet retourné par la fonction demandée
 HTTP 400 : le résultat est un AppExc
 Exception : un AppExc avec les propriétés code, message, stack
 */
@@ -128,12 +111,12 @@ export async function post (op, fonction, args) {
     args.APIVERSION = config.APIVERSION
     const data = new Uint8Array(encode(args))
     if (op) op.cancelToken = axios.CancelToken.source()
-    const par = { 
-      method: 'post', 
+    const par = {
+      method: 'post',
       url: u,
       timeout: 0,
-      data: data, 
-      responseType: 'arraybuffer' 
+      data: data,
+      responseType: 'arraybuffer'
     }
     if (op) par.cancelToken = op.cancelToken.token
     const r = await axios(par)
@@ -150,7 +133,7 @@ export async function post (op, fonction, args) {
     if (resp) {
       if (resp.srvBUILD) session.srvBUILD = resp.srvBUILD
       if (resp.adq) session.setAdq(resp.adq)
-      if (resp.trlog) 
+      if (resp.trlog)
         syncQueue.synchro(resp.trlog)
       if (resp.nhb !== undefined) hb.retOP(resp.nhb) // { sessionId, nhb, nomop }
     }
@@ -182,9 +165,9 @@ function procEx (e, op, u) {
       ex = new AppExc(E_BRO, 1, [op ? op.nom : '', e2.message])
     }
     throw ex
-  } else { 
+  } else {
     // inattendue, pas mise en forme (500 et autres)
-    if (config.mondebug) 
+    if (config.mondebug)
       console.log('EXC de POST - status:' + status + ' url:' + (u || '?') + ' exc:' + e.toString())
     throw new AppExc(E_SRV, 100, [status, (u || '?'), e.message])
   }
@@ -192,10 +175,10 @@ function procEx (e, op, u) {
 
 // Utilisé pour obtenir le texte depuis une URL sur le stockage de fichier
 export async function getData (url, nf) {
-  const r = await axios({ 
-    method: 'get', 
-    url, 
-    responseType: 'arraybuffer' 
+  const r = await axios({
+    method: 'get',
+    url,
+    responseType: 'arraybuffer'
   })
   return new Uint8Array(r.data)
   // Exception : e.message
@@ -203,9 +186,9 @@ export async function getData (url, nf) {
 
 export async function putData (url, data) {
   try {
-    const r = await axios({ 
-      method: 'put', 
-      url, 
+    const r = await axios({
+      method: 'put',
+      url,
       data: data,
       headers: { // OBLIGATOIRE pour putUrl
         'Content-Type': 'application/octet-stream'
