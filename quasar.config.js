@@ -83,6 +83,7 @@ export default defineConfig((ctx) => {
         // We return an Object which will get deeply merged into
         // the config, instead of directly tampering with viteConf
         return {
+          base: './',
           build: {
             assetsInlineLimit: 0,
             chunkSizeWarningLimit: 3000
@@ -117,29 +118,6 @@ export default defineConfig((ctx) => {
       // watchOptions: {
         // ignored: '**/node_modules',
       // },
-      /*
-      extendWebpack (cfg) {
-        cfg.module.rules.push({ test: /\.md$/i, type: 'asset/source' })
-        cfg.module.rules.push({ test: /\.txt$/i, type: 'asset/source' })
-        cfg.module.rules.push({ test: /\.bin$/i, type: 'asset/inline' })
-      },
-      chainWebpack: chain => {
-        chain.module
-          .rule('i18n-resource')
-          .test(/\.(json5?|ya?ml)$/)
-          .include.add(path.resolve(__dirname, './src/i18n'))
-          .end()
-          .type('javascript/auto')
-          .use('i18n-resource')
-          .loader('@intlify/vue-i18n-loader')
-        chain.module
-          .rule('i18n')
-          .resourceQuery(/blockType=i18n/)
-          .type('javascript/auto')
-          .use('i18n')
-          .loader('@intlify/vue-i18n-loader')
-      }
-      */
     },
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-devServer
