@@ -1,7 +1,7 @@
 <template>
   <q-page class="q-px-xs q-pb-sm">
 
-    <q-tabs  class="col titre-md tbp" v-model="tab" 
+    <q-tabs  class="col titre-md tbp" v-model="tab"
       inline-label outside-arrows mobile-arrows no-caps dense>
       <q-tab name="espaces" :label="$t('EStabe')"/>
       <q-tab name="taches" :label="$t('EStabt')"/>
@@ -50,9 +50,9 @@
               <btn-cond icon="refresh" @ok="tacheGo(t)"/>
             </div>
           </div>
-          <q-input v-if="t.exc" type="textarea" autogrow 
+          <q-input v-if="t.exc" type="textarea" autogrow
             v-model="t.exc" class="q-ml-lg q-pa-xs stackclass font-mono"/>
-        </div>     
+        </div>
       </div>
     </div>
 
@@ -81,10 +81,10 @@
         </template>
 
         <div class="q-ml-lg">
-          <btn-cond v-if="esp.hTC" class="q-ma-xs" :label="$t('ENnpspc')" 
+          <btn-cond v-if="esp.hTC" class="q-ma-xs" :label="$t('ENnpspc')"
             @ok="ovnspc(esp)" />
-          
-          <q-expansion-item class="q-my-xs" 
+
+          <q-expansion-item class="q-my-xs"
             switch-toggle-side expand-separator dense header-class="tbp titre-md"
             :label="$t('ESquotas')" group="espaces2">
             <div class="q-my-sm">
@@ -95,17 +95,17 @@
             </div>
           </q-expansion-item>
 
-          <q-expansion-item class="q-my-xs" 
+          <q-expansion-item class="q-my-xs"
             switch-toggle-side expand-separator dense header-class="tbp titre-md"
             :label="$t('ESal')" group="espaces2">
             <div class="q-my-sm">
               <bouton-dlvat :espace="esp" @close="finDlv"/>
-              <apercu-notif class="q-my-sm" :notif="esp.notifE" :idx="idx" 
+              <apercu-notif class="q-my-sm" :notif="esp.notifE" :idx="idx"
                 :type="0" :cible="esp.org"/>
             </div>
           </q-expansion-item>
 
-          <q-expansion-item v-if="!esp.hTC" class="q-my-xs" 
+          <q-expansion-item v-if="!esp.hTC" class="q-my-xs"
             switch-toggle-side expand-separator dense header-class="tbp titre-md"
             :label="$t('ESoptc')" group="espaces2">
             <div class="q-my-sm">
@@ -114,7 +114,7 @@
             </div>
           </q-expansion-item>
 
-          <q-expansion-item v-if="!esp.hTC" class="q-my-xs" 
+          <q-expansion-item v-if="!esp.hTC" class="q-my-xs"
             switch-toggle-side expand-separator dense header-class="tbp titre-md"
             :label="$t('PEstm1')" group="espaces2">
             <div class="q-ml-lg q-my-sm">
@@ -139,7 +139,7 @@
       <q-card-section class="q-ma-sm column justify-center">
         <div class="column justify-center">
           <nom-org class="q-mb-md" :set-orgs="setOrgs" v-model="orgE"/>
-          <phrase-contact declaration v-model="phraseE" 
+          <phrase-contact declaration v-model="phraseE"
             :class="orgE.err !== '' ? 'disabled' : ''"/>
         </div>
       </q-card-section>
@@ -154,7 +154,7 @@
     </dial-std1>
 
     <!-- Changement des quotas de l'espace
-    v-if: pour se protéger de l'absence de quotas avant ouverture du dialogue 
+    v-if: pour se protéger de l'absence de quotas avant ouverture du dialogue
     -->
     <dial-std1 v-if="m1" v-model="m1" :titre="$t('ESchg')"
       :disable="quotas.err !== '' || !quotas.chg" okwarn :okfn="valider">
@@ -183,7 +183,7 @@ import IconAlerte from '../components/IconAlerte.vue'
 import QuotasVols from '../components/QuotasVols.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import DialStd1 from '../dialogues/DialStd1.vue'
-import { GetEspaces, CreationEspace, MajSponsEspace, SetEspaceQuotas, InitTachesGC, 
+import { GetEspaces, CreationEspace, MajSponsEspace, SetEspaceQuotas, InitTachesGC,
   DownloadStatC, GetTaches, DelTache, GoTache } from '../app/operations4.mjs'
 import { get } from '../app/net.mjs'
 import { compile, Phrase } from '../app/modele.mjs'
@@ -258,7 +258,7 @@ onMounted(async () => {
 })
 
 const sty = computed(() => $q.dark.isActive ? 'sombre' : 'clair' )
-const maxdl = computed(() => { 
+const maxdl = computed(() => {
   const m = AMJ.djMoisN(AMJ.amjUtc(), -1)
   return Math.floor(m / 100)
 })
@@ -291,7 +291,7 @@ function nvntf (ntf) {
 
 function ev0 (idx) { return mon(cfg.profils[idx][0]) }
 
-function ev1 (idx) { 
+function ev1 (idx) {
   const n = cfg.profils[idx][1]
   return '[' + n + '] ' + nbn(n * UNITEN)
 }
@@ -354,20 +354,20 @@ function ovchgquotas (e) {
   esp.value = e
   const qm = cfg.quotasMaxE
   // minn, minv, maxn, maxv, minc, maxc, err
-  quotas.value = { ...e.quotas, err: null, minn: 1, minv: 1, minc: 1, 
-    maxn: qm[0], 
-    maxv: qm[1], 
+  quotas.value = { ...e.quotas, err: null, minn: 1, minv: 1, minc: 1,
+    maxn: qm[0],
+    maxv: qm[1],
     maxc: qm[2]
   }
   ui.oD('PAedprf', idc)
 }
 
-function mindl (esp) { 
+function mindl (esp) {
   return Math.floor(esp.creation / 100)
 }
 
 async function dlstat (esp, mr) {
-  if (mr >= 0) 
+  if (mr >= 0)
     mois.value = AMJ.moisMoins(Math.floor(session.auj / 100), mr)
   const cleES = esp.cleES
   const { err, blob } = await new DownloadStatC()
@@ -398,7 +398,7 @@ async function tacheGo (t) {
 <style lang="sass" scoped>
 @import '../css/app.sass'
 .w6
-  with: 6rem
+  width: 6rem
 .bord
   border: 1px solid $grey-5
   border-radius: 5px
