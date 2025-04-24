@@ -12,6 +12,8 @@ const props = defineProps({
 </script>
 
 <style lang="css" scoped>
+@import 'github-markdown-css/github-markdown-dark.css';
+
 .markdown-body {
   font-family:  "Ubuntu Sans" !important;
   background-color: transparent !important;
@@ -20,7 +22,6 @@ const props = defineProps({
   font-size: 0.9rem;
   font-weight: 200;
 }
-@import 'github-markdown-css/github-markdown-dark.css'
 </style>
 
 <style lang="sass">

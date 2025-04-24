@@ -6,6 +6,47 @@ import { AMJ, appexc } from './api.mjs'
 
 import { gzip, ungzip } from './pako.mjs'
 
+const decoder = new TextDecoder('utf-8')
+const encoder = new TextEncoder('utf-8')
+
+export async function getImgUrl (name) {
+  try {
+    const x = await res('../assets/help/' + name)
+    return x ? x : await res('../assets/help/defaut.png')
+  } catch (e) {
+    return await res('../assets/help/defaut.png')
+  }
+}
+
+export async function getMd (page, lang) {
+  try {
+    let x = await res('help/' + page + '_' + lang + '.md')
+    if (x) return x
+    if (lang !== 'fr-FR') x = await res('help/' + page + '_fr-FR.md')
+    if (x) return x
+    return await res('help/bientot_' + lang + '.md')
+  } catch (e) {
+    return await res('help/bientot_' + lang + '.md')
+  }
+}
+
+export async function res (name) {
+  const url = new URL('/' + name, import.meta.url).href
+  // console.log('fetch >>> ' + url)
+  const response = await fetch(url)
+  if (!response.ok) return null
+  const t = name.substring(name.lastIndexOf('.') + 1)
+  if (t === 'json') return await response.json()
+  const x = await response.bytes()
+  if (t === 'md')
+    return decoder.decode(x)
+  if (t === 'jpg' || t === 'png')
+    return 'data:image/' + t + ';base64,' + u8ToB64(x, true)
+  if (t === 'bin')
+    return 'data:audio/mpeg;base64,' + u8ToB64(x, true)
+  return x
+}
+
 /* i18n : fonction $t() ********************************************/
 export let $t
 export let $q
@@ -46,9 +87,6 @@ export function sty () {
   // if (!$q) $q = useQuasar()
   return $q.dark.isActive ? 'sombre ' : 'clair '
 }
-
-const decoder = new TextDecoder('utf-8')
-const encoder = new TextEncoder('utf-8')
 
 let audioContext = null
 

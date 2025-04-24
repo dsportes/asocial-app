@@ -3,51 +3,12 @@ import { boot } from 'quasar/wrappers'
 import stores from '../stores/stores.mjs'
 import { config } from '../app/config.mjs'
 import { ID } from '../app/api.mjs'
-import { u8ToB64 } from '../app/util.mjs'
-
-export async function getImgUrl (name) {
-  try {
-    const x = await res('../assets/help/' + name)
-    return x ? x : await res('../assets/help/defaut.png')
-  } catch (e) {
-    return await res('../assets/help/defaut.png')
-  }
-}
-
-export async function getMd (page, lang) {
-  try {
-    let x = await res('../assets/help/' + page + '_' + lang + '.md')
-    if (x) return x
-    if (lang !== 'fr-FR') x = await res('../assets/help/' + page + '_fr-FR.md')
-    if (x) return x
-    return await res('../assets/help/bientot_' + lang + '.md')
-  } catch (e) {
-    return await res('../assets/help/bientot_' + lang + '.md')
-  }
-}
-
-const decoder = new TextDecoder('utf-8')
-
-async function res (path, type) {
-  const url = new URL(path, import.meta.url)
-  const response = await fetch(url.pathname)
-  if (!response.ok) return null
-  const t = path.substring(path.lastIndexOf('.') + 1)
-  if (t === 'json') return await response.json()
-  const x = await response.bytes()
-  if (t === 'md')
-    return decoder.decode(x)
-  if (t === 'jpg' || t === 'png')
-    return 'data:image/' + t + ';base64,' + u8ToB64(x, true)
-  if (t === 'bin')
-    return 'data:audio/mpeg;base64,' + u8ToB64(x, true)
-  return x
-}
+import { res } from '../app/util.mjs'
 
 export default boot(async ({ app /* Vue */ }) => {
 
-  const readme = await res('/README.md')
-  const svc = await res('/services.json')
+  const readme = await res('README.md')
+  const svc = await res('services.json')
 
   const cfg = { pageSessionId: ID.rnd(), nc: 0 }
   for(const x in config) cfg[x] = config[x]
@@ -79,20 +40,20 @@ export default boot(async ({ app /* Vue */ }) => {
     }
   })
 
-  cfg.iconAvatar = await res('../assets/avatar.jpg')
-  cfg.iconGroupe = await res('../assets/groupe.jpg')
-  cfg.iconSuperman = await res('../assets/superman.jpg')
-  cfg.iconComptable = await res('../assets/police.jpg')
+  cfg.iconAvatar = await res('images/avatar.jpg')
+  cfg.iconGroupe = await res('images/groupe.jpg')
+  cfg.iconSuperman = await res('images/superman.jpg')
+  cfg.iconComptable = await res('images/police.jpg')
 
   /* N'importe quel binaire en .bin peut être chargé en dataURL:
   - son MIME est 'application/octet-stream'
   - pour le rendre utilisable il faut lui donner son 'vrai' type
   Ici cliccamera est un pur .mp3 audio/mpeg
   */
-  cfg.cliccamera = await res('../assets/cliccamera.bin')
-  cfg.beep = await res('../assets/beep.bin')
+  cfg.cliccamera = await res('images/cliccamera.bin')
+  cfg.beep = await res('images/beep.bin')
 
-  cfg.planHelp = await res('../assets/help/_plan.json')
+  cfg.planHelp = await res('help/_plan.json')
 
   await stores.config.setConfig(cfg)
 

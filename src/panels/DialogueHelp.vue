@@ -126,9 +126,8 @@
 import { ref, watch, computed } from 'vue'
 
 import { useI18n } from 'vue-i18n'
-import { getImgUrl, getMd } from '../boot/appconfig.js'
 import stores from '../stores/stores.mjs'
-import { styp, sty, $t } from '../app/util.mjs'
+import { styp, sty, $t, res } from '../app/util.mjs'
 
 import ShowHtml from '../components/ShowHtml.vue'
 import BtnCond from '../components/BtnCond.vue'
@@ -143,6 +142,27 @@ const docsurl = config.docsurls[locale] || 'http://localhost:8080/fr'
 const urld = '<a href="' + docsurl + '/'
 const arbre = config.getHelpArbre()
 const pages = config.getHelpPages() // Key: nom page, value: nom de sa page mère (null si racine)
+
+async function getImgUrl (name) {
+  try {
+    const x = await res('help/' + name)
+    return x ? x : await res('help/defaut.png')
+  } catch (e) {
+    return await res('help/defaut.png')
+  }
+}
+
+async function getMd (page, lang) {
+  try {
+    let x = await res('help/' + page + '_' + lang + '.md')
+    if (x) return x
+    if (lang !== 'fr-FR') x = await res('help/' + page + '_fr-FR.md')
+    if (x) return x
+    return await res('help/bientot_' + lang + '.md')
+  } catch (e) {
+    return await res('help/bientot_' + lang + '.md')
+  }
+}
 
 function parents (n) { // nom d'une page ou section
   const r = [n]

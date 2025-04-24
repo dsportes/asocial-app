@@ -1,8 +1,46 @@
+/* eslint-env serviceworker */
+
 /*
  * This file (which will be your service worker)
  * is picked up by the build system ONLY if
- * quasar.config.js > pwa > workboxPluginMode is set to "InjectManifest"
+ * quasar.config file > pwa > workboxMode is set to "InjectManifest"
  */
+
+import { clientsClaim } from 'workbox-core'
+import { precacheAndRoute, cleanupOutdatedCaches, createHandlerBoundToURL } from 'workbox-precaching'
+import { registerRoute, NavigationRoute } from 'workbox-routing'
+
+self.skipWaiting()
+clientsClaim()
+const mf = self.__WB_MANIFEST
+console.log('Dans SW-1js b')
+console.log('WB_MANIFEST >>>>>>>')
+mf.forEach(x => {
+  console.log('WB_MANIFEST: ' + x.url)
+})
+console.log('WB_MANIFEST <<<<<<<')
+
+// Use with precache injection
+
+if (process.env.PROD) {
+  console.log('precacheAndRoute')
+  precacheAndRoute(mf)
+}
+
+cleanupOutdatedCaches()
+
+// Non-SSR fallbacks to index.html
+// Production SSR fallbacks to offline.html (except for dev)
+/*
+if (process.env.MODE !== 'ssr' || process.env.PROD) {
+  registerRoute(
+    new NavigationRoute(
+      createHandlerBoundToURL(process.env.PWA_FALLBACK_HTML),
+      { denylist: [new RegExp(process.env.PWA_SERVICE_WORKER_REGEX), /workbox-(.)*\.js$/] }
+    )
+  )
+}
+*/
 
 import { decode } from '@msgpack/msgpack'
 
@@ -17,23 +55,6 @@ const b64ToU8 = base64String => {
     outputArray[i] = rawData.charCodeAt(i)
   return outputArray
 }
-
-/* Use with precache injection
-L'utilisation du precaching a provoqué des bouclages de rechargement de la page
-Toutefois la variable mf ci-dessous est requise:
-webpack cherche le string qui figure après self...
-et se plante si ne le trouve pas.
-En conséquence webpack installe, au build, une liste de fichiers qui
-n'est pas utilisée en runtime.
-*/
-// import { precacheAndRoute } from 'workbox-precaching'
-const mf = self.__WB_MANIFEST
-console.log('WB_MANIFEST >>>>>>>')
-mf.forEach(x => {
-  console.log('WB_MANIFEST: ' + x.url)
-})
-console.log('WB_MANIFEST <<<<<<<')
-// precacheAndRoute(mf)
 
 const broadcast = new BroadcastChannel('channel-pubsub')
 

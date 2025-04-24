@@ -5,12 +5,14 @@
 <script setup>
 import { VueShowdown } from 'vue-showdown'
 
-const props = defineProps({ 
+const props = defineProps({
   texte: String
 })
 </script>
 
 <style lang="css" scoped>
+@import 'github-markdown-css/github-markdown-dark.css';
+
 .markdown-body {
   font-family:  "Ubuntu Sans" !important;
   background-color: transparent !important;
@@ -19,7 +21,7 @@ const props = defineProps({
   font-size: 0.9rem;
   font-weight: 200;
 }
-@import 'github-markdown-css/github-markdown-dark.css'
+
 </style>
 
 <style lang="sass">
@@ -28,7 +30,7 @@ p
 .markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5
   font-family: Comfortaa
   font-weight: 400
-h1, h2, h2, h3, h4, h5, h6 
+h1, h2, h2, h3, h4, h5, h6
   color: $mdtitre !important
 h1
   font-size: 1.5em !important
