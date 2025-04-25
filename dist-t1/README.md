@@ -7,4 +7,4 @@ Application "asocial":
 Sources:
 - dépôt: https://github.com/dsportes/asocial-app/tree/v2.7
 
-Refonte du mode de build.
+Refonte du mode de build (vite).
