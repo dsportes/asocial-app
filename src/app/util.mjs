@@ -31,8 +31,9 @@ export async function getMd (page, lang) {
 }
 
 export async function res (name) {
-  const url = new URL('/' + name, import.meta.url).href
-  // console.log('fetch >>> ' + url)
+  // const url = new URL('/' + name, import.meta.url).href
+  const url = './' + name
+  console.log('fetch >>> ' + url)
   const response = await fetch(url)
   if (!response.ok) return null
   const t = name.substring(name.lastIndexOf('.') + 1)

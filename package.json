@@ -7,7 +7,7 @@
   "private": true,
   "scripts": {
     "test": "quasar dev",
-    "build:pwa": "quasar build -m pwa"
+    "build:pwa": "yarn quasar build -m pwa"
   },
   "dependencies": {
     "@msgpack/msgpack": "^3.0.0-beta2",
@@ -40,6 +40,7 @@
     "@quasar/app-vite": "^2.2.0",
     "autoprefixer": "^10.4.2",
     "postcss": "^8.4.14",
+    "vite": "^6.3.3",
     "vite-plugin-pwa": "^1.0.0",
     "workbox-build": "^7.0.0",
     "workbox-cacheable-response": "^7.0.0",

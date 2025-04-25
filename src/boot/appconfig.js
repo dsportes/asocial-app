@@ -6,6 +6,12 @@ import { ID } from '../app/api.mjs'
 import { res } from '../app/util.mjs'
 
 export default boot(async ({ app /* Vue */ }) => {
+  /*
+  if('serviceWorker' in navigator) {
+    console.log('Register de Daniel')
+    navigator.serviceWorker.register('./sw.js')
+  }
+  */
 
   const readme = await res('README.md')
   const svc = await res('services.json')
@@ -53,7 +59,7 @@ export default boot(async ({ app /* Vue */ }) => {
   cfg.cliccamera = await res('images/cliccamera.bin')
   cfg.beep = await res('images/beep.bin')
 
-  cfg.planHelp = await res('help/_plan.json')
+  cfg.planHelp = await res('help/a_plan.json')
 
   await stores.config.setConfig(cfg)
 

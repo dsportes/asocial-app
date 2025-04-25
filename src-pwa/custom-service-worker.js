@@ -13,7 +13,7 @@ import { registerRoute, NavigationRoute } from 'workbox-routing'
 self.skipWaiting()
 clientsClaim()
 const mf = self.__WB_MANIFEST
-console.log('Dans SW-1js b')
+console.log('Dans SW')
 console.log('WB_MANIFEST >>>>>>>')
 mf.forEach(x => {
   console.log('WB_MANIFEST: ' + x.url)

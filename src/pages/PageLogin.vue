@@ -2,8 +2,8 @@
 <q-page class="column align-start items-center">
 
   <div class="row self-end items-center">
-    <div v-if="infx" class="font-mono fs-sm text-italic q-mr-sm">
-      {{endp + config.BUILD + (session.srvBUILD ? ' / ' + session.srvBUILD : '')}}
+    <div v-if="infx" class="font-mono fs-sm q-mr-sm">
+      {{'aaa' + endp + config.BUILD + (session.srvBUILD ? ' / ' + session.srvBUILD : '')}}
     </div>
     <q-toggle :class="'q-my-xs bg-' + clrInfx " v-model="infx" color="grey-5" size="25px"/>
   </div>
@@ -30,7 +30,7 @@
                 {{$t('LOGparah')}}
               </div>
             </div>
-            <q-input filled v-model="parano" dense class="parano font-mono fs-sm" 
+            <q-input filled v-model="parano" dense class="parano font-mono fs-sm"
               counter maxlength="4"/>
             <q-select filled dense v-model="optVal" :options="optPar" class="w6 font-mono fs-sm"/>
           </div>
@@ -39,7 +39,7 @@
       </div>
 
       <div class="row justify-center q-gutter-sm q-mt-sm">
-        <btn-cond class="titre-lg" no-caps @ok="ouvrirPS(1)" 
+        <btn-cond class="titre-lg" no-caps @ok="ouvrirPS(1)"
           :disable="orgE.org === 'admin'" icon="cloud_sync" :label="$t('sync')"/>
 
         <btn-cond class="titre-lg" no-caps @ok="ouvrirPS(2)">
@@ -83,7 +83,7 @@
       <div v-if="session.mode" class="row justify-end items-center">
         <q-spinner v-if="encours" color="primary" class="q-mr-sm"
           size="1.5rem" :thickness="8" />
-        <btn-cond :disable="orgE.err !== '' || phraseE.err !== ''" 
+        <btn-cond :disable="orgE.err !== '' || phraseE.err !== ''"
           icon="check" :label="$t('creer')" @ok="crypterphrase"/>
       </div>
     </div>
@@ -149,10 +149,10 @@ const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 const clrInfx = computed(() => config.subJSON.startsWith('???') ? 'warning': 'green')
 const endp = computed(() => config.subJSON.startsWith('???') ? config.subJSON + '... ': '')
 
-const chkp = val => { 
+const chkp = val => {
   if (!val) return true
   if (val.length !== 4) return false
-  for (let i = 0; i < val.length; i++) { 
+  for (let i = 0; i < val.length; i++) {
     const c = val.charAt(i)
     if (c < '1' || c > '9') return false
   }
@@ -188,9 +188,9 @@ async function demperm () {
 
 function ouvrirPS (mode) {
   session.setMode(mode)
-  ui.ps = { 
+  ui.ps = {
     login: true,
-    labelValider: "LOGconn", 
+    labelValider: "LOGconn",
     iconValider: "send",
     ok: onps
   }
@@ -260,17 +260,17 @@ async function crypterphrase () {
       if (sp.value.dlv <  AMJ.amjUtc()) {
         await afficherDiag($t('LOGppinv'))
         raz()
-        return                  
+        return
       }
       if (sp.value.st !== 0) {
         await afficherDiag($t('LOGsp' + sp.value.st))
         raz()
-        return                  
+        return
       }
       ui.oD('ASaccsp', idc)
     } catch (e) {
       await afficherDiag($t('LOGppatt'))
-      raz()        
+      raz()
     }
   } catch (e) {
     console.log('crypterphrase: ' + e)
@@ -284,7 +284,7 @@ async function creationComptable (pc) {
 }
 
 setTimeout(() => {
-  if (!config.permission) 
+  if (!config.permission)
     ui.oD('pubsub', idc)
 }, 1000)
 

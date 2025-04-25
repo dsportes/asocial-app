@@ -2447,6 +2447,7 @@ __metadata:
     raw-loader: "npm:^4.0.2"
     register-service-worker: "npm:^1.7.2"
     simple-keyboard: "npm:^3.7.107"
+    vite: "npm:^6.3.3"
     vite-plugin-pwa: "npm:^1.0.0"
     vue: "npm:^3.5.3"
     vue-advanced-cropper: "npm:^2.8.9"
@@ -7482,7 +7483,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:^6.1.0":
+"vite@npm:^6.1.0, vite@npm:^6.3.3":
   version: 6.3.3
   resolution: "vite@npm:6.3.3"
   dependencies:

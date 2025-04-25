@@ -14,11 +14,15 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig((ctx) => {
   return {
+    /*
     plugins: [
       VitePWA({
-        registerType: 'autoUpdate'
+        registerType: 'autoUpdate',
+        injectRegister: null,
+        manifest: false
       })
     ],
+    */
     // https://v2.quasar.dev/quasar-cli-webpack/supporting-ts
     supportTS: false,
 
@@ -85,7 +89,7 @@ export default defineConfig((ctx) => {
         return {
           base: './',
           build: {
-            assetsInlineLimit: 0,
+            // assetsInlineLimit: 0,
             chunkSizeWarningLimit: 3000
           }
         }
@@ -110,6 +114,32 @@ export default defineConfig((ctx) => {
 
           // you need to set i18n resource including paths !
           include: [ fileURLToPath(new URL('./src/i18n', import.meta.url)) ]
+        }],
+        [VitePWA, {
+          registerType: 'autoUpdate',
+          strategies: 'injectManifest',
+          injectManifest: { maximumFileSizeToCacheInBytes: 3000000 },
+          srcDir: 'src-pwa',
+          filename: 'custom-service-worker.js',
+          injectRegister: null,
+          manifest: {
+            name: 'Application asocial',
+            short_name: 'asocial',
+            description: 'Application asocial',
+            theme_color: '#ffffff',
+            icons: [
+              {
+                src: './icons/icon-192x192.png',
+                sizes: '192x192',
+                type: 'image/png'
+              },
+              {
+                src: './icons/icon-512x512.png',
+                sizes: '512x512',
+                type: 'image/png'
+              }
+            ]
+          }
         }]
       ]
 
@@ -165,7 +195,7 @@ export default defineConfig((ctx) => {
     // https://v2.quasar.dev/quasar-cli-webpack/developing-pwa/configuring-pwa
     pwa: {
       workboxMode: 'InjectManifest', // 'GenerateSW' or 'InjectManifest'
-      workboxPluginMode: 'InjectManifest'
+      // workboxPluginMode: 'InjectManifest',
       // swFilename: 'sw.js',
       // manifestFilename: 'manifest.json',
       // extendManifestJson (json) {},
@@ -174,6 +204,11 @@ export default defineConfig((ctx) => {
       // extendPWACustomSWConf (esbuildConf) {},
       // extendGenerateSWOptions (cfg) {},
       // extendInjectManifestOptions (cfg) {}
+      // injectPwaMetaTags ({ pwaManifest, publicPath }) {
+      //    const x2 = '<link rel="manifest" href=manifest.json></link>'
+      //    console.log('Injection de >>>' + x2)
+      //    return x2
+      //  }
     }
   }
 })

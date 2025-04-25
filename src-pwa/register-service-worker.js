@@ -6,7 +6,9 @@ import stores from '../src/stores/stores.mjs'
 // events passes a ServiceWorkerRegistration instance in their arguments.
 // ServiceWorkerRegistration: https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerRegistration
 
-register(process.env.SERVICE_WORKER_FILE, {
+// register(process.env.SERVICE_WORKER_FILE, {
+
+register('./sw.js', {
   // The registrationOptions object will be passed as the second argument
   // to ServiceWorkerContainer.register()
   // https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerContainer/register#Parameter
@@ -14,16 +16,16 @@ register(process.env.SERVICE_WORKER_FILE, {
   // registrationOptions: { scope: './' },
 
   async ready (registration) {
-    console.log('Service worker is active.')
+    console.log('DSDSDSService worker is active.')
     await stores.config.setRegistration(registration)
   },
 
   registered (registration) {
-    console.log('Service worker has been registered.')
+    console.log('DSDSDSService worker has been registered.')
   },
 
   cached (registration) {
-    console.log('Content has been cached for offline use.')
+    console.log('DSDSDSContent has been cached for offline use.')
   },
 
   updatefound (/* registration */) {
