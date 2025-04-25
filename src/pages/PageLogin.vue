@@ -3,7 +3,7 @@
 
   <div class="row self-end items-center">
     <div v-if="infx" class="font-mono fs-sm q-mr-sm">
-      {{'aaa' + endp + config.BUILD + (session.srvBUILD ? ' / ' + session.srvBUILD : '')}}
+      {{ endp + config.BUILD + (session.srvBUILD ? ' / ' + session.srvBUILD : '')}}
     </div>
     <q-toggle :class="'q-my-xs bg-' + clrInfx " v-model="infx" color="grey-5" size="25px"/>
   </div>

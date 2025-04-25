@@ -2,11 +2,11 @@
 
 export const config = {
   // CONFIGURATION TECHNIQUE : à adapter SI NECESSAIRE à chaque déploiement
-  BUILD: 'v2.6',
+  BUILD: 'v2.7',
   APIVERSION: 2,
   mondebug: true,
 
-  /* Configuration linguistiques - Commenter les langues non souhaitées dans ce déploiement */  
+  /* Configuration linguistiques - Commenter les langues non souhaitées dans ce déploiement */
   locale: 'fr-FR',
   localeOptions: [
     { value: 'en-EN', label: 'English',  flag: '🇬🇧' },
@@ -37,8 +37,8 @@ export const config = {
   },
 
   motscles: {
-    indesirable: { 'fr-FR': 'indesirable', 'en-EN': 'junk'}, 
-    important: { 'fr-FR': 'important', 'en-EN': 'important'}, 
+    indesirable: { 'fr-FR': 'indesirable', 'en-EN': 'junk'},
+    important: { 'fr-FR': 'important', 'en-EN': 'important'},
     obsolete: { 'fr-FR': 'obsolete', 'en-EN': 'obsolete'},
     ami: { 'fr-FR': 'ami', 'en-EN': 'friend'},
     alire: { 'fr-FR': 'alire', 'en-EN': 'toread'},
