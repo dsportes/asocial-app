@@ -1,15 +1,17 @@
 {
-  "name": "asocial",
+  "name": "Application asocial",
   "short_name": "asocial",
-  "description": "Réseau a-social",
-  "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#ffffff",
-  "theme_color": "#027be3",
+  "description": "Application asocial",
+  "theme_color": "#ffffff",
   "icons": [
     {
-      "src": "icons/favicon-128x128.png",
+      "src": "icons/pwa-192x192.png",
       "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/pwa-512x512.png",
+      "sizes": "512x512",
       "type": "image/png"
     }
   ]

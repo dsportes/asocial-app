@@ -32,23 +32,24 @@ Ce qui provoque l'enregistrement du sw **c'est `workbox` PAS `vite`**. C'est pou
   - le nom a l'air d'être fixé en dur.
   - `register('./sw.js', ...`
     - le `./` est indispensable pour que le `sw.js` ne soit pas cherché à la racine du domaine mais à celle du site.
-- `src-pwa/manifest.json` ne sert pas parce que le vrai manifest est généré ailleurs. **Mais il doit être présent** (c'est celui qui sert en DEV a priori).
+- `src-pwa/manifest.json` c'est le vrai manifest.
 - `src-pwa/custom-service-worker.js` correspond au SW qui sera exécuté.
 
 La seule directive utile dans `pwa:` est `workboxMode: 'InjectManifest'`. C'est elle qui va activer le `custom-service-worker`.
 
-Le manifest à générer est dans la configuration de `VitePWA`.
+#### Configuration de `VitePWA`.
 - `maximumFileSizeToCacheInBytes: 3000000` a été nécessaire du fait de la taille des assets générés.
-- `srcDir: 'src-pwa'` et `filename...` ne servent peut-être plus (à vérifier) mais `injectRegister: null` est définitivement indispensable.
+- `srcDir: 'src-pwa'` et `filename...` indiquent où `vite` va injecter la liste des fichiers à mettre en cache.
+- `injectRegister: null` indique à `vite` de ne pas invoquer register (c'est `workbox` qui le fait).
 
 ### `index.html`
 Le _template_ est obsolète (et ne marche plus), c'est directement un `index.html` à la racine qui est nécessaire avec une bannière `<!-- quasar:entry-point -->` obligatoire.
 
-Ce fichier est édité par `workbox / vite / quasar (?)`: il est **mal** généré avec un lien vers `manifest.json` à la racine du domaine `/manifest.json` et non à celle du site `./manifest.json`.
+Ce fichier est édité par `workbox / vite / quasar (?)`: il est **mal** généré avec des liens `href="/..."`, dont celui vers `manifest.json` à la racine du domaine `/manifest.json` et non à celle du site `./manifest.json`.
 
 Une ligne de script rectifie le résultat du build:
 
-    sed -i s"/\/manifest.json/.\/manifest.json/" dist/pwa/index.html
+    sed -i s"/href=\"\//href=\".\//g" dist/pwa/index.html
 
 ### Pas de PWA réel en DEV
 Par principe il est considéré qu'en DEV on n'est pas offline: le test du _vrai_ mode avion n'est possible que sur l'application buildée.

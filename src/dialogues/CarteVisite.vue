@@ -41,7 +41,6 @@
         <div>
           <video ref="webcam" autoplay playsinline width="240" height="180" :class="camOn ? '' : 'd-none'"></video>
           <canvas ref="canvas" class="d-none"></canvas>
-          <audio ref="sound" :src="clic" preload = "auto"></audio>
           <div v-if="!camOn" class="camoff">{{$t('CVoff')}}</div>
         </div>
         <div class=" q-py-md"> <!--  -->
@@ -67,16 +66,15 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onUnmounted } from 'vue'
 
 import Webcam from 'webcam-easy'
 import { Cropper } from 'vue-advanced-cropper'
 
 import stores from '../stores/stores.mjs'
-import { styp, readFile } from '../app/util.mjs'
+import { styp, readFile, beep } from '../app/util.mjs'
 import BtnCond from '../components/BtnCond.vue'
 import { CV } from '../app/modele.mjs'
-import { ID } from '../app/api.mjs'
 import { MajCv } from '../app/operations4.mjs'
 
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -90,17 +88,14 @@ const props = defineProps({
 
 const crop = ref()
 const webcam = ref()
-const sound = ref()
 const canvas = ref()
 const md = ref()
 
 const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 const config = stores.config
-const clic = stores.config.cliccamera
 const ncv = ref(new CV(props.cv.id, props.cv.v, props.cv.photo, props.cv.tx))
 
-const sty = computed(() => this.$q.dark.isActive ? 'sombre' : 'clair')
 const modif = computed(() => ncv.value.tx !== props.cv.tx || modifph.value)
 const modifph = computed(() => ncv.value.ph !== props.cv.ph)
 
@@ -148,10 +143,8 @@ function phok () {
 }
 
 function startCam () {
-  if (!cam.value) {
-    cam.value = new Webcam(webcam.value, 'user', canvas.value, 
-      silence.value ? null : sound.value)
-  }
+  if (!cam.value)
+    cam.value = new Webcam(webcam.value, 'user', canvas.value, null)
   cam.value.start()
   camOn.value = true
 }
@@ -163,9 +156,11 @@ function stopCam () {
   camOn.value = false
 }
 
-function snapCam () {
+async function snapCam () {
   if (camOn.value) {
     const x = cam.value.snap()
+    if (!silence.value)
+      await beep(config.cliccamera)
     file.value.type = x.substring(x.indexOf(':') + 1, x.indexOf(';'))
     file.value.b64 = x
   }

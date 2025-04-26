@@ -50,7 +50,7 @@ export const useConfigStore = defineStore('config', {
     ],
     portupload: 33666,
     phrases: [ ],
-      
+
     lgtitre: 120,
     maxlgtextegen: 250,
     maxlgtextenote: 5000,
@@ -63,10 +63,10 @@ export const useConfigStore = defineStore('config', {
     emojiIndex: null
   }),
 
-  
+
   getters: {
     session: (state) => stores.session,
-    motsclesLOC (state) { 
+    motsclesLOC (state) {
       const lg = useI18n().locale.value
       return state.motsclesloc[lg]
     },
@@ -95,7 +95,7 @@ export const useConfigStore = defineStore('config', {
     },
 
     async setConfig(cfg) {
-      if (cfg.tarifs) 
+      if (cfg.tarifs)
         Tarif.tarifs = cfg.tarifs
       for(const x in cfg) this[x] = cfg[x]
       for(const svc in this.services)
@@ -144,6 +144,7 @@ export const useConfigStore = defineStore('config', {
         console.log("User decided to change his settings. New permission: " + this.notificationPerm.state)
         await this.getPerm()
         if (this.permState === 'granted') await this.setSubscription()
+        else this.subJSON = '??? Notifications NON accordées par l\'utiisateur'
       }
     },
 
@@ -167,7 +168,7 @@ export const useConfigStore = defineStore('config', {
         console.log('subJSON: ' + this.subJSON.substring(0, 200))
       } catch (e) {
         console.log(e.toString())
-        this.subJSON = '???' + e.message
+        this.subJSON = '??? Souscription non obtenue - ' + e.message
       }
     },
 

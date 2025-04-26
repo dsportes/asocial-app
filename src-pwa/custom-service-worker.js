@@ -31,7 +31,7 @@ cleanupOutdatedCaches()
 
 // Non-SSR fallbacks to index.html
 // Production SSR fallbacks to offline.html (except for dev)
-/*
+
 if (process.env.MODE !== 'ssr' || process.env.PROD) {
   registerRoute(
     new NavigationRoute(
@@ -40,11 +40,8 @@ if (process.env.MODE !== 'ssr' || process.env.PROD) {
     )
   )
 }
-*/
 
 import { decode } from '@msgpack/msgpack'
-
-const local = {}
 
 const b64ToU8 = base64String => {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
@@ -76,10 +73,19 @@ self.addEventListener('push', (event) => {
   }
 })
 
+/* On peut appeler une fonction du SW depuis une app Web */
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'FROM_APP') {
+    console.log('Appel depuis app:' + JSON.stringify(event.data.payload))
+  }
+})
+
 /* Il est possible de récupérer la configuration services.json dans le SW
 - par ajout d'un listener 'install' qui charge le fichier
   et fait différer l'actiivation effective après le chargement
 - par récupération de la subscription lors de l'activation
+
+const local = {}
 
 self.addEventListener('install', event => {
   console.log('Install dans custom-service-worker')
@@ -104,10 +110,3 @@ self.addEventListener('activate', async event => {
   // console.log('Subscription dans SW: ' + local.subJSON)
 })
 */
-
-/* On peut appeler une fonction du SW depuis une app Web */
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'FROM_APP') {
-    console.log('Appel depuis app:' + JSON.stringify(event.data.payload))
-  }
-})

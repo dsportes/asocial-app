@@ -6,13 +6,6 @@ import { ID } from '../app/api.mjs'
 import { res } from '../app/util.mjs'
 
 export default boot(async ({ app /* Vue */ }) => {
-  /*
-  if('serviceWorker' in navigator) {
-    console.log('Register de Daniel')
-    navigator.serviceWorker.register('./sw.js')
-  }
-  */
-
   const readme = await res('README.md')
   const svc = await res('services.json')
 
@@ -46,18 +39,13 @@ export default boot(async ({ app /* Vue */ }) => {
     }
   })
 
-  cfg.iconAvatar = await res('images/avatar.jpg')
-  cfg.iconGroupe = await res('images/groupe.jpg')
-  cfg.iconSuperman = await res('images/superman.jpg')
-  cfg.iconComptable = await res('images/police.jpg')
+  cfg.iconAvatar = await res('icons/avatar.jpg')
+  cfg.iconGroupe = await res('icons/groupe.jpg')
+  cfg.iconSuperman = await res('icons/superman.jpg')
+  cfg.iconComptable = await res('icons/police.jpg')
 
-  /* N'importe quel binaire en .bin peut être chargé en dataURL:
-  - son MIME est 'application/octet-stream'
-  - pour le rendre utilisable il faut lui donner son 'vrai' type
-  Ici cliccamera est un pur .mp3 audio/mpeg
-  */
-  cfg.cliccamera = await res('images/cliccamera.bin')
-  cfg.beep = await res('images/beep.bin')
+  cfg.cliccamera = await res('sounds/cliccamera.mp3')
+  cfg.beep = await res('sounds/beep.mp3')
 
   cfg.planHelp = await res('help/a_plan.json')
 

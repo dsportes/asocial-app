@@ -2,7 +2,7 @@
 
 export const config = {
   // CONFIGURATION TECHNIQUE : à adapter SI NECESSAIRE à chaque déploiement
-  BUILD: 'v2.7',
+  BUILD: 'v2.8',
   APIVERSION: 2,
   mondebug: true,
 
@@ -13,7 +13,6 @@ export const config = {
     { value: 'fr-FR', label: 'Français', flag: '🇫🇷' }
   ],
 
-  silence: false,
   silenceHome: true,
   touchInMinutes: 10,
 

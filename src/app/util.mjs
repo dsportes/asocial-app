@@ -37,15 +37,14 @@ export async function res (name) {
   const response = await fetch(url)
   if (!response.ok) return null
   const t = name.substring(name.lastIndexOf('.') + 1)
-  if (t === 'json') return await response.json()
+  if (t === 'json')
+    return await response.json()
   const x = await response.bytes()
   if (t === 'md')
     return decoder.decode(x)
   if (t === 'jpg' || t === 'png')
     return 'data:image/' + t + ';base64,' + u8ToB64(x, true)
-  if (t === 'bin')
-    return 'data:audio/mpeg;base64,' + u8ToB64(x, true)
-  return x
+  return arrayBuffer(x)
 }
 
 /* i18n : fonction $t() ********************************************/
@@ -91,18 +90,13 @@ export function sty () {
 
 let audioContext = null
 
-export async function beep() {
-  const config = stores.config
-  if (config.silence) return
+export async function beep (son) {
   if (!audioContext) audioContext = new AudioContext()
-  const b64 = config.beep.substring(config.beep.indexOf(',') + 1)
-  const beep = toByteArray(b64)
-
-  const b = await audioContext.decodeAudioData(beep.buffer) // (arrayBuffer)
+  const b = await audioContext.decodeAudioData(son) // (arrayBuffer)
   const source = audioContext.createBufferSource() // creates a sound source
-  source.buffer = b                  // tell the source which sound to play
-  source.connect(audioContext.destination)       // connect the source to the context's destination (the speakers)
-  source.start()                          // play the source now
+  source.buffer = b // tell the source which sound to play
+  source.connect(audioContext.destination) // connect the source to the context's destination (the speakers)
+  source.start() // play the source now
 }
 
 export function html (exc) {

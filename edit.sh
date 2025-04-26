@@ -1,3 +1,3 @@
 #! /bin/bash
-sed -i s"/\/manifest.json/.\/manifest.json/" dist/pwa/index.html
+sed -i s"/href=\"\//href=\".\//g" dist/pwa/index.html
 

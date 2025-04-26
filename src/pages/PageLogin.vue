@@ -211,7 +211,8 @@ async function onps (phrase) {
   if (phrase) phrase.phrase = null
   await connexion(phrase, ui.razdb, orgE.value.org)
   ui.setParano(parano.value || '', optVal.value.value)
-  if (!config.silenceHome) await beep()
+  if (!config.silenceHome)
+    await beep(config.beep)
 }
 
 async function crypterphrase () {

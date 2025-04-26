@@ -122,24 +122,7 @@ export default defineConfig((ctx) => {
           srcDir: 'src-pwa',
           filename: 'custom-service-worker.js',
           injectRegister: null,
-          manifest: {
-            name: 'Application asocial',
-            short_name: 'asocial',
-            description: 'Application asocial',
-            theme_color: '#ffffff',
-            icons: [
-              {
-                src: './icons/icon-192x192.png',
-                sizes: '192x192',
-                type: 'image/png'
-              },
-              {
-                src: './icons/icon-512x512.png',
-                sizes: '512x512',
-                type: 'image/png'
-              }
-            ]
-          }
+          manifest: false // pris dans src-pwa
         }]
       ]
 
@@ -153,7 +136,7 @@ export default defineConfig((ctx) => {
     // Full list of options: https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-devServer
     devServer: {
       // https: true,
-      port: 8081,
+      port: 8082,
       host: 'localhost',
       open: false // opens browser window automatically
     },

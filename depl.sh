@@ -16,7 +16,7 @@ cp -f $dt1/services.json $pub/
 mv $depl/.git $temp
 cd $base
 yarn quasar build -m pwa
-sed -i s"/\/manifest.json/.\/manifest.json/" $dist/index.html
+sed -i s"/href=\"\//href=\".\//g" $dist/index.html
 
 rm -rf $depl/*
 cp -r $dist/* $depl
