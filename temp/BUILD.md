@@ -49,27 +49,29 @@ Ce fichier est édité par `workbox / vite / quasar (?)`: il est **mal** génér
 
 Une ligne de script rectifie le résultat du build:
 
-    sed -i s"/href=\"\//href=\".\//g" dist/pwa/index.html
+        #! /bin/bash
+        sed -i s"/href=\"\//href=\".\//g" dist/pwa/index.html
+        sed -i s"/content=\"\//content=\".\//g" dist/pwa/index.html
 
 ### Pas de PWA réel en DEV
 Par principe il est considéré qu'en DEV on n'est pas offline: le test du _vrai_ mode avion n'est possible que sur l'application buildée.
 
 Pour builder il faut 2 commandes:
 
-    npm run build:pwa
-    OU
-    yarn quasar build -m pwa
+        npm run build:pwa
+        OU
+        yarn quasar build -m pwa
 
-    ./edit.sh
-    OU
-    sed -i s"/\/manifest.json/.\/manifest.json/" dist/pwa/index.html
+        ./edit.sh
+        OU
+        ./edit.ps1
 
 On peut tester cette build en mode avion:
 
-    npx http-server . -p 8081 --cors
+        npx http-server . -p 8081 --cors
 
-    L'URL à invoquer est:
-    localhost:8081/pwa
+        L'URL à invoquer est:
+        localhost:8081/pwa
 
 On teste ainsi le bon fonctionnement avec un site de l'application PAS à la racine du domaine.
 
@@ -89,7 +91,6 @@ Il reste à faire un `commit git` de `asocialapps-t1` pour que ce soit en ligne 
 
     (Get-Content dist/pwa/index.html) |
       ForEach-Object { $_ -replace '/manifest.json', './manifest.json.' } |
-      Set-Content dist/pwa/index.html -WhatIf
+      Set-Content dist/pwa/index.html
 
-    Note: The -WhatIf common parameter in the command above previews the operation. Remove -WhatIf once you're sure the operation will do what you want.
 
