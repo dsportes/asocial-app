@@ -570,12 +570,12 @@ export default {
   // App.vue reload
   RLnvver: 'Nouvelle version disponible',
   RLnvver2: 'Une nouvelle version a été téléchargée et est prête à être installée',
-  RLtit1: 'Il est important d\'en bénéficier le plus tôt possible en raison d\'éventuels correctifs d\'erreurs qu\'ele peut inclure.',
+  RLtit1: 'Il est important d\'en bénéficier le plus tôt possible en raison d\'éventuels correctifs d\'erreurs qu\'elle peut inclure.',
   RLtit2: 'L\'installation initialise une nouvelle session et le besoin de se connecter à nouveau.', 
   RLopt: 'Option {0} :',
   RLopt1: 'presser le bouton ',
-  RLopt2: 'presser CONTROL+F5 (sur Mac SHIFT+CMD+R)',
-  RLopt3: 'fermer la fenêtre / onglet puis appeler à nouveau l\'aplication dans une nouvelle fenêtre / onglet.',
+  // RLopt2: 'presser CONTROL+F5 (sur Mac SHIFT+CMD+R)',
+  RLopt3: 'fermer TOUS les onglets et fenêtres où s\'exécute l\'application puis l\'appeler à nouveau dans une nouvelle fenêtre / onglet.',
   RLinstal: 'Installer',
 
   // OutilsTests.vue
@@ -1899,12 +1899,13 @@ Sinon,
 `,
 
   BULLErl1: `Mais ça ne marche pas avec tous les navigateurs.
-- si l'installation n'a pas eu lieu, utiliser l'option 2 ou l'option 3.
+- si l'installation n'a pas eu lieu, utiliser l'option 2.
 `,
 
+/*
   BULLErl2: `En général c'est efficace, mais sur smartphone il n'y a ni touche CONTROL, ni touche de fonction F5
 `,
-
+*/
   BULLEhashtags: `A droite les hashtags déjà utilisés, à gauche ceux de la sélection. 
   - Ajouter un hashtag non trouvé à droite: le saisir et touche ENTREE
   - Ajouter un hashtag présent à droite: cliquer dessus

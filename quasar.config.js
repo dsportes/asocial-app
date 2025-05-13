@@ -12,6 +12,15 @@ import { defineConfig } from '#q-app/wrappers'
 import { fileURLToPath } from 'node:url'
 import { VitePWA } from 'vite-plugin-pwa'
 
+const htmlPlugin = () => {
+  return {
+    name: 'html-transform',
+    transformIndexHtml(html) {
+      return html.replaceAll('href="/', 'href="./').replaceAll('content="/', 'content="./')
+    },
+  }
+}
+
 export default defineConfig((ctx) => {
   return {
     /*
@@ -123,7 +132,8 @@ export default defineConfig((ctx) => {
           filename: 'custom-service-worker.js',
           injectRegister: null,
           manifest: false // pris dans src-pwa
-        }]
+        }],
+        [htmlPlugin, {}]
       ]
 
       // https://v2.quasar.dev/quasar-cli-webpack/handling-webpack

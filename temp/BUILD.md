@@ -56,17 +56,13 @@ Une ligne de script rectifie le résultat du build:
 ### Pas de PWA réel en DEV
 Par principe il est considéré qu'en DEV on n'est pas offline: le test du _vrai_ mode avion n'est possible que sur l'application buildée.
 
-Pour builder il faut 2 commandes:
+Pour builder:
 
         npm run build:pwa
         OU
         yarn quasar build -m pwa
 
-        ./edit.sh
-        OU
-        ./edit.ps1
-
-On peut tester cette build en mode avion:
+Pour tester cette build en mode avion:
 
         npx http-server . -p 8081 --cors
 
@@ -85,12 +81,3 @@ On peut tester avant de déployer vraiment:
     npx http-server . -p 8081 --cors
 
 Il reste à faire un `commit git` de `asocialapps-t1` pour que ce soit en ligne sous `asocialapps.github.io/t1`.
-
-# PowerShell équivalent de `sed`
-(à tester sous Windows)
-
-    (Get-Content dist/pwa/index.html) |
-      ForEach-Object { $_ -replace '/manifest.json', './manifest.json.' } |
-      Set-Content dist/pwa/index.html
-
-

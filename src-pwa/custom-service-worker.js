@@ -31,11 +31,22 @@ cleanupOutdatedCaches()
 
 // Non-SSR fallbacks to index.html
 // Production SSR fallbacks to offline.html (except for dev)
-
+/*
 if (process.env.MODE !== 'ssr' || process.env.PROD) {
   registerRoute(
     new NavigationRoute(
       createHandlerBoundToURL(process.env.PWA_FALLBACK_HTML),
+      { denylist: [new RegExp(process.env.PWA_SERVICE_WORKER_REGEX), /workbox-(.)*\.js$/] }
+    )
+  )
+}
+*/
+if (process.env.PROD) {
+  registerRoute(
+    new NavigationRoute(
+      // @ts-ignore
+      createHandlerBoundToURL(process.env.PWA_FALLBACK_HTML),
+      // @ts-ignore
       { denylist: [new RegExp(process.env.PWA_SERVICE_WORKER_REGEX), /workbox-(.)*\.js$/] }
     )
   )
@@ -77,6 +88,14 @@ self.addEventListener('push', (event) => {
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'FROM_APP') {
     console.log('Appel depuis app:' + JSON.stringify(event.data.payload))
+  } else if (event.data && event.data.type === 'STARTING') {
+    console.log('SW: Duplicate App detection')
+    event.waitUntil(
+      clients.matchAll().then((clientList) => {
+        for(const client of clientList)
+          if (client.id !== event.source.id) event.source.postMessage({ type: 'STOP' })
+      })
+    )
   }
 })
 

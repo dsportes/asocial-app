@@ -48,8 +48,7 @@
     "workbox-expiration": "^7.0.0",
     "workbox-precaching": "^7.0.0",
     "workbox-routing": "^7.3.0",
-    "workbox-strategies": "^7.0.0",
-    "workbox-webpack-plugin": "^7.1.0"
+    "workbox-strategies": "^7.0.0"
   },
   "browserslist": [
     "last 10 Chrome versions",
@@ -65,6 +64,6 @@
   "engines": {
     "node": "^28 || ^26 || ^24 || ^22 || ^20 || ^18",
     "npm": ">= 6.13.4",
-    "yarn": ">= 1.22.22"
+    "yarn": ">= 1.22.19"
   }
 }

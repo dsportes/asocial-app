@@ -16,7 +16,6 @@ cp -f $dt1/services.json $pub/
 mv $depl/.git $temp
 cd $base
 yarn quasar build -m pwa
-./edit.sh
 
 rm -rf $depl/*
 cp -r $dist/* $depl

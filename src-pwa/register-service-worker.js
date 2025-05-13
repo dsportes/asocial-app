@@ -2,11 +2,23 @@ import { register } from 'register-service-worker'
 
 import stores from '../src/stores/stores.mjs'
 
+import { urlFromText, byeHtml } from '../src/app/util.mjs'
+
+
 // The ready(), registered(), cached(), updatefound() and updated()
 // events passes a ServiceWorkerRegistration instance in their arguments.
 // ServiceWorkerRegistration: https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerRegistration
 
 // register(process.env.SERVICE_WORKER_FILE, {
+
+navigator.serviceWorker.onmessage = (message) => {
+  if (message.data) {
+    if (message.data.type === 'STOP')
+      window.location.href = urlFromText(byeHtml)
+    else
+      console.log('Message reçu ??? :' + JSON.stringify(message.data))
+  }
+}
 
 register('./sw.js', {
   // The registrationOptions object will be passed as the second argument
@@ -16,16 +28,17 @@ register('./sw.js', {
   // registrationOptions: { scope: './' },
 
   async ready (registration) {
-    console.log('DSDSDSService worker is active.')
+    console.log('Service worker is active.')
     await stores.config.setRegistration(registration)
+    registration.active.postMessage({ type: 'STARTING' })
   },
 
   registered (registration) {
-    console.log('DSDSDSService worker has been registered.')
+    console.log('Service worker has been registered.')
   },
 
   cached (registration) {
-    console.log('DSDSDSContent has been cached for offline use.')
+    console.log('Content has been cached for offline use.')
   },
 
   updatefound (/* registration */) {

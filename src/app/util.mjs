@@ -43,7 +43,7 @@ export async function res (name) {
   if (t === 'md')
     return decoder.decode(x)
   if (t === 'jpg' || t === 'png')
-    return 'data:image/' + t + ';base64,' + u8ToB64(x, true)
+    return 'data:image/' + t + ';base64,' + u8ToB64(x)
   return arrayBuffer(x)
 }
 
@@ -567,4 +567,29 @@ export class HelpTree {
     const x = chp || this.arbre
     x.push({ id: page[0], label: $t('A_' + page[0]), children: ch, type: n })
   }
+}
+export const byeHtml =  `<html><head><meta charset="utf-8">
+<style>div {font-size:18px;margin:12px;font-family:sans-serif;text-align:center;};</style>
+</head>
+<body>
+<div>Le lancement de l'application plus d'une fois dans ce browser n'est pas autorisé.</div>
+<a href="https://asocialapps.github.io/frdocs/">Help / Aide</a>
+</body></html>`
+
+export function urlFromText (text, type) {
+  const blob = new Blob([encoder.encode(text)], { type: type || 'text/html' })
+  return URL.createObjectURL(blob)
+}
+
+export function reloadPage () {
+  const hr = window.location.href
+  const t =  `<html><head><meta charset="utf-8">
+<script>
+setTimeout(() => { window.location.href = "${hr}" }, 2000)
+</script>
+<style>div {font-size:18px;margin:12px;font-family:sans-serif;text-align:center;};</style>
+</head><body>
+<div>Rechargement de l'application, merci d'attendre 2s.</div>
+</body></html>`
+  window.location.href = urlFromText(t)
 }

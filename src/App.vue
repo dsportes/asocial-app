@@ -46,7 +46,7 @@
       <q-toolbar-title>
         <div class="row justify-between items-center">
           <div v-if="(!session.ok || (session.ok && session.accesNet)) && config.nouvelleVersion" @click="ui.oD('reload', 'a')" 
-            class="bg-negative row items-center">
+            class="bg-negative row items-center cursor-pointer">
             <span class="titre-sm text-white text-bold q-mr-sm">{{$t('RLnvver')}}</span>
             <q-icon name="system_update" size="sm" color="white"/>
           </div>
@@ -313,16 +313,16 @@
         <bouton-bulle idtext="BULLErl1"/>
       </div>
 
-      <div class="row no-wrap items-start justify-between q-mb-sm">
+      <!--div class="row no-wrap items-start justify-between q-mb-sm">
         <div class="row">
           <div class="titre-md text-bold text-primary q-pr-sm lg1">{{$t('RLopt', ['2'])}}</div>
           <div class="titre-md">{{$t('RLopt2')}}</div>
         </div>
         <bouton-bulle class="text-right" idtext="BULLErl2"/>
-      </div>
+      </div-->
 
       <div class="row no-wrap items-start q-mb-sm">
-        <div class="titre-md text-bold text-primary q-pr-sm lg1">{{$t('RLopt', ['3'])}}</div>
+        <div class="titre-md text-bold text-primary q-pr-sm lg1">{{$t('RLopt', ['2'])}}</div>
         <div class="titre-md">{{$t('RLopt3')}}</div>
       </div>
 
@@ -442,9 +442,8 @@ import { useI18n } from 'vue-i18n'
 
 import stores from './stores/stores.mjs'
 
-import { set$t, hms, dkli, styp } from './app/util.mjs'
+import { set$t, reloadPage, dkli, styp } from './app/util.mjs'
 import { deconnexion, SyncFull } from './app/synchro.mjs'
-import { CV } from './app/modele.mjs'
 
 import BtnCond from './components/BtnCond.vue'
 import IconMode from './components/IconMode.vue'
@@ -452,7 +451,6 @@ import BoutonHelp from './components/BoutonHelp.vue'
 import BoutonLangue from './components/BoutonLangue.vue'
 import BoutonBulle from './components/BoutonBulle.vue'
 import IconAlerte from './components/IconAlerte.vue'
-import QueueIcon from './components/QueueIcon.vue'
 import FiltreNonlus from './components/FiltreNonlus.vue'
 import FiltreNom from './components/FiltreNom.vue'
 import FiltreMc from './components/FiltreMc.vue'
@@ -603,9 +601,8 @@ async function reconnexion () {
 }
 
 function reload () { 
-  setTimeout(() => {
-    location.reload(true) 
-  }, 1000)
+  reloadPage()
+  // setTimeout(() => { location.reload(true)  }, 1000)
 }
 
 function stopop () {
