@@ -30,16 +30,16 @@ a accès aux membres (donc dans l'onglet "membres").
         </div>
 
         <div class="q-mt-xs row justify-end q-gutter-xs">
-          <btn-cond v-if="stm >= 1 && stm <= 3 && gSt.egrC.estAnim" 
+          <btn-cond v-if="stm >= 1 && stm <= 3 && gSt.egrC.estAnim"
             icon="grade" cond="cEdit" stop flat
             :label="$t('AMinvitbtn1')" @ok="ouvririnvit"/>
-          <btn-cond v-if="stm === 3 && session.estAvc(id)" 
+          <btn-cond v-if="stm === 3 && session.estAvc(id)"
             icon="check" cond="cEdit" stop flat
             :label="$t('AMinvitbtn2')" @ok="accinvit"/>
-          <btn-cond v-if="stm >= 4" 
+          <btn-cond v-if="stm >= 4"
             icon="check" cond="cEdit" stop flat
             :label="$t('AMinvitbtn3')" @ok="gererDroits"/>
-          <btn-cond v-if="stm === 1 || stm >= 4" 
+          <btn-cond v-if="stm === 1 || stm >= 4"
             icon="close" cond="cEdit" stop flat
             :label="$t('AMinvitbtn4')" @ok="radiation"/>
         </div>
@@ -117,7 +117,7 @@ a accès aux membres (donc dans l'onglet "membres").
     </div>
   </q-expansion-item>
 
-  <!-- Dialogue d'invitation 
+  <!-- Dialogue d'invitation
   A minima UN des avatars du compte est animateur, pas forcément l'avatar courant
   -->
   <dial-std2 v-if="m1" v-model="m1" :titre="$t('AMinvtit', [nomm, nomg])" help="dial_invit">
@@ -127,7 +127,7 @@ a accès aux membres (donc dans l'onglet "membres").
 
       <!--affiche l'avatar du compte animateur choisi, en forçant à choisir, si choix il y a -->
       <sel-avidgr/>
-    
+
       <div class="row justify-betwwen items-end">
         <!--span class="titre-lg">{{$t('AMcas' + stm)}}</span--> <!-- 1: création invit, 2: vote, 3: déjà invité -->
         <span v-if="stm > 1" class="titre-md q-ml-md">[ {{edFlagsiv}} ]</span>
@@ -157,7 +157,7 @@ a accès aux membres (donc dans l'onglet "membres").
       </div>
       <div v-else class="full-width titre-md text-center">{{$t('AMopt0')}}</div>
 
-      <!-- Edition / création d'une invitation 
+      <!-- Edition / création d'une invitation
       rmsv: 0: inviter, 1: renoncer, 2: modifier, 3: supprimer, 4: voter pour -->
       <div v-if="rmsv !== 3 && rmsv !== 1" class="full-width">
         <droits-membre v-model="drMb" :id="id" />
@@ -165,8 +165,8 @@ a accès aux membres (donc dans l'onglet "membres").
         <div class="q-mt-md titre-md text-italic">{{$t('AMbienv')}}</div>
         <editeur-md class="q-my-sm bord1" :lgmax="1000" v-model="msg" :texte="msg"
           modetxt mh="8rem" editable/>
-        
-        <div v-if="gr.msu && stm !== 1 && (nvfl !== invits.fl || mb.msg !== msg)" 
+
+        <div v-if="gr.msu && stm !== 1 && (nvfl !== invits.fl || mb.msg !== msg)"
           class="msg">{{$t('AMchg')}}</div>
       </div>
 
@@ -262,7 +262,7 @@ const m2 = computed(() => ui.d[idc].IAaccinvit)
 const m3 = computed(() => ui.d[idc].AMdroits)
 const m4 = computed(() => ui.d[idc].AMradiation)
 
-const props = defineProps({ 
+const props = defineProps({
   id: String, // id de l'avatar membre
   idx: Number
 })
@@ -276,10 +276,10 @@ const optSuppr = ref([
 const optRad = ref([])
 const rmsv = ref(1) // 1 = ref(ne pas changer, 2:modifier, 3 = ref(supprimer, 4 = ref(voter
 const ina = ref(false)
-const idm = ref(false) 
-const idn = ref(false) 
-const ide = ref(false) 
-const iam = ref(false) 
+const idm = ref(false)
+const idn = ref(false)
+const ide = ref(false)
+const iam = ref(false)
 const ian = ref(false)
 const msg = ref('')
 const invparf = ref(null)
@@ -299,6 +299,8 @@ const estAnim = computed(() => gr.value.estAnim(gr.value.mmb.get(session.avatarI
 const mb = computed(() => gSt.egrC && gSt.egrC.membres ? gSt.egrC.membres.get(im.value) : null)
 const im = computed(() => gSt.egrC && gSt.egrC.groupe ? gSt.egrC.groupe.mmb.get(props.id) : 0)
 const gr = computed(() => gSt.egrC.groupe)
+const fond = computed(() => gr.value
+  && gr.value.tid[1] === avid.value)
 const amb = computed(() => gr.value.accesMembre(im.value))
 const ano = computed(() => gr.value.accesNote2(im.value))
 const fl = computed(() => gr.value.flags[im.value])
@@ -320,7 +322,7 @@ async function accinvit () {
   ui.oD('IAaccinvit', idc)
 }
 
-const edFlagsiv = computed(() => { 
+const edFlagsiv = computed(() => {
   const f = invits.value.fl
   if (!f) return ''
   const ed = []
@@ -331,7 +333,7 @@ const edFlagsiv = computed(() => {
   return ed.join(', ')
 })
 
-const edFlags2 = computed(() => { 
+const edFlags2 = computed(() => {
   const f = fl.value
   if (!f) return ''
   const ed = []
@@ -358,12 +360,12 @@ const nvfl = computed(() => {
 // avatars du compte étant animateurs du groupe courant: { l:[{ label: nom, value: id}], m: Map(id, {...})}
 const optAvAnims = computed(() => gSt.avcAnims)
 
-const nbAnimsAp2 = computed(() => { 
+const nbAnimsAp2 = computed(() => {
   const anav = stm.value === 5 ? true : false
   const n = gr.value.nbAnims
   return anav ? n - 1 : n
 })
-const nbActifsAp = computed(() => { 
+const nbActifsAp = computed(() => {
   const acav = stm.value >= 4 ? true : false
   const n = gr.value.nbActifs
   return acav ? n - 1 : n
@@ -387,10 +389,12 @@ const chgDr = computed(() => (drMb.value.fl !== drMbAv.value.fl) || (drMb.value.
 async function gererDroits () {
   if (gSt.egrC.estAnim) {
     if (stm.value === 5 && !session.compte.mav.has(props.id)) {
-      await afficherDiag($t('AGpasdroits'))
-      return
+      if (!fond.value) {
+        await afficherDiag($t('AGpasdroits'))
+        return
+      }
     }
-  } else { 
+  } else {
     if (!session.compte.mav.has(props.id)) {
       await afficherDiag($t('AGpasdroits2'))
       return
@@ -415,7 +419,7 @@ async function radiation () {
       await afficherDiag($t('AGpasrad'))
       return
     }
-  } else { 
+  } else {
     if (!session.compte.mav.has(props.id)) {
       await afficherDiag($t('AGpasrad2'))
       return
@@ -454,7 +458,7 @@ async function ouvririnvit () {
   if ((f & FLAGS.DN) !== 0) fl |= FLAGS.DN
   if ((f & FLAGS.DE) !== 0) fl |= FLAGS.DE
   drMb.value = { fl, anim }
-  
+
   msg.value = mb.value.msg || $t('invitation')
   suppr.value = 1
   // session.setMembreId(im.value)

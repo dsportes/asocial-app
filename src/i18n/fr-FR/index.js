@@ -3,7 +3,7 @@ export default {
   nomDeAdmin: 'Administrateur',
   nomPartitionPrimitive: 'Primitive',
   defhashtags: 'important indesirable alire archive',
-  
+
   aide: 'Un peu d\'aide ... ', // PageAccueil
 
   sync: 'Synchronisé', // PageLogin Page Session
@@ -163,7 +163,7 @@ export default {
   FLAGS5: 'a pu voir les membres', // HM
   FLAGS6: 'a pu voir les notes', // HN
   FLAGS7: 'a pu éditer les notes', // HE
-  
+
   // FiltreDel
   roledel0: '(ignorer)',
   roledel1: 'Compte de ma partition',
@@ -547,7 +547,7 @@ export default {
   LOGsp2: 'Sponsoring dèjà accepté',
   LOGsp3: 'Sponsoring annulé par le sponsor',
   LOGnosp: 'Le compte du Comptable ne peut pas être créé: la phrase d\'autorisation déclarée par l\'Administrateur Technique n\'est pas celle saisie.',
-  LOGnosp2: '(BUG) Clé E non decryptable. Demander à l\'Administrateur Technique de décklarer une nouvelle phrase d\'autisation de compte Comptable.', 
+  LOGnosp2: '(BUG) Clé E non decryptable. Demander à l\'Administrateur Technique de décklarer une nouvelle phrase d\'autisation de compte Comptable.',
   LOGparano1: 'Verrouillage (fac.) pour les paranoïaques',
   LOGparano2: 'Code PIN de déverrouillage',
   LOGparah: '4 c. de 1 à 9',
@@ -571,7 +571,7 @@ export default {
   RLnvver: 'Nouvelle version disponible',
   RLnvver2: 'Une nouvelle version a été téléchargée et est prête à être installée',
   RLtit1: 'Il est important d\'en bénéficier le plus tôt possible en raison d\'éventuels correctifs d\'erreurs qu\'elle peut inclure.',
-  RLtit2: 'L\'installation initialise une nouvelle session et le besoin de se connecter à nouveau.', 
+  RLtit2: 'L\'installation initialise une nouvelle session et le besoin de se connecter à nouveau.',
   RLopt: 'Option {0} :',
   RLopt1: 'presser le bouton ',
   // RLopt2: 'presser CONTROL+F5 (sur Mac SHIFT+CMD+R)',
@@ -642,7 +642,7 @@ export default {
   HLPdg: 'Site de documentaion de l\'application',
   HLPmenu: 'Voir le détail dans le menu ci-dessus, rubrique _{0}_',
   HLPrm1: 'Note à propos de la révision de l\'application: quels sources ...',
-  HLPrm2: 'En savoir plus: "Analyse de la confiance ..."', 
+  HLPrm2: 'En savoir plus: "Analyse de la confiance ..."',
   HLPurls: 'URLs des services externes:',
 
   // Page sponsorings - Nouveau sponsoring
@@ -688,7 +688,7 @@ export default {
   SHed: 'Editer',
   SHpe: 'Plein écran',
   SHre: 'Réduire',
-  
+
   // DialogueErreur
   ERdec: 'Se déconnecter',
   ERfige: 'Voir les Alertes',
@@ -888,7 +888,7 @@ export default {
   GRC11: 'Simple',
   GRC12: 'Lect.',
   GRC13: 'Restr.',
-  
+
   GRC20: 'Quota',
   GRC21: '%attr',
   GRC22: '%util.',
@@ -1054,7 +1054,7 @@ export default {
   ISst0: 'fermée, connexion possible',
   ISst1: 'connexion en cours',
   ISst2: 'ouverte',
-  
+
   // App et PageAccueil
   PNCntf: 'Alertes',
   PNCabo: 'Abon. / Conso.',
@@ -1191,11 +1191,11 @@ export default {
   DFdispm: '(déjà en mémoire)',
 
   // NoteConfirme
-  NCFm0: 'Droits insuffisants pour exécuter cette opération', 
+  NCFm0: 'Droits insuffisants pour exécuter cette opération',
   NCFm1: 'C\'est une note de groupe: au moins un des avatars du compte doit avoir le droit d\'écriture sur les notes du groupe.',
   NCFm2: 'Cette note de groupe a une exclusivité d\'écriture pour {0} qui n\'est pas un des avatars du compte. Pour cette opération, il faudrait que un de vos avatars ait pouvoir d\'animateur.',
   NCFsuppr: 'Confirmer la suppression de la note',
-  
+
   // NotePlus
   NPLnote: 'Note {0}',
 
@@ -1255,7 +1255,7 @@ export default {
   PNFnv15: 'Suivi de l\'opération',
   PNFnv15a: 'Opération impossible : le compte dépasserait son quota de volume de fichiers de {0} bytes.',
   PNFnv15a: 'Opération impossible : le groupe dépasserait le volume maximum de fichiers déclaré par l\'hébergeur de {0} bytes.',
-  PNFnvs0: 'Compression éventuelle et cryptage', 
+  PNFnvs0: 'Compression éventuelle et cryptage',
   PNFnvs1: 'Transfert vers le serveur de fichiers',
   PNFnvs2: 'Validation',
   PNFgetEr: 'Contenu du fichier non disponible (corrompu ? effacé ?).',
@@ -1273,7 +1273,7 @@ export default {
   EMDjr: 'Je reste sur cette fenêtre',
   EMDjq: 'Je quitte la fenêtre et perd mes modifications',
   EMDph: 'texte ici ...',
-  
+
   // ContactChat
   CChtit: 'Créer un chat',
   CChnopc: 'Aucun avatar n\'a enregistré cette phrase de contact',
@@ -1456,7 +1456,7 @@ export default {
   AMchinv: 'Quel avatar est "invitant" ?',
   AMchg: 'Les droits où le message de bienvenue ont changé, les votes des autres animateurs seront effacées.',
   AMlng: 'en liste noire (par un animateur)',
-  AMlnc: 'en liste noire (par lui-même)',  
+  AMlnc: 'en liste noire (par lui-même)',
 
   AMm0: 'Radié',
   AMm1: 'Contact',
@@ -1486,8 +1486,8 @@ export default {
   ICbienv: 'Message d\'invitation',
   ICrem1: 'Remerciement ...',
   ICrem2: 'Raison du refus ...',
-  ICacc: 'J\'accepte', 
-  ICdec: 'Je décline', 
+  ICacc: 'J\'accepte',
+  ICdec: 'Je décline',
   ICd2: 'Me conserver comme contact, je pourrai plus tard être à nouveau invité',
   ICd3: 'Me radier de ce groupe, je n\'y apparaîtrai plus',
   ICd4: 'Me radier de ce groupe ET me mettre en "liste noire"',
@@ -1551,10 +1551,9 @@ export default {
 
   AGupasan: 'Seul un animateur est habilité pour cette action, mais aucun de vos avatars n\'est "animateur" dans ce groupe.',
   AGupasan2: 'Seul un animateur ayant accès aux membres est habilité pour cette action, mais ce n\'est le cas pour aucun de vos avatars.',
-  AGpasdroits: 'Un animateur ne peut pas changer les droits d\'un autre animateur (sauf les siens)',
   AGpasrad: 'Un animateur ne peut pas radier un autre animateur (sauf lui-même)',
   AGpasrad2: 'Un membre NON animateur peut s\'auto-radier mais ne peut pas radier d\'autres membres',
-  AGpasdroits: 'Un animateur ne peut pas changer les droits d\'un autre animateur (sauf lui-même)',
+  AGpasdroits: 'Un animateur non fondateur ne peut pas changer les droits d\'un autre animateur (sauf lui-même)',
   AGpasdroits2: 'Un membre NON animateur peut changer ses propres droits, mais pas ceux d\'autres membres',
 
   AGumu: 'Passer en mode UNANIME',
@@ -1631,10 +1630,10 @@ export default {
   NAw2: 'et caractères non imprimables (CR TAB ...) interdits.',
   NAng: 'Nom du groupe',
   NAna: 'Nom de l\'avatar',
-  NAph0: 'Saisir un nom', 
+  NAph0: 'Saisir un nom',
   NAe1: 'Entre {0} et {1} caractères',
   NAe2: 'Caractères interdits',
-  
+
   // CarteVisite
   CVtit: 'Édition de la carte de visite',
   CVsil: 'Clic silencieux',
@@ -1654,7 +1653,7 @@ export default {
   // AcceptationSponsoring
   APAconf: 'Confirmer la création du compte',
   APAdec2: 'Décliner définitivement ce sponsoring',
-  APAcf2: 'Ne pas ouvrir de "chat" avec {0}', 
+  APAcf2: 'Ne pas ouvrir de "chat" avec {0}',
 
   // Aperçu Alerte
   ANlong0: 'Tout est OK, aucune Alerte.',
@@ -1871,9 +1870,9 @@ export default {
 */
 
   BULLEclos: 'Application figée par l\'administrateur technique: aucune mise à jour possible',
-  
+
   BULLEinv2: `Décliner l\'invitation et rester en tant que "contact" du groupe:
-- je pourrai être ré-invité plus tard à des conditions éventuellemnt différentes, 
+- je pourrai être ré-invité plus tard à des conditions éventuellemnt différentes,
 - je reste connu dans le groupe, en particulier vis à vis des notes que j'aurais pu écrire dans le passé`,
 
   BULLEinv3: `Décliner l\'invitation MAIS M'OUBLIER:
@@ -1889,7 +1888,7 @@ export default {
   BULLEexclu: `
 Seul un avatar ayant droit d'écriture dans le groupe peut avoir l'exclusivité d'écriture d'une note.
 
-Si une note a une exclusivité d\'écriture pour un avatar ayant droit d'écriture sur le groupe, 
+Si une note a une exclusivité d\'écriture pour un avatar ayant droit d'écriture sur le groupe,
 - le compte de cet avatar peut la transférer ou la supprimer.
 - un compte animateur du groupe peut aussi la transférer SAUF si l'avatar ayant l'exclusivité est lui-même animateur du groupe.
 
@@ -1906,7 +1905,7 @@ Sinon,
   BULLErl2: `En général c'est efficace, mais sur smartphone il n'y a ni touche CONTROL, ni touche de fonction F5
 `,
 */
-  BULLEhashtags: `A droite les hashtags déjà utilisés, à gauche ceux de la sélection. 
+  BULLEhashtags: `A droite les hashtags déjà utilisés, à gauche ceux de la sélection.
   - Ajouter un hashtag non trouvé à droite: le saisir et touche ENTREE
   - Ajouter un hashtag présent à droite: cliquer dessus
   - Enlever un hashtag sélectionné à gauche: cliquer dessus
@@ -1945,9 +1944,9 @@ La "consommation mensuelle" de calcul est en centimes et est la somme des coûts
   Pcontactgr: 'Tous les contacts',
   Pnotes: 'Toutes les notes',
   Pficavion: 'Fichiers visibles en avion',
-  
+
   A_DOCpg: 'L\'application "a-social"',
-  
+
   A_pages: 'Pages de l\'application',
   A_pages_struct: 'Disposition générale d\'une page',
   A_page_accueil: 'Page d\'accueil',

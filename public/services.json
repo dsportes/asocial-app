@@ -1,14 +1,14 @@
 {
   "vapid_public_key": "BC8J60JGGoZRHWJDrSbRih-0qi4Ug0LPbYsnft668oH56hqApUR0piwzZ_fsr0qGrkbOYSJ0lX1hPRTawQE88Ew",
-  "docsurls": { 
-    "fr-FR": "https://asocialapps.github.io/frdocs", 
-    "en-EN": "https://asocialapps.github.io/frdocs" 
+  "docsurls": {
+    "fr-FR": "https://asocialapps.github.io/frdocs",
+    "en-EN": "https://asocialapps.github.io/frdocs"
   },
   "services": {
     "z": {
       "opurl": "http://localhost:8080",
       "pubsuburl": "http://localhost:8080",
-      "orgs": ["local"]        
+      "orgs": ["doda"]
     }
-  } 
+  }
 }
