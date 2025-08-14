@@ -45,13 +45,8 @@ La seule directive utile dans `pwa:` est `workboxMode: 'InjectManifest'`. C'est 
 ### `index.html`
 Le _template_ est obsolète (et ne marche plus), c'est directement un `index.html` à la racine qui est nécessaire avec une bannière `<!-- quasar:entry-point -->` obligatoire.
 
-Ce fichier est édité par `workbox / vite / quasar (?)`: il est **mal** généré avec des liens `href="/..."`, dont celui vers `manifest.json` à la racine du domaine `/manifest.json` et non à celle du site `./manifest.json`.
-
-Une ligne de script rectifie le résultat du build:
-
-        #! /bin/bash
-        sed -i s"/href=\"\//href=\".\//g" dist/pwa/index.html
-        sed -i s"/content=\"\//content=\".\//g" dist/pwa/index.html
+Ce fichier est édité par `workbox / vite / quasar`: le plugin `htmlPlugin` dans quasar-config.js
+a pour fonction de _corriger_ le html généré qui de base n'est pas correct.
 
 ### Pas de PWA réel en DEV
 Par principe il est considéré qu'en DEV on n'est pas offline: le test du _vrai_ mode avion n'est possible que sur l'application buildée.
