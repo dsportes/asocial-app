@@ -54,7 +54,7 @@
     <q-separator />
     <q-card-section>
       <editeur-md ref="md" :texte="cv.tx" v-model="ncv.tx"
-        editable modetxt mh="10rem"></editeur-md>
+        editable modetxt mh="10rem"/>
     </q-card-section>
     <q-separator />
     <q-card-actions align="right" class="q-gutter-sm">

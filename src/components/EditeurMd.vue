@@ -1,45 +1,16 @@
 <template>
 <div ref="root">
-  <q-card v-if="!ui.d[idc].EMmax" :class="dkli(idx)">
-    <div :style="'height:' + (mh || '10rem')" class="dlx">
-      <q-layout container view="hHh lpR fFf">
-        <q-header elevated>
-          <q-toolbar class="fs-md full-width tbs">
-            <btn-cond class="q-mr-xs" @ok="ui.oD('EMmax', idc)" icon="zoom_out_map" flat color="white"/>
-            <btn-cond flat color="white" :icon="md ? 'edit' : 'visibility'" 
-              round @ok="md = !md"/>
-            <btn-cond v-if="editable && !md" :disable="md" class="q-mr-xs" @ok="ouvriremojimd1"
-              icon="insert_emoticon" flat color="white"/>
-            <btn-cond v-if="modifie" class="q-mr-xs" @ok="undo" icon="undo" flat color="white"/>
-            <slot/>
-            <q-space/>
-            <div :class="'font-mono fs-sm' + (textelocal && textelocal.length >= maxlg ? ' text-bold text-warning bg-yellow-5':'')">
-              {{textelocal ? textelocal.length : 0}}/{{maxlg}}c
-            </div>
-            <bouton-help page="dial_editeur"/>
-          </q-toolbar>
-        </q-header>
-
-        <q-page-container :class="dkli(idx)">
-          <q-input autogrow v-if="!md" class="q-pa-xs font-mono" v-model="textelocal"
-            :readonly="!editable" :placeholder="textelocal==='' ? (placeholder || $t('EMDph')) : ''"/>
-          <show-html v-else class="q-pa-xs bord1" :texte="textelocal"/>
-        </q-page-container>
-      </q-layout>
-    </div>
-  </q-card>
-
-  <q-dialog v-model="ui.d[idc].EMmax" full-height full-width 
-    transition-show="slide-up" transition-hide="slide-down">
-    <div ref="root2" :class="sty() + 'column'">
-      <q-header elevated>
-        <q-toolbar class="fs-md full-width tbs">
-          <btn-cond class="q-mr-xs" @ok="ui.fD" icon="zoom_in_map" flat color="white"/>
-          <btn-cond flat color="white" :icon="md ? 'edit' : 'visibility'" 
+  <div v-if="!max" :style="'height:' + (mh || '10rem')" :class="sty()">
+    <q-layout container view="hHh lpR fFf">
+      <q-header>
+        <q-toolbar class="fs-md full-width tbs bar">
+          <btn-cond class="q-mr-xs" @ok="max=true" icon="zoom_out_map" flat color="nb"/>
+          <btn-cond flat color="nb" :icon="md ? 'edit' : 'visibility'"
             round @ok="md = !md"/>
-          <btn-cond v-if="editable && !md" :disable="md" class="q-mr-xs" @ok="ouvriremojimd2"
-            icon="insert_emoticon" flat color="white"/>
-          <btn-cond v-if="modifie" class="q-mr-xs" @ok="undo" icon="undo" flat color="white"/>
+          <btn-cond v-if="editable && !md" :disable="md" class="q-mr-xs" @ok="ouvriremojimd1"
+            icon="insert_emoticon" flat color="nb"/>
+          <btn-cond v-if="modifie" class="q-mr-xs" @ok="undo" icon="undo" flat color="nb"/>
+          <slot/>
           <q-space/>
           <div :class="'font-mono fs-sm' + (textelocal && textelocal.length >= maxlg ? ' text-bold text-warning bg-yellow-5':'')">
             {{textelocal ? textelocal.length : 0}}/{{maxlg}}c
@@ -48,11 +19,42 @@
         </q-toolbar>
       </q-header>
 
-      <q-page-container class="dlx">
-        <q-input autogrow v-if="!md" :class="dkli(idx) + ' q-pa-xs col font-mono'" v-model="textelocal" 
+      <q-page-container :class="sty()">
+        <q-input v-if="!md" type="textarea" rows="100"
+          class="q-pa-xs font-mono" v-model="textelocal"
           :readonly="!editable" :placeholder="textelocal==='' ? (placeholder || $t('EMDph')) : ''"/>
-        <show-html v-else :class="dkli(idx) + ' q-pa-xs col-auto bord1'" :texte="textelocal"/>
+        <sd-nb v-else :texte="textelocal" class="q-pa-xs bord1"/>
       </q-page-container>
+    </q-layout>
+  </div>
+
+  <q-dialog v-model="max" full-height full-width
+    transition-show="slide-up" transition-hide="slide-down">
+    <div ref="root2" :class="sty()">
+    <q-layout container view="hHh lpR fFf">
+      <q-header elevated>
+        <q-toolbar class="fs-md full-width tbs">
+          <btn-cond class="q-mr-xs" @ok="max=false" icon="zoom_in_map" flat color="nb"/>
+          <btn-cond flat :icon="md ? 'edit' : 'visibility'" color="nb"
+            round @ok="md = !md"/>
+          <btn-cond v-if="editable && !md" :disable="md" class="q-mr-xs" @ok="ouvriremojimd2"
+            icon="insert_emoticon" flat color="nb"/>
+          <btn-cond v-if="modifie" class="q-mr-xs" @ok="undo" icon="undo" flat color="nb"/>
+          <q-space/>
+          <div :class="'font-mono fs-sm' + (textelocal && textelocal.length >= maxlg ? ' text-bold text-warning bg-yellow-5':'')">
+            {{textelocal ? textelocal.length : 0}}/{{maxlg}}c
+          </div>
+          <bouton-help page="dial_editeur"/>
+        </q-toolbar>
+      </q-header>
+
+      <q-page-container>
+        <q-input v-if="!md" type="textarea" rows="100" v-model="textelocal"
+          :class="sty() + ' q-pa-xs font-mono'"
+          :readonly="!editable" :placeholder="textelocal==='' ? (placeholder || $t('EMDph')) : ''"/>
+        <sd-nb v-else :class="sty() + ' q-pa-xs bord1'" :texte="textelocal"/>
+      </q-page-container>
+    </q-layout>
     </div>
   </q-dialog>
 
@@ -65,22 +67,22 @@
 import { ref, toRef, watch, computed, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
-import { sty, dkli } from '../app/util.mjs'
+import { sty } from '../app/util.mjs'
 
-import ShowHtml from './ShowHtml.vue'
+import SdNb from './SdNb.vue'
 import BtnCond from './BtnCond.vue'
 import BoutonHelp from './BoutonHelp.vue'
 import ChoixEmoji from '../dialogues/ChoixEmoji.vue'
 
 const model = defineModel({ type: String })
 
-const props = defineProps({ 
+const props = defineProps({
   help: String,
-  lgmax: Number, 
+  lgmax: Number,
   texte: String,
   placeholder: String,
-  editable: Boolean, 
-  idx: Number, 
+  editable: Boolean,
+  idx: Number,
   modetxt: Boolean,
   mh: String
 })
@@ -91,6 +93,8 @@ const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 const config = stores.config
 const root = ref()
 const root2 = ref()
+
+const max = ref(false)
 
 const maxlg = ref(props.lgmax || config.maxlgtextegen)
 

@@ -14,14 +14,14 @@
     >
       <template v-slot:default-header="prop">
         <div :class="cl(prop.node.type) + ' row full-width justify-between items-start'">
-          <div class="col-11 row items-center cursor-pointer hov1" 
+          <div class="col-11 row items-center cursor-pointer hov1"
             @click.stop="clicknode(prop.node)" @keypress.stop="clicknode(prop.node)">
             <q-icon :name="icons[prop.node.type]" :color="colors[prop.node.type]"
               size="sm" class="col-auto q-mr-xs"/>
             <q-icon v-if="prop.node.type === 3 || prop.node.type > 5" class="col-auto q-mr-xs"
               name="close" color="negative" size="sm"/>
             <q-icon v-if="nbf(prop.node)" name="attachment" class="col-auto q-mr" color="orange" size="sm"/>
-            <q-badge v-if="nbf(prop.node)" class="col-auto q-mr-xs" color="orange" rounded 
+            <q-badge v-if="nbf(prop.node)" class="col-auto q-mr-xs" color="orange" rounded
               :label="nbf(prop.node)" text-color="black"/>
             <q-icon v-if="!prop.node.filx" size="xs" class="col-auto q-mr-xs" name="check"
               color="warning"/>
@@ -36,14 +36,14 @@
                   <q-item v-if="prop.node.type > 3"
                     clickable class="hov1" v-close-popup @click.stop="clicknode(prop.node)">
                     <div class="row q-gutter-sm items-center">
-                      <q-icon size="md" name="zoom_in"/> 
+                      <q-icon size="md" name="zoom_in"/>
                       <span>{{$t('details')}}</span>
                     </div>
                   </q-item>
 
                   <q-item clickable class="hov1" v-close-popup @click.stop="ovAlbum(prop.node)">
                     <div class="row q-gutter-sm items-center">
-                      <q-icon size="md" name="photo_album"/> 
+                      <q-icon size="md" name="photo_album"/>
                       <span>{{$t('PNOalbum')}}</span>
                     </div>
                   </q-item>
@@ -144,9 +144,9 @@
 
         <q-card-section>
           <div class="row q-mb-sm q-gutter-sm justify-center full-width">
-            <q-input class="col" dense v-model="portupload" 
+            <q-input class="col" dense v-model="portupload"
               outlined :label="$t('PNOdlhp')"/>
-            <q-input class="col" dense v-model="dirloc" 
+            <q-input class="col" dense v-model="dirloc"
               outlined :label="$t('PNOdldir')"/>
             <btn-cond dense :label="$t('test')" @ok="testup"/>
           </div>
@@ -181,16 +181,16 @@
     <!-- Dialogue de création d'une nouvelle note -->
     <q-dialog v-model="ui.d[idc].NNnotenouvelle" position="left" persistent>
       <note-nouvelle
-        :estgr="estgr" 
-        :groupe="estgr ? groupex : null" 
-        :avatar="avatarx" 
+        :estgr="estgr"
+        :groupe="estgr ? groupex : null"
+        :avatar="avatarx"
         :notep="nSt.node.note"/>
     </q-dialog>
 
     <q-page-sticky expand position="top" class="splg">
       <div :class="sty() + ' box2 full-width q-pa-xs'">
         <div class="row q-gutter-xs items-center">
-          <btn-cond v-if="!rec" 
+          <btn-cond v-if="!rec"
             icon="photo_album" :label="$t('PNOalbum')" @ok="ovAlbumG()"/>
           <btn-cond v-if="!expandAll" size="md" icon="unfold_more"
             :label="$t('PNOdep')" @ok="tree.expandAll();expandAll=true"/>
@@ -198,7 +198,7 @@
             :label="$t('PNOrep')" @ok="tree.collapseAll();expandAll=false"/>
           <btn-cond v-if="rec" icon="undo" color="warning"
             :label="$t('PNOanratt')" @ok="anrattacher"/>
-          <btn-cond class="q-mr-sm" flat icon="file_download" color="white" 
+          <btn-cond class="q-mr-sm" flat icon="file_download" color="white"
             :label="$t('PNOdlc')" @ok="dlopen"/>
         </div>
 
@@ -223,14 +223,12 @@ import { ref, computed, watch, onUnmounted} from 'vue'
 
 import mime2ext from 'mime2ext'
 import stores from '../stores/stores.mjs'
-import { dkli, sty, styp, $t, u8ToB64, dhcool, edvol, afficherDiag, 
+import { dkli, sty, styp, $t, u8ToB64, dhcool, edvol, afficherDiag,
   sleep, normNomFichier } from '../app/util.mjs'
-import ShowHtml from '../components/ShowHtml.vue'
 import { appexc, AppExc, E_WS } from '../app/api.mjs'
 import NoteDetail from '../panels/NoteDetail.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BtnCond from '../components/BtnCond.vue'
-import ListeAuts from '../components/ListeAuts.vue'
 import NoteNouvelle from '../panels/NoteNouvelle.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import AlbumPhotos from '../panels/AlbumPhotos.vue'
@@ -244,10 +242,10 @@ const icons = ['','person','group','group','description','article','description'
 const colors = ['','primary','secondary','grey-5','primary','secondary','grey-5','grey-5']
 const styles = [
   '',
-  'titre-md text-bold', 
-  'titre-md text-bold', 
-  'titre-md text-bold text-italic', 
-  'fs-md', 
+  'titre-md text-bold',
+  'titre-md text-bold',
+  'titre-md text-bold text-italic',
+  'fs-md',
   'fs-md',
   'fs-md text-italic',
   'fs-md text-italic'
@@ -388,8 +386,8 @@ watch(selected, (ap, av) => {
 })
 
 const cl = (t) => t > 3 ? '' : 'cl' + t
-const styn = (n) => { 
-  const s1 = styles[n ? n.type : 0] 
+const styn = (n) => {
+  const s1 = styles[n ? n.type : 0]
   return s1 + (n && nSt.node && (n.ids === nSt.node.ids) ? ' msg' : '')
 }
 
@@ -399,7 +397,7 @@ const selectN = (n) => {
   if (!n || (n.type === 1 && selected.value === n.ids)) {
     selected.value = ''
     nSt.setCourant(null)
-  } else { 
+  } else {
     selected.value = n.ids
     nSt.setCourant(n.ids)
   }
@@ -450,19 +448,19 @@ const lib = (n) => {
     }
     case 3 : {
       // const nom = pSt.nom(n.ids, 24)
-      const s1 = (nfnt.nt ? ('[' + nfnt.nf + ' / ' + nfnt.nt + '] ') : '') 
+      const s1 = (nfnt.nt ? ('[' + nfnt.nf + ' / ' + nfnt.nt + '] ') : '')
       return $t('ghost', [s1 + '#' + n.ids])
     }
-    case 4 : 
+    case 4 :
     case 5 : {
-      const s1 = (nfnt.nt ? ('[' + nfnt.nf + ' / ' + nfnt.nt + '] ') : '') 
+      const s1 = (nfnt.nt ? ('[' + nfnt.nf + ' / ' + nfnt.nt + '] ') : '')
       const r = n.note.ref
       const s2 = r && r[0] !== n.note.id ? '(' + pSt.nom(n.note.id, 16)+ ') ' : ''
       return s1 + s2 + n.note.titre
     }
-    case 6 : 
+    case 6 :
     case 7 : {
-      const s1 = (nfnt.nt ? ('[' + nfnt.nf + ' / ' + nfnt.nt + '] ') : '') 
+      const s1 = (nfnt.nt ? ('[' + nfnt.nf + ' / ' + nfnt.nt + '] ') : '')
       return $t('ghostn', [s1 + '#' + n.ids])
     }
   }
@@ -482,13 +480,13 @@ const libF = (n) => {
       const nom = pSt.nom(n.ids, 24)
       return $t('groupe2', [nom])
     }
-    case 4 : 
+    case 4 :
     case 5 : {
       const r = n.note.ref
       const s2 = r && r[0] !== n.note.id ? '(' + pSt.nom(n.note.id, 16)+ ') ' : ''
       return s2 + n.note.titre
     }
-    case 6 : 
+    case 6 :
     case 7 : {
       return '#' + n.ids
     }
@@ -518,7 +516,7 @@ function depRatt () {
   expanded.value = Array.from(setRatt.value)
 }
 
-function anrattacher () { 
+function anrattacher () {
   rec.value = false
   nSt.resetRatt(false)
 }
@@ -541,7 +539,7 @@ function scanNode (node, rac, path, lstn) {
     if (node.children.length) {
       const p = path + '/' + label
       for (const c of node.children) scanNode(c, rac, p, lstn)
-    } 
+    }
   } else {
     // c'est une vraie note
     const n = node.note
@@ -597,9 +595,9 @@ async function testup () {
   }
 }
 
-const url = (u) => { 
+const url = (u) => {
   const d = dirloc.value + '/'
-  return 'http://localhost:' + portupload.value + '/' + u8ToB64(enc.encode(d + u), true) 
+  return 'http://localhost:' + portupload.value + '/' + u8ToB64(enc.encode(d + u), true)
 }
 
 async function dlnote (n, avecf) {
@@ -613,7 +611,7 @@ async function dlnote (n, avecf) {
   const buf = enc.encode(n.n.texte)
   const u = url(n.p + '/_.md')
   const er = await putData(u, buf)
-  if (er) 
+  if (er)
     throw new AppExc(E_WS, 6, [er])
   if (ralentissement) await sleep(ralentissement)
   if (avecf) {
@@ -625,7 +623,7 @@ async function dlnote (n, avecf) {
       if (buf) {
         const u = url(n.p + '/' + nf)
         const er = await putData(u, buf)
-        if (er) 
+        if (er)
           throw new AppExc(E_WS, 6, [er])
         else {
           dlnbf.value++

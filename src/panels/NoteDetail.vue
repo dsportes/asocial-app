@@ -17,7 +17,7 @@
 
   <q-page-container>
     <q-page class="q-pa-xs">
-      <div style="margin-top:53vh">
+      <div style="margin-top:53vh" class="bord2 q-pa-xs">
         <div class="q-mb-sm row">
            <node-parent />
           <span class="text-italic q-mx-md">{{$t('PNOdate')}}</span>
@@ -44,7 +44,7 @@
         </div>
 
         <!-- hashtags -->
-        <div class="q-my-sm row justify-between"> 
+        <div class="q-my-sm row justify-between">
           <div class="col row q-gutter-xs">
             <span class="text-italic">{{$t('hashtags')}} : </span>
             <span v-for="ht of note.tousHt" :key="ht">{{ht}}</span>
@@ -53,7 +53,7 @@
         </div>
 
         <!-- fichiers -->
-        <div class="q-my-sm row justify-between">  
+        <div class="q-my-sm row justify-between">
           <div class="col titre-sm">
             <span :class="!note.mfa.size ? 'text-italic': ''">
               {{$t('PNOnf', note.mfa.size, {count: note.mfa.size})}}
@@ -69,12 +69,12 @@
 
     <q-page-sticky expand position="top">
       <editeur-md class="col" mh="50vh"
-        :texte="note.texte" 
-        :lgmax="cfg.maxlgtextesecret" 
+        :texte="note.texte"
+        :lgmax="cfg.maxlgtextesecret"
         :editable="!ro"
         v-model="texte">
         <btn-cond icon="check" :label="$t('ok')" cond="cEdit" color="warning"
-          :disable="(note.deGroupe && !aut) || !modifie || !texte.length" 
+          :disable="(note.deGroupe && !aut) || !modifie || !texte.length"
           @ok="valider"/>
       </editeur-md>
     </q-page-sticky>
@@ -102,7 +102,7 @@
           :disable="!modifht"  @ok="validerHt"/>
         <bouton-help page="dial_noteht"/>
       </q-toolbar>
-    
+
       <hash-tags v-model="ht" :src="note.ht" :titre="$t('PNOht1')"/>
 
       <hash-tags v-if="note.deGroupe && estAnim" v-model="htg" :src="note.htg" :titre="$t('PNOht2')"/>
@@ -181,13 +181,13 @@ const estAnim = computed(() => { const e = note.value ? gSt.egr(note.value.id) :
 
 const ro = computed(() => session.cEdit !== '' || nSt.diagEd !== '')
 
-const modifht = computed(() => { 
+const modifht = computed(() => {
   return !egaliteSet(note.value.ht, ht.value) || (estAnim.value && !egaliteSet(note.value.htg, htg.value))
 })
 
-function fermer () { 
+function fermer () {
   if (modifie.value) ui.oD('confirmFerm', 'a')
-  else ui.fD() 
+  else ui.fD()
 }
 
 async function valider () {
@@ -197,7 +197,7 @@ async function valider () {
 }
 
 function selNa (e) { // e : { nom, i, ko, im, id }
-  aut.value = e 
+  aut.value = e
 }
 
 async function noteSuppr () {
@@ -226,7 +226,7 @@ async function ovHT () {
 const s2Str = (s) => Array.from(s).sort().join(' ')
 
 async function validerHt () {
-  await new HTNote().run(note.value, s2Str(ht.value), 
+  await new HTNote().run(note.value, s2Str(ht.value),
     note.value.deGroupe ? s2Str(htg.value) : null)
   ui.fD()
 }
@@ -237,5 +237,8 @@ async function validerHt () {
 @import '../css/app.sass'
 .bord1
   border: 1px solid $grey-5
+  border-radius: 8px
+.bord2
+  border: 2px solid $grey-5
   border-radius: 8px
 </style>

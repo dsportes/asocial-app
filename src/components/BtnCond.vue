@@ -2,7 +2,7 @@
 <span>
   <q-btn v-if="stop"
     :icon="icon"
-    padding="none" 
+    padding="none"
     :disable="disable || false"
     :flat="flat || false"
     dense
@@ -18,7 +18,7 @@
   </q-btn>
   <q-btn v-else
     :icon="icon"
-    padding="none" 
+    padding="none"
     :disable="disable || false"
     :flat="flat || false"
     dense
@@ -39,11 +39,11 @@
 import { ref, computed } from 'vue'
 
 import stores from '../stores/stores.mjs'
-import { afficherDiag, $t } from '../app/util.mjs'
+import { afficherDiag, $t, $q } from '../app/util.mjs'
 
 const session = stores.session
 
-const props = defineProps({ 
+const props = defineProps({
   color: String, // defaut primary
   icon: String, // defaut aucune
   size: String, // defaut 'md'
@@ -60,27 +60,35 @@ const props = defineProps({
 
 const emit = defineEmits(['ok'])
 
-const tc = computed(() => { 
+const tc = computed(() => {
   if (props.flat) return clr.value
   const x = diag.value ? 'white' : (
-  !props.color || props.color === 'primary' ? 'btntc' : 
+  !props.color || props.color === 'primary' ? 'btntc' :
   (props.color === 'warning' ? 'btwtc' : 'white'))
   return x
 })
 
-const clr = computed(() => { 
-  const x = diag.value ? 'negative' : ( 
-    !props.color || props.color === 'primary' ? 'btnbg' : 
+const clr = computed(() => {
+  /*
+  const x = diag.value ? 'negative' : (
+    !props.color || props.color === 'primary' ? 'btnbg' :
     (props.color === 'warning' ? 'btwbg' : (props.color || 'none')))
   return x
+  */
+  if (diag.value) return 'negative'
+  if (!props.color) return 'btnbg'
+  if (props.color === 'warning') return 'btwbg'
+  if (props.color === 'primary') return 'btnbg'
+  if (props.color === 'nb') return $q.dark.isActive ? 'white' : 'black'
+  return props.color
 })
 
 const diag = computed(() => props.cond && session[props.cond] ? $t(session[props.cond]) : '')
 
 async function ok () {
-  if (!diag.value) { 
+  if (!diag.value) {
     emit('ok', props.ctx || null)
-    return 
+    return
   }
   await afficherDiag(diag.value)
 }
