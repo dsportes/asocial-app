@@ -1,10 +1,10 @@
 Application "asocial":
 - distribution: t1
-- build: v2.11.1
+- build: v2.12.1
 - url: https://asocialapps.github.io/t1
 - patchs: _aucun_
 
 Sources:
-- dépôt: https://github.com/dsportes/asocial-app/tree/v2.11
+- dépôt: https://github.com/dsportes/asocial-app/tree/v2.12
 
-Résolution des bugs de 17 août 2025.
+Affichage / impression d'une note.

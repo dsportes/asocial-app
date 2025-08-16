@@ -63,6 +63,8 @@ export default {
   ghostn: 'Note fantôme {0}',
   toutes: '(toutes)',
 
+  noprint: 'Note non affichable',
+
   avatar: 'Avatar {0}', // FiltreAvgr
   groupe: 'Groupe {0}', // FiltreAvgr
   avatar1: 'Avatar {0} - {1} / {2} note(s)', // PageNotes

@@ -15,6 +15,7 @@
           <div :class="'font-mono fs-sm' + (textelocal && textelocal.length >= maxlg ? ' text-bold text-warning bg-yellow-5':'')">
             {{textelocal ? textelocal.length : 0}}/{{maxlg}}c
           </div>
+          <btn-cond class="q-mx-xs" @ok="print" icon="print" flat color="nb"/>
           <bouton-help page="dial_editeur"/>
         </q-toolbar>
       </q-header>
@@ -44,6 +45,7 @@
           <div :class="'font-mono fs-sm' + (textelocal && textelocal.length >= maxlg ? ' text-bold text-warning bg-yellow-5':'')">
             {{textelocal ? textelocal.length : 0}}/{{maxlg}}c
           </div>
+          <btn-cond class="q-mx-xs" @ok="print" icon="print" flat color="nb"/>
           <bouton-help page="dial_editeur"/>
         </q-toolbar>
       </q-header>
@@ -64,10 +66,11 @@
 </template>
 
 <script setup>
-import { ref, toRef, watch, computed, onUnmounted } from 'vue'
+import { ref, watch, computed, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
-import { sty } from '../app/util.mjs'
+import { sty, afficherDiag, $t } from '../app/util.mjs'
+import { debut, finmd, fintxt, stytxt, css } from '../app/showdowncss.mjs'
 
 import SdNb from './SdNb.vue'
 import BtnCond from './BtnCond.vue'
@@ -130,6 +133,28 @@ function ouvriremojimd1 () {
 function ouvriremojimd2 () {
   inp.value = root2.value.querySelector('textarea')
   ui.oD('choixEmoji', idc)
+}
+
+async function print () {
+  let txt
+  const r = max.value ? root2.value : root.value
+  if (md.value) {
+    const el = r.querySelector('.markdown-body')
+    const html = el.innerHTML
+    txt = debut + css + html + finmd
+  } else {
+    const inp = r.querySelector('textarea')
+    txt = debut + stytxt + inp.value.replaceAll('\n', '<br>') + fintxt
+  }
+
+  const buf = new TextEncoder().encode(txt)
+  const blob = new Blob([buf], { type: 'text/html' })
+  const url = URL.createObjectURL(blob)
+  if (url) {
+    setTimeout(() => { window.open(url, '_blank') }, 100)
+  } else {
+    await afficherDiag($t('noprint'))
+  }
 }
 
 function undo () {
